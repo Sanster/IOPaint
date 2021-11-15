@@ -1,0 +1,46 @@
+@tailwind base;
+
+/* Your own custom base styles */
+
+/* Start purging... */
+@tailwind components;
+/* Stop purging. */
+
+/* Your own custom component styles */
+
+/* Start purging... */
+@tailwind utilities;
+/* Stop purging. */
+
+/* Your own custom utilities */
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@600;900&display=swap');
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  font-family: 'Work Sans';
+  font-weight: 600;
+  overflow: hidden;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 17px;
+  height: 17px;
+  background: black;
+  border-radius: 50%;
+}
+
+*:not(input):not(textarea) {
+  user-select: none; /* disable selection/Copy of UIWebView */
+  -webkit-user-select: none; /* disable selection/Copy of UIWebView */
+  -webkit-touch-callout: none; /* disable the IOS popup when long-press on a link */
+}
+
+@supports (-webkit-touch-callout: none) {
+  .full-visible-h-safari {
+    height: calc(100% - 80px); /* -webkit-fill-available;*/
+  }
+}
