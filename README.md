@@ -27,7 +27,7 @@ docker run -p 8080:8080 -e cache_dir=/app/models -v models:/app/models -v $(pwd)
 ## Docker (gpu)
 ```
 docker build -f Dockerfile -t lamacleaner .
-docker run --gpus all -p 8080:8080 -e cache_dir=/app/models -v models:/app/models -v $(pwd):/app --rm lamacleaner python3 main.py --device=gpu --port=8080
+docker run --gpus all -p 8080:8080 -e cache_dir=/app/models -v models:/app/models -v $(pwd):/app --rm lamacleaner python3 main.py --device=cuda --port=8080
 ```
 
 Then open [http://localhost:8080](http://localhost:8080)
