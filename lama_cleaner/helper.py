@@ -17,8 +17,9 @@ def download_model(url=LAMA_MODEL_URL):
     parts = urlparse(url)
     hub_dir = get_dir()
     model_dir = os.path.join(hub_dir, "checkpoints")
+    if not os.path.isdir(model_dir):
+        os.makedirs(os.path.join(model_dir, "hub", "checkpoints"))
     filename = os.path.basename(parts.path)
-
     cached_file = os.path.join(model_dir, filename)
     if not os.path.exists(cached_file):
         sys.stderr.write('Downloading: "{}" to {}\n'.format(url, cached_file))

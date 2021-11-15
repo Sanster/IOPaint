@@ -17,12 +17,16 @@ from lama_cleaner.helper import (
     pad_img_to_modulo,
 )
 
-NUM_THREADS = "4"
+import multiprocessing
+
+NUM_THREADS = str(multiprocessing.cpu_count())
+
 os.environ["OMP_NUM_THREADS"] = NUM_THREADS
 os.environ["OPENBLAS_NUM_THREADS"] = NUM_THREADS
 os.environ["MKL_NUM_THREADS"] = NUM_THREADS
 os.environ["VECLIB_MAXIMUM_THREADS"] = NUM_THREADS
 os.environ["NUMEXPR_NUM_THREADS"] = NUM_THREADS
+os.environ["TORCH_HOME"] = os.environ["cache_dir"]
 
 BUILD_DIR = os.environ.get("LAMA_CLEANER_BUILD_DIR", "./lama_cleaner/app/build")
 
