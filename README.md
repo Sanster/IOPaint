@@ -18,13 +18,17 @@ You can experience their great online services [here](https://cleanup.pictures/)
 - Start development server: `yarn dev`
 - Build: `yarn build`
 
-## Docker (cpu)
+## Docker
+Run within a Docker container. Set the `cache_dir` to models location path. 
+Optionally add a `-d` option to the `docker run` command below to run as a daemon.
+
+### Docker (cpu)
 ```
 docker build -f Dockerfile -t lamacleaner .
 docker run -p 8080:8080 -e cache_dir=/app/models -v models:/app/models -v $(pwd):/app --rm lamacleaner python3 main.py --device=cpu --port=8080
 ```
 
-## Docker (gpu)
+### Docker (gpu)
 ```
 docker build -f Dockerfile -t lamacleaner .
 docker run --gpus all -p 8080:8080 -e cache_dir=/app/models -v models:/app/models -v $(pwd):/app --rm lamacleaner python3 main.py --device=cuda --port=8080
