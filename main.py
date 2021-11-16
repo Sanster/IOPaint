@@ -26,8 +26,8 @@ os.environ["OPENBLAS_NUM_THREADS"] = NUM_THREADS
 os.environ["MKL_NUM_THREADS"] = NUM_THREADS
 os.environ["VECLIB_MAXIMUM_THREADS"] = NUM_THREADS
 os.environ["NUMEXPR_NUM_THREADS"] = NUM_THREADS
-if os.environ["cache_dir"]:
-    os.environ["TORCH_HOME"] = os.environ["cache_dir"]
+if os.environ.get("CACHE_DIR"):
+    os.environ["TORCH_HOME"] = os.environ["CACHE_DIR"]
 
 BUILD_DIR = os.environ.get("LAMA_CLEANER_BUILD_DIR", "./lama_cleaner/app/build")
 
