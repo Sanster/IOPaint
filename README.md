@@ -17,3 +17,24 @@ You can experience their great online services [here](https://cleanup.pictures/)
 - Install dependencies:`cd lama_cleaner/app/ && yarn`
 - Start development server: `yarn dev`
 - Build: `yarn build`
+
+## Docker
+Run within a Docker container. Set the `cache_dir` to models location path. 
+Optionally add a `-d` option to the `docker run` command below to run as a daemon.
+
+### Build Docker image
+```
+docker build -f Dockerfile -t lamacleaner .
+```
+
+### Run Docker (cpu)
+```
+docker run -p 8080:8080 -e cache_dir=/app/models -v  $(pwd)/models:/app/models -v $(pwd):/app --rm lamacleaner python3 main.py --device=cpu --port=8080
+```
+
+### Run Docker (gpu)
+```
+docker run --gpus all -p 8080:8080 -e cache_dir=/app/models -v $(pwd)/models:/app/models -v $(pwd):/app --rm lamacleaner python3 main.py --device=cuda --port=8080
+```
+
+Then open [http://localhost:8080](http://localhost:8080)
