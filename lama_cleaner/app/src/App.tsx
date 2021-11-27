@@ -4,7 +4,6 @@ import { useWindowSize } from 'react-use'
 import Button from './components/Button'
 import FileSelect from './components/FileSelect'
 import Editor from './Editor'
-import { resizeImageFile } from './utils'
 
 function App() {
   const [file, setFile] = useState<File>()

@@ -1,10 +1,11 @@
 import { DownloadIcon, EyeIcon } from '@heroicons/react/outline'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useWindowSize } from 'react-use'
+import { useWindowSize, useLocalStorage } from 'react-use'
 import inpaint from './adapters/inpainting'
 import Button from './components/Button'
 import Slider from './components/Slider'
-import { downloadImage, loadImage, shareImage, useImage } from './utils'
+import SizeSelector from './components/SizeSelector'
+import { downloadImage, loadImage, useImage } from './utils'
 
 const TOOLBAR_SIZE = 200
 const BRUSH_COLOR = 'rgba(189, 255, 1, 0.75)'
@@ -55,6 +56,8 @@ export default function Editor(props: EditorProps) {
   const [isInpaintingLoading, setIsInpaintingLoading] = useState(false)
   const [showSeparator, setShowSeparator] = useState(false)
   const [scale, setScale] = useState(1)
+  // ['1080', '2000', 'Original']
+  const [sizeLimit, setSizeLimit] = useLocalStorage('sizeLimit', '1080')
   const windowSize = useWindowSize()
 
   const draw = useCallback(() => {
@@ -144,8 +147,7 @@ export default function Editor(props: EditorProps) {
       window.removeEventListener('mouseup', onPointerUp)
       refreshCanvasMask()
       try {
-        const start = Date.now()
-        const res = await inpaint(file, maskCanvas.toDataURL())
+        const res = await inpaint(file, maskCanvas.toDataURL(), sizeLimit)
         if (!res) {
           throw new Error('empty response')
         }
@@ -221,6 +223,7 @@ export default function Editor(props: EditorProps) {
     original.naturalHeight,
     original.naturalWidth,
     scale,
+    sizeLimit,
   ])
 
   const undo = useCallback(() => {
@@ -252,12 +255,16 @@ export default function Editor(props: EditorProps) {
   }, [renders, undo])
 
   function download() {
-    const base64 = context?.canvas.toDataURL(file.type)
-    if (!base64) {
-      throw new Error('could not get canvas data')
-    }
     const name = file.name.replace(/(\.[\w\d_-]+)$/i, '_cleanup$1')
-    downloadImage(base64, name)
+    const currRender = renders[renders.length - 1]
+    downloadImage(currRender.currentSrc, name)
+  }
+
+  const onSizeLimitChange = (_sizeLimit: string) => {
+    // TODO: clean renders
+    // if (renders.length !== 0) {
+    // }
+    setSizeLimit(_sizeLimit)
   }
 
   return (
@@ -337,7 +344,7 @@ export default function Editor(props: EditorProps) {
 
       <div
         className={[
-          'flex items-center w-full max-w-3xl',
+          'flex items-center w-full max-w-5xl',
           'space-x-3 sm:space-x-5',
           'p-6',
           scale !== 1
@@ -345,10 +352,15 @@ export default function Editor(props: EditorProps) {
             : 'relative justify-evenly sm:justify-between',
         ].join(' ')}
       >
+        <SizeSelector
+          value={sizeLimit}
+          onChange={onSizeLimitChange}
+          originalSize={`${original.naturalWidth}x${original.naturalHeight}`}
+        />
         <Slider
           label={
             <span>
-              <span className="hidden md:inline">Brush</span> Size
+              <span className="hidden md:inline">Brush</span>
             </span>
           }
           min={10}
