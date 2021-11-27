@@ -61,13 +61,7 @@ function App() {
             >
               <FileSelect
                 onSelection={async f => {
-                  const {
-                    file: resizedFile,
-                    resized,
-                    originalWidth,
-                    originalHeight,
-                  } = await resizeImageFile(f, 1024)
-                  setFile(resizedFile)
+                  setFile(f)
                 }}
               />
             </div>
