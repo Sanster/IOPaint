@@ -2,6 +2,8 @@
 
 This project is mainly used for selfhosting LaMa model, some interaction improvements may be added later.
 
+![example](./assets/lama-cleaner-example.gif)
+
 ## Quick Start
 
 - Install requirements: `pip3 install -r requirements.txt`
