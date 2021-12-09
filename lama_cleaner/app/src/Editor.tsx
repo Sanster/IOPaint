@@ -1,6 +1,6 @@
 import { DownloadIcon, EyeIcon } from '@heroicons/react/outline'
-import React, { useCallback, useEffect, useState } from 'react'
-import { useWindowSize, useLocalStorage } from 'react-use'
+import React, { SyntheticEvent, useCallback, useEffect, useState } from 'react'
+import { useWindowSize, useLocalStorage, useKey } from 'react-use'
 import inpaint from './adapters/inpainting'
 import Button from './components/Button'
 import Slider from './components/Slider'
@@ -9,6 +9,7 @@ import { downloadImage, loadImage, useImage } from './utils'
 
 const TOOLBAR_SIZE = 200
 const BRUSH_COLOR = 'rgba(189, 255, 1, 0.75)'
+const NO_COLOR = 'rgba(255,255,255,0)'
 
 interface EditorProps {
   file: File
@@ -50,6 +51,8 @@ export default function Editor(props: EditorProps) {
     return document.createElement('canvas')
   })
   const [lines, setLines] = useState<Line[]>([{ pts: [] }])
+  const [lines4Show, setLines4Show] = useState<Line[]>([{ pts: [] }])
+  const [historyLineCount, setHistoryLineCount] = useState<number[]>([])
   const [{ x, y }, setCoords] = useState({ x: -1, y: -1 })
   const [showBrush, setShowBrush] = useState(false)
   const [showOriginal, setShowOriginal] = useState(false)
@@ -59,6 +62,9 @@ export default function Editor(props: EditorProps) {
   // ['1080', '2000', 'Original']
   const [sizeLimit, setSizeLimit] = useLocalStorage('sizeLimit', '1080')
   const windowSize = useWindowSize()
+
+  const [isDraging, setIsDraging] = useState(false)
+  const [isMultiStrokeKeyPressed, setIsMultiStrokeKeyPressed] = useState(false)
 
   const draw = useCallback(() => {
     if (!context) {
@@ -71,9 +77,8 @@ export default function Editor(props: EditorProps) {
     } else {
       context.drawImage(original, 0, 0)
     }
-    const currentLine = lines[lines.length - 1]
-    drawLines(context, [currentLine])
-  }, [context, lines, original, renders])
+    drawLines(context, lines4Show)
+  }, [context, lines4Show, original, renders])
 
   const refreshCanvasMask = useCallback(() => {
     if (!context?.canvas.width || !context?.canvas.height) {
@@ -85,8 +90,76 @@ export default function Editor(props: EditorProps) {
     if (!ctx) {
       throw new Error('could not retrieve mask canvas')
     }
+
     drawLines(ctx, lines, 'white')
   }, [context?.canvas.height, context?.canvas.width, lines, maskCanvas])
+
+  const runInpainting = useCallback(async () => {
+    setIsInpaintingLoading(true)
+    refreshCanvasMask()
+    try {
+      const res = await inpaint(file, maskCanvas.toDataURL(), sizeLimit)
+      if (!res) {
+        throw new Error('empty response')
+      }
+      // TODO: fix the render if it failed loading
+      const newRender = new Image()
+      await loadImage(newRender, res)
+      renders.push(newRender)
+      lines.push({ pts: [] } as Line)
+      setRenders([...renders])
+      setLines([...lines])
+
+      historyLineCount.push(lines4Show.length)
+      setHistoryLineCount(historyLineCount)
+      lines4Show.length = 0
+      setLines4Show([{ pts: [] } as Line])
+    } catch (e: any) {
+      // eslint-disable-next-line
+      alert(e.message ? e.message : e.toString())
+    }
+    setIsInpaintingLoading(false)
+    draw()
+  }, [
+    draw,
+    file,
+    lines,
+    lines4Show,
+    maskCanvas,
+    refreshCanvasMask,
+    renders,
+    sizeLimit,
+    historyLineCount,
+  ])
+
+  const handleMultiStrokeKeyDown = () => {
+    if (isInpaintingLoading) {
+      return
+    }
+    setIsMultiStrokeKeyPressed(true)
+  }
+
+  const handleMultiStrokeKeyup = () => {
+    if (!isMultiStrokeKeyPressed) {
+      return
+    }
+    if (isInpaintingLoading) {
+      return
+    }
+
+    setIsMultiStrokeKeyPressed(false)
+    if (lines4Show.length !== 0 && lines4Show[0].pts.length !== 0) {
+      runInpainting()
+    }
+  }
+
+  const predicate = (event: KeyboardEvent) => {
+    return event.key === 'Control' || event.key === 'Meta'
+  }
+  useKey(predicate, handleMultiStrokeKeyup, { event: 'keyup' })
+  useKey(predicate, handleMultiStrokeKeyDown, {
+    event: 'keydown',
+  })
 
   // Draw once the original image is loaded
   useEffect(() => {
@@ -107,152 +180,111 @@ export default function Editor(props: EditorProps) {
     }
   }, [context?.canvas, draw, original, isOriginalLoaded, windowSize])
 
-  // Handle mouse interactions
-  useEffect(() => {
+  const onPaint = (px: number, py: number) => {
+    const currShowLine = lines4Show[lines4Show.length - 1]
+    currShowLine.pts.push({ x: px, y: py })
+
+    const currLine = lines[lines.length - 1]
+    currLine.pts.push({ x: px, y: py })
+
+    draw()
+  }
+
+  const onMouseMove = (ev: SyntheticEvent) => {
+    const mouseEvent = ev.nativeEvent as MouseEvent
+    setCoords({ x: mouseEvent.pageX, y: mouseEvent.pageY })
+  }
+
+  const onMouseDrag = (ev: SyntheticEvent) => {
+    if (!isDraging) {
+      return
+    }
+    const mouseEvent = ev.nativeEvent as MouseEvent
+    const px = mouseEvent.offsetX
+    const py = mouseEvent.offsetY
+    onPaint(px, py)
+  }
+
+  const onPointerUp = () => {
+    if (!original.src) {
+      return
+    }
     const canvas = context?.canvas
     if (!canvas) {
       return
     }
+    if (isInpaintingLoading) {
+      return
+    }
+    setIsDraging(false)
+    if (isMultiStrokeKeyPressed) {
+      lines.push({ pts: [] } as Line)
+      setLines([...lines])
 
-    const onMouseDown = (ev: MouseEvent) => {
-      if (!original.src) {
-        return
-      }
-      const currLine = lines[lines.length - 1]
-      currLine.size = brushSize
-      canvas.addEventListener('mousemove', onMouseDrag)
-      window.addEventListener('mouseup', onPointerUp)
-      onPaint(ev.offsetX, ev.offsetY)
-    }
-    const onMouseMove = (ev: MouseEvent) => {
-      setCoords({ x: ev.pageX, y: ev.pageY })
-    }
-    const onPaint = (px: number, py: number) => {
-      const currLine = lines[lines.length - 1]
-      currLine.pts.push({ x: px, y: py })
-      draw()
-    }
-    const onMouseDrag = (ev: MouseEvent) => {
-      const px = ev.offsetX
-      const py = ev.offsetY
-      onPaint(px, py)
+      lines4Show.push({ pts: [] } as Line)
+      setLines4Show([...lines4Show])
+      return
     }
 
-    const onPointerUp = async () => {
-      if (!original.src) {
-        return
-      }
-      setIsInpaintingLoading(true)
-      canvas.removeEventListener('mousemove', onMouseDrag)
-      window.removeEventListener('mouseup', onPointerUp)
-      refreshCanvasMask()
-      try {
-        const res = await inpaint(file, maskCanvas.toDataURL(), sizeLimit)
-        if (!res) {
-          throw new Error('empty response')
-        }
-        // TODO: fix the render if it failed loading
-        const newRender = new Image()
-        await loadImage(newRender, res)
-        renders.push(newRender)
-        lines.push({ pts: [] } as Line)
-
-        setRenders([...renders])
-        setLines([...lines])
-      } catch (e: any) {
-        // eslint-disable-next-line
-        alert(e.message ? e.message : e.toString())
-      }
-      setIsInpaintingLoading(false)
-      draw()
+    if (lines4Show.length !== 0 && lines4Show[0].pts.length !== 0) {
+      runInpainting()
     }
-    window.addEventListener('mousemove', onMouseMove)
+  }
 
-    const onTouchMove = (ev: TouchEvent) => {
-      ev.preventDefault()
-      ev.stopPropagation()
-      const currLine = lines[lines.length - 1]
-      const coords = canvas.getBoundingClientRect()
-      currLine.pts.push({
-        x: (ev.touches[0].clientX - coords.x) / scale,
-        y: (ev.touches[0].clientY - coords.y) / scale,
-      })
-      draw()
+  const onMouseDown = (ev: SyntheticEvent) => {
+    if (!original.src) {
+      return
     }
-    const onPointerStart = (ev: TouchEvent) => {
-      if (!original.src) {
-        return
-      }
-      const currLine = lines[lines.length - 1]
-      currLine.size = brushSize
-      canvas.addEventListener('mousemove', onMouseDrag)
-      window.addEventListener('mouseup', onPointerUp)
-      const coords = canvas.getBoundingClientRect()
-      const px = (ev.touches[0].clientX - coords.x) / scale
-      const py = (ev.touches[0].clientY - coords.y) / scale
-      onPaint(px, py)
+    const canvas = context?.canvas
+    if (!canvas) {
+      return
     }
-    canvas.addEventListener('touchstart', onPointerStart)
-    canvas.addEventListener('touchmove', onTouchMove)
-    canvas.addEventListener('touchend', onPointerUp)
-    canvas.onmouseenter = () => setShowBrush(true)
-    canvas.onmouseleave = () => setShowBrush(false)
-    canvas.onmousedown = onMouseDown
+    if (isInpaintingLoading) {
+      return
+    }
+    setIsDraging(true)
+    const currLine4Show = lines4Show[lines4Show.length - 1]
+    currLine4Show.size = brushSize
+    const currLine = lines[lines.length - 1]
+    currLine.size = brushSize
 
-    return () => {
-      canvas.removeEventListener('mousemove', onMouseDrag)
-      window.removeEventListener('mousemove', onMouseMove)
-      window.removeEventListener('mouseup', onPointerUp)
-      canvas.removeEventListener('touchstart', onPointerStart)
-      canvas.removeEventListener('touchmove', onTouchMove)
-      canvas.removeEventListener('touchend', onPointerUp)
-      canvas.onmouseenter = null
-      canvas.onmouseleave = null
-      canvas.onmousedown = null
-    }
-  }, [
-    brushSize,
-    context,
-    file,
-    draw,
-    lines,
-    refreshCanvasMask,
-    maskCanvas,
-    original.src,
-    renders,
-    original.naturalHeight,
-    original.naturalWidth,
-    scale,
-    sizeLimit,
-  ])
+    const mouseEvent = ev.nativeEvent as MouseEvent
+    onPaint(mouseEvent.offsetX, mouseEvent.offsetY)
+  }
 
-  const undo = useCallback(() => {
+  const undo = () => {
     const l = lines
-    l.pop()
-    l.pop()
+    const count = historyLineCount[historyLineCount.length - 1]
+    for (let i = 0; i <= count; i += 1) {
+      l.pop()
+    }
+
     setLines([...l, { pts: [] }])
+    historyLineCount.pop()
+    setHistoryLineCount(historyLineCount)
+
     const r = renders
     r.pop()
     setRenders([...r])
-  }, [lines, renders])
+  }
 
   // Handle Cmd+Z
-  useEffect(() => {
-    const handler = (event: KeyboardEvent) => {
-      if (!renders.length) {
-        return
-      }
-      const isCmdZ = (event.metaKey || event.ctrlKey) && event.key === 'z'
-      if (isCmdZ) {
-        event.preventDefault()
-        undo()
-      }
+  const undoPredicate = (event: KeyboardEvent) => {
+    if (!renders.length) {
+      return false
     }
-    window.addEventListener('keydown', handler)
-    return () => {
-      window.removeEventListener('keydown', handler)
+    if (!historyLineCount.length) {
+      return false
     }
-  }, [renders, undo])
+    const isCmdZ = (event.metaKey || event.ctrlKey) && event.key === 'z'
+    if (isCmdZ) {
+      event.preventDefault()
+      return true
+    }
+    return false
+  }
+
+  useKey(undoPredicate, undo)
 
   function download() {
     const name = file.name.replace(/(\.[\w\d_-]+)$/i, '_cleanup$1')
@@ -261,32 +293,49 @@ export default function Editor(props: EditorProps) {
   }
 
   const onSizeLimitChange = (_sizeLimit: string) => {
-    // TODO: clean renders
-    // if (renders.length !== 0) {
-    // }
     setSizeLimit(_sizeLimit)
+  }
+
+  const toggleShowBrush = (newState: boolean) => {
+    if (newState !== showBrush) {
+      setShowBrush(newState)
+    }
   }
 
   return (
     <div
       className={[
         'flex flex-col items-center',
-        isInpaintingLoading
-          ? 'animate-pulse-fast pointer-events-none transition-opacity'
-          : '',
+        isInpaintingLoading ? 'animate-pulse-fast transition-opacity' : '',
         scale !== 1 ? 'pb-24' : '',
       ].join(' ')}
       style={{
         height: scale !== 1 ? original.naturalHeight * scale : undefined,
       }}
+      aria-hidden="true"
+      onMouseMove={onMouseMove}
+      onMouseUp={onPointerUp}
     >
       <div
         className={[scale !== 1 ? '' : 'relative'].join(' ')}
-        style={{ transform: `scale(${scale})`, transformOrigin: 'top center' }}
+        style={{
+          transform: `scale(${scale})`,
+          transformOrigin: 'top center',
+          borderColor: `${isMultiStrokeKeyPressed ? BRUSH_COLOR : NO_COLOR}`,
+          borderWidth: `${8 / scale}px`,
+        }}
       >
         <canvas
           className="rounded-sm"
           style={showBrush ? { cursor: 'none' } : {}}
+          onContextMenu={e => {
+            e.preventDefault()
+          }}
+          onMouseOver={() => toggleShowBrush(true)}
+          onFocus={() => toggleShowBrush(true)}
+          onMouseLeave={() => toggleShowBrush(false)}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseDrag}
           ref={r => {
             if (r && !context) {
               const ctx = r.getContext('2d')
@@ -329,7 +378,7 @@ export default function Editor(props: EditorProps) {
         </div>
       </div>
 
-      {showBrush && (
+      {showBrush && !isInpaintingLoading && (
         <div
           className="hidden sm:block absolute rounded-full border border-primary bg-primary bg-opacity-80 pointer-events-none"
           style={{
