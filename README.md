@@ -4,6 +4,10 @@ This project is mainly used for selfhosting LaMa model, some interaction improve
 
 ![example](./assets/lama-cleaner-example.gif)
 
+- [x] High resolution support
+- [x] Multi stroke support. Press and hold the `cmd/ctrl` key to enable multi stroke mode.
+- [ ] Keep image EXIF data
+
 ## Quick Start
 
 - Install requirements: `pip3 install -r requirements.txt`

@@ -6,6 +6,7 @@ interface ButtonProps {
   icon?: ReactNode
   primary?: boolean
   disabled?: boolean
+  onKeyDown?: () => void
   onClick?: () => void
   onDown?: (ev: PointerEvent) => void
   onUp?: (ev: PointerEvent) => void
@@ -18,6 +19,7 @@ export default function Button(props: ButtonProps) {
     disabled,
     icon,
     primary,
+    onKeyDown,
     onClick,
     onDown,
     onUp,
@@ -36,7 +38,7 @@ export default function Button(props: ButtonProps) {
   return (
     <div
       role="button"
-      onKeyDown={onClick}
+      onKeyDown={onKeyDown}
       onClick={onClick}
       onPointerDown={(ev: React.PointerEvent<HTMLDivElement>) => {
         setActive(true)
