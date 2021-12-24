@@ -1,5 +1,19 @@
 # Lama-cleaner: Image inpainting tool powered by [LaMa](https://github.com/saic-mdal/lama)
+| This fork extends the project to enable hosting on Colab using ```ngrok```. Use the button below! |
+| --- |
 
+[![Host On Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/P-Kshitij/lama-cleaner/blob/9161d5b31bb06a63c2690c6d1a8ea85cb343cfbc/host_Colab.ipynb)
+<br><br>
+Steps:
+1) Open the notebook
+2) Add ngrok AUTH token
+3) Open the ngrok link in the output of the last cell to use the hosted project
+
+NOTE: 
+- ngrok links are temporary and might expire in a couple of hours
+- make sure to enable GPU runtime on Colab
+<hr>
+<br>
 This project is mainly used for selfhosting LaMa model, some interaction improvements may be added later.
 
 ![example](./assets/lama-cleaner-example.gif)
