@@ -133,7 +133,7 @@ def main():
     model = torch.jit.load(model_path, map_location="cpu")
     model = model.to(device)
     model.eval()
-    app.run(host="0.0.0.0", port=args.port, debug=args.debug)
+    app.run()
 
 
 if __name__ == "__main__":
