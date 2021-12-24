@@ -13,6 +13,7 @@ import numpy as np
 import torch
 from flask import Flask, request, send_file
 from flask_cors import CORS
+from flask_ngrok import run_with_ngrok
 
 from lama_cleaner.helper import (download_model, load_img, norm_img,
                                  numpy_to_bytes, pad_img_to_modulo,
@@ -33,7 +34,7 @@ BUILD_DIR = os.environ.get("LAMA_CLEANER_BUILD_DIR", "./lama_cleaner/app/build")
 app = Flask(__name__, static_folder=os.path.join(BUILD_DIR, "static"))
 app.config["JSON_AS_ASCII"] = False
 CORS(app)
-
+run_with_ngrok(app)
 model = None
 device = None
 
