@@ -402,9 +402,10 @@ export default function Editor(props: EditorProps) {
         ].join(' ')}
       >
         <SizeSelector
-          value={sizeLimit}
+          value={sizeLimit!}
           onChange={onSizeLimitChange}
-          originalSize={`${original.naturalWidth}x${original.naturalHeight}`}
+          originalWidth={original.naturalWidth}
+          originalHeight={original.naturalHeight}
         />
         <Slider
           label={
