@@ -15,6 +15,8 @@ This project is mainly used for selfhosting LaMa model, some interaction improve
 
 ## Development
 
+Only needed if you plan to modify the frontend and recompile yourself.
+
 ### Fronted
 
 Frontend code are modified from [cleanup.pictures](https://github.com/initml/cleanup.pictures),
