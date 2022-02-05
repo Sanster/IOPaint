@@ -395,7 +395,7 @@ export default function Editor(props: EditorProps) {
         className={[
           'flex items-center w-full max-w-5xl',
           'space-x-3 sm:space-x-5',
-          'p-6',
+          'pb-6',
           scale !== 1
             ? 'absolute bottom-0 justify-evenly'
             : 'relative justify-evenly sm:justify-between',
