@@ -11,7 +11,12 @@ import {
   TransformComponent,
   TransformWrapper,
 } from 'react-zoom-pan-pinch'
-import { useWindowSize, useLocalStorage, useKey } from 'react-use'
+import {
+  useWindowSize,
+  useLocalStorage,
+  useKey,
+  useKeyPressEvent,
+} from 'react-use'
 import inpaint from './adapters/inpainting'
 import Button from './components/Button'
 import Slider from './components/Slider'
@@ -211,7 +216,10 @@ export default function Editor(props: EditorProps) {
     const offsetX = (windowSize.width - original.width * minScale) / 2
     const offsetY = (windowSize.height - original.height * minScale) / 2
     viewport.setTransform(offsetX, offsetY, minScale, 200, 'easeOutQuad')
-  }, [minScale, original, windowSize, isOriginalLoaded])
+    setScale(minScale)
+  }, [minScale, original, windowSize])
+
+  useKeyPressEvent('Escape', resetZoom)
 
   const onPaint = (px: number, py: number) => {
     const currShowLine = lines4Show[lines4Show.length - 1]
@@ -343,7 +351,6 @@ export default function Editor(props: EditorProps) {
     <div
       className="flex flex-col items-center"
       style={{
-        // height: minScale !== 1 ? original.naturalHeight * minScale : undefined,
         height: '100%',
         width: '100%',
       }}
@@ -373,7 +380,6 @@ export default function Editor(props: EditorProps) {
           wrapperStyle={{
             width: '100%',
             height: '100%',
-            marginBottom: '36px',
           }}
           contentClass={
             isInpaintingLoading

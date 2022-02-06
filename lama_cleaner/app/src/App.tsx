@@ -11,7 +11,7 @@ function App() {
 
   return (
     <div className="h-full full-visible-h-safari flex flex-col">
-      <header className="relative z-10 flex px-5 pt-3 justify-center sm:justify-between items-center sm:items-start">
+      <header className="absolute z-10 flex px-5 pt-3 justify-center sm:justify-between items-center sm:items-start">
         {file ? (
           <Button
             icon={<ArrowLeftIcon className="w-6 h-6" />}
@@ -29,9 +29,7 @@ function App() {
       <main
         className={[
           'h-full flex flex-1 flex-col sm:items-center sm:justify-center overflow-hidden',
-          // file ? 'items-center justify-center' : '', // center on mobile
           'items-center justify-center',
-          'pb-20',
         ].join(' ')}
       >
         {file ? (
