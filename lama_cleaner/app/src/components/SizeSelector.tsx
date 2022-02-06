@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FocusEvent } from 'react'
 import { Listbox } from '@headlessui/react'
 import { CheckIcon, SelectorIcon } from '@heroicons/react/solid'
 
@@ -29,6 +29,10 @@ export default function SizeSelector(props: SizeSelectorProps) {
     }
     const newWidth = Math.ceil(scale * originalWidth)
     return `${newWidth}x${size}`
+  }
+
+  const onButtonFocus = (e: FocusEvent<any>) => {
+    e.currentTarget.blur()
   }
 
   return (
@@ -72,7 +76,10 @@ export default function SizeSelector(props: SizeSelectorProps) {
               </Listbox.Option>
             ))}
           </Listbox.Options>
-          <Listbox.Button className="relative w-full inline-flex w-full px-4 py-2 text-sm font-medium bg-black rounded-md bg-opacity-10  focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+          <Listbox.Button
+            onFocus={onButtonFocus}
+            className="relative w-full inline-flex w-full px-4 py-2 text-sm font-medium bg-black rounded-md bg-opacity-10  focus:outline-none "
+          >
             <span className="block truncate">{getSizeShowName(value)}</span>
             <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
               <SelectorIcon

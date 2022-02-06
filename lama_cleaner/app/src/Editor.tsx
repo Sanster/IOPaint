@@ -439,6 +439,7 @@ export default function Editor(props: EditorProps) {
     ' ',
     ev => {
       ev?.preventDefault()
+      ev?.stopPropagation()
       setShowBrush(!showBrush)
       setIsPanning(!isPanning)
     },
