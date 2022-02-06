@@ -11,7 +11,12 @@ import {
   TransformComponent,
   TransformWrapper,
 } from 'react-zoom-pan-pinch'
-import { useWindowSize, useLocalStorage, useKey } from 'react-use'
+import {
+  useWindowSize,
+  useLocalStorage,
+  useKey,
+  useKeyPressEvent,
+} from 'react-use'
 import inpaint from './adapters/inpainting'
 import Button from './components/Button'
 import Slider from './components/Slider'
@@ -147,6 +152,10 @@ export default function Editor(props: EditorProps) {
 
   const hadDrawSomething = () => {
     return lines4Show.length !== 0 && lines4Show[0].pts.length !== 0
+  }
+
+  const hadRunInpainting = () => {
+    return renders.length !== 0
   }
 
   const clearDrawing = () => {
@@ -356,6 +365,10 @@ export default function Editor(props: EditorProps) {
   // Handle Cmd+Z
   const undoPredicate = (event: KeyboardEvent) => {
     const isCmdZ = (event.metaKey || event.ctrlKey) && event.key === 'z'
+    // Handle tab switch
+    if (event.key === 'Tab') {
+      event.preventDefault()
+    }
     if (isCmdZ) {
       event.preventDefault()
       return true
@@ -364,6 +377,26 @@ export default function Editor(props: EditorProps) {
   }
 
   useKey(undoPredicate, undo)
+
+  useKeyPressEvent(
+    'Tab',
+    ev => {
+      ev?.preventDefault()
+      ev?.stopPropagation()
+      if (hadRunInpainting()) {
+        setShowSeparator(true)
+        setShowOriginal(true)
+      }
+    },
+    ev => {
+      ev?.preventDefault()
+      ev?.stopPropagation()
+      if (hadRunInpainting()) {
+        setShowOriginal(false)
+        setTimeout(() => setShowSeparator(false), 300)
+      }
+    }
+  )
 
   function download() {
     const name = file.name.replace(/(\.[\w\d_-]+)$/i, '_cleanup$1')
