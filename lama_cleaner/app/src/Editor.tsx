@@ -1,4 +1,8 @@
-import { DownloadIcon, EyeIcon } from '@heroicons/react/outline'
+import {
+  ArrowsExpandIcon,
+  DownloadIcon,
+  EyeIcon,
+} from '@heroicons/react/outline'
 import React, {
   SyntheticEvent,
   useCallback,
@@ -593,6 +597,12 @@ export default function Editor(props: EditorProps) {
           <div>
             <Button
               className="mr-2"
+              icon={<ArrowsExpandIcon className="w-6 h-6" />}
+              disabled={scale === minScale}
+              onClick={resetZoom}
+            />
+            <Button
+              className="mr-2"
               icon={
                 <svg
                   width="19"
@@ -629,7 +639,6 @@ export default function Editor(props: EditorProps) {
             </Button>
 
             <Button
-              primary
               icon={<DownloadIcon className="w-6 h-6" />}
               disabled={!renders.length}
               onClick={download}
@@ -642,7 +651,7 @@ export default function Editor(props: EditorProps) {
             className="absolute bg-black backdrop-blur backdrop-filter bg-opacity-10 rounded-xl"
             style={{
               height: '58px',
-              width: '680px',
+              width: '700px',
               zIndex: -1,
               marginLeft: '-1px',
             }}
