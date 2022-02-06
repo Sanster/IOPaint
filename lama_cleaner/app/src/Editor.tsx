@@ -1,5 +1,16 @@
 import { DownloadIcon, EyeIcon } from '@heroicons/react/outline'
-import React, { SyntheticEvent, useCallback, useEffect, useState } from 'react'
+import React, {
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import {
+  ReactZoomPanPinchRef,
+  TransformComponent,
+  TransformWrapper,
+} from 'react-zoom-pan-pinch'
 import { useWindowSize, useLocalStorage, useKey } from 'react-use'
 import inpaint from './adapters/inpainting'
 import Button from './components/Button'
@@ -58,10 +69,12 @@ export default function Editor(props: EditorProps) {
   const [showOriginal, setShowOriginal] = useState(false)
   const [isInpaintingLoading, setIsInpaintingLoading] = useState(false)
   const [showSeparator, setShowSeparator] = useState(false)
-  const [scale, setScale] = useState(1)
+  const [scale, setScale] = useState<number>(1)
+  const [minScale, setMinScale] = useState<number>()
   // ['1080', '2000', 'Original']
   const [sizeLimit, setSizeLimit] = useLocalStorage('sizeLimit', '1080')
   const windowSize = useWindowSize()
+  const viewportRef = useRef<ReactZoomPanPinchRef | undefined | null>()
 
   const [isDraging, setIsDraging] = useState(false)
   const [isMultiStrokeKeyPressed, setIsMultiStrokeKeyPressed] = useState(false)
@@ -163,22 +176,42 @@ export default function Editor(props: EditorProps) {
 
   // Draw once the original image is loaded
   useEffect(() => {
-    if (!context?.canvas) {
+    if (!original) {
       return
     }
+
     if (isOriginalLoaded) {
-      context.canvas.width = original.naturalWidth
-      context.canvas.height = original.naturalHeight
       const rW = windowSize.width / original.naturalWidth
       const rH = (windowSize.height - TOOLBAR_SIZE) / original.naturalHeight
       if (rW < 1 || rH < 1) {
-        setScale(Math.min(rW, rH))
+        const s = Math.min(rW, rH)
+        setMinScale(s)
+        setScale(s)
       } else {
-        setScale(1)
+        setMinScale(1)
+      }
+
+      if (context?.canvas) {
+        context.canvas.width = original.naturalWidth
+        context.canvas.height = original.naturalHeight
       }
       draw()
     }
   }, [context?.canvas, draw, original, isOriginalLoaded, windowSize])
+
+  // Zoom reset
+  const resetZoom = useCallback(() => {
+    if (!minScale || !original || !windowSize) {
+      return
+    }
+    const viewport = viewportRef.current
+    if (!viewport) {
+      throw new Error('no viewport')
+    }
+    const offsetX = (windowSize.width - original.width * minScale) / 2
+    const offsetY = (windowSize.height - original.height * minScale) / 2
+    viewport.setTransform(offsetX, offsetY, minScale, 200, 'easeOutQuad')
+  }, [minScale, original, windowSize, isOriginalLoaded])
 
   const onPaint = (px: number, py: number) => {
     const currShowLine = lines4Show[lines4Show.length - 1]
@@ -302,81 +335,106 @@ export default function Editor(props: EditorProps) {
     }
   }
 
+  if (!original || !scale || !minScale) {
+    return <></>
+  }
+
   return (
     <div
-      className={[
-        'flex flex-col items-center',
-        isInpaintingLoading ? 'animate-pulse-fast transition-opacity' : '',
-        scale !== 1 ? 'pb-24' : '',
-      ].join(' ')}
+      className="flex flex-col items-center"
       style={{
-        height: scale !== 1 ? original.naturalHeight * scale : undefined,
+        // height: minScale !== 1 ? original.naturalHeight * minScale : undefined,
+        height: '100%',
+        width: '100%',
       }}
       aria-hidden="true"
       onMouseMove={onMouseMove}
       onMouseUp={onPointerUp}
     >
-      <div
-        className={[scale !== 1 ? '' : 'relative'].join(' ')}
-        style={{
-          transform: `scale(${scale})`,
-          transformOrigin: 'top center',
-          borderColor: `${isMultiStrokeKeyPressed ? BRUSH_COLOR : NO_COLOR}`,
-          borderWidth: `${8 / scale}px`,
+      <TransformWrapper
+        ref={r => {
+          if (r) {
+            viewportRef.current = r
+          }
+        }}
+        panning={{ disabled: true, velocityDisabled: true }}
+        wheel={{ step: 0.05 }}
+        centerZoomedOut
+        alignmentAnimation={{ disabled: true }}
+        centerOnInit
+        limitToBounds={false}
+        initialScale={minScale}
+        minScale={minScale}
+        onZoom={ref => {
+          setScale(ref.state.scale)
         }}
       >
-        <canvas
-          className="rounded-sm"
-          style={showBrush ? { cursor: 'none' } : {}}
-          onContextMenu={e => {
-            e.preventDefault()
+        <TransformComponent
+          wrapperStyle={{
+            width: '100%',
+            height: '100%',
+            marginBottom: '36px',
           }}
-          onMouseOver={() => toggleShowBrush(true)}
-          onFocus={() => toggleShowBrush(true)}
-          onMouseLeave={() => toggleShowBrush(false)}
-          onMouseDown={onMouseDown}
-          onMouseMove={onMouseDrag}
-          ref={r => {
-            if (r && !context) {
-              const ctx = r.getContext('2d')
-              if (ctx) {
-                setContext(ctx)
-              }
-            }
-          }}
-        />
-        <div
-          className={[
-            'absolute top-0 right-0 pointer-events-none',
-            'overflow-hidden',
-            'border-primary',
-            showSeparator ? 'border-l-4' : '',
-            // showOriginal ? 'border-opacity-100' : 'border-opacity-0',
-          ].join(' ')}
-          style={{
-            width: showOriginal
-              ? `${Math.round(original.naturalWidth)}px`
-              : '0px',
-            height: original.naturalHeight,
-            transitionProperty: 'width, height',
-            transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-            transitionDuration: '300ms',
-          }}
+          contentClass={
+            isInpaintingLoading
+              ? 'animate-pulse-fast pointer-events-none transition-opacity'
+              : ''
+          }
         >
-          <img
-            className="absolute right-0"
-            src={original.src}
-            alt="original"
-            width={`${original.naturalWidth}px`}
-            height={`${original.naturalHeight}px`}
-            style={{
-              width: `${original.naturalWidth}px`,
-              height: `${original.naturalHeight}px`,
-              maxWidth: 'none',
-            }}
-          />
-        </div>
-      </div>
+          <>
+            <canvas
+              className="rounded-sm"
+              style={showBrush ? { cursor: 'none' } : {}}
+              onContextMenu={e => {
+                e.preventDefault()
+              }}
+              onMouseOver={() => toggleShowBrush(true)}
+              onFocus={() => toggleShowBrush(true)}
+              onMouseLeave={() => toggleShowBrush(false)}
+              onMouseDown={onMouseDown}
+              onMouseMove={onMouseDrag}
+              ref={r => {
+                if (r && !context) {
+                  const ctx = r.getContext('2d')
+                  if (ctx) {
+                    setContext(ctx)
+                  }
+                }
+              }}
+            />
+            <div
+              className={[
+                'absolute top-0 right-0 pointer-events-none',
+                'overflow-hidden',
+                'border-primary',
+                showSeparator ? 'border-l-4' : '',
+              ].join(' ')}
+              style={{
+                width: showOriginal
+                  ? `${Math.round(original.naturalWidth)}px`
+                  : '0px',
+                height: original.naturalHeight,
+                transitionProperty: 'width, height',
+                transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                transitionDuration: '300ms',
+              }}
+            >
+              <img
+                className="absolute right-0"
+                src={original.src}
+                alt="original"
+                width={`${original.naturalWidth}px`}
+                height={`${original.naturalHeight}px`}
+                style={{
+                  width: `${original.naturalWidth}px`,
+                  height: `${original.naturalHeight}px`,
+                  maxWidth: 'none',
+                }}
+              />
+            </div>
+          </>
+        </TransformComponent>
+      </TransformWrapper>
 
       {showBrush && !isInpaintingLoading && (
         <div
@@ -396,7 +454,7 @@ export default function Editor(props: EditorProps) {
           'flex items-center w-full max-w-5xl',
           'space-x-3 sm:space-x-5',
           'pb-6',
-          scale !== 1
+          minScale !== 1
             ? 'absolute bottom-0 justify-evenly'
             : 'relative justify-evenly sm:justify-between',
         ].join(' ')}

@@ -37,7 +37,7 @@ export default function SizeSelector(props: SizeSelectorProps) {
         <div className="relative">
           <Listbox.Options
             style={{ top: '-112px' }}
-            className="absolute mb-1 w-full overflow-auto text-base bg-black backdrop-blur backdrop-filter md:bg-opacity-10 rounded-md max-h-60 ring-opacity-50 focus:outline-none sm:text-sm"
+            className="absolute mb-1 w-full overflow-auto text-base bg-black backdrop-blur backdrop-filter bg-opacity-10 rounded-md max-h-60 ring-opacity-50 focus:outline-none sm:text-sm"
           >
             {sizes.map((size, _) => (
               <Listbox.Option

@@ -24,6 +24,7 @@
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
     "react-use": "^17.3.1",
+    "react-zoom-pan-pinch": "^2.1.3",
     "tailwindcss": "2.x",
     "typescript": "4.x"
   },
