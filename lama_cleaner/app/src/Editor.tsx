@@ -659,7 +659,7 @@ export default function Editor(props: EditorProps) {
             className="absolute bg-black backdrop-blur backdrop-filter bg-opacity-10 rounded-xl"
             style={{
               height: '58px',
-              width: '700px',
+              width: '600px',
               zIndex: -1,
               marginLeft: '-1px',
             }}

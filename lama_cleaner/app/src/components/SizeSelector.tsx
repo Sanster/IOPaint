@@ -16,7 +16,7 @@ export default function SizeSelector(props: SizeSelectorProps) {
 
   const getSizeShowName = (size: string) => {
     if (size === 'Original') {
-      return `${originalWidth}x${originalHeight}(${size})`
+      return `${originalWidth}x${originalHeight}`
     }
     const length: number = parseInt(size, 10)
     const longSide: number =
@@ -36,7 +36,7 @@ export default function SizeSelector(props: SizeSelectorProps) {
   }
 
   return (
-    <div className="w-52">
+    <div className="w-32">
       <Listbox value={value} onChange={onChange}>
         <div className="relative">
           <Listbox.Options
