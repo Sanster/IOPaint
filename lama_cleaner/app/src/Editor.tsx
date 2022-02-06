@@ -11,12 +11,7 @@ import {
   TransformComponent,
   TransformWrapper,
 } from 'react-zoom-pan-pinch'
-import {
-  useWindowSize,
-  useLocalStorage,
-  useKey,
-  useKeyPressEvent,
-} from 'react-use'
+import { useWindowSize, useLocalStorage, useKey } from 'react-use'
 import inpaint from './adapters/inpainting'
 import Button from './components/Button'
 import Slider from './components/Slider'
@@ -25,7 +20,7 @@ import { downloadImage, loadImage, useImage } from './utils'
 
 const TOOLBAR_SIZE = 200
 const BRUSH_COLOR = 'rgba(189, 255, 1, 0.75)'
-const NO_COLOR = 'rgba(255,255,255,0)'
+// const NO_COLOR = 'rgba(255,255,255,0)'
 
 interface EditorProps {
   file: File
@@ -150,6 +145,16 @@ export default function Editor(props: EditorProps) {
     historyLineCount,
   ])
 
+  const hadDrawSomething = () => {
+    return lines4Show.length !== 0 && lines4Show[0].pts.length !== 0
+  }
+
+  const clearDrawing = () => {
+    setIsDraging(false)
+    lines4Show.length = 0
+    setLines4Show([{ pts: [] } as Line])
+  }
+
   const handleMultiStrokeKeyDown = () => {
     if (isInpaintingLoading) {
       return
@@ -166,7 +171,7 @@ export default function Editor(props: EditorProps) {
     }
 
     setIsMultiStrokeKeyPressed(false)
-    if (lines4Show.length !== 0 && lines4Show[0].pts.length !== 0) {
+    if (hadDrawSomething()) {
       runInpainting()
     }
   }
@@ -174,10 +179,21 @@ export default function Editor(props: EditorProps) {
   const predicate = (event: KeyboardEvent) => {
     return event.key === 'Control' || event.key === 'Meta'
   }
-  useKey(predicate, handleMultiStrokeKeyup, { event: 'keyup' })
-  useKey(predicate, handleMultiStrokeKeyDown, {
-    event: 'keydown',
-  })
+
+  useKey(predicate, handleMultiStrokeKeyup, { event: 'keyup' }, [
+    isInpaintingLoading,
+    isMultiStrokeKeyPressed,
+    hadDrawSomething,
+  ])
+
+  useKey(
+    predicate,
+    handleMultiStrokeKeyDown,
+    {
+      event: 'keydown',
+    },
+    [isInpaintingLoading]
+  )
 
   // Draw once the original image is loaded
   useEffect(() => {
@@ -219,7 +235,25 @@ export default function Editor(props: EditorProps) {
     setScale(minScale)
   }, [minScale, original, windowSize])
 
-  useKeyPressEvent('Escape', resetZoom)
+  const handleEscPressed = () => {
+    if (isInpaintingLoading) {
+      return
+    }
+    if (isDraging || isMultiStrokeKeyPressed) {
+      clearDrawing()
+    } else {
+      resetZoom()
+    }
+  }
+
+  useKey(
+    'Escape',
+    handleEscPressed,
+    {
+      event: 'keydown',
+    },
+    [isDraging, isMultiStrokeKeyPressed]
+  )
 
   const onPaint = (px: number, py: number) => {
     const currShowLine = lines4Show[lines4Show.length - 1]
@@ -255,6 +289,9 @@ export default function Editor(props: EditorProps) {
       return
     }
     if (isInpaintingLoading) {
+      return
+    }
+    if (!isDraging) {
       return
     }
     setIsDraging(false)
@@ -294,6 +331,13 @@ export default function Editor(props: EditorProps) {
   }
 
   const undo = () => {
+    if (!renders.length) {
+      return
+    }
+    if (!historyLineCount.length) {
+      return
+    }
+
     const l = lines
     const count = historyLineCount[historyLineCount.length - 1]
     for (let i = 0; i <= count; i += 1) {
@@ -311,12 +355,6 @@ export default function Editor(props: EditorProps) {
 
   // Handle Cmd+Z
   const undoPredicate = (event: KeyboardEvent) => {
-    if (!renders.length) {
-      return false
-    }
-    if (!historyLineCount.length) {
-      return false
-    }
     const isCmdZ = (event.metaKey || event.ctrlKey) && event.key === 'z'
     if (isCmdZ) {
       event.preventDefault()
@@ -370,6 +408,7 @@ export default function Editor(props: EditorProps) {
         alignmentAnimation={{ disabled: true }}
         centerOnInit
         limitToBounds={false}
+        doubleClick={{ disabled: true }}
         initialScale={minScale}
         minScale={minScale}
         onZoom={ref => {
@@ -466,7 +505,7 @@ export default function Editor(props: EditorProps) {
         ].join(' ')}
       >
         <SizeSelector
-          value={sizeLimit!}
+          value={sizeLimit || '1080'}
           onChange={onSizeLimitChange}
           originalWidth={original.naturalWidth}
           originalHeight={original.naturalHeight}

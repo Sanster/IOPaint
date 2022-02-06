@@ -39,7 +39,7 @@ export default function SizeSelector(props: SizeSelectorProps) {
             style={{ top: '-112px' }}
             className="absolute mb-1 w-full overflow-auto text-base bg-black backdrop-blur backdrop-filter bg-opacity-10 rounded-md max-h-60 ring-opacity-50 focus:outline-none sm:text-sm"
           >
-            {sizes.map((size, _) => (
+            {sizes.map(size => (
               <Listbox.Option
                 key={size}
                 className={({ active }) =>
