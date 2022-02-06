@@ -36,15 +36,15 @@ export default function SizeSelector(props: SizeSelectorProps) {
       <Listbox value={value} onChange={onChange}>
         <div className="relative">
           <Listbox.Options
-            style={{ top: '-112px' }}
-            className="absolute mb-1 w-full overflow-auto text-base bg-black backdrop-blur backdrop-filter bg-opacity-10 rounded-md max-h-60 ring-opacity-50 focus:outline-none sm:text-sm"
+            style={{ top: '-122px' }}
+            className="absolute mb-1 w-full overflow-auto text-base bg-opacity-10 bg-black backdrop-blur rounded-md max-h-60 outline-none sm:text-sm"
           >
             {sizes.map(size => (
               <Listbox.Option
                 key={size}
                 className={({ active }) =>
                   `${active ? 'bg-black bg-opacity-10' : 'text-gray-900'}
-                          cursor-default select-none relative py-2 pl-10 pr-4`
+                   cursor-default select-none relative py-2 pl-4 pr-4`
                 }
                 value={size}
               >
@@ -57,7 +57,7 @@ export default function SizeSelector(props: SizeSelectorProps) {
                     >
                       {getSizeShowName(size)}
                     </span>
-                    {selected ? (
+                    {/* {selected ? (
                       <span
                         className={`${
                           active ? 'text-amber-600' : 'text-amber-600'
@@ -66,7 +66,7 @@ export default function SizeSelector(props: SizeSelectorProps) {
                       >
                         <CheckIcon className="w-5 h-5" aria-hidden="true" />
                       </span>
-                    ) : null}
+                    ) : null} */}
                   </>
                 )}
               </Listbox.Option>

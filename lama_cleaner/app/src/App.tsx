@@ -11,7 +11,7 @@ function App() {
 
   return (
     <div className="h-full full-visible-h-safari flex flex-col">
-      <header className="absolute z-10 flex px-5 pt-3 justify-center sm:justify-between items-center sm:items-start">
+      <header className="absolute z-10 flex w-full p-2 justify-center sm:justify-between items-center sm:items-start  bg-white backdrop-blur backdrop-filter bg-opacity-30">
         {file ? (
           <Button
             icon={<ArrowLeftIcon className="w-6 h-6" />}
