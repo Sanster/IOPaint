@@ -71,6 +71,7 @@ export default function Editor(props: EditorProps) {
   const [historyLineCount, setHistoryLineCount] = useState<number[]>([])
   const [{ x, y }, setCoords] = useState({ x: -1, y: -1 })
   const [showBrush, setShowBrush] = useState(false)
+  const [isPanning, setIsPanning] = useState<boolean>(false)
   const [showOriginal, setShowOriginal] = useState(false)
   const [isInpaintingLoading, setIsInpaintingLoading] = useState(false)
   const [showSeparator, setShowSeparator] = useState(false)
@@ -280,6 +281,9 @@ export default function Editor(props: EditorProps) {
   }
 
   const onMouseDrag = (ev: SyntheticEvent) => {
+    if (isPanning) {
+      return
+    }
     if (!isDraging) {
       return
     }
@@ -290,6 +294,9 @@ export default function Editor(props: EditorProps) {
   }
 
   const onPointerUp = () => {
+    if (isPanning) {
+      return
+    }
     if (!original.src) {
       return
     }
@@ -319,6 +326,9 @@ export default function Editor(props: EditorProps) {
   }
 
   const onMouseDown = (ev: SyntheticEvent) => {
+    if (isPanning) {
+      return
+    }
     if (!original.src) {
       return
     }
@@ -409,10 +419,34 @@ export default function Editor(props: EditorProps) {
   }
 
   const toggleShowBrush = (newState: boolean) => {
-    if (newState !== showBrush) {
+    if (newState !== showBrush && !isPanning) {
       setShowBrush(newState)
     }
   }
+
+  const getCursor = useCallback(() => {
+    if (isPanning) {
+      return 'grab'
+    }
+    if (showBrush) {
+      return 'none'
+    }
+    return undefined
+  }, [showBrush, isPanning])
+
+  // Toggle clean/zoom tool on spacebar.
+  useKey(
+    ' ',
+    ev => {
+      ev?.preventDefault()
+      setShowBrush(!showBrush)
+      setIsPanning(!isPanning)
+    },
+    {
+      event: 'keydown',
+    },
+    [isPanning, showBrush]
+  )
 
   if (!original || !scale || !minScale) {
     return <></>
@@ -435,7 +469,7 @@ export default function Editor(props: EditorProps) {
             viewportRef.current = r
           }
         }}
-        panning={{ disabled: true, velocityDisabled: true }}
+        panning={{ disabled: !isPanning, velocityDisabled: true }}
         wheel={{ step: 0.05 }}
         centerZoomedOut
         alignmentAnimation={{ disabled: true }}
@@ -462,7 +496,7 @@ export default function Editor(props: EditorProps) {
           <>
             <canvas
               className="rounded-sm"
-              style={showBrush ? { cursor: 'none' } : {}}
+              style={{ cursor: getCursor() }}
               onContextMenu={e => {
                 e.preventDefault()
               }}
@@ -514,7 +548,7 @@ export default function Editor(props: EditorProps) {
         </TransformComponent>
       </TransformWrapper>
 
-      {showBrush && !isInpaintingLoading && (
+      {showBrush && !isInpaintingLoading && !isPanning && (
         <div
           className="hidden sm:block absolute rounded-full border border-primary bg-primary bg-opacity-80 pointer-events-none"
           style={{
