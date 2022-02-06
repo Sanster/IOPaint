@@ -266,7 +266,13 @@ export default function Editor(props: EditorProps) {
     {
       event: 'keydown',
     },
-    [isDraging, isMultiStrokeKeyPressed]
+    [
+      isDraging,
+      isInpaintingLoading,
+      isMultiStrokeKeyPressed,
+      resetZoom,
+      clearDrawing,
+    ]
   )
 
   const onPaint = (px: number, py: number) => {
@@ -439,18 +445,20 @@ export default function Editor(props: EditorProps) {
   }, [showBrush, isPanning])
 
   // Toggle clean/zoom tool on spacebar.
-  useKey(
+  useKeyPressEvent(
     ' ',
     ev => {
       ev?.preventDefault()
       ev?.stopPropagation()
-      setShowBrush(!showBrush)
-      setIsPanning(!isPanning)
+      setShowBrush(false)
+      setIsPanning(true)
     },
-    {
-      event: 'keydown',
-    },
-    [isPanning, showBrush]
+    ev => {
+      ev?.preventDefault()
+      ev?.stopPropagation()
+      setShowBrush(true)
+      setIsPanning(false)
+    }
   )
 
   if (!original || !scale || !minScale) {
