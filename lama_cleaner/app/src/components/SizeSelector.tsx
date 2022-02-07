@@ -1,4 +1,4 @@
-import React, { FocusEvent } from 'react'
+import React, { FocusEvent, useCallback } from 'react'
 import { Listbox } from '@headlessui/react'
 import { CheckIcon, SelectorIcon } from '@heroicons/react/solid'
 
@@ -35,15 +35,31 @@ export default function SizeSelector(props: SizeSelectorProps) {
     e.currentTarget.blur()
   }
 
+  const getValidSizes = useCallback((): string[] => {
+    const longSide: number =
+      originalWidth > originalHeight ? originalWidth : originalHeight
+
+    const validSizes = []
+    for (let i = 0; i < sizes.length; i += 1) {
+      const s = sizes[i]
+      if (s === 'Original') {
+        validSizes.push(s)
+      } else if (parseInt(s, 10) <= longSide) {
+        validSizes.push(s)
+      }
+    }
+    return validSizes
+  }, [originalHeight, originalWidth])
+
   return (
     <div className="w-32">
       <Listbox value={value} onChange={onChange}>
         <div className="relative">
           <Listbox.Options
-            style={{ top: '-122px' }}
+            style={{ top: `-${getValidSizes().length * 40 + 5}px` }}
             className="absolute mb-1 w-full overflow-auto text-base bg-opacity-10 bg-black backdrop-blur rounded-md max-h-60 outline-none sm:text-sm"
           >
-            {sizes.map(size => (
+            {getValidSizes().map(size => (
               <Listbox.Option
                 key={size}
                 className={({ active }) =>
