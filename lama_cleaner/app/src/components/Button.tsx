@@ -35,11 +35,17 @@ export default function Button(props: ButtonProps) {
   if (!primary && !active) {
     background = 'hover:bg-primary'
   }
+
+  const blurOnClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.currentTarget.blur()
+    onClick?.()
+  }
+
   return (
     <div
       role="button"
       onKeyDown={onKeyDown}
-      onClick={onClick}
+      onClick={blurOnClick}
       onPointerDown={(ev: React.PointerEvent<HTMLDivElement>) => {
         setActive(true)
         onDown?.(ev.nativeEvent)

@@ -1,12 +1,14 @@
 import { ArrowLeftIcon } from '@heroicons/react/outline'
 import React, { useState } from 'react'
-import { useWindowSize } from 'react-use'
+import { useToggle, useWindowSize } from 'react-use'
 import Button from './components/Button'
 import FileSelect from './components/FileSelect'
+import ShortcutsModal from './components/ShortcutsModal'
 import Editor from './Editor'
 
 function App() {
   const [file, setFile] = useState<File>()
+  const [showShortcuts, toggleShowShortcuts] = useToggle(false)
   const windowSize = useWindowSize()
 
   return (
@@ -27,6 +29,7 @@ function App() {
 
         {file ? (
           <Button
+            onClick={toggleShowShortcuts}
             icon={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -56,6 +59,8 @@ function App() {
           <></>
         )}
       </header>
+
+      {showShortcuts && <ShortcutsModal onClose={toggleShowShortcuts} />}
 
       <main
         className={[
