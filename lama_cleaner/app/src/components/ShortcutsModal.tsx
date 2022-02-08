@@ -31,8 +31,8 @@ export default function ShortcutsModal(props: ShortcutsModalProps) {
           <ShortCut content="Enable multi-stroke mask drawing">
             <p>Hold Cmd/Ctrl</p>
           </ShortCut>
-          <ShortCut content="Enable panning">
-            <p>Hold Space</p>
+          <ShortCut content="Pan">
+            <p>Space & Drag</p>
           </ShortCut>
           <ShortCut content="View original image">
             <p>Hold Tab</p>

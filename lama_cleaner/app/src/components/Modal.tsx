@@ -1,6 +1,6 @@
 import { XIcon } from '@heroicons/react/outline'
 import React, { ReactNode, useRef } from 'react'
-import { useClickAway } from 'react-use'
+import { useClickAway, useKey } from 'react-use'
 import Button from './Button'
 
 interface ModalProps {
@@ -15,6 +15,10 @@ export default function Modal(props: ModalProps) {
 
   useClickAway(ref, () => {
     onClose?.()
+  })
+
+  useKey('Escape', onClose, {
+    event: 'keydown',
   })
 
   return (
