@@ -246,8 +246,9 @@ export default function Editor(props: EditorProps) {
     const offsetX = (windowSize.width - original.width * minScale) / 2
     const offsetY = (windowSize.height - original.height * minScale) / 2
     viewport.setTransform(offsetX, offsetY, minScale, 200, 'easeOutQuad')
+    viewport.state.scale = minScale
     setScale(minScale)
-  }, [minScale, original, windowSize])
+  }, [viewportRef, minScale, original, windowSize])
 
   const handleEscPressed = () => {
     if (isInpaintingLoading) {
@@ -461,6 +462,25 @@ export default function Editor(props: EditorProps) {
     }
   )
 
+  const getCurScale = (): number => {
+    let s = minScale
+    if (viewportRef.current?.state.scale !== undefined) {
+      s = viewportRef.current?.state.scale
+    }
+    return s!
+  }
+
+  const getBrushStyle = () => {
+    const curScale = getCurScale()
+    return {
+      width: `${brushSize * curScale}px`,
+      height: `${brushSize * curScale}px`,
+      left: `${x}px`,
+      top: `${y}px`,
+      transform: 'translate(-50%, -50%)',
+    }
+  }
+
   if (!original || !scale || !minScale) {
     return <></>
   }
@@ -564,13 +584,7 @@ export default function Editor(props: EditorProps) {
       {showBrush && !isInpaintingLoading && !isPanning && (
         <div
           className="hidden sm:block absolute rounded-full border border-primary bg-primary bg-opacity-80 pointer-events-none"
-          style={{
-            width: `${brushSize * scale}px`,
-            height: `${brushSize * scale}px`,
-            left: `${x}px`,
-            top: `${y}px`,
-            transform: 'translate(-50%, -50%)',
-          }}
+          style={getBrushStyle()}
         />
       )}
 

@@ -2,7 +2,7 @@ import React, { FocusEvent, useCallback, useEffect } from 'react'
 import { Listbox } from '@headlessui/react'
 import { CheckIcon, SelectorIcon } from '@heroicons/react/solid'
 
-const sizes = ['1080', '2000', 'Original']
+const sizes = ['720', '1080', '2000', 'Original']
 
 type SizeSelectorProps = {
   value: string
