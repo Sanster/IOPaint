@@ -96,7 +96,13 @@ export default function Editor(props: EditorProps) {
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
     const currRender = renders[renders.length - 1]
     if (currRender?.src) {
-      context.drawImage(currRender, 0, 0)
+      context.drawImage(
+        currRender,
+        0,
+        0,
+        original.naturalWidth,
+        original.naturalHeight
+      )
     } else {
       context.drawImage(original, 0, 0)
     }

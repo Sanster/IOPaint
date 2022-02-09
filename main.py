@@ -14,9 +14,14 @@ import torch
 from flask import Flask, request, send_file
 from flask_cors import CORS
 
-from lama_cleaner.helper import (download_model, load_img, norm_img,
-                                 numpy_to_bytes, pad_img_to_modulo,
-                                 resize_max_size)
+from lama_cleaner.helper import (
+    download_model,
+    load_img,
+    norm_img,
+    numpy_to_bytes,
+    pad_img_to_modulo,
+    resize_max_size,
+)
 
 NUM_THREADS = str(multiprocessing.cpu_count())
 
@@ -63,11 +68,11 @@ def process():
     res_np_img = run(image, mask)
 
     # resize to original size
-    res_np_img = cv2.resize(
-        res_np_img,
-        dsize=(original_shape[1], original_shape[0]),
-        interpolation=interpolation,
-    )
+    # res_np_img = cv2.resize(
+    #     res_np_img,
+    #     dsize=(original_shape[1], original_shape[0]),
+    #     interpolation=interpolation,
+    # )
 
     return send_file(
         io.BytesIO(numpy_to_bytes(res_np_img)),
