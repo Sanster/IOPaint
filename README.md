@@ -6,6 +6,7 @@ This project is mainly used for selfhosting LaMa model, some interaction improve
 
 - [x] High resolution support
 - [x] Multi stroke support. Press and hold the `cmd/ctrl` key to enable multi stroke mode.
+- [x] Zoom & Pan
 - [ ] Keep image EXIF data
 
 ## Quick Start
