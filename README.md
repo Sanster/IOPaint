@@ -2,7 +2,8 @@
 
 This project is mainly used for selfhosting LaMa model, some interaction improvements may be added later.
 
-![example](./assets/lama-cleaner-example.gif)
+https://user-images.githubusercontent.com/3998421/153323093-b664bb68-2928-480b-b59b-7c1ee24a4507.mp4
+
 
 - [x] High resolution support
 - [x] Multi stroke support. Press and hold the `cmd/ctrl` key to enable multi stroke mode.
