@@ -52,3 +52,10 @@ docker run --gpus all -p 8080:8080 -e CACHE_DIR=/app/models -v $(pwd)/models:/ap
 ```
 
 Then open [http://localhost:8080](http://localhost:8080)
+
+https://www.buymeacoffee.com/Sanster
+
+## Like My Work?
+<a href="https://www.buymeacoffee.com/Sanster"> 
+  <img height="50em" src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Sanster" />
+</a>
