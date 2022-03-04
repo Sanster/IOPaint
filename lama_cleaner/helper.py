@@ -7,13 +7,8 @@ import numpy as np
 import torch
 from torch.hub import download_url_to_file, get_dir
 
-LAMA_MODEL_URL = os.environ.get(
-    "LAMA_MODEL_URL",
-    "https://github.com/Sanster/models/releases/download/add_big_lama/big-lama.pt",
-)
 
-
-def download_model(url=LAMA_MODEL_URL):
+def download_model(url):
     parts = urlparse(url)
     hub_dir = get_dir()
     model_dir = os.path.join(hub_dir, "checkpoints")
