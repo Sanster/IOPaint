@@ -27,7 +27,8 @@ from lama_cleaner.helper import (
     load_img,
     norm_img,
     numpy_to_bytes,
-    resize_max_size, )
+    resize_max_size,
+)
 
 NUM_THREADS = str(multiprocessing.cpu_count())
 
@@ -74,6 +75,8 @@ def process():
 
     res_np_img = model(image, mask)
 
+    torch.cuda.empty_cache()
+
     return send_file(
         io.BytesIO(numpy_to_bytes(res_np_img)),
         mimetype="image/jpeg",
@@ -91,8 +94,13 @@ def get_args_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", default=8080, type=int)
     parser.add_argument("--model", default="lama", choices=["lama", "ldm"])
-    parser.add_argument("--ldm-steps", default=50, type=int, help="Steps for DDIM sampling process."
-                                                                  "The larger the value, the better the result, but it will be more time-consuming")
+    parser.add_argument(
+        "--ldm-steps",
+        default=50,
+        type=int,
+        help="Steps for DDIM sampling process."
+        "The larger the value, the better the result, but it will be more time-consuming",
+    )
     parser.add_argument("--device", default="cuda", type=str)
     parser.add_argument("--debug", action="store_true")
     return parser.parse_args()
