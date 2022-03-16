@@ -450,7 +450,7 @@ export default function Editor(props: EditorProps) {
     }
     return undefined
   }, [showBrush, isPanning])
-  
+
   // Standard Hotkeys for Brush Size
   useKeyPressEvent('[', () => {
     setBrushSize(currentBrushSize => {
