@@ -43,6 +43,12 @@ export default function ShortcutsModal(props: ShortcutsModalProps) {
           <ShortCut content="Reset zoom/pan & Cancel mask drawing">
             <p>Esc</p>
           </ShortCut>
+          <ShortCut content="Decrease Brush Size">
+            <p>[</p>
+          </ShortCut>
+          <ShortCut content="Increase Brush Size">
+            <p>]</p>
+          </ShortCut>
         </div>
       </div>
     </Modal>
