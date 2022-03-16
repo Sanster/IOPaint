@@ -450,6 +450,25 @@ export default function Editor(props: EditorProps) {
     }
     return undefined
   }, [showBrush, isPanning])
+  
+  // Standard Hotkeys for Brush Size
+  useKeyPressEvent('[', () => {
+    setBrushSize(currentBrushSize => {
+      if (currentBrushSize > 10) {
+        return currentBrushSize - 10
+      }
+      if (currentBrushSize <= 10 && currentBrushSize > 0) {
+        return currentBrushSize - 5
+      }
+      return currentBrushSize
+    })
+  })
+
+  useKeyPressEvent(']', () => {
+    setBrushSize(currentBrushSize => {
+      return currentBrushSize + 10
+    })
+  })
 
   // Toggle clean/zoom tool on spacebar.
   useKeyPressEvent(
