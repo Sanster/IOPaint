@@ -4,6 +4,7 @@ import argparse
 import io
 import multiprocessing
 import os
+import time
 from typing import Union
 
 import cv2
@@ -73,7 +74,9 @@ def process():
     mask = resize_max_size(mask, size_limit=size_limit, interpolation=interpolation)
     mask = norm_img(mask)
 
+    start = time.time()
     res_np_img = model(image, mask)
+    print(f"process time: {(time.time() - start) * 1000}ms")
 
     torch.cuda.empty_cache()
 

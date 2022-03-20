@@ -1,5 +1,4 @@
 import os
-import time
 
 import cv2
 import torch
@@ -20,7 +19,9 @@ class LaMa:
         if os.environ.get("LAMA_MODEL"):
             model_path = os.environ.get("LAMA_MODEL")
             if not os.path.exists(model_path):
-                raise FileNotFoundError(f"lama torchscript model not found: {model_path}")
+                raise FileNotFoundError(
+                    f"lama torchscript model not found: {model_path}"
+                )
         else:
             model_path = download_model(LAMA_MODEL_URL)
 
@@ -45,10 +46,8 @@ class LaMa:
         image = torch.from_numpy(image).unsqueeze(0).to(device)
         mask = torch.from_numpy(mask).unsqueeze(0).to(device)
 
-        start = time.time()
         inpainted_image = self.model(image, mask)
 
-        print(f"process time: {(time.time() - start) * 1000}ms")
         cur_res = inpainted_image[0].permute(1, 2, 0).detach().cpu().numpy()
         cur_res = cur_res[0:origin_height, 0:origin_width, :]
         cur_res = np.clip(cur_res * 255, 0, 255).astype("uint8")
