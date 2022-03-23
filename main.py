@@ -97,12 +97,18 @@ def get_args_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", default=8080, type=int)
     parser.add_argument("--model", default="lama", choices=["lama", "ldm"])
+    parser.add_argument("--crop-trigger-size", default="2042,2042",
+                        help="If image size large then crop-trigger-size, "
+                             "crop each area from original image to do inference."
+                             "Mainly for performance and memory reasons"
+                             "Only for lama")
+    parser.add_argument("--crop-size", default="512,512")
     parser.add_argument(
         "--ldm-steps",
         default=50,
         type=int,
         help="Steps for DDIM sampling process."
-        "The larger the value, the better the result, but it will be more time-consuming",
+             "The larger the value, the better the result, but it will be more time-consuming",
     )
     parser.add_argument("--device", default="cuda", type=str)
     parser.add_argument("--debug", action="store_true")
@@ -115,8 +121,11 @@ def main():
     args = get_args_parser()
     device = torch.device(args.device)
 
+    crop_trigger_size = [int(it) for it in args.crop_trigger_size.split(",")]
+    crop_size = [int(it) for it in args.crop_size.split(",")]
+
     if args.model == "lama":
-        model = LaMa(device)
+        model = LaMa(crop_trigger_size=crop_trigger_size, crop_size=crop_size, device=device)
     elif args.model == "ldm":
         model = LDM(device, steps=args.ldm_steps)
     else:
