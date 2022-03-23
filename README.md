@@ -40,6 +40,7 @@ results than LaMa.
 You can run lama-cleaner as a desktop application using the following command line arguments.
 
 `--gui`: Launch lama-cleaner as a desktop application
+
 `--gui_size`: Set the window size for the application. Usage: --gui_size 1200 900
 
 |Original Image|LaMa|LDM|
