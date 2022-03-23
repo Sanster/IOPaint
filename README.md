@@ -20,6 +20,10 @@ Install requirements: `pip3 install -r requirements.txt`
 python3 main.py --device=cuda --port=8080 --model=lama
 ```
 
+- `--crop-trigger-size`: If image size large then crop-trigger-size, crop each area from original image to do inference.
+  Mainly for performance and memory reasons on **very** large image.Default is 2042,2042
+- `--crop-size`: Crop size for `--crop-trigger-size`. Default is 512,512.
+
 ### Start server with LDM model
 
 ```bash
@@ -34,7 +38,6 @@ results than LaMa.
 |Original Image|LaMa|LDM|
 |--------------|------|----|
 |![photo-1583445095369-9c651e7e5d34](https://user-images.githubusercontent.com/3998421/156923525-d6afdec3-7b98-403f-ad20-88ebc6eb8d6d.jpg)|![photo-1583445095369-9c651e7e5d34_cleanup_lama](https://user-images.githubusercontent.com/3998421/156923620-a40cc066-fd4a-4d85-a29f-6458711d1247.png)|![photo-1583445095369-9c651e7e5d34_cleanup_ldm](https://user-images.githubusercontent.com/3998421/156923652-0d06c8c8-33ad-4a42-a717-9c99f3268933.png)|
-
 
 Blogs about diffusion models:
 

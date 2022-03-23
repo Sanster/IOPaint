@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import List
 
 from urllib.parse import urlparse
 import cv2
@@ -80,3 +81,27 @@ def pad_img_to_modulo(img, mod):
         ((0, 0), (0, out_height - height), (0, out_width - width)),
         mode="symmetric",
     )
+
+
+def boxes_from_mask(mask: np.ndarray) -> List[np.ndarray]:
+    """
+    Args:
+        mask: (1, h, w)  0~1
+
+    Returns:
+
+    """
+    height, width = mask.shape[1:]
+    _, thresh = cv2.threshold((mask.transpose(1, 2, 0) * 255).astype(np.uint8), 127, 255, 0)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    boxes = []
+    for cnt in contours:
+        x, y, w, h = cv2.boundingRect(cnt)
+        box = np.array([x, y, x + w, y + h]).astype(np.int)
+
+        box[::2] = np.clip(box[::2], 0, width)
+        box[1::2] = np.clip(box[1::2], 0, height)
+        boxes.append(box)
+
+    return boxes
