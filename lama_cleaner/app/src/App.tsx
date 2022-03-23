@@ -6,6 +6,27 @@ import FileSelect from './components/FileSelect'
 import ShortcutsModal from './components/ShortcutsModal'
 import Editor from './Editor'
 
+// Keeping GUI Window Open
+async function getRequest(url = '') {
+  const response = await fetch(url, {
+    method: 'GET',
+    cache: 'no-cache',
+  })
+  return response.json()
+}
+
+if (!process.env.NODE_ENV || process.env.NODE_ENV === 'production') {
+  document.addEventListener('DOMContentLoaded', function () {
+    const url = document.location
+    const route = '/flaskwebgui-keep-server-alive'
+    const intervalRequest = 3 * 1000
+    function keepAliveServer() {
+      getRequest(url + route).then(data => console.log(data))
+    }
+    setInterval(keepAliveServer, intervalRequest)
+  })
+}
+
 function App() {
   const [file, setFile] = useState<File>()
   const [showShortcuts, toggleShowShortcuts] = useToggle(false)

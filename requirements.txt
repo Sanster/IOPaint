@@ -2,4 +2,5 @@ torch>=1.8.2
 opencv-python
 flask_cors
 flask
+flaskwebgui
 tqdm
