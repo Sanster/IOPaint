@@ -102,7 +102,7 @@ def get_args_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", default=8080, type=int)
     parser.add_argument("--model", default="lama", choices=["lama", "ldm"])
-    parser.add_argument("--crop-trigger-size", default="2042,2042",
+    parser.add_argument("--crop-trigger-size", nargs=2, type=int,
                         help="If image size large then crop-trigger-size, "
                              "crop each area from original image to do inference."
                              "Mainly for performance and memory reasons"
@@ -119,7 +119,7 @@ def get_args_parser():
     parser.add_argument("--device", default="cuda", type=str)
     parser.add_argument("--gui", action="store_true",
                         help="Launch as desktop app")
-    parser.add_argument("--gui_size", default=[1600, 1000], nargs=2, type=int,
+    parser.add_argument("--gui-size", default=[1600, 1000], nargs=2, type=int,
                         help="Set window size for GUI")
     parser.add_argument("--debug", action="store_true")
     return parser.parse_args()
@@ -131,10 +131,8 @@ def main():
     args = get_args_parser()
     device = torch.device(args.device)
 
-    crop_trigger_size = [int(it) for it in args.crop_trigger_size.split(",")]
-
     if args.model == "lama":
-        model = LaMa(crop_trigger_size=crop_trigger_size, crop_margin=args.crop_margin, device=device)
+        model = LaMa(crop_trigger_size=args.crop_trigger_size, crop_margin=args.crop_margin, device=device)
     elif args.model == "ldm":
         model = LDM(device, steps=args.ldm_steps)
     else:
