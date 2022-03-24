@@ -35,6 +35,14 @@ python3 main.py --device=cuda --port=8080 --model=ldm --ldm-steps=50
 Diffusion model is **MUCH MORE** slower than GANs(1080x720 image takes 8s on 3090), but it's possible to get better
 results than LaMa.
 
+### GUI
+
+You can run lama-cleaner as a desktop application using the following command line arguments.
+
+`--gui`: Launch lama-cleaner as a desktop application
+
+`--gui_size`: Set the window size for the application. Usage: --gui_size 1200 900
+
 |Original Image|LaMa|LDM|
 |--------------|------|----|
 |![photo-1583445095369-9c651e7e5d34](https://user-images.githubusercontent.com/3998421/156923525-d6afdec3-7b98-403f-ad20-88ebc6eb8d6d.jpg)|![photo-1583445095369-9c651e7e5d34_cleanup_lama](https://user-images.githubusercontent.com/3998421/156923620-a40cc066-fd4a-4d85-a29f-6458711d1247.png)|![photo-1583445095369-9c651e7e5d34_cleanup_ldm](https://user-images.githubusercontent.com/3998421/156923652-0d06c8c8-33ad-4a42-a717-9c99f3268933.png)|

@@ -13,6 +13,8 @@ import torch
 from lama_cleaner.lama import LaMa
 from lama_cleaner.ldm import LDM
 
+from flaskwebgui import FlaskUI
+
 try:
     torch._C._jit_override_can_fuse_on_cpu(False)
     torch._C._jit_override_can_fuse_on_gpu(False)
@@ -41,7 +43,8 @@ os.environ["NUMEXPR_NUM_THREADS"] = NUM_THREADS
 if os.environ.get("CACHE_DIR"):
     os.environ["TORCH_HOME"] = os.environ["CACHE_DIR"]
 
-BUILD_DIR = os.environ.get("LAMA_CLEANER_BUILD_DIR", "./lama_cleaner/app/build")
+BUILD_DIR = os.environ.get("LAMA_CLEANER_BUILD_DIR",
+                           "./lama_cleaner/app/build")
 
 app = Flask(__name__, static_folder=os.path.join(BUILD_DIR, "static"))
 app.config["JSON_AS_ASCII"] = False
@@ -66,12 +69,14 @@ def process():
         size_limit = int(size_limit)
 
     print(f"Origin image shape: {original_shape}")
-    image = resize_max_size(image, size_limit=size_limit, interpolation=interpolation)
+    image = resize_max_size(image, size_limit=size_limit,
+                            interpolation=interpolation)
     print(f"Resized image shape: {image.shape}")
     image = norm_img(image)
 
     mask = load_img(input["mask"].read(), gray=True)
-    mask = resize_max_size(mask, size_limit=size_limit, interpolation=interpolation)
+    mask = resize_max_size(mask, size_limit=size_limit,
+                           interpolation=interpolation)
     mask = norm_img(mask)
 
     start = time.time()
@@ -112,6 +117,10 @@ def get_args_parser():
              "The larger the value, the better the result, but it will be more time-consuming",
     )
     parser.add_argument("--device", default="cuda", type=str)
+    parser.add_argument("--gui", action="store_true",
+                        help="Launch as desktop app")
+    parser.add_argument("--gui_size", default=[1600, 1000], nargs=2, type=int,
+                        help="Set window size for GUI")
     parser.add_argument("--debug", action="store_true")
     return parser.parse_args()
 
@@ -131,7 +140,12 @@ def main():
     else:
         raise NotImplementedError(f"Not supported model: {args.model}")
 
-    app.run(host="0.0.0.0", port=args.port, debug=args.debug)
+    if args.gui:
+        app_width, app_height = args.gui_size
+        ui = FlaskUI(app, width=app_width, height=app_height)
+        ui.run()
+    else:
+        app.run(host="127.0.0.1", port=args.port, debug=args.debug)
 
 
 if __name__ == "__main__":
