@@ -102,7 +102,7 @@ def get_args_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", default=8080, type=int)
     parser.add_argument("--model", default="lama", choices=["lama", "ldm"])
-    parser.add_argument("--crop-trigger-size", nargs=2, type=int,
+    parser.add_argument("--crop-trigger-size", default=[2042, 2042], nargs=2, type=int,
                         help="If image size large then crop-trigger-size, "
                              "crop each area from original image to do inference."
                              "Mainly for performance and memory reasons"
