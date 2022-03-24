@@ -3,8 +3,8 @@
 https://user-images.githubusercontent.com/3998421/153323093-b664bb68-2928-480b-b59b-7c1ee24a4507.mp4
 
 - [x] Support multiple model architectures
-    1. [LaMa](https://github.com/saic-mdal/lama)
-    1. [LDM](https://github.com/CompVis/latent-diffusion)
+  1. [LaMa](https://github.com/saic-mdal/lama)
+  1. [LDM](https://github.com/CompVis/latent-diffusion)
 - [x] High resolution support
 - [x] Multi stroke support. Press and hold the `cmd/ctrl` key to enable multi stroke mode.
 - [x] Zoom & Pan
@@ -12,40 +12,30 @@ https://user-images.githubusercontent.com/3998421/153323093-b664bb68-2928-480b-b
 
 ## Quick Start
 
-Install requirements: `pip3 install -r requirements.txt`
+1. Install requirements: `pip3 install -r requirements.txt`
+2. Start server: `python3 main.py`, open http://localhost:8080
 
-### Start server with LaMa model
+Available commands for `main.py`
 
-```bash
-python3 main.py --device=cuda --port=8080 --model=lama
-```
+| Name                | Description                                                                                                                                                        | Default   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| --model             | lama or ldm. See details in **Model Comparison**                                                                                                                   | lama      |
+| --device            | cuda or cpu                                                                                                                                                        | cuda      |
+| --ldm-steps         | The larger the value, the better the result, but it will be more time-consuming                                                                                    | 50        |
+| --crop-trigger-size | If image size large then crop-trigger-size, crop each area from original image to do inference. Mainly for performance and memory reasons on **very** large image. | 2042,2042 |
+| --crop-margin       | Margin around bounding box of painted stroke when crop mode triggered.                                                                                             | 256       |
+| --port              | Port for web server                                                                                                                                                | 8080      |
+| --gui               | Launch lama-cleaner as a desktop application                                                                                                                       |           |
+| --gui_size          | Set the window size for the application                                                                                                                            | 1200 900  |
 
-- `--crop-trigger-size`: If image size large then crop-trigger-size, crop each area from original image to do inference.
-  Mainly for performance and memory reasons on **very** large image.Default is 2042,2042
-- `--crop-margin`: Margin around bounding box of painted stroke when crop mode triggered. Default is 256.
+## Model Comparison
 
-### Start server with LDM model
+Diffusion model(ldm) is **MUCH MORE** slower than GANs(lama)(1080x720 image takes 8s on 3090), but it's possible to get better
+result, see below example:
 
-```bash
-python3 main.py --device=cuda --port=8080 --model=ldm --ldm-steps=50
-```
-
-`--ldm-steps`: The larger the value, the better the result, but it will be more time-consuming
-
-Diffusion model is **MUCH MORE** slower than GANs(1080x720 image takes 8s on 3090), but it's possible to get better
-results than LaMa.
-
-### GUI
-
-You can run lama-cleaner as a desktop application using the following command line arguments.
-
-`--gui`: Launch lama-cleaner as a desktop application
-
-`--gui_size`: Set the window size for the application. Usage: --gui_size 1200 900
-
-|Original Image|LaMa|LDM|
-|--------------|------|----|
-|![photo-1583445095369-9c651e7e5d34](https://user-images.githubusercontent.com/3998421/156923525-d6afdec3-7b98-403f-ad20-88ebc6eb8d6d.jpg)|![photo-1583445095369-9c651e7e5d34_cleanup_lama](https://user-images.githubusercontent.com/3998421/156923620-a40cc066-fd4a-4d85-a29f-6458711d1247.png)|![photo-1583445095369-9c651e7e5d34_cleanup_ldm](https://user-images.githubusercontent.com/3998421/156923652-0d06c8c8-33ad-4a42-a717-9c99f3268933.png)|
+| Original Image                                                                                                                            | LaMa                                                                                                                                                   | LDM                                                                                                                                                   |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![photo-1583445095369-9c651e7e5d34](https://user-images.githubusercontent.com/3998421/156923525-d6afdec3-7b98-403f-ad20-88ebc6eb8d6d.jpg) | ![photo-1583445095369-9c651e7e5d34_cleanup_lama](https://user-images.githubusercontent.com/3998421/156923620-a40cc066-fd4a-4d85-a29f-6458711d1247.png) | ![photo-1583445095369-9c651e7e5d34_cleanup_ldm](https://user-images.githubusercontent.com/3998421/156923652-0d06c8c8-33ad-4a42-a717-9c99f3268933.png) |
 
 Blogs about diffusion models:
 
