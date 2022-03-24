@@ -22,7 +22,7 @@ python3 main.py --device=cuda --port=8080 --model=lama
 
 - `--crop-trigger-size`: If image size large then crop-trigger-size, crop each area from original image to do inference.
   Mainly for performance and memory reasons on **very** large image.Default is 2042,2042
-- `--crop-size`: Crop size for `--crop-trigger-size`. Default is 512,512.
+- `--crop-margin`: Margin around bounding box of painted stroke when crop mode triggered. Default is 256.
 
 ### Start server with LDM model
 

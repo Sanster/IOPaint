@@ -318,8 +318,10 @@ class LDM:
                 cx = box_x + box_w // 2
                 cy = box_y + box_h // 2
 
-                w = max(512, box_w)
-                h = max(512, box_h)
+                # w = max(512, box_w)
+                # h = max(512, box_h)
+                w = box_w + 512
+                h = box_h + 512
 
                 left = max(cx - w // 2, 0)
                 top = max(cy - h // 2, 0)
