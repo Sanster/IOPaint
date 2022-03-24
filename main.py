@@ -107,7 +107,8 @@ def get_args_parser():
                              "crop each area from original image to do inference."
                              "Mainly for performance and memory reasons"
                              "Only for lama")
-    parser.add_argument("--crop-size", default="512,512")
+    parser.add_argument("--crop-margin", type=int, default=256,
+                        help="Margin around bounding box of painted stroke when crop mode triggered")
     parser.add_argument(
         "--ldm-steps",
         default=50,
@@ -131,11 +132,9 @@ def main():
     device = torch.device(args.device)
 
     crop_trigger_size = [int(it) for it in args.crop_trigger_size.split(",")]
-    crop_size = [int(it) for it in args.crop_size.split(",")]
 
     if args.model == "lama":
-        model = LaMa(crop_trigger_size=crop_trigger_size,
-                     crop_size=crop_size, device=device)
+        model = LaMa(crop_trigger_size=crop_trigger_size, crop_margin=args.crop_margin, device=device)
     elif args.model == "ldm":
         model = LDM(device, steps=args.ldm_steps)
     else:

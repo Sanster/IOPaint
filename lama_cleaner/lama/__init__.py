@@ -14,16 +14,16 @@ LAMA_MODEL_URL = os.environ.get(
 
 
 class LaMa:
-    def __init__(self, crop_trigger_size: List[int], crop_size: List[int], device):
+    def __init__(self, crop_trigger_size: List[int], crop_margin: int, device):
         """
 
         Args:
             crop_trigger_size: h, w
-            crop_size: h, w
+            crop_margin:
             device:
         """
         self.crop_trigger_size = crop_trigger_size
-        self.crop_size = crop_size
+        self.crop_margin = crop_margin
         self.device = device
 
         if os.environ.get("LAMA_MODEL"):
@@ -79,12 +79,10 @@ class LaMa:
         box_w = box[2] - box[0]
         cx = (box[0] + box[2]) // 2
         cy = (box[1] + box[3]) // 2
-        crop_h, crop_w = self.crop_size
         img_h, img_w = image.shape[1:]
 
-        # TODO: when box_w > crop_w, add some margin around?
-        w = max(crop_w, box_w)
-        h = max(crop_h, box_h)
+        w = box_w + self.crop_margin * 2
+        h = box_h + self.crop_margin * 2
 
         l = max(cx - w // 2, 0)
         t = max(cy - h // 2, 0)
@@ -94,7 +92,7 @@ class LaMa:
         crop_img = image[:, t:b, l:r]
         crop_mask = mask[:, t:b, l:r]
 
-        print(f"Apply zoom in size width x height: {crop_img.shape}")
+        print(f"box size: ({box_h},{box_w}) crop size: {crop_img.shape}")
 
         return self._run(crop_img, crop_mask), [l, t, r, b]
 
