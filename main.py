@@ -101,22 +101,21 @@ def index():
 
 @app.route('/inputimage')
 def set_input_photo():
-    filename = os.path.join(os.path.dirname(__file__), input_image)
-    if (os.path.exists(filename)):
-        if (imghdr.what(filename) is not None):
-            with open(filename, 'rb') as f:
-                byte_im = f.read()
-            return send_file(io.BytesIO(byte_im), mimetype='image/jpeg')
-        else:
-            return 'Invalid Input'
+    if input_image:
+        input_file = os.path.join(os.path.dirname(__file__), input_image)
+        if (os.path.exists(input_file)):  # Check if file exists
+            if (imghdr.what(input_file) is not None):  # Check if file is image
+                with open(input_file, 'rb') as f:
+                    image_in_bytes = f.read()
+                return send_file(io.BytesIO(image_in_bytes), mimetype='image/jpeg')
     else:
-        return 'Invalid Input'
+        return 'No Input Image'
 
 
 def get_args_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--input", default='', type=str, help="Path to image you want to load by default")
+        "--input", type=str, help="Path to image you want to load by default")
     parser.add_argument("--port", default=8080, type=int)
     parser.add_argument("--model", default="lama", choices=["lama", "ldm"])
     parser.add_argument("--crop-trigger-size", default=[2042, 2042], nargs=2, type=int,

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 export default function useInputImage() {
-  const [inputImage, setInputImage] = useState()
+  const [inputImage, setInputImage] = useState<File>()
 
   const fetchInputImage = useCallback(() => {
     fetch('/inputimage')
