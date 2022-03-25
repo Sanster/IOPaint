@@ -16,7 +16,7 @@ export default function useInputImage() {
 
   useEffect(() => {
     fetchInputImage()
-  }, [])
+  }, [fetchInputImage])
 
   return inputImage
 }
