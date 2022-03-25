@@ -162,9 +162,7 @@ def main():
     if args.gui:
         app_width, app_height = args.gui_size
         ui = FlaskUI(app, width=app_width, height=app_height)
-        import threading
-        thread = threading.Thread(target=ui.run)
-        # ui.run()
+        ui.run()
     else:
         app.run(host="127.0.0.1", port=args.port, debug=args.debug)
 
