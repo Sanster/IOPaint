@@ -5,6 +5,7 @@ import io
 import multiprocessing
 import os
 import time
+import imghdr
 from typing import Union
 
 import cv2
@@ -98,11 +99,26 @@ def index():
     return send_file(os.path.join(BUILD_DIR, "index.html"))
 
 
+@app.route('/inputimage')
+def set_input_photo():
+    if input_image:
+        input_file = os.path.join(os.path.dirname(__file__), input_image)
+        if (os.path.exists(input_file)):  # Check if file exists
+            if (imghdr.what(input_file) is not None):  # Check if file is image
+                with open(input_file, 'rb') as f:
+                    image_in_bytes = f.read()
+                return send_file(io.BytesIO(image_in_bytes), mimetype='image/jpeg')
+    else:
+        return 'No Input Image'
+
+
 def get_args_parser():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--input", type=str, help="Path to image you want to load by default")
     parser.add_argument("--port", default=8080, type=int)
     parser.add_argument("--model", default="lama", choices=["lama", "ldm"])
-    parser.add_argument("--crop-trigger-size", nargs=2, type=int,
+    parser.add_argument("--crop-trigger-size", default=[2042, 2042], nargs=2, type=int,
                         help="If image size large then crop-trigger-size, "
                              "crop each area from original image to do inference."
                              "Mainly for performance and memory reasons"
@@ -128,11 +144,16 @@ def get_args_parser():
 def main():
     global model
     global device
+    global input_image
+
     args = get_args_parser()
     device = torch.device(args.device)
 
+    input_image = args.input
+
     if args.model == "lama":
-        model = LaMa(crop_trigger_size=args.crop_trigger_size, crop_margin=args.crop_margin, device=device)
+        model = LaMa(crop_trigger_size=args.crop_trigger_size,
+                     crop_margin=args.crop_margin, device=device)
     elif args.model == "ldm":
         model = LDM(device, steps=args.ldm_steps)
     else:

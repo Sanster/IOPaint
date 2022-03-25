@@ -1,4 +1,4 @@
-import React, { FocusEvent, useCallback, useEffect } from 'react'
+import React, { FocusEvent, useCallback } from 'react'
 import { Listbox } from '@headlessui/react'
 import { CheckIcon, SelectorIcon } from '@heroicons/react/solid'
 

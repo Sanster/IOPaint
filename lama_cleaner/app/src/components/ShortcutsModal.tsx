@@ -1,4 +1,3 @@
-import { ArrowLeftIcon } from '@heroicons/react/outline'
 import React, { ReactNode } from 'react'
 import Modal from './Modal'
 
