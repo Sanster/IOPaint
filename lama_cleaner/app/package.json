@@ -29,9 +29,7 @@
     "typescript": "4.x"
   },
   "scripts": {
-    "dev:python": "nodemon --watch ../../* --exec python ../../main.py",
-    "dev:react": "run-p watch:css react-scripts:start",
-    "dev": "concurrently \"yarn dev:python\" \"yarn dev:react\"",
+    "dev": "run-p watch:css react-scripts:start",
     "build": "run-s build:css react-scripts:build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -57,7 +55,6 @@
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.1.0",
-    "concurrently": "^7.0.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.2",
@@ -65,7 +62,6 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "nodemon": "^2.0.15",
     "prettier": "^2.4.1"
   }
 }

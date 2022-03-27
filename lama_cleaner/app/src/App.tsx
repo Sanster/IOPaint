@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useToggle, useWindowSize } from 'react-use'
 import Button from './components/Button'
 import FileSelect from './components/FileSelect'
-import useInputImage from './components/hooks/useInputImage'
+import useInputImage from './hooks/useInputImage'
 import ShortcutsModal from './components/ShortcutsModal'
 import Editor from './Editor'
 
