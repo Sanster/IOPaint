@@ -103,8 +103,8 @@ def index():
 def set_input_photo():
     if input_image:
         input_file = os.path.join(os.path.dirname(__file__), input_image)
-        if (os.path.exists(input_file)):  # Check if file exists
-            if (imghdr.what(input_file) is not None):  # Check if file is image
+        if os.path.exists(input_file):  # Check if file exists
+            if imghdr.what(input_file) is not None:  # Check if file is image
                 with open(input_file, 'rb') as f:
                     image_in_bytes = f.read()
                 return send_file(io.BytesIO(image_in_bytes), mimetype='image/jpeg')
