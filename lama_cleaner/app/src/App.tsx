@@ -1,8 +1,9 @@
 import { ArrowLeftIcon } from '@heroicons/react/outline'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useToggle, useWindowSize } from 'react-use'
 import Button from './components/Button'
 import FileSelect from './components/FileSelect'
+import useInputImage from './hooks/useInputImage'
 import ShortcutsModal from './components/ShortcutsModal'
 import Editor from './Editor'
 
@@ -31,6 +32,11 @@ function App() {
   const [file, setFile] = useState<File>()
   const [showShortcuts, toggleShowShortcuts] = useToggle(false)
   const windowSize = useWindowSize()
+  const userInputImage = useInputImage()
+
+  useEffect(() => {
+    setFile(userInputImage)
+  }, [userInputImage])
 
   return (
     <div className="h-full full-visible-h-safari flex flex-col">

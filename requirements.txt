@@ -4,3 +4,4 @@ flask_cors
 flask
 flaskwebgui
 tqdm
+imghdr

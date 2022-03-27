@@ -5,6 +5,7 @@ import io
 import multiprocessing
 import os
 import time
+import imghdr
 from typing import Union
 
 import cv2
@@ -52,6 +53,7 @@ CORS(app)
 
 model = None
 device = None
+input_image_path: str = None
 
 
 @app.route("/inpaint", methods=["POST"])
@@ -98,11 +100,23 @@ def index():
     return send_file(os.path.join(BUILD_DIR, "index.html"))
 
 
+@app.route('/inputimage')
+def set_input_photo():
+    if input_image_path:
+        with open(input_image_path, 'rb') as f:
+            image_in_bytes = f.read()
+        return send_file(io.BytesIO(image_in_bytes), mimetype='image/jpeg')
+    else:
+        return 'No Input Image'
+
+
 def get_args_parser():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--input", type=str, help="Path to image you want to load by default")
     parser.add_argument("--port", default=8080, type=int)
     parser.add_argument("--model", default="lama", choices=["lama", "ldm"])
-    parser.add_argument("--crop-trigger-size", nargs=2, type=int,
+    parser.add_argument("--crop-trigger-size", default=[2042, 2042], nargs=2, type=int,
                         help="If image size large then crop-trigger-size, "
                              "crop each area from original image to do inference."
                              "Mainly for performance and memory reasons"
@@ -122,17 +136,29 @@ def get_args_parser():
     parser.add_argument("--gui-size", default=[1600, 1000], nargs=2, type=int,
                         help="Set window size for GUI")
     parser.add_argument("--debug", action="store_true")
-    return parser.parse_args()
+
+    args = parser.parse_args()
+    if args.input is not None:
+        if not os.path.exists(args.input):
+            parser.error(f"invalid --input: {args.input} not exists")
+        if imghdr.what(args.input) is None:
+            parser.error(f"invalid --input: {args.input} is not a valid image file")
+
+    return args
 
 
 def main():
     global model
     global device
+    global input_image_path
+
     args = get_args_parser()
     device = torch.device(args.device)
+    input_image_path = args.input
 
     if args.model == "lama":
-        model = LaMa(crop_trigger_size=args.crop_trigger_size, crop_margin=args.crop_margin, device=device)
+        model = LaMa(crop_trigger_size=args.crop_trigger_size,
+                     crop_margin=args.crop_margin, device=device)
     elif args.model == "ldm":
         model = LDM(device, steps=args.ldm_steps)
     else:
