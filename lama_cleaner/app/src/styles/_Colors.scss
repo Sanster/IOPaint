@@ -1,0 +1,23 @@
+:root {
+  // General
+
+  // Theme
+  --page-bg: rgb(240, 240, 250);
+  --page-text-color: rgb(0, 0, 0);
+  --link-color: rgb(0, 0, 0);
+  --yellow-accent: rgb(255, 190, 0);
+  --border-color: rgb(100, 100, 120);
+
+  // Editor
+  --editor-toolkit-bg: rgb(240, 240, 250, 0.15);
+
+  // Modal
+  --modal-bg: var(--page-bg);
+  --modal-text-color: rgb(0, 0, 0);
+  --modal-hotkey-bg: rgb(240, 240, 240);
+
+  // Shared
+  --btn-primary-bg: rgb(210, 210, 220);
+  --btn-primary-hover-bg: var(--yellow-accent);
+  --animation-pulsing-bg: rgb(255, 255, 255, 0.5);
+}

@@ -1,0 +1,40 @@
+// Define Breakpoints
+$breakpoints: (
+  mobile-res: 768px,
+  desktop-res: 1224px,
+);
+
+// Calcualte Min and Max Widths Based on Breakpoints
+$sizes: (
+  mobile-max-width: calc(map-get($breakpoints, mobile-res) - 1px),
+  tablet-min-width: map-get($breakpoints, mobile-res),
+  tablet-max-width: calc(map-get($breakpoints, desktop-res) - 1px),
+  desktop-min-width: map-get($breakpoints, desktop-res),
+);
+
+// Mobile Mixin
+@mixin mobile {
+  @media screen and (max-width: map-get($sizes, mobile-max-width)) {
+    @content;
+  }
+}
+
+// Tablet Mixin
+@mixin tablet {
+  @media screen and (min-width: map-get($sizes, tablet-min-width)) and (max-width: map-get($sizes, tablet-max-width)) {
+    @content;
+  }
+}
+
+// Desktop Mixin
+@mixin desktop {
+  @media screen and (min-width: map-get($sizes, desktop-min-width)) {
+    @content;
+  }
+}
+
+@mixin large {
+  @media screen and (min-width: map-get($sizes, tablet-min-width)) {
+    @content;
+  }
+}

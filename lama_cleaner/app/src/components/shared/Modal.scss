@@ -1,0 +1,19 @@
+.modal {
+  display: grid;
+  grid-auto-rows: max-content;
+  row-gap: 2rem;
+  place-self: center;
+  padding: 2rem;
+  border-radius: 0.95rem;
+  z-index: 9999;
+
+  .modal-header {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    align-items: center;
+
+    .btn-primary {
+      justify-self: end;
+    }
+  }
+}

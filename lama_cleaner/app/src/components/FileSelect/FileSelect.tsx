@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import useResolution from '../../hooks/useResolution'
 
 type FileSelectProps = {
   onSelection: (file: File) => void
@@ -9,6 +10,8 @@ export default function FileSelect(props: FileSelectProps) {
 
   const [dragHover, setDragHover] = useState(false)
   const [uploadElemId] = useState(`file-upload-${Math.random().toString()}`)
+
+  const resolution = useResolution()
 
   function onFileSelected(file: File) {
     if (!file) {
@@ -94,17 +97,11 @@ export default function FileSelect(props: FileSelectProps) {
   }
 
   return (
-    <label
-      htmlFor={uploadElemId}
-      className="block w-full h-full group relative cursor-pointer rounded-md font-medium focus-within:outline-none"
-    >
+    <label htmlFor={uploadElemId} className="file-select-label">
       <div
         className={[
-          'w-full h-full flex items-center justify-center px-6 pt-5 pb-6 text-md',
-          'border-2 border-dashed rounded-md',
-          'hover:border-black hover:bg-primary',
-          'text-center',
-          dragHover ? 'border-black bg-primary' : 'bg-gray-100 border-gray-300',
+          'file-select-container',
+          dragHover ? 'file-select-label-hover' : '',
         ].join(' ')}
         onDrop={handleDrop}
         onDragOver={ev => {
@@ -118,7 +115,6 @@ export default function FileSelect(props: FileSelectProps) {
           id={uploadElemId}
           name={uploadElemId}
           type="file"
-          className="sr-only"
           onChange={ev => {
             const file = ev.currentTarget.files?.[0]
             if (file) {
@@ -127,8 +123,11 @@ export default function FileSelect(props: FileSelectProps) {
           }}
           accept="image/png, image/jpeg"
         />
-        <p className="hidden sm:block">Click here or drag an image file</p>
-        <p className="sm:hidden">Tap here to load your picture</p>
+        <p className="file-select-message">
+          {resolution === 'desktop'
+            ? 'Click here or drag an image file'
+            : 'Tap here to load your picture'}
+        </p>
       </div>
     </label>
   )

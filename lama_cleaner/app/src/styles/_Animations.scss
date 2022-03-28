@@ -1,0 +1,21 @@
+@keyframes pulsing {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.75;
+    background-color: var(--animation-pulsing-bg);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes opacityReveal {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

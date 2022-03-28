@@ -1,0 +1,32 @@
+.modal-shortcuts {
+  grid-area: main-content;
+  background-color: var(--modal-bg);
+  color: var(--modal-text-color);
+  box-shadow: 0px 0px 20px rgb(0, 0, 40, 0.2);
+}
+
+.shortcut-options {
+  display: grid;
+  row-gap: 1rem;
+
+  .shortcut-option {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    column-gap: 6rem;
+    align-items: center;
+  }
+
+  .shortcut-key {
+    font-family: 'WorkSans-Bold';
+    background-color: var(--modal-hotkey-bg);
+    padding: 0.4rem 1rem;
+    width: max-content;
+    border-radius: 0.4rem;
+  }
+
+  .shortcut-description {
+    justify-self: end;
+    text-align: right;
+    width: 15rem;
+  }
+}

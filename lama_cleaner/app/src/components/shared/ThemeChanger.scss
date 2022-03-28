@@ -1,0 +1,29 @@
+.theme-changer {
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  box-shadow: inset 4px 10px 0px rgb(80, 80, 80);
+  transform: rotate(-75deg);
+  transition: all 0.2s ease-in;
+  margin: 1rem;
+  position: absolute;
+  right: 1rem;
+  top: 0.25rem;
+  z-index: 10;
+  outline: none;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+[data-theme='dark'] {
+  .theme-changer {
+    background: rgb(255, 190, 0);
+    box-shadow: none;
+    transform: rotate(-75deg);
+    outline: none;
+  }
+}

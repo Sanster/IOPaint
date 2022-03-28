@@ -14,14 +14,9 @@ export default function Slider(props: SliderProps) {
   const step = ((max || 100) - (min || 0)) / 100
 
   return (
-    <div className="inline-flex items-center space-x-4 text-black">
+    <div className="editor-brush-slider">
       <span>{label}</span>
       <input
-        className={[
-          'appearance-none rounded-lg h-4',
-          'bg-primary',
-          'w-24 md:w-auto',
-        ].join(' ')}
         type="range"
         step={step}
         min={min}
