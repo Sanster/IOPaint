@@ -1,5 +1,6 @@
 import React from 'react'
 import { atom, useRecoilState } from 'recoil'
+import { SunIcon, MoonIcon } from '@heroicons/react/outline'
 
 export const themeState = atom({
   key: 'themeState',
@@ -15,11 +16,20 @@ export const ThemeChanger = () => {
   }
 
   return (
-    <button
-      type="button"
-      className="theme-changer"
-      onClick={themeSwitchHandler}
-      aria-label="Switch Theme"
-    />
+    <div className="theme-toggle-ui">
+      <div
+        className="theme-btn"
+        onClick={themeSwitchHandler}
+        role="button"
+        tabIndex={0}
+        aria-hidden="true"
+      >
+        {theme === 'light' ? (
+          <MoonIcon />
+        ) : (
+          <SunIcon style={{ color: 'rgb(255, 190, 0)' }} />
+        )}
+      </div>
+    </div>
   )
 }

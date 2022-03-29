@@ -6,27 +6,10 @@ import LandingPage from './components/LandingPage/LandingPage'
 import { ThemeChanger, themeState } from './components/shared/ThemeChanger'
 import Workspace from './components/Workspace'
 import { fileState } from './store/Atoms'
+import { keepGUIAlive } from './utils'
 
 // Keeping GUI Window Open
-async function getRequest(url = '') {
-  const response = await fetch(url, {
-    method: 'GET',
-    cache: 'no-cache',
-  })
-  return response.json()
-}
-
-if (!process.env.NODE_ENV || process.env.NODE_ENV === 'production') {
-  document.addEventListener('DOMContentLoaded', function () {
-    const url = document.location
-    const route = '/flaskwebgui-keep-server-alive'
-    const intervalRequest = 3 * 1000
-    function keepAliveServer() {
-      getRequest(url + route).then(data => console.log(data))
-    }
-    setInterval(keepAliveServer, intervalRequest)
-  })
-}
+keepGUIAlive()
 
 function App() {
   const [file, setFile] = useRecoilState(fileState)
@@ -39,7 +22,8 @@ function App() {
   }, [userInputImage, setFile])
 
   // Dark Mode Hotkey
-  useKeyPressEvent('D', () => {
+  useKeyPressEvent('D', ev => {
+    ev?.preventDefault()
     const newTheme = theme === 'light' ? 'dark' : 'light'
     setTheme(newTheme)
   })

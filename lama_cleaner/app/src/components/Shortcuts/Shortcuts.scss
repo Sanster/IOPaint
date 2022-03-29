@@ -1,8 +1,18 @@
+@use '../../styles/Mixins/' as *;
+
 .modal-shortcuts {
   grid-area: main-content;
   background-color: var(--modal-bg);
   color: var(--modal-text-color);
   box-shadow: 0px 0px 20px rgb(0, 0, 40, 0.2);
+
+  @include mobile {
+    display: grid;
+    width: 100%;
+    height: auto;
+    margin-top: -11rem;
+    animation: slideDown 0.2s ease-out;
+  }
 }
 
 .shortcut-options {
@@ -14,6 +24,12 @@
     grid-template-columns: repeat(2, auto);
     column-gap: 6rem;
     align-items: center;
+
+    @include mobile {
+      grid-template-columns: auto;
+      column-gap: 0;
+      row-gap: 0.6rem;
+    }
   }
 
   .shortcut-key {
@@ -22,11 +38,21 @@
     padding: 0.4rem 1rem;
     width: max-content;
     border-radius: 0.4rem;
+
+    @include mobile {
+      padding: 0.2rem 0.4rem;
+    }
   }
 
   .shortcut-description {
     justify-self: end;
     text-align: right;
     width: 15rem;
+
+    @include mobile {
+      text-align: left;
+      width: auto;
+      justify-self: start;
+    }
   }
 }

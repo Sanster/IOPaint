@@ -15,12 +15,7 @@ import {
   TransformComponent,
   TransformWrapper,
 } from 'react-zoom-pan-pinch'
-import {
-  useWindowSize,
-  useLocalStorage,
-  useKey,
-  useKeyPressEvent,
-} from 'react-use'
+import { useWindowSize, useKey, useKeyPressEvent } from 'react-use'
 import inpaint from '../../adapters/inpainting'
 import Button from '../shared/Button'
 import Slider from './Slider'
@@ -28,7 +23,7 @@ import SizeSelector from './SizeSelector'
 import { downloadImage, loadImage, useImage } from '../../utils'
 
 const TOOLBAR_SIZE = 200
-const BRUSH_COLOR = 'rgba(189, 255, 1, 0.75)'
+const BRUSH_COLOR = 'rgba(255, 190, 0, 0.65)'
 // const NO_COLOR = 'rgba(255,255,255,0)'
 
 interface EditorProps {
@@ -80,13 +75,14 @@ export default function Editor(props: EditorProps) {
   const [isInpaintingLoading, setIsInpaintingLoading] = useState(false)
   const [scale, setScale] = useState<number>(1)
   const [minScale, setMinScale] = useState<number>()
-  // ['1080', '2000', 'Original']
-  const [sizeLimit, setSizeLimit] = useLocalStorage('sizeLimit', '1080')
+  const [sizeLimit, setSizeLimit] = useState<number>(1080)
   const windowSize = useWindowSize()
   const viewportRef = useRef<ReactZoomPanPinchRef | undefined | null>()
 
   const [isDraging, setIsDraging] = useState(false)
   const [isMultiStrokeKeyPressed, setIsMultiStrokeKeyPressed] = useState(false)
+
+  const [sliderPos, setSliderPos] = useState<number>(0)
 
   const draw = useCallback(() => {
     if (!context) {
@@ -126,11 +122,14 @@ export default function Editor(props: EditorProps) {
     setIsInpaintingLoading(true)
     refreshCanvasMask()
     try {
-      const res = await inpaint(file, maskCanvas.toDataURL(), sizeLimit)
+      const res = await inpaint(
+        file,
+        maskCanvas.toDataURL(),
+        sizeLimit.toString()
+      )
       if (!res) {
         throw new Error('empty response')
       }
-      // TODO: fix the render if it failed loading
       const newRender = new Image()
       await loadImage(newRender, res)
       renders.push(newRender)
@@ -231,6 +230,9 @@ export default function Editor(props: EditorProps) {
         setMinScale(1)
       }
 
+      const imageSizeLimit = Math.max(original.width, original.height)
+      setSizeLimit(imageSizeLimit)
+
       if (context?.canvas) {
         context.canvas.width = original.naturalWidth
         context.canvas.height = original.naturalHeight
@@ -238,6 +240,17 @@ export default function Editor(props: EditorProps) {
       draw()
     }
   }, [context?.canvas, draw, original, isOriginalLoaded, windowSize])
+
+  useEffect(() => {
+    window.addEventListener('resize', () => {
+      resetZoom()
+    })
+    return () => {
+      window.removeEventListener('resize', () => {
+        resetZoom()
+      })
+    }
+  }, [windowSize])
 
   // Zoom reset
   const resetZoom = useCallback(() => {
@@ -410,14 +423,22 @@ export default function Editor(props: EditorProps) {
       ev?.preventDefault()
       ev?.stopPropagation()
       if (hadRunInpainting()) {
-        setShowOriginal(true)
+        setShowOriginal(() => {
+          window.setTimeout(() => {
+            setSliderPos(100)
+          }, 10)
+          return true
+        })
       }
     },
     ev => {
       ev?.preventDefault()
       ev?.stopPropagation()
       if (hadRunInpainting()) {
-        setShowOriginal(false)
+        setSliderPos(0)
+        window.setTimeout(() => {
+          setShowOriginal(false)
+        }, 350)
       }
     }
   )
@@ -427,7 +448,7 @@ export default function Editor(props: EditorProps) {
     const currRender = renders[renders.length - 1]
     downloadImage(currRender.currentSrc, name)
   }
-  const onSizeLimitChange = (_sizeLimit: string) => {
+  const onSizeLimitChange = (_sizeLimit: number) => {
     setSizeLimit(_sizeLimit)
   }
 
@@ -538,7 +559,11 @@ export default function Editor(props: EditorProps) {
           <div className="editor-canvas-container">
             <canvas
               className="editor-canvas"
-              style={{ cursor: getCursor() }}
+              style={{
+                cursor: getCursor(),
+                clipPath: `inset(0 ${sliderPos}% 0 0)`,
+                transition: 'clip-path 350ms ease-in-out',
+              }}
               onContextMenu={e => {
                 e.preventDefault()
               }}
@@ -556,25 +581,32 @@ export default function Editor(props: EditorProps) {
                 }
               }}
             />
-            {showOriginal ? (
-              <div
-                className="original-image-container"
+            <div
+              className="original-image-container"
+              style={{
+                width: `${original.naturalWidth}px`,
+                height: `${original.naturalHeight}px`,
+              }}
+            >
+              {showOriginal && (
+                <div
+                  className="editor-slider"
+                  style={{
+                    marginRight: `${sliderPos}%`,
+                  }}
+                />
+              )}
+
+              <img
+                className="original-image"
+                src={original.src}
+                alt="original"
                 style={{
                   width: `${original.naturalWidth}px`,
                   height: `${original.naturalHeight}px`,
                 }}
-              >
-                <img
-                  className="original-image"
-                  src={original.src}
-                  alt="original"
-                  style={{
-                    width: `${original.naturalWidth}px`,
-                    height: `${original.naturalHeight}px`,
-                  }}
-                />
-              </div>
-            ) : null}
+              />
+            </div>
           </div>
         </TransformComponent>
       </TransformWrapper>
@@ -588,7 +620,6 @@ export default function Editor(props: EditorProps) {
           {showOriginal ? 'Original' : 'Inpainted'}
         </p>
         <SizeSelector
-          value={sizeLimit || '1080'}
           onChange={onSizeLimitChange}
           originalWidth={original.naturalWidth}
           originalHeight={original.naturalHeight}
@@ -628,10 +659,18 @@ export default function Editor(props: EditorProps) {
             icon={<EyeIcon />}
             onDown={ev => {
               ev.preventDefault()
-              setShowOriginal(true)
+              setShowOriginal(() => {
+                window.setTimeout(() => {
+                  setSliderPos(100)
+                }, 10)
+                return true
+              })
             }}
             onUp={() => {
-              setShowOriginal(false)
+              setSliderPos(0)
+              window.setTimeout(() => {
+                setShowOriginal(false)
+              }, 350)
             }}
             disabled={renders.length === 0}
           >

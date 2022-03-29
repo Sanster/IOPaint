@@ -14,7 +14,7 @@ const Header = () => {
     return (
       <header>
         <Button
-          icon={<ArrowLeftIcon className="w-6 h-6" />}
+          icon={<ArrowLeftIcon />}
           onClick={() => {
             setFile(undefined)
           }}

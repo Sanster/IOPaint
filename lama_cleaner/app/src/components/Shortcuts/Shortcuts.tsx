@@ -13,7 +13,8 @@ const Shortcuts = () => {
     })
   }
 
-  useKeyPressEvent('h', () => {
+  useKeyPressEvent('h', ev => {
+    ev?.preventDefault()
     shortcutStateHandler()
   })
 
