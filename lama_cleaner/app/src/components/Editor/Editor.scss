@@ -56,7 +56,7 @@
   bottom: 0;
   padding: 1rem 4rem;
   display: grid;
-  grid-template-areas: 'toolkit-image-type toolkit-size-selector toolkit-brush-slider toolkit-btns';
+  grid-template-areas: 'toolkit-size-selector toolkit-brush-slider toolkit-btns';
   column-gap: 2rem;
   align-items: center;
   background-color: var(--editor-toolkit-bg);
@@ -67,7 +67,7 @@
   @include mobile {
     padding: 1rem 2rem;
     grid-template-areas:
-      'toolkit-image-type toolkit-size-selector'
+      'toolkit-size-selector toolkit-size-selector'
       'toolkit-brush-slider toolkit-brush-slider'
       'toolkit-btns toolkit-btns';
     row-gap: 2rem;
@@ -158,12 +158,4 @@
       background-color: var(--yellow-accent);
     }
   }
-}
-
-.image-type-tag {
-  @include accented-display(var(--yellow-accent));
-  grid-area: toolkit-image-type;
-  z-index: 2;
-  width: 100px;
-  text-align: center;
 }

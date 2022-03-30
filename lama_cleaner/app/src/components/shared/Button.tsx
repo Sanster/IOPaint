@@ -9,6 +9,7 @@ interface ButtonProps {
   onClick?: () => void
   onDown?: (ev: PointerEvent) => void
   onUp?: (ev: PointerEvent) => void
+  style?: React.CSSProperties
 }
 
 export default function Button(props: ButtonProps) {
@@ -21,6 +22,7 @@ export default function Button(props: ButtonProps) {
     onClick,
     onDown,
     onUp,
+    style,
   } = props
 
   const blurOnClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -31,6 +33,7 @@ export default function Button(props: ButtonProps) {
   return (
     <div
       role="button"
+      style={style}
       onKeyDown={onKeyDown}
       onClick={blurOnClick}
       onPointerDown={(ev: React.PointerEvent<HTMLDivElement>) => {

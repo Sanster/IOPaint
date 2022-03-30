@@ -616,9 +616,6 @@ export default function Editor(props: EditorProps) {
       )}
 
       <div className="editor-toolkit-panel">
-        <p className="image-type-tag">
-          {showOriginal ? 'Original' : 'Inpainted'}
-        </p>
         <SizeSelector
           onChange={onSizeLimitChange}
           originalWidth={original.naturalWidth}
@@ -657,6 +654,7 @@ export default function Editor(props: EditorProps) {
           />
           <Button
             icon={<EyeIcon />}
+            style={showOriginal ? { backgroundColor: 'rgb(255, 190, 0)' } : {}}
             onDown={ev => {
               ev.preventDefault()
               setShowOriginal(() => {
