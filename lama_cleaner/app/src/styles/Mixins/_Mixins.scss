@@ -1,7 +1,7 @@
 @mixin accented-display($bg-color) {
   background: $bg-color;
   color: rgb(0, 0, 0);
-  font-family: 'WorkSans-Bold';
+  font-family: 'WorkSans';
   padding: 0.5rem;
   border-radius: 0.5rem;
 }
@@ -30,7 +30,7 @@
     height: 1.2rem;
     width: 1.2rem;
     border-radius: 50%;
-    border: 2px solid rgb(0, 0, 0);
+    border: 1px solid rgb(0, 0, 0);
     z-index: 2;
     background: var(--yellow-accent);
     margin-top: -0.5rem;
@@ -45,10 +45,6 @@
   input[type='range']::-moz-range-track {
     border-radius: 2rem;
     background: var(--btn-primary-bg);
-  }
-
-  input[type='range']::-ms-fill-lower {
-    background-color: red;
   }
 
   input[type='range']::-moz-range-progress {

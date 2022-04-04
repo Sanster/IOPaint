@@ -2,22 +2,29 @@
   // General
 
   // Theme
-  --page-bg: rgb(20, 20, 30);
-  --page-text-color: rgb(200, 200, 210);
-  --link-color: rgb(255, 190, 0);
-  --yellow-accent: rgb(255, 190, 0);
+  --page-bg: #040404;
+  --page-text-color: #F9F9F9;
+  --yellow-accent: #ffcc00;
+  --link-color: var(--yellow-accent);
   --border-color: rgb(100, 100, 120);
 
   // Editor
-  --editor-toolkit-bg: rgb(20, 20, 30, 0.5);
+  --editor-toolkit-bg: rgba(0, 0, 0, 0.5);
+  --options-text-color: var(--page-text-color);
+  --editor-size-border-color: var(--yellow-accent);
 
   // Modal
   --modal-bg: var(--page-bg);
   --modal-text-color: var(--page-text-color);
-  --modal-hotkey-bg: rgb(60, 60, 90);
+  // --modal-hotkey-bg: rgb(60, 60, 90);
+  --modal-hotkey-border-color: var(--page-text-color);;
+  --model-mask-bg: rgba(76, 76, 87, 0.4);
 
   // Shared
   --btn-primary-bg: rgb(140, 140, 180);
+  --btn-text-color: white;
+  --btn-text-hover-color: var(--page-bg);
+  --btn-border-color: var(--yellow-accent);
   --btn-primary-hover-bg: var(--yellow-accent);
   --animation-pulsing-bg: rgb(240, 240, 255);
 }

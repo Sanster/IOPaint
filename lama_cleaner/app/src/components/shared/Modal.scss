@@ -1,3 +1,16 @@
+.modal-mask {
+  z-index: 9999;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  background-color: var(--model-mask-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
 .modal {
   display: grid;
   grid-auto-rows: max-content;
@@ -5,7 +18,6 @@
   place-self: center;
   padding: 2rem;
   border-radius: 0.95rem;
-  z-index: 9999;
 
   .modal-header {
     display: grid;

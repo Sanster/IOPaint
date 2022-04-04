@@ -13,8 +13,8 @@ function ShortCut(props: Shortcut) {
 
   return (
     <div className="shortcut-option">
-      <div className="shortcut-key">{children}</div>
       <div className="shortcut-description">{content}</div>
+      <div className="shortcut-key">{children}</div>
     </div>
   )
 }
@@ -45,7 +45,10 @@ export default function ShortcutsModal() {
         <ShortCut content="View original image">
           <p>Hold Tab</p>
         </ShortCut>
-        <ShortCut content="Reset zoom/pan & Cancel mask drawing">
+        <ShortCut content="Reset zoom/pan">
+          <p>Esc</p>
+        </ShortCut>
+        <ShortCut content="Cancel mask drawing">
           <p>Esc</p>
         </ShortCut>
         <ShortCut content="Decrease Brush Size">

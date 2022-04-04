@@ -1,16 +1,25 @@
 header {
-  grid-area: main-content;
+  height: 60px;
   padding: 1rem 2rem;
   position: absolute;
   top: 0;
-  display: grid;
-  grid-template-columns: repeat(2, max-content);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
-  grid-template-columns: repeat(2, auto);
+  z-index: 20;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgb(100, 100, 120, 0.2);
 }
 
 .shortcuts {
-  justify-self: end;
-  margin-right: 4rem;
   z-index: 1;
+}
+
+.header-icons-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  justify-self: end;
 }

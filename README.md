@@ -55,7 +55,7 @@ Frontend code are modified from [cleanup.pictures](https://github.com/initml/cle
 great online services [here](https://cleanup.pictures/).
 
 - Install dependencies:`cd lama_cleaner/app/ && yarn`
-- Start development server: `yarn dev`
+- Start development server: `yarn start`
 - Build: `yarn build`
 
 ## Docker

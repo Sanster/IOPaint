@@ -33,8 +33,9 @@
   }
 
   .shortcut-key {
+    justify-self: end;
     font-family: 'WorkSans-Bold';
-    background-color: var(--modal-hotkey-bg);
+    border: 1px solid var(--modal-hotkey-border-color);
     padding: 0.4rem 1rem;
     width: max-content;
     border-radius: 0.4rem;
@@ -45,9 +46,9 @@
   }
 
   .shortcut-description {
-    justify-self: end;
-    text-align: right;
-    width: 15rem;
+    justify-self: start;
+    text-align: left;
+    width: 18rem;
 
     @include mobile {
       text-align: left;

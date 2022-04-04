@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react'
-import ChevronDoubleDownIcon from '@heroicons/react/solid/ChevronDoubleDownIcon'
 import { useClickAway } from 'react-use'
+import { ChevronUpIcon } from '@heroicons/react/outline'
 
 const sizes = ['720', '1080', '2000', 'Original']
 
@@ -68,7 +68,6 @@ export default function SizeSelector(props: SizeSelectorProps) {
 
   return (
     <div className="editor-size-selector" ref={sizeSelectorRef}>
-      <p>Size:</p>
       <div
         className="editor-size-selector-main"
         role="button"
@@ -77,8 +76,8 @@ export default function SizeSelector(props: SizeSelectorProps) {
         aria-hidden="true"
       >
         <p>{getSizeShowName(activeSize.toString())}</p>
-        <div className="editor-size-selector-chevron">
-          <ChevronDoubleDownIcon />
+        <div className="editor-size-selector-icon">
+          <ChevronUpIcon />
         </div>
       </div>
 

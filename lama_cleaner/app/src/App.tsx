@@ -3,10 +3,11 @@ import { useKeyPressEvent } from 'react-use'
 import { useRecoilState } from 'recoil'
 import useInputImage from './hooks/useInputImage'
 import LandingPage from './components/LandingPage/LandingPage'
-import { ThemeChanger, themeState } from './components/shared/ThemeChanger'
+import { themeState } from './components/Header/ThemeChanger'
 import Workspace from './components/Workspace'
 import { fileState } from './store/Atoms'
 import { keepGUIAlive } from './utils'
+import Header from './components/Header/Header'
 
 // Keeping GUI Window Open
 keepGUIAlive()
@@ -30,7 +31,7 @@ function App() {
 
   return (
     <div className="lama-cleaner" data-theme={theme}>
-      <ThemeChanger />
+      <Header />
       {file ? <Workspace file={file} /> : <LandingPage />}
     </div>
   )

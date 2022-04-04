@@ -23,6 +23,7 @@ const Shortcuts = () => {
       <Button
         onClick={shortcutStateHandler}
         disabled={shortcutVisibility}
+        style={{ border: 0 }}
         icon={
           <svg
             xmlns="http://www.w3.org/2000/svg"

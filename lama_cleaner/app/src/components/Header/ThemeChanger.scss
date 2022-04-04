@@ -1,18 +1,18 @@
 .theme-toggle-ui {
-  position: absolute;
-  right: 2.5rem;
-  top: 1rem;
   z-index: 10;
   transition: all 0.2s ease-in;
   user-select: none;
 
   .theme-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
     outline: none;
 
     svg {
-      width: 36px;
-      height: 36px;
+      width: 22px;
+      height: 22px;
     }
   }
 }

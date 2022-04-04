@@ -23,12 +23,14 @@ export default function Modal(props: ModalProps) {
   })
 
   return (
-    <div ref={ref} className={`modal ${className}`}>
-      <div className="modal-header">
-        <h3>{title}</h3>
-        <Button icon={<XIcon />} onClick={onClose} />
+    <div className="modal-mask">
+      <div ref={ref} className={`modal ${className}`}>
+        <div className="modal-header">
+          <h3>{title}</h3>
+          <Button icon={<XIcon />} onClick={onClose} />
+        </div>
+        {children}
       </div>
-      {children}
     </div>
   )
 }

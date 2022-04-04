@@ -23,8 +23,7 @@ import SizeSelector from './SizeSelector'
 import { downloadImage, loadImage, useImage } from '../../utils'
 
 const TOOLBAR_SIZE = 200
-const BRUSH_COLOR = 'rgba(255, 190, 0, 0.65)'
-// const NO_COLOR = 'rgba(255,255,255,0)'
+const BRUSH_COLOR = '#ffcc00bb'
 
 interface EditorProps {
   file: File
@@ -654,7 +653,7 @@ export default function Editor(props: EditorProps) {
           />
           <Button
             icon={<EyeIcon />}
-            style={showOriginal ? { backgroundColor: 'rgb(255, 190, 0)' } : {}}
+            className={showOriginal ? 'eyeicon-active' : ''}
             onDown={ev => {
               ev.preventDefault()
               setShowOriginal(() => {
