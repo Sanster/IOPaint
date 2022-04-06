@@ -35,6 +35,7 @@ class LaMa:
         else:
             model_path = download_model(LAMA_MODEL_URL)
 
+        print(f"Load LaMa model from: {model_path}")
         model = torch.jit.load(model_path, map_location="cpu")
         model = model.to(device)
         model.eval()

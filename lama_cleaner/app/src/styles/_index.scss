@@ -1,0 +1,32 @@
+// General
+@use './Fonts';
+@use './Colors';
+@use './ColorsDark';
+@use './Animations';
+
+// App
+@use './App';
+@use '../components/Editor/Editor';
+@use '../components/LandingPage/LandingPage';
+@use '../components/Header/Header';
+@use '../components/Header/ThemeChanger';
+@use '../components/Shortcuts/Shortcuts';
+
+// Shared
+@use '../components/FileSelect/FileSelect';
+@use '../components/shared/Button';
+@use '../components/shared/Modal';
+
+// Main CSS
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  font-family: 'WorkSans', sans-serif;
+}

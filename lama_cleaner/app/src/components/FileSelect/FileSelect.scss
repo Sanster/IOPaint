@@ -1,0 +1,35 @@
+@use '../../styles/Mixins/' as *;
+
+.file-select-label {
+  display: grid;
+  cursor: pointer;
+  border: 2px dashed var(--border-color);
+  border-radius: 0.5rem;
+  min-width: 600px;
+
+  @include mobile {
+    min-width: 300px;
+  }
+
+  &:hover,
+  .file-select-label-hover {
+    color: black;
+    background-color: var(--yellow-accent);
+  }
+}
+
+.file-select-container {
+  display: grid;
+  padding: 4rem;
+  width: 100%;
+  height: 100%;
+
+  input {
+    display: none;
+  }
+}
+
+.file-select-message {
+  font-family: 'WorkSans';
+  text-align: center;
+}

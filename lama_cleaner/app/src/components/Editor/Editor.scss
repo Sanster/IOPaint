@@ -1,0 +1,190 @@
+@use '../../styles/Mixins' as *;
+
+.editor-container {
+  grid-area: main-content;
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  place-items: center;
+}
+
+.react-transform-wrapper {
+  display: grid !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.editor-canvas-container {
+  display: grid;
+  grid-template-areas: 'editor-content';
+  row-gap: 1rem;
+}
+
+.editor-canvas {
+  grid-area: editor-content;
+  z-index: 2;
+}
+
+.original-image-container {
+  grid-area: editor-content;
+  pointer-events: none;
+  display: grid;
+  grid-template-areas: 'original-image-content';
+
+  img {
+    grid-area: original-image-content;
+  }
+
+  .editor-slider {
+    grid-area: original-image-content;
+    height: 100%;
+    width: 6px;
+    justify-self: end;
+    background-color: var(--yellow-accent);
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+  }
+}
+
+.editor-canvas-loading {
+  pointer-events: none;
+  animation: pulsing 750ms infinite;
+}
+
+.editor-toolkit-panel {
+  // width: 100%;
+  position: fixed;
+  bottom: 0.5rem;
+  // border: 1px solid rgb(100, 100, 120, 0.5);
+  border-radius: 3rem;
+  padding: 1rem 3rem;
+  display: grid;
+  grid-template-areas: 'toolkit-size-selector toolkit-brush-slider toolkit-btns';
+  column-gap: 2rem;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--editor-toolkit-bg);
+  backdrop-filter: blur(12px);
+  animation: slideUp 0.2s ease-out;
+  border: 1px solid rgb(100, 100, 120, 0.4);
+
+  @include mobile {
+    padding: 1rem 2rem;
+    grid-template-areas:
+      'toolkit-size-selector toolkit-size-selector'
+      'toolkit-brush-slider toolkit-brush-slider'
+      'toolkit-btns toolkit-btns';
+    row-gap: 2rem;
+    justify-items: center;
+  }
+
+  .eyeicon-active {
+    background-color: var(--yellow-accent);
+    color: var(--btn-text-hover-color);
+  }
+}
+
+.editor-brush-slider {
+  grid-area: toolkit-brush-slider;
+  user-select: none;
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  height: max-content;
+  column-gap: 1rem;
+  align-items: center;
+
+  @include slider-bar;
+}
+
+.editor-toolkit-btns {
+  grid-area: toolkit-btns;
+  display: grid;
+  grid-auto-flow: column;
+  column-gap: 1rem;
+}
+
+.brush-shape {
+  position: absolute;
+  border-radius: 50%;
+  background-color: #ffcc00bb;
+  border: 1px solid var(--yellow-accent);
+  pointer-events: none;
+}
+
+.editor-size-selector-options {
+  position: fixed;
+  display: grid;
+}
+
+.editor-size-selector {
+  grid-area: toolkit-size-selector;
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  align-items: center;
+}
+
+.editor-size-selector-main {
+  @include accented-display(var(white));
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  outline: none;
+  gap: 8px;
+  width: 128px;
+
+  border: 1px solid var(--editor-size-border-color);
+  color: var(--options-text-color);
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.25rem;
+  }
+}
+
+.editor-size-options {
+  @include accented-display(var(--btn-primary-bg));
+  width: 128px;
+  padding: 0;
+  display: grid;
+  justify-self: center;
+  position: fixed;
+  bottom: 4rem;
+  cursor: pointer;
+
+  color: var(--options-text-color);
+  background-color: var(--page-bg);
+  border: 1px solid var(--editor-size-border-color);
+
+  border-radius: 0.6rem;
+
+  @include mobile {
+    bottom: 11.5rem;
+  }
+
+  .editor-size-option {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    user-select: none;
+    padding: 0.2rem 0.8rem;
+
+
+    &:first-of-type {
+      border-top-right-radius: 0.5rem;
+      border-top-left-radius: 0.5rem;
+    }
+
+    &:last-of-type {
+      border-bottom-left-radius: 0.5rem;
+      border-bottom-right-radius: 0.5rem;
+    }
+
+    &:hover {
+      background-color: var(--yellow-accent);
+      color: var(--btn-text-hover-color);
+    }
+  }
+}

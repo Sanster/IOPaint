@@ -1,0 +1,30 @@
+@use '../../styles/Mixins/' as *;
+
+.landing-page {
+  display: grid;
+  place-self: center;
+  justify-items: center;
+  row-gap: 2rem;
+  grid-auto-rows: max-content;
+
+  @include mobile {
+    padding: 1rem;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.4rem;
+
+    @include mobile {
+      font-size: 1.2rem;
+    }
+  }
+
+  a {
+    color: var(--link-color);
+  }
+}
+
+.landing-file-selector {
+  display: grid;
+}

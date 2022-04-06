@@ -1,0 +1,11 @@
+.lama-cleaner {
+  display: grid;
+  grid-template-areas: 'main-content';
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--page-bg);
+  color: var(--page-text-color);
+  transition-property: background-color, color;
+  transition-duration: 0.2s;
+  transition-timing-function: repeat(2, ease-out);
+}

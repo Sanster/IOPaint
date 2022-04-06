@@ -1,0 +1,53 @@
+@mixin accented-display($bg-color) {
+  background: $bg-color;
+  color: rgb(0, 0, 0);
+  font-family: 'WorkSans';
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+@mixin slider-bar {
+  input[type='range'] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    cursor: pointer;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+  }
+
+  input[type='range']:focus {
+    outline: none;
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 1.2rem;
+    width: 1.2rem;
+    border-radius: 50%;
+    border: 1px solid rgb(0, 0, 0);
+    z-index: 2;
+    background: var(--yellow-accent);
+    margin-top: -0.5rem;
+  }
+
+  input[type='range']::-webkit-slider-runnable-track {
+    border-radius: 2rem;
+    height: 0.2rem;
+    background: var(--btn-primary-bg);
+  }
+
+  input[type='range']::-moz-range-track {
+    border-radius: 2rem;
+    background: var(--btn-primary-bg);
+  }
+
+  input[type='range']::-moz-range-progress {
+    background: var(--yellow-accent);
+  }
+}

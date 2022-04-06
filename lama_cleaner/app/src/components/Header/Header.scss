@@ -1,0 +1,25 @@
+header {
+  height: 60px;
+  padding: 1rem 2rem;
+  position: absolute;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  z-index: 20;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgb(100, 100, 120, 0.2);
+}
+
+.shortcuts {
+  z-index: 1;
+}
+
+.header-icons-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  justify-self: end;
+}
