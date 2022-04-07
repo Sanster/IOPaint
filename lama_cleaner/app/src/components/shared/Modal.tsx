@@ -3,7 +3,8 @@ import React, { ReactNode, useRef } from 'react'
 import { useClickAway, useKey } from 'react-use'
 import Button from './Button'
 
-interface ModalProps {
+export interface ModalProps {
+  show: boolean
   children?: ReactNode
   onClose?: () => void
   title: string
@@ -11,7 +12,7 @@ interface ModalProps {
 }
 
 export default function Modal(props: ModalProps) {
-  const { children, onClose, className, title } = props
+  const { show, children, onClose, className, title } = props
   const ref = useRef(null)
 
   useClickAway(ref, () => {
@@ -23,7 +24,10 @@ export default function Modal(props: ModalProps) {
   })
 
   return (
-    <div className="modal-mask">
+    <div
+      className="modal-mask"
+      style={{ visibility: show === true ? 'visible' : 'hidden' }}
+    >
       <div ref={ref} className={`modal ${className}`}>
         <div className="modal-header">
           <h3>{title}</h3>

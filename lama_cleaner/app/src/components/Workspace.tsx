@@ -13,7 +13,7 @@ const Workspace = ({ file }: WorkspaceProps) => {
   return (
     <>
       <Editor file={file} />
-      {shortcutVisbility ? <ShortcutsModal /> : null}
+      <ShortcutsModal show={shortcutVisbility} />
     </>
   )
 }
