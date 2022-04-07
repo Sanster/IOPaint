@@ -1,11 +1,11 @@
 @use '../../styles/Mixins' as *;
 
 .editor-container {
-  grid-area: main-content;
-  display: grid;
+  display: flex;
   width: 100vw;
   height: 100vh;
-  place-items: center;
+  justify-content: center;
+  align-items: center;
 }
 
 .react-transform-wrapper {
