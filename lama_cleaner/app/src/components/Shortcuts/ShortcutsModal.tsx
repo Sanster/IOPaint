@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react'
 import { useSetRecoilState } from 'recoil'
 import { shortcutsState } from '../../store/Atoms'
-import Modal, { ModalProps } from '../shared/Modal'
+import Modal from '../shared/Modal'
 
 interface Shortcut {
   children: ReactNode
@@ -28,7 +28,7 @@ export default function ShortcutsModal(props: ShortcutsModalProps) {
   const setShortcutState = useSetRecoilState(shortcutsState)
 
   const shortcutStateHandler = () => {
-    setShortcutState(prevShortcutState => !prevShortcutState)
+    setShortcutState(false)
   }
 
   return (
