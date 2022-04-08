@@ -240,17 +240,6 @@ export default function Editor(props: EditorProps) {
     }
   }, [context?.canvas, draw, original, isOriginalLoaded, windowSize])
 
-  useEffect(() => {
-    window.addEventListener('resize', () => {
-      resetZoom()
-    })
-    return () => {
-      window.removeEventListener('resize', () => {
-        resetZoom()
-      })
-    }
-  }, [windowSize])
-
   // Zoom reset
   const resetZoom = useCallback(() => {
     if (!minScale || !original || !windowSize) {
@@ -266,6 +255,17 @@ export default function Editor(props: EditorProps) {
     viewport.state.scale = minScale
     setScale(minScale)
   }, [viewportRef, minScale, original, windowSize])
+
+  useEffect(() => {
+    window.addEventListener('resize', () => {
+      resetZoom()
+    })
+    return () => {
+      window.removeEventListener('resize', () => {
+        resetZoom()
+      })
+    }
+  }, [windowSize, resetZoom])
 
   const handleEscPressed = () => {
     if (isInpaintingLoading) {
