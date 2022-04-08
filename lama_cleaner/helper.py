@@ -30,8 +30,8 @@ def ceil_modulo(x, mod):
     return (x // mod + 1) * mod
 
 
-def numpy_to_bytes(image_numpy: np.ndarray) -> bytes:
-    data = cv2.imencode(".jpg", image_numpy)[1]
+def numpy_to_bytes(image_numpy: np.ndarray, ext: str) -> bytes:
+    data = cv2.imencode(f".{ext}", image_numpy)[1]
     image_bytes = data.tobytes()
     return image_bytes
 
@@ -92,7 +92,9 @@ def boxes_from_mask(mask: np.ndarray) -> List[np.ndarray]:
 
     """
     height, width = mask.shape[1:]
-    _, thresh = cv2.threshold((mask.transpose(1, 2, 0) * 255).astype(np.uint8), 127, 255, 0)
+    _, thresh = cv2.threshold(
+        (mask.transpose(1, 2, 0) * 255).astype(np.uint8), 127, 255, 0
+    )
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     boxes = []
