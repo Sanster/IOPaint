@@ -73,10 +73,11 @@ export default function Editor(props: EditorProps) {
   const [showOriginal, setShowOriginal] = useState(false)
   const [isInpaintingLoading, setIsInpaintingLoading] = useState(false)
   const [scale, setScale] = useState<number>(1)
-  const [minScale, setMinScale] = useState<number>()
+  const [minScale, setMinScale] = useState<number>(1.0)
   const [sizeLimit, setSizeLimit] = useState<number>(1080)
   const windowSize = useWindowSize()
   const viewportRef = useRef<ReactZoomPanPinchRef | undefined | null>()
+  const [centered, setCentered] = useState(false)
 
   const [isDraging, setIsDraging] = useState(false)
   const [isMultiStrokeKeyPressed, setIsMultiStrokeKeyPressed] = useState(false)
@@ -214,31 +215,38 @@ export default function Editor(props: EditorProps) {
 
   // Draw once the original image is loaded
   useEffect(() => {
-    if (!original) {
+    if (!isOriginalLoaded) {
       return
     }
 
-    if (isOriginalLoaded) {
-      const rW = windowSize.width / original.naturalWidth
-      const rH = (windowSize.height - TOOLBAR_SIZE) / original.naturalHeight
-      if (rW < 1 || rH < 1) {
-        const s = Math.min(rW, rH)
-        setMinScale(s)
-        setScale(s)
-      } else {
-        setMinScale(1)
-      }
+    const rW = windowSize.width / original.naturalWidth
+    const rH = (windowSize.height - TOOLBAR_SIZE) / original.naturalHeight
 
-      const imageSizeLimit = Math.max(original.width, original.height)
-      setSizeLimit(imageSizeLimit)
-
-      if (context?.canvas) {
-        context.canvas.width = original.naturalWidth
-        context.canvas.height = original.naturalHeight
-      }
-      draw()
+    let s = 1.0
+    if (rW < 1 || rH < 1) {
+      s = Math.min(rW, rH)
     }
-  }, [context?.canvas, draw, original, isOriginalLoaded, windowSize])
+    setMinScale(s)
+    setScale(s)
+
+    const imageSizeLimit = Math.max(original.width, original.height)
+    setSizeLimit(imageSizeLimit)
+
+    if (context?.canvas) {
+      context.canvas.width = original.naturalWidth
+      context.canvas.height = original.naturalHeight
+    }
+    viewportRef.current?.centerView(s, 1)
+    setCentered(true)
+    draw()
+  }, [
+    context?.canvas,
+    draw,
+    viewportRef,
+    original,
+    isOriginalLoaded,
+    windowSize,
+  ])
 
   // Zoom reset
   const resetZoom = useCallback(() => {
@@ -522,10 +530,6 @@ export default function Editor(props: EditorProps) {
     }
   }
 
-  if (!original || !scale || !minScale) {
-    return <></>
-  }
-
   return (
     <div
       className="editor-container"
@@ -543,7 +547,7 @@ export default function Editor(props: EditorProps) {
         wheel={{ step: 0.05 }}
         centerZoomedOut
         alignmentAnimation={{ disabled: true }}
-        centerOnInit
+        // centerOnInit
         limitToBounds={false}
         doubleClick={{ disabled: true }}
         initialScale={minScale}
@@ -554,6 +558,9 @@ export default function Editor(props: EditorProps) {
       >
         <TransformComponent
           contentClass={isInpaintingLoading ? 'editor-canvas-loading' : ''}
+          contentStyle={{
+            visibility: centered ? 'visible' : 'hidden',
+          }}
         >
           <div className="editor-canvas-container">
             <canvas
