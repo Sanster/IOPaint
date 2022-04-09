@@ -37,17 +37,19 @@ def numpy_to_bytes(image_numpy: np.ndarray, ext: str) -> bytes:
 
 
 def load_img(img_bytes, gray: bool = False):
+    alpha_channel = None
     nparr = np.frombuffer(img_bytes, np.uint8)
     if gray:
         np_img = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
     else:
         np_img = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
         if len(np_img.shape) == 3 and np_img.shape[2] == 4:
+            alpha_channel = np_img[:, :, -1]
             np_img = cv2.cvtColor(np_img, cv2.COLOR_BGRA2RGB)
         else:
             np_img = cv2.cvtColor(np_img, cv2.COLOR_BGR2RGB)
 
-    return np_img
+    return np_img, alpha_channel
 
 
 def norm_img(np_img):
