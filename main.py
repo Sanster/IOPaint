@@ -132,6 +132,7 @@ def get_args_parser():
     parser.add_argument(
         "--input", type=str, help="Path to image you want to load by default"
     )
+    parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", default=8080, type=int)
     parser.add_argument("--model", default="lama", choices=["lama", "ldm"])
     parser.add_argument(
@@ -203,7 +204,7 @@ def main():
         ui = FlaskUI(app, width=app_width, height=app_height)
         ui.run()
     else:
-        app.run(host="127.0.0.1", port=args.port, debug=args.debug)
+        app.run(host=args.host, port=args.port, debug=args.debug)
 
 
 if __name__ == "__main__":
