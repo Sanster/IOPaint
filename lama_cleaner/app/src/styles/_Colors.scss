@@ -17,13 +17,22 @@
   --modal-bg: var(--page-bg);
   --modal-text-color: rgb(0, 0, 0);
   --modal-hotkey-border-color: rgb(0, 0, 0);
-  --model-mask-bg: rgba(209,213,219,0.4);
+  --model-mask-bg: rgba(209, 213, 219, 0.4);
+
+  // Text
+  --text-color: #040404;
+  --text-color-gray: rgb(107, 111, 118);
 
   // Shared
   --btn-primary-bg: rgb(210, 210, 220);
-  --btn-text-color: black;
-  --btn-text-hover-color: black;
+  --btn-text-color: var(--text-color);
+  --btn-text-hover-color: #040404;
   --btn-border-color: rgb(100, 100, 120);
   --btn-primary-hover-bg: var(--yellow-accent);
   --animation-pulsing-bg: rgb(255, 255, 255, 0.5);
+
+  // switch
+  --switch-root-background-color: rgb(223, 225, 228);
+  --switch-thumb-color: var(--page-bg);
+  --switch-thumb-checked-color: var(--page-bg);
 }

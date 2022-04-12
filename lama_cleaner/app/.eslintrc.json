@@ -17,6 +17,7 @@
     "project": "./tsconfig.json"
   },
   "rules": {
+    "react/jsx-props-no-spreading": 0,
     "import/no-unresolved": 0,
     "react/jsx-no-bind": "off",
     "react/jsx-filename-extension": [
