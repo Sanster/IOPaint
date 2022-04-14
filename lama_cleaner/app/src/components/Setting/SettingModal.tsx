@@ -4,6 +4,7 @@ import { useRecoilState } from 'recoil'
 import { settingState } from '../../store/Atoms'
 import Modal from '../shared/Modal'
 import HDSettingBlock from './HDSettingBlock'
+import ModelSettingBlock from './ModelSettingBlock'
 import SavePathSettingBlock from './SavePathSettingBlock'
 
 export default function SettingModal() {
@@ -23,6 +24,7 @@ export default function SettingModal() {
       show={setting.show}
     >
       <SavePathSettingBlock />
+      <ModelSettingBlock />
       <HDSettingBlock />
     </Modal>
   )

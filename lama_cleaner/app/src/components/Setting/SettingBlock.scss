@@ -1,13 +1,18 @@
 .setting-block {
   display: flex;
   flex-direction: column;
-  margin-top: 12px;
 
   .option-desc {
+    color: var(--text-color-gray);
     margin-top: 12px;
     border: 1px solid var(--border-color);
     border-radius: 0.3rem;
     padding: 2rem;
+
+    .sub-setting-block {
+      margin-top: 8px;
+      color: var(--text-color);
+    }
   }
 }
 

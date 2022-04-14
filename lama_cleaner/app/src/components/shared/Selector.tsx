@@ -7,6 +7,7 @@ type SelectorChevronDirection = 'up' | 'down'
 type SelectorProps = {
   minWidth?: number
   chevronDirection?: SelectorChevronDirection
+  value: string
   options: string[]
   onChange: (value: string) => void
 }
@@ -17,9 +18,8 @@ const selectorDefaultProps = {
 }
 
 function Selector(props: SelectorProps) {
-  const { minWidth, chevronDirection, options, onChange } = props
+  const { minWidth, chevronDirection, value, options, onChange } = props
   const [showOptions, setShowOptions] = useState<boolean>(false)
-  const [index, setIndex] = useState<number>(0)
   const selectorRef = useRef<HTMLDivElement | null>(null)
 
   const showOptionsHandler = () => {
@@ -46,7 +46,6 @@ function Selector(props: SelectorProps) {
     const currentRes = e.target.textContent.split('x')
     onChange(currentRes[0])
     setShowOptions(false)
-    setIndex(newIndex)
   }
 
   return (
@@ -57,7 +56,7 @@ function Selector(props: SelectorProps) {
         onClick={showOptionsHandler}
         aria-hidden="true"
       >
-        <p>{options[index]}</p>
+        <p>{value}</p>
         <div className="selector-icon">
           {chevronDirection === 'up' ? <ChevronUpIcon /> : <ChevronDownIcon />}
         </div>

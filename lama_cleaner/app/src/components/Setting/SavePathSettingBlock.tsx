@@ -6,7 +6,7 @@ import SettingBlock from './SettingBlock'
 function SavePathSettingBlock() {
   return (
     <SettingBlock
-      title="Download image at same folder of origin image"
+      title="Download image beside origin image"
       input={
         <Switch defaultChecked>
           <SwitchThumb />

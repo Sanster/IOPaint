@@ -22,6 +22,7 @@ function PixelSizeInputSetting(props: PixelSizeInputProps) {
 
   return (
     <SettingBlock
+      className="sub-setting-block"
       title={title}
       input={
         <div
@@ -54,14 +55,23 @@ function HDSettingBlock() {
   }
 
   const onResizeLimitChange = (value: string) => {
+    const val = value.length === 0 ? 0 : parseInt(value, 10)
     setSettingState(old => {
-      return { ...old, hdStrategyResizeLimit: value }
+      return { ...old, hdStrategyResizeLimit: val }
     })
   }
 
   const onCropTriggerSizeChange = (value: string) => {
+    const val = value.length === 0 ? 0 : parseInt(value, 10)
     setSettingState(old => {
-      return { ...old, hdStrategyCropTrigerSize: value }
+      return { ...old, hdStrategyCropTrigerSize: val }
+    })
+  }
+
+  const onCropMarginChange = (value: string) => {
+    const val = value.length === 0 ? 0 : parseInt(value, 10)
+    setSettingState(old => {
+      return { ...old, hdStrategyCropMargin: val }
     })
   }
 
@@ -69,7 +79,16 @@ function HDSettingBlock() {
     return (
       <div>
         Use the original resolution of the picture, suitable for picture size
-        below 2K, of course you can try it on higher resolution pictures
+        below 2K. Try{' '}
+        <div
+          tabIndex={0}
+          role="button"
+          className="inline-tip"
+          onClick={() => onStrategyChange(HDStrategy.REISIZE)}
+        >
+          Resize Strategy
+        </div>{' '}
+        if you do not get good results on high resolution images.
       </div>
     )
   }
@@ -79,7 +98,7 @@ function HDSettingBlock() {
       <div>
         <div>
           Resize the longer side of the image to a specific size(keep ratio),
-          then do inpainting on the entire resized image.
+          then do inpainting on the resized image.
         </div>
         <PixelSizeInputSetting
           title="Size limit"
@@ -103,6 +122,11 @@ function HDSettingBlock() {
           value={`${setting.hdStrategyCropTrigerSize}`}
           onValue={onCropTriggerSizeChange}
         />
+        <PixelSizeInputSetting
+          title="Crop margin"
+          value={`${setting.hdStrategyCropMargin}`}
+          onValue={onCropMarginChange}
+        />
       </div>
     )
   }
@@ -122,9 +146,11 @@ function HDSettingBlock() {
 
   return (
     <SettingBlock
+      className="hd-setting-block"
       title="High Resolution Strategy"
       input={
         <Selector
+          value={setting.hdStrategy as string}
           options={Object.values(HDStrategy)}
           onChange={val => onStrategyChange(val as HDStrategy)}
         />
