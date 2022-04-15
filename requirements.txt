@@ -1,6 +1,9 @@
 torch>=1.8.2
 opencv-python
 flask_cors
-flask
+flask==2.1.1
 flaskwebgui
 tqdm
+pydantic
+loguru
+pytest

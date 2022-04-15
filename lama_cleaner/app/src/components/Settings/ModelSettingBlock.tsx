@@ -2,11 +2,12 @@ import React, { ReactNode } from 'react'
 import { useRecoilState } from 'recoil'
 import { settingState } from '../../store/Atoms'
 import Selector from '../shared/Selector'
+import NumberInputSetting from './NumberInputSetting'
 import SettingBlock from './SettingBlock'
 
 export enum AIModel {
-  LAMA = 'LaMa',
-  LDM = 'LDM',
+  LAMA = 'lama',
+  LDM = 'ldm',
 }
 
 function ModelSettingBlock() {
@@ -24,7 +25,7 @@ function ModelSettingBlock() {
     githubUrl: string
   ) => {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
         <a
           className="model-desc-link"
           href={paperUrl}
@@ -34,17 +35,36 @@ function ModelSettingBlock() {
           {name}
         </a>
 
-        <br />
-
         <a
           className="model-desc-link"
           href={githubUrl}
           target="_blank"
           rel="noreferrer noopener"
-          style={{ marginTop: '8px' }}
         >
           {githubUrl}
         </a>
+      </div>
+    )
+  }
+
+  const renderLDMModelDesc = () => {
+    return (
+      <div>
+        {renderModelDesc(
+          'High-Resolution Image Synthesis with Latent Diffusion Models',
+          'https://arxiv.org/abs/2112.10752',
+          'https://github.com/CompVis/latent-diffusion'
+        )}
+        <NumberInputSetting
+          title="Steps"
+          value={`${setting.ldmSteps}`}
+          onValue={value => {
+            const val = value.length === 0 ? 0 : parseInt(value, 10)
+            setSettingState(old => {
+              return { ...old, ldmSteps: val }
+            })
+          }}
+        />
       </div>
     )
   }
@@ -58,11 +78,7 @@ function ModelSettingBlock() {
           'https://github.com/saic-mdal/lama'
         )
       case AIModel.LDM:
-        return renderModelDesc(
-          'High-Resolution Image Synthesis with Latent Diffusion Models',
-          'https://arxiv.org/abs/2112.10752',
-          'https://github.com/CompVis/latent-diffusion'
-        )
+        return renderLDMModelDesc()
       default:
         return <></>
     }

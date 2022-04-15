@@ -1,11 +1,11 @@
 import React from 'react'
 
 import { useRecoilState } from 'recoil'
+import { switchModel } from '../../adapters/inpainting'
 import { settingState } from '../../store/Atoms'
 import Modal from '../shared/Modal'
 import HDSettingBlock from './HDSettingBlock'
 import ModelSettingBlock from './ModelSettingBlock'
-import SavePathSettingBlock from './SavePathSettingBlock'
 
 export default function SettingModal() {
   const [setting, setSettingState] = useRecoilState(settingState)
@@ -14,6 +14,8 @@ export default function SettingModal() {
     setSettingState(old => {
       return { ...old, show: false }
     })
+
+    switchModel(setting.model)
   }
 
   return (
@@ -23,7 +25,9 @@ export default function SettingModal() {
       className="modal-setting"
       show={setting.show}
     >
-      <SavePathSettingBlock />
+      {/* It's not possible because this poses a security risk */}
+      {/* https://stackoverflow.com/questions/34870711/download-a-file-at-different-location-using-html5 */}
+      {/* <SavePathSettingBlock /> */}
       <ModelSettingBlock />
       <HDSettingBlock />
     </Modal>

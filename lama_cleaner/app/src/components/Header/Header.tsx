@@ -6,7 +6,7 @@ import Button from '../shared/Button'
 import Shortcuts from '../Shortcuts/Shortcuts'
 import useResolution from '../../hooks/useResolution'
 import { ThemeChanger } from './ThemeChanger'
-import SettingIcon from '../Setting/SettingIcon'
+import SettingIcon from '../Settings/SettingIcon'
 
 const Header = () => {
   const [file, setFile] = useRecoilState(fileState)

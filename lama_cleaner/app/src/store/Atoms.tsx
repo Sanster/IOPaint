@@ -1,6 +1,6 @@
 import { atom } from 'recoil'
-import { HDStrategy } from '../components/Setting/HDSettingBlock'
-import { AIModel } from '../components/Setting/ModelSettingBlock'
+import { HDStrategy } from '../components/Settings/HDSettingBlock'
+import { AIModel } from '../components/Settings/ModelSettingBlock'
 
 export const fileState = atom<File | undefined>({
   key: 'fileState',
@@ -16,10 +16,15 @@ export interface Setting {
   show: boolean
   saveImageBesideOrigin: boolean
   model: AIModel
+
+  // For LaMa
   hdStrategy: HDStrategy
   hdStrategyResizeLimit: number
   hdStrategyCropTrigerSize: number
   hdStrategyCropMargin: number
+
+  // For LDM
+  ldmSteps: number
 }
 
 export const settingState = atom<Setting>({
@@ -28,9 +33,10 @@ export const settingState = atom<Setting>({
     show: false,
     saveImageBesideOrigin: false,
     model: AIModel.LAMA,
-    hdStrategy: HDStrategy.ORIGINAL,
+    hdStrategy: HDStrategy.RESIZE,
     hdStrategyResizeLimit: 2048,
     hdStrategyCropTrigerSize: 2048,
     hdStrategyCropMargin: 128,
+    ldmSteps: 50,
   },
 })

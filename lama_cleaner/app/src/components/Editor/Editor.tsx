@@ -15,12 +15,14 @@ import {
   TransformComponent,
   TransformWrapper,
 } from 'react-zoom-pan-pinch'
+import { useRecoilValue } from 'recoil'
 import { useWindowSize, useKey, useKeyPressEvent } from 'react-use'
 import inpaint from '../../adapters/inpainting'
 import Button from '../shared/Button'
 import Slider from './Slider'
 import SizeSelector from './SizeSelector'
 import { downloadImage, loadImage, useImage } from '../../utils'
+import { settingState } from '../../store/Atoms'
 
 const TOOLBAR_SIZE = 200
 const BRUSH_COLOR = '#ffcc00bb'
@@ -57,6 +59,7 @@ function drawLines(
 
 export default function Editor(props: EditorProps) {
   const { file } = props
+  const settings = useRecoilValue(settingState)
   const [brushSize, setBrushSize] = useState(40)
   const [original, isOriginalLoaded] = useImage(file)
   const [renders, setRenders] = useState<HTMLImageElement[]>([])
@@ -125,6 +128,7 @@ export default function Editor(props: EditorProps) {
       const res = await inpaint(
         file,
         maskCanvas.toDataURL(),
+        settings,
         sizeLimit.toString()
       )
       if (!res) {
@@ -157,6 +161,7 @@ export default function Editor(props: EditorProps) {
     renders,
     sizeLimit,
     historyLineCount,
+    settings,
   ])
 
   const hadDrawSomething = () => {

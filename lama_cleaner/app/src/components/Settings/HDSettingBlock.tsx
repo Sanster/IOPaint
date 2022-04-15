@@ -1,48 +1,14 @@
 import React, { ReactNode } from 'react'
 import { useRecoilState } from 'recoil'
 import { settingState } from '../../store/Atoms'
-import NumberInput from '../shared/NumberInput'
 import Selector from '../shared/Selector'
+import NumberInputSetting from './NumberInputSetting'
 import SettingBlock from './SettingBlock'
 
 export enum HDStrategy {
   ORIGINAL = 'Original',
-  REISIZE = 'Resize',
+  RESIZE = 'Resize',
   CROP = 'Crop',
-}
-
-interface PixelSizeInputProps {
-  title: string
-  value: string
-  onValue: (val: string) => void
-}
-
-function PixelSizeInputSetting(props: PixelSizeInputProps) {
-  const { title, value, onValue } = props
-
-  return (
-    <SettingBlock
-      className="sub-setting-block"
-      title={title}
-      input={
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
-          <NumberInput
-            style={{ width: '80px' }}
-            value={`${value}`}
-            onValue={onValue}
-          />
-          <span>pixel</span>
-        </div>
-      }
-    />
-  )
 }
 
 function HDSettingBlock() {
@@ -84,7 +50,7 @@ function HDSettingBlock() {
           tabIndex={0}
           role="button"
           className="inline-tip"
-          onClick={() => onStrategyChange(HDStrategy.REISIZE)}
+          onClick={() => onStrategyChange(HDStrategy.RESIZE)}
         >
           Resize Strategy
         </div>{' '}
@@ -100,9 +66,10 @@ function HDSettingBlock() {
           Resize the longer side of the image to a specific size(keep ratio),
           then do inpainting on the resized image.
         </div>
-        <PixelSizeInputSetting
+        <NumberInputSetting
           title="Size limit"
           value={`${setting.hdStrategyResizeLimit}`}
+          suffix="pixel"
           onValue={onResizeLimitChange}
         />
       </div>
@@ -117,14 +84,16 @@ function HDSettingBlock() {
           the result back. Mainly for performance and memory reasons on high
           resolution image.
         </div>
-        <PixelSizeInputSetting
+        <NumberInputSetting
           title="Trigger size"
           value={`${setting.hdStrategyCropTrigerSize}`}
+          suffix="pixel"
           onValue={onCropTriggerSizeChange}
         />
-        <PixelSizeInputSetting
+        <NumberInputSetting
           title="Crop margin"
           value={`${setting.hdStrategyCropMargin}`}
+          suffix="pixel"
           onValue={onCropMarginChange}
         />
       </div>
@@ -137,7 +106,7 @@ function HDSettingBlock() {
         return renderOriginalOptionDesc()
       case HDStrategy.CROP:
         return renderCropOptionDesc()
-      case HDStrategy.REISIZE:
+      case HDStrategy.RESIZE:
         return renderResizeOptionDesc()
       default:
         return renderOriginalOptionDesc()

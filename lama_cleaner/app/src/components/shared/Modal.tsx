@@ -16,11 +16,15 @@ export default function Modal(props: ModalProps) {
   const ref = useRef(null)
 
   useClickAway(ref, () => {
-    onClose?.()
+    if (show) {
+      onClose?.()
+    }
   })
 
   useKeyPressEvent('Escape', e => {
-    onClose?.()
+    if (show) {
+      onClose?.()
+    }
   })
 
   return (
