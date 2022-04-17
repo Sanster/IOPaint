@@ -9,7 +9,7 @@ import torch
 from torch.hub import download_url_to_file, get_dir
 
 
-def download_model(url):
+def get_cache_path_by_url(url):
     parts = urlparse(url)
     hub_dir = get_dir()
     model_dir = os.path.join(hub_dir, "checkpoints")
@@ -17,6 +17,11 @@ def download_model(url):
         os.makedirs(os.path.join(model_dir, "hub", "checkpoints"))
     filename = os.path.basename(parts.path)
     cached_file = os.path.join(model_dir, filename)
+    return cached_file
+
+
+def download_model(url):
+    cached_file = get_cache_path_by_url(url)
     if not os.path.exists(cached_file):
         sys.stderr.write('Downloading: "{}" to {}\n'.format(url, cached_file))
         hash_prefix = None

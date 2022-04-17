@@ -1,26 +1,28 @@
 import React from 'react'
 
 import { useRecoilState } from 'recoil'
-import { switchModel } from '../../adapters/inpainting'
 import { settingState } from '../../store/Atoms'
 import Modal from '../shared/Modal'
 import HDSettingBlock from './HDSettingBlock'
 import ModelSettingBlock from './ModelSettingBlock'
 
-export default function SettingModal() {
+interface SettingModalProps {
+  onClose: () => void
+}
+export default function SettingModal(props: SettingModalProps) {
+  const { onClose } = props
   const [setting, setSettingState] = useRecoilState(settingState)
 
-  const onClose = () => {
+  const handleOnClose = () => {
     setSettingState(old => {
       return { ...old, show: false }
     })
-
-    switchModel(setting.model)
+    onClose()
   }
 
   return (
     <Modal
-      onClose={onClose}
+      onClose={handleOnClose}
       title="Settings"
       className="modal-setting"
       show={setting.show}

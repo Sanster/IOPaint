@@ -1,10 +1,28 @@
 import { atom } from 'recoil'
 import { HDStrategy } from '../components/Settings/HDSettingBlock'
 import { AIModel } from '../components/Settings/ModelSettingBlock'
+import { ToastState } from '../components/shared/Toast'
 
 export const fileState = atom<File | undefined>({
   key: 'fileState',
   default: undefined,
+})
+
+interface ToastAtomState {
+  open: boolean
+  desc: string
+  state: ToastState
+  duration: number
+}
+
+export const toastState = atom<ToastAtomState>({
+  key: 'toastState',
+  default: {
+    open: false,
+    desc: '',
+    state: 'default',
+    duration: 3000,
+  },
 })
 
 export const shortcutsState = atom<boolean>({
@@ -12,7 +30,7 @@ export const shortcutsState = atom<boolean>({
   default: false,
 })
 
-export interface Setting {
+export interface Settings {
   show: boolean
   saveImageBesideOrigin: boolean
   model: AIModel
@@ -27,16 +45,18 @@ export interface Setting {
   ldmSteps: number
 }
 
-export const settingState = atom<Setting>({
+export const settingStateDefault = {
+  show: false,
+  saveImageBesideOrigin: false,
+  model: AIModel.LAMA,
+  ldmSteps: 50,
+  hdStrategy: HDStrategy.RESIZE,
+  hdStrategyResizeLimit: 2048,
+  hdStrategyCropTrigerSize: 2048,
+  hdStrategyCropMargin: 128,
+}
+
+export const settingState = atom<Settings>({
   key: 'settingsState',
-  default: {
-    show: false,
-    saveImageBesideOrigin: false,
-    model: AIModel.LAMA,
-    hdStrategy: HDStrategy.RESIZE,
-    hdStrategyResizeLimit: 2048,
-    hdStrategyCropTrigerSize: 2048,
-    hdStrategyCropMargin: 128,
-    ldmSteps: 50,
-  },
+  default: settingStateDefault,
 })

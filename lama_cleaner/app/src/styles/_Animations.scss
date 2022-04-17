@@ -37,3 +37,21 @@
     transform: translateY(0);
   }
 }
+
+@keyframes slideIn {
+  0% {
+    transform: translateX(calc(100% + 25px));
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

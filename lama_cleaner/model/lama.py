@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from loguru import logger
 
-from lama_cleaner.helper import pad_img_to_modulo, download_model, norm_img
+from lama_cleaner.helper import pad_img_to_modulo, download_model, norm_img, get_cache_path_by_url
 from lama_cleaner.model.base import InpaintModel
 from lama_cleaner.schema import Config
 
@@ -36,12 +36,16 @@ class LaMa(InpaintModel):
                 )
         else:
             model_path = download_model(LAMA_MODEL_URL)
-
         logger.info(f"Load LaMa model from: {model_path}")
         model = torch.jit.load(model_path, map_location="cpu")
         model = model.to(device)
         model.eval()
         self.model = model
+        self.model_path = model_path
+
+    @staticmethod
+    def is_downloaded() -> bool:
+        return os.path.exists(get_cache_path_by_url(LAMA_MODEL_URL))
 
     def forward(self, image, mask, config: Config):
         """Input image and output image have same size

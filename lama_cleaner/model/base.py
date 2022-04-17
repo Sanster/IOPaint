@@ -24,6 +24,11 @@ class InpaintModel:
     def init_model(self, device):
         ...
 
+    @staticmethod
+    @abc.abstractmethod
+    def is_downloaded() -> bool:
+        ...
+
     @abc.abstractmethod
     def forward(self, image, mask, config: Config):
         """Input image and output image have same size

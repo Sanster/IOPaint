@@ -125,7 +125,17 @@ def process():
     )
 
 
-@app.route("/switch_model", methods=["POST"])
+@app.route("/model")
+def current_model():
+    return model.name, 200
+
+
+@app.route("/model_downloaded/<name>")
+def model_downloaded(name):
+    return str(model.is_downloaded(name)), 200
+
+
+@app.route("/model", methods=["POST"])
 def switch_model():
     new_name = request.form.get("name")
     if new_name == model.name:

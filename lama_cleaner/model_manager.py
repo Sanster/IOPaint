@@ -21,6 +21,14 @@ class ModelManager:
             raise NotImplementedError(f"Not supported model: {name}")
         return model
 
+    def is_downloaded(self, name: str) -> bool:
+        if name == self.LAMA:
+            return LaMa.is_downloaded()
+        elif name == self.LDM:
+            return LDM.is_downloaded()
+        else:
+            raise NotImplementedError(f"Not supported model: {name}")
+
     def __call__(self, image, mask, config: Config):
         return self.model(image, mask, config)
 

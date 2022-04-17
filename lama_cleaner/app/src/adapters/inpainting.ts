@@ -1,4 +1,4 @@
-import { Setting } from '../store/Atoms'
+import { Settings } from '../store/Atoms'
 import { dataURItoBlob } from '../utils'
 
 export const API_ENDPOINT = `${process.env.REACT_APP_INPAINTING_URL}`
@@ -6,7 +6,7 @@ export const API_ENDPOINT = `${process.env.REACT_APP_INPAINTING_URL}`
 export default async function inpaint(
   imageFile: File,
   maskBase64: string,
-  settings: Setting,
+  settings: Settings,
   sizeLimit?: string
 ) {
   // 1080, 2000, Original
@@ -43,8 +43,20 @@ export default async function inpaint(
 export function switchModel(name: string) {
   const fd = new FormData()
   fd.append('name', name)
-  return fetch(`${API_ENDPOINT}/switch_model`, {
+  return fetch(`${API_ENDPOINT}/model`, {
     method: 'POST',
     body: fd,
+  })
+}
+
+export function currentModel() {
+  return fetch(`${API_ENDPOINT}/model`, {
+    method: 'GET',
+  })
+}
+
+export function modelDownloaded(name: string) {
+  return fetch(`${API_ENDPOINT}/model_downloaded/${name}`, {
+    method: 'GET',
   })
 }
