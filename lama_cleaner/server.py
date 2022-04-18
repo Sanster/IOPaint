@@ -183,6 +183,7 @@ def main(args):
     if args.gui:
         app_width, app_height = args.gui_size
         from flaskwebgui import FlaskUI
-        return FlaskUI(app, width=app_width, height=app_height, host=args.host, port=args.port)
+        ui = FlaskUI(app, width=app_width, height=app_height, host=args.host, port=args.port)
+        ui.run()
     else:
         app.run(host=args.host, port=args.port, debug=args.debug)
