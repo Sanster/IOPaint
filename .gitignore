@@ -3,3 +3,6 @@
 examples/
 .idea/
 .vscode/
+build/
+dist/
+lama_cleaner.egg-info/
