@@ -2,13 +2,16 @@ import os
 
 import numpy as np
 import torch
+from loguru import logger
+
+from lama_cleaner.model.base import InpaintModel
+from lama_cleaner.schema import Config
 
 torch.manual_seed(42)
 import torch.nn as nn
 from tqdm import tqdm
-import cv2
-from lama_cleaner.helper import pad_img_to_modulo, download_model
-from lama_cleaner.ldm.utils import make_beta_schedule, make_ddim_timesteps, make_ddim_sampling_parameters, noise_like, \
+from lama_cleaner.helper import download_model, norm_img, get_cache_path_by_url
+from lama_cleaner.model.utils import make_beta_schedule, make_ddim_timesteps, make_ddim_sampling_parameters, noise_like, \
     timestep_embedding
 
 LDM_ENCODE_MODEL_URL = os.environ.get(
@@ -217,7 +220,7 @@ class DDIMSampler(object):
 
         time_range = reversed(range(0, timesteps)) if ddim_use_original_steps else np.flip(timesteps)
         total_steps = timesteps if ddim_use_original_steps else timesteps.shape[0]
-        print(f"Running DDIM Sampling with {total_steps} timesteps")
+        logger.info(f"Running DDIM Sampling with {total_steps} timesteps")
 
         iterator = tqdm(time_range, desc='DDIM Sampler', total=total_steps)
 
@@ -263,102 +266,54 @@ class DDIMSampler(object):
 
 def load_jit_model(url, device):
     model_path = download_model(url)
+    logger.info(f"Load LDM model from: {model_path}")
     model = torch.jit.load(model_path).to(device)
     model.eval()
     return model
 
 
-class LDM:
-    def __init__(self, device, steps=50):
+class LDM(InpaintModel):
+    pad_mod = 32
+
+    def __init__(self, device):
+        super().__init__(device)
         self.device = device
 
+    def init_model(self, device):
         self.diffusion_model = load_jit_model(LDM_DIFFUSION_MODEL_URL, device)
         self.cond_stage_model_decode = load_jit_model(LDM_DECODE_MODEL_URL, device)
         self.cond_stage_model_encode = load_jit_model(LDM_ENCODE_MODEL_URL, device)
 
         model = LatentDiffusion(self.diffusion_model, device)
         self.sampler = DDIMSampler(model)
-        self.steps = steps
 
-    def _norm(self, tensor):
-        return tensor * 2.0 - 1.0
+    @staticmethod
+    def is_downloaded() -> bool:
+        model_paths = [
+            get_cache_path_by_url(LDM_DIFFUSION_MODEL_URL),
+            get_cache_path_by_url(LDM_DECODE_MODEL_URL),
+            get_cache_path_by_url(LDM_ENCODE_MODEL_URL),
+        ]
+        return all([os.path.exists(it) for it in model_paths])
 
-    @torch.no_grad()
-    def __call__(self, image, mask):
+    def forward(self, image, mask, config: Config):
         """
-        image: [C, H, W] RGB
-        mask: [1, H, W]
+        image: [H, W, C] RGB
+        mask: [H, W, 1]
         return: BGR IMAGE
         """
         # image [1,3,512,512] float32
         # mask: [1,1,512,512] float32
         # masked_image: [1,3,512,512] float32
-        origin_height, origin_width = image.shape[1:]
-        image = pad_img_to_modulo(image, mod=32)
-        mask = pad_img_to_modulo(mask, mod=32)
-        padded_height, padded_width = image.shape[1:]
+        steps = config.ldm_steps
+        image = norm_img(image)
+        mask = norm_img(mask)
+
         mask[mask < 0.5] = 0
         mask[mask >= 0.5] = 1
 
-        # crop 512 x 512
-        if padded_width <= 512 or padded_height <= 512:
-            np_img = self._forward(image, mask, self.device)
-        else:
-            print("Try to zoom in")
-            # zoom in
-            # x,y,w,h
-            # box = self.box_from_bitmap(mask)
-            box = self.find_main_content(mask)
-            if box is None:
-                print("No bbox found")
-                np_img = self._forward(image, mask, self.device)
-            else:
-                print(f"box: {box}")
-                box_x, box_y, box_w, box_h = box
-                cx = box_x + box_w // 2
-                cy = box_y + box_h // 2
-
-                # w = max(512, box_w)
-                # h = max(512, box_h)
-                w = box_w + 512
-                h = box_h + 512
-
-                left = max(cx - w // 2, 0)
-                top = max(cy - h // 2, 0)
-                right = min(cx + w // 2, origin_width)
-                bottom = min(cy + h // 2, origin_height)
-
-                x = left
-                y = top
-                w = right - left
-                h = bottom - top
-
-                crop_img = image[:, int(y):int(y + h), int(x):int(x + w)]
-                crop_mask = mask[:, int(y):int(y + h), int(x):int(x + w)]
-
-                print(f"Apply zoom in size width x height: {crop_img.shape}")
-
-                crop_img_height, crop_img_width = crop_img.shape[1:]
-
-                crop_img = pad_img_to_modulo(crop_img, mod=32)
-                crop_mask = pad_img_to_modulo(crop_mask, mod=32)
-                # RGB
-                np_img = self._forward(crop_img, crop_mask, self.device)
-
-                image = (image.transpose(1, 2, 0) * 255).astype(np.uint8)
-                image[int(y): int(y + h), int(x): int(x + w), :] = np_img[0:crop_img_height, 0:crop_img_width, :]
-                np_img = image
-                # BGR to RGB
-                # np_img = image[:, :, ::-1]
-
-        np_img = np_img[0:origin_height, 0:origin_width, :]
-        np_img = np_img[:, :, ::-1]
-
-        return np_img
-
-    def _forward(self, image, mask, device):
-        image = torch.from_numpy(image).unsqueeze(0).to(device)
-        mask = torch.from_numpy(mask).unsqueeze(0).to(device)
+        image = torch.from_numpy(image).unsqueeze(0).to(self.device)
+        mask = torch.from_numpy(mask).unsqueeze(0).to(self.device)
         masked_image = (1 - mask) * image
 
         image = self._norm(image)
@@ -371,47 +326,20 @@ class LDM:
         c = torch.cat((c, cc), dim=1)  # 1,4,128,128
 
         shape = (c.shape[1] - 1,) + c.shape[2:]
-        samples_ddim = self.sampler.sample(steps=self.steps,
+        samples_ddim = self.sampler.sample(steps=steps,
                                            conditioning=c,
                                            batch_size=c.shape[0],
                                            shape=shape)
         x_samples_ddim = self.cond_stage_model_decode(samples_ddim)  # samples_ddim: 1, 3, 128, 128 float32
 
-        image = torch.clamp((image + 1.0) / 2.0, min=0.0, max=1.0)
-        mask = torch.clamp((mask + 1.0) / 2.0, min=0.0, max=1.0)
-        predicted_image = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
+        # image = torch.clamp((image + 1.0) / 2.0, min=0.0, max=1.0)
+        # mask = torch.clamp((mask + 1.0) / 2.0, min=0.0, max=1.0)
+        inpainted_image = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
 
-        inpainted = (1 - mask) * image + mask * predicted_image
-        inpainted = inpainted.cpu().numpy().transpose(0, 2, 3, 1)[0] * 255
-        np_img = inpainted.astype(np.uint8)
-        return np_img
+        # inpainted = (1 - mask) * image + mask * predicted_image
+        inpainted_image = inpainted_image.cpu().numpy().transpose(0, 2, 3, 1)[0] * 255
+        inpainted_image = inpainted_image.astype(np.uint8)[:, :, ::-1]
+        return inpainted_image
 
-    def find_main_content(self, bitmap: np.ndarray):
-        th2 = bitmap[0].astype(np.uint8)
-        row_sum = th2.sum(1)
-        col_sum = th2.sum(0)
-        xmin = max(0, np.argwhere(col_sum != 0).min() - 20)
-        xmax = min(np.argwhere(col_sum != 0).max() + 20, th2.shape[1])
-        ymin = max(0, np.argwhere(row_sum != 0).min() - 20)
-        ymax = min(np.argwhere(row_sum != 0).max() + 20, th2.shape[0])
-
-        left, top, right, bottom = int(xmin), int(ymin), int(xmax), int(ymax)
-        return left, top, right - left, bottom - top
-
-    def box_from_bitmap(self, bitmap):
-        """
-        bitmap: single map with shape (NUM_CLASSES, H, W),
-            whose values are binarized as {0, 1}
-        """
-        contours, _ = cv2.findContours(
-            (bitmap[0] * 255).astype(np.uint8), cv2.RETR_FLOODFILL, cv2.CHAIN_APPROX_NONE
-        )
-
-        contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
-        num_contours = len(contours)
-        print(f"contours size: {num_contours}")
-        if num_contours != 1:
-            return None
-
-        # x,y,w,h
-        return cv2.boundingRect(contours[0])
+    def _norm(self, tensor):
+        return tensor * 2.0 - 1.0

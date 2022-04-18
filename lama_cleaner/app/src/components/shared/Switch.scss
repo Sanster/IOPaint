@@ -1,0 +1,36 @@
+.switch-root {
+  all: 'unset';
+  width: 42px;
+  height: 25px;
+  background-color: var(--switch-root-background-color);
+  border-radius: 9999px;
+  border: none;
+  position: relative;
+  transition: background-color 100ms;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.switch-root[data-state='checked'] {
+  background-color: var(--yellow-accent);
+}
+
+.switch-thumb {
+  display: block;
+  width: 17px;
+  height: 17px;
+  background-color: var(--switch-thumb-color);
+  border-radius: 9999px;
+  transition: transform 100ms;
+  transform: translateX(4px);
+  will-change: transform;
+}
+
+.switch-thumb[data-state='checked'] {
+  transform: translateX(21px);
+  background-color: var(--switch-thumb-checked-color);
+  outline: 1px solid rgb(100, 100, 120, 0.5);
+}

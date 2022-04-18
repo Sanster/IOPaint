@@ -11,11 +11,16 @@
 @use '../components/Header/Header';
 @use '../components/Header/ThemeChanger';
 @use '../components/Shortcuts/Shortcuts';
+@use '../components/Settings/Settings.scss';
 
 // Shared
 @use '../components/FileSelect/FileSelect';
 @use '../components/shared/Button';
 @use '../components/shared/Modal';
+@use '../components/shared/Selector';
+@use '../components/shared/Switch';
+@use '../components/shared/NumberInput';
+@use '../components/shared/Toast';
 
 // Main CSS
 *,

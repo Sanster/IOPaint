@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react'
-import { useSetRecoilState } from 'recoil'
+import { useRecoilState } from 'recoil'
 import { shortcutsState } from '../../store/Atoms'
 import Modal from '../shared/Modal'
 
@@ -19,13 +19,8 @@ function ShortCut(props: Shortcut) {
   )
 }
 
-interface ShortcutsModalProps {
-  show: boolean
-}
-
-export default function ShortcutsModal(props: ShortcutsModalProps) {
-  const { show } = props
-  const setShortcutState = useSetRecoilState(shortcutsState)
+export default function ShortcutsModal() {
+  const [shortcutsShow, setShortcutState] = useRecoilState(shortcutsState)
 
   const shortcutStateHandler = () => {
     setShortcutState(false)
@@ -36,7 +31,7 @@ export default function ShortcutsModal(props: ShortcutsModalProps) {
       onClose={shortcutStateHandler}
       title="Hotkeys"
       className="modal-shortcuts"
-      show={show}
+      show={shortcutsShow}
     >
       <div className="shortcut-options">
         <ShortCut content="Enable multi-stroke mask drawing">

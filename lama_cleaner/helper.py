@@ -9,7 +9,7 @@ import torch
 from torch.hub import download_url_to_file, get_dir
 
 
-def download_model(url):
+def get_cache_path_by_url(url):
     parts = urlparse(url)
     hub_dir = get_dir()
     model_dir = os.path.join(hub_dir, "checkpoints")
@@ -17,6 +17,11 @@ def download_model(url):
         os.makedirs(os.path.join(model_dir, "hub", "checkpoints"))
     filename = os.path.basename(parts.path)
     cached_file = os.path.join(model_dir, filename)
+    return cached_file
+
+
+def download_model(url):
+    cached_file = get_cache_path_by_url(url)
     if not os.path.exists(cached_file):
         sys.stderr.write('Downloading: "{}" to {}\n'.format(url, cached_file))
         hash_prefix = None
@@ -31,7 +36,11 @@ def ceil_modulo(x, mod):
 
 
 def numpy_to_bytes(image_numpy: np.ndarray, ext: str) -> bytes:
-    data = cv2.imencode(f".{ext}", image_numpy)[1]
+    data = cv2.imencode(f".{ext}", image_numpy,
+                        [
+                            int(cv2.IMWRITE_JPEG_QUALITY), 100,
+                            int(cv2.IMWRITE_PNG_COMPRESSION), 0
+                        ])[1]
     image_bytes = data.tobytes()
     return image_bytes
 
@@ -74,13 +83,24 @@ def resize_max_size(
         return np_img
 
 
-def pad_img_to_modulo(img, mod):
-    channels, height, width = img.shape
+def pad_img_to_modulo(img: np.ndarray, mod: int):
+    """
+
+    Args:
+        img: [H, W, C]
+        mod:
+
+    Returns:
+
+    """
+    if len(img.shape) == 2:
+        img = img[:, :, np.newaxis]
+    height, width = img.shape[:2]
     out_height = ceil_modulo(height, mod)
     out_width = ceil_modulo(width, mod)
     return np.pad(
         img,
-        ((0, 0), (0, out_height - height), (0, out_width - width)),
+        ((0, out_height - height), (0, out_width - width), (0, 0)),
         mode="symmetric",
     )
 
@@ -88,15 +108,13 @@ def pad_img_to_modulo(img, mod):
 def boxes_from_mask(mask: np.ndarray) -> List[np.ndarray]:
     """
     Args:
-        mask: (1, h, w)  0~1
+        mask: (h, w, 1)  0~255
 
     Returns:
 
     """
-    height, width = mask.shape[1:]
-    _, thresh = cv2.threshold(
-        (mask.transpose(1, 2, 0) * 255).astype(np.uint8), 127, 255, 0
-    )
+    height, width = mask.shape[:2]
+    _, thresh = cv2.threshold(mask, 127, 255, 0)
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     boxes = []

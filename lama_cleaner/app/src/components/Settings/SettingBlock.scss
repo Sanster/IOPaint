@@ -1,0 +1,36 @@
+.setting-block {
+  display: flex;
+  flex-direction: column;
+
+  .option-desc {
+    color: var(--text-color-gray);
+    margin-top: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 0.3rem;
+    padding: 1rem;
+
+    .sub-setting-block {
+      margin-top: 8px;
+      color: var(--text-color);
+    }
+  }
+}
+
+.setting-block-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12rem;
+}
+
+.setting-block-content-title {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.setting-block-desc {
+  font-size: 1rem;
+  margin-top: 8px;
+  color: var(--text-color-gray);
+}

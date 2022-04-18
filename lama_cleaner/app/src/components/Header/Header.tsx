@@ -6,6 +6,7 @@ import Button from '../shared/Button'
 import Shortcuts from '../Shortcuts/Shortcuts'
 import useResolution from '../../hooks/useResolution'
 import { ThemeChanger } from './ThemeChanger'
+import SettingIcon from '../Settings/SettingIcon'
 
 const Header = () => {
   const [file, setFile] = useRecoilState(fileState)
@@ -26,7 +27,11 @@ const Header = () => {
           </Button>
         </div>
         <div className="header-icons-wrapper">
-          <div style={{ visibility: file ? 'visible' : 'hidden' }}>
+          <div
+            className="header-icons"
+            style={{ visibility: file ? 'visible' : 'hidden' }}
+          >
+            <SettingIcon />
             <Shortcuts />
           </div>
           <ThemeChanger />

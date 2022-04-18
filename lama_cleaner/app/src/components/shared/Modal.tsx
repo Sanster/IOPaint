@@ -1,6 +1,6 @@
 import { XIcon } from '@heroicons/react/outline'
 import React, { ReactNode, useRef } from 'react'
-import { useClickAway, useKey } from 'react-use'
+import { useClickAway, useKey, useKeyPress, useKeyPressEvent } from 'react-use'
 import Button from './Button'
 
 export interface ModalProps {
@@ -16,11 +16,15 @@ export default function Modal(props: ModalProps) {
   const ref = useRef(null)
 
   useClickAway(ref, () => {
-    onClose?.()
+    if (show) {
+      onClose?.()
+    }
   })
 
-  useKey('Escape', onClose, {
-    event: 'keydown',
+  useKeyPressEvent('Escape', e => {
+    if (show) {
+      onClose?.()
+    }
   })
 
   return (
@@ -30,7 +34,7 @@ export default function Modal(props: ModalProps) {
     >
       <div ref={ref} className={`modal ${className}`}>
         <div className="modal-header">
-          <h3>{title}</h3>
+          <h2>{title}</h2>
           <Button icon={<XIcon />} onClick={onClose} />
         </div>
         {children}

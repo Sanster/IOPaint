@@ -17,6 +17,8 @@
     "project": "./tsconfig.json"
   },
   "rules": {
+    "jsx-a11y/click-events-have-key-events": 0,
+    "react/jsx-props-no-spreading": 0,
     "import/no-unresolved": 0,
     "react/jsx-no-bind": "off",
     "react/jsx-filename-extension": [
