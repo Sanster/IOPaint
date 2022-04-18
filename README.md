@@ -11,12 +11,15 @@ https://user-images.githubusercontent.com/3998421/153323093-b664bb68-2928-480b-b
 - [x] Zoom & Pan
 - [ ] Keep image EXIF data
 
-## Quick Start
+## Install
 
-1. Install requirements: `pip3 install -r requirements.txt`
-2. Start server: `python3 main.py`, open http://localhost:8080
+```bash
+pip install lama-cleaner
 
-Available commands for `main.py`
+lama-cleaner --device=cpu --port=8080
+```
+
+Available commands:
 
 | Name       | Description                                      | Default  |
 | ---------- | ------------------------------------------------ | -------- |
