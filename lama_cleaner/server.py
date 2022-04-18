@@ -48,15 +48,15 @@ if os.environ.get("CACHE_DIR"):
 BUILD_DIR = os.environ.get("LAMA_CLEANER_BUILD_DIR", "app/build")
 
 
-class InterceptHandler(logging.Handler):
-    def emit(self, record):
-        logger_opt = logger.opt(depth=6, exception=record.exc_info)
-        logger_opt.log(record.levelno, record.getMessage())
+class NoFlaskwebgui(logging.Filter):
+    def filter(self, record):
+        return 'GET //flaskwebgui-keep-server-alive' not in record.getMessage()
 
+
+logging.getLogger("werkzeug").addFilter(NoFlaskwebgui())
 
 app = Flask(__name__, static_folder=os.path.join(BUILD_DIR, "static"))
 app.config["JSON_AS_ASCII"] = False
-app.logger.addHandler(InterceptHandler())
 CORS(app, expose_headers=["Content-Disposition"])
 
 model: ModelManager = None
