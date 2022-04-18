@@ -18,18 +18,15 @@ https://user-images.githubusercontent.com/3998421/153323093-b664bb68-2928-480b-b
 
 Available commands for `main.py`
 
-| Name                | Description                                                                                                                                                        | Default   |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
-| --model             | lama or ldm. See details in **Model Comparison**                                                                                                                   | lama      |
-| --device            | cuda or cpu                                                                                                                                                        | cuda      |
-| --ldm-steps         | The larger the value, the better the result, but it will be more time-consuming                                                                                    | 50        |
-| --crop-trigger-size | If image size large then crop-trigger-size, crop each area from original image to do inference. Mainly for performance and memory reasons on **very** large image. | 2042,2042 |
-| --crop-margin       | Margin around bounding box of painted stroke when crop mode triggered.                                                                                             | 256       |
-| --gui               | Launch lama-cleaner as a desktop application                                                                                                                       |           |
-| --gui_size          | Set the window size for the application                                                                                                                            | 1200 900  |
-| --input             | Path to image you want to load by default                                                                                                                          | None      |
-| --port              | Port for flask web server                                                                                                                                          | 8080      |
-| --debug             | Enable debug mode for flask web server                                                                                                                             |           |
+| Name       | Description                                      | Default  |
+| ---------- | ------------------------------------------------ | -------- |
+| --model    | lama or ldm. See details in **Model Comparison** | lama     |
+| --device   | cuda or cpu                                      | cuda     |
+| --gui      | Launch lama-cleaner as a desktop application     |          |
+| --gui_size | Set the window size for the application          | 1200 900 |
+| --input    | Path to image you want to load by default        | None     |
+| --port     | Port for flask web server                        | 8080     |
+| --debug    | Enable debug mode for flask web server           |          |
 
 ## Model Comparison
 
