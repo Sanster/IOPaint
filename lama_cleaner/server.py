@@ -26,6 +26,7 @@ except:
     pass
 
 from flask import Flask, request, send_file, cli
+
 # Disable ability for Flask to display warning about using a development server in a production environment.
 # https://gist.github.com/jerblack/735b9953ba1ab6234abb43174210d356
 cli.show_server_banner = lambda *_: None
@@ -52,7 +53,7 @@ BUILD_DIR = os.environ.get("LAMA_CLEANER_BUILD_DIR", "app/build")
 
 class NoFlaskwebgui(logging.Filter):
     def filter(self, record):
-        return 'GET //flaskwebgui-keep-server-alive' not in record.getMessage()
+        return "GET //flaskwebgui-keep-server-alive" not in record.getMessage()
 
 
 logging.getLogger("werkzeug").addFilter(NoFlaskwebgui())
@@ -91,11 +92,11 @@ def process():
         size_limit = int(size_limit)
 
     config = Config(
-        ldm_steps=form['ldmSteps'],
-        hd_strategy=form['hdStrategy'],
-        hd_strategy_crop_margin=form['hdStrategyCropMargin'],
-        hd_strategy_crop_trigger_size=form['hdStrategyCropTrigerSize'],
-        hd_strategy_resize_limit=form['hdStrategyResizeLimit'],
+        ldm_steps=form["ldmSteps"],
+        hd_strategy=form["hdStrategy"],
+        hd_strategy_crop_margin=form["hdStrategyCropMargin"],
+        hd_strategy_crop_trigger_size=form["hdStrategyCropTrigerSize"],
+        hd_strategy_resize_limit=form["hdStrategyResizeLimit"],
     )
 
     logger.info(f"Origin image shape: {original_shape}")
@@ -163,7 +164,7 @@ def set_input_photo():
         return send_file(
             input_image_path,
             as_attachment=True,
-            download_name=Path(input_image_path).name,
+            attachment_filename=Path(input_image_path).name,
             mimetype=f"image/{get_image_ext(image_in_bytes)}",
         )
     else:
@@ -183,7 +184,10 @@ def main(args):
     if args.gui:
         app_width, app_height = args.gui_size
         from flaskwebgui import FlaskUI
-        ui = FlaskUI(app, width=app_width, height=app_height, host=args.host, port=args.port)
+
+        ui = FlaskUI(
+            app, width=app_width, height=app_height, host=args.host, port=args.port
+        )
         ui.run()
     else:
         app.run(host=args.host, port=args.port, debug=args.debug)
