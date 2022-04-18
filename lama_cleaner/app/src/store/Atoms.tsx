@@ -56,7 +56,27 @@ export const settingStateDefault = {
   hdStrategyCropMargin: 128,
 }
 
+const localStorageEffect =
+  (key: string) =>
+  ({ setSelf, onSet }: any) => {
+    const savedValue = localStorage.getItem(key)
+    if (savedValue != null) {
+      const storageSettings = JSON.parse(savedValue)
+      storageSettings.show = false
+      setSelf(storageSettings)
+    }
+
+    onSet((newValue: Settings, _: string, isReset: boolean) =>
+      isReset
+        ? localStorage.removeItem(key)
+        : localStorage.setItem(key, JSON.stringify(newValue))
+    )
+  }
+
+// Each atom can reference an array of these atom effect functions which are called in priority order when the atom is initialized
+// https://recoiljs.org/docs/guides/atom-effects/#local-storage-persistence
 export const settingState = atom<Settings>({
   key: 'settingsState',
   default: settingStateDefault,
+  effects: [localStorageEffect('settingsState')],
 })
