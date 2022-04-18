@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import argparse
 import io
 import logging
 import multiprocessing
@@ -26,7 +25,10 @@ try:
 except:
     pass
 
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, cli
+# Disable ability for Flask to display warning about using a development server in a production environment.
+# https://gist.github.com/jerblack/735b9953ba1ab6234abb43174210d356
+cli.show_server_banner = lambda *_: None
 from flask_cors import CORS
 
 from lama_cleaner.helper import (
