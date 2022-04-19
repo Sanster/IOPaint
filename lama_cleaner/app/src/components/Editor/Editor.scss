@@ -64,6 +64,7 @@
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(12px);
+  background-color: var(--page-bg-light);
   animation: slideUp 0.2s ease-out;
   border: 1px solid rgb(100, 100, 120, 0.4);
 
@@ -169,7 +170,6 @@
     height: 40px;
     user-select: none;
     padding: 0.2rem 0.8rem;
-
 
     &:first-of-type {
       border-top-right-radius: 0.5rem;
