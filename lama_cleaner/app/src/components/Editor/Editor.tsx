@@ -80,7 +80,8 @@ export default function Editor(props: EditorProps) {
   const [sizeLimit, setSizeLimit] = useState<number>(1080)
   const windowSize = useWindowSize()
   const viewportRef = useRef<ReactZoomPanPinchRef | undefined | null>()
-  const [centered, setCentered] = useState(false)
+  // Indicates that the image has been loaded and is centered on first load
+  const [initialCentered, setInitialCentered] = useState(false)
 
   const [isDraging, setIsDraging] = useState(false)
   const [isMultiStrokeKeyPressed, setIsMultiStrokeKeyPressed] = useState(false)
@@ -241,8 +242,12 @@ export default function Editor(props: EditorProps) {
       context.canvas.width = original.naturalWidth
       context.canvas.height = original.naturalHeight
     }
-    viewportRef.current?.centerView(s, 1)
-    setCentered(true)
+
+    if (!initialCentered) {
+      viewportRef.current?.centerView(s, 1)
+      setInitialCentered(true)
+    }
+
     draw()
   }, [
     context?.canvas,
@@ -251,6 +256,7 @@ export default function Editor(props: EditorProps) {
     original,
     isOriginalLoaded,
     windowSize,
+    initialCentered,
   ])
 
   // Zoom reset
@@ -564,7 +570,7 @@ export default function Editor(props: EditorProps) {
         <TransformComponent
           contentClass={isInpaintingLoading ? 'editor-canvas-loading' : ''}
           contentStyle={{
-            visibility: centered ? 'visible' : 'hidden',
+            visibility: initialCentered ? 'visible' : 'hidden',
           }}
         >
           <div className="editor-canvas-container">
