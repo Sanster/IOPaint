@@ -1,5 +1,8 @@
 # Lama-cleaner: Image inpainting tool powered by SOTA AI model
 
+![downloads](https://img.shields.io/pypi/dm/lama-cleaner)
+![version](https://img.shields.io/pypi/v/lama-cleaner)
+
 https://user-images.githubusercontent.com/3998421/153323093-b664bb68-2928-480b-b59b-7c1ee24a4507.mp4
 
 - [x] Support multiple model architectures
