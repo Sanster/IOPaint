@@ -1,10 +1,10 @@
 import React, { ReactNode } from 'react'
 
 interface ButtonProps {
+  disabled?: boolean
   children?: ReactNode
   className?: string
   icon?: ReactNode
-  disabled?: boolean
   onKeyDown?: () => void
   onClick?: () => void
   onDown?: (ev: PointerEvent) => void
@@ -12,7 +12,7 @@ interface ButtonProps {
   style?: React.CSSProperties
 }
 
-export default function Button(props: ButtonProps) {
+const Button: React.FC<ButtonProps> = props => {
   const {
     children,
     className,
@@ -46,7 +46,7 @@ export default function Button(props: ButtonProps) {
       className={[
         'btn-primary',
         children ? 'btn-primary-content' : '',
-        disabled ? 'btn-primary-disabled' : '',
+        disabled === true ? 'btn-primary-disabled' : '',
         className,
       ].join(' ')}
     >
@@ -55,3 +55,9 @@ export default function Button(props: ButtonProps) {
     </div>
   )
 }
+
+Button.defaultProps = {
+  disabled: false,
+}
+
+export default Button

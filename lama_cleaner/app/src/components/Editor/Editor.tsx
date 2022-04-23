@@ -94,20 +94,23 @@ export default function Editor(props: EditorProps) {
 
   const [sliderPos, setSliderPos] = useState<number>(0)
 
-  const draw = (render: HTMLImageElement, lineGroup: LineGroup) => {
-    if (!context) {
-      return
-    }
-    context.clearRect(0, 0, context.canvas.width, context.canvas.height)
-    context.drawImage(
-      render,
-      0,
-      0,
-      original.naturalWidth,
-      original.naturalHeight
-    )
-    drawLines(context, lineGroup)
-  }
+  const draw = useCallback(
+    (render: HTMLImageElement, lineGroup: LineGroup) => {
+      if (!context) {
+        return
+      }
+      context.clearRect(0, 0, context.canvas.width, context.canvas.height)
+      context.drawImage(
+        render,
+        0,
+        0,
+        original.naturalWidth,
+        original.naturalHeight
+      )
+      drawLines(context, lineGroup)
+    },
+    [context, original]
+  )
 
   const drawAllLinesOnMask = (_lineGroups: LineGroup[]) => {
     if (!context?.canvas.width || !context?.canvas.height) {
@@ -167,13 +170,16 @@ export default function Editor(props: EditorProps) {
     return renders.length !== 0
   }
 
-  const drawOnCurrentRender = (lineGroup: LineGroup) => {
-    if (renders.length === 0) {
-      draw(original, lineGroup)
-    } else {
-      draw(renders[renders.length - 1], lineGroup)
-    }
-  }
+  const drawOnCurrentRender = useCallback(
+    (lineGroup: LineGroup) => {
+      if (renders.length === 0) {
+        draw(original, lineGroup)
+      } else {
+        draw(renders[renders.length - 1], lineGroup)
+      }
+    },
+    [original, renders, draw]
+  )
 
   const clearDrawing = () => {
     setIsDraging(false)
@@ -395,7 +401,16 @@ export default function Editor(props: EditorProps) {
     drawOnCurrentRender(lineGroup)
   }
 
-  const undo = () => {
+  const undoStroke = useCallback(() => {
+    if (curLineGroup.length === 0) {
+      return
+    }
+    const newLineGroup = curLineGroup.slice(0, curLineGroup.length - 1)
+    setCurLineGroup(newLineGroup)
+    drawOnCurrentRender(newLineGroup)
+  }, [curLineGroup, drawOnCurrentRender])
+
+  const undoRender = useCallback(() => {
     if (!renders.length) {
       return
     }
@@ -410,6 +425,14 @@ export default function Editor(props: EditorProps) {
       draw(original, [])
     } else {
       draw(newRenders[newRenders.length - 1], [])
+    }
+  }, [draw, renders, lineGroups, original])
+
+  const undo = () => {
+    if (settings.runInpaintingManually && curLineGroup.length !== 0) {
+      undoStroke()
+    } else {
+      undoRender()
     }
   }
 
@@ -427,7 +450,23 @@ export default function Editor(props: EditorProps) {
     return false
   }
 
-  useKey(undoPredicate, undo)
+  useKey(undoPredicate, undo, undefined, [undoStroke, undoRender])
+
+  const disableUndo = () => {
+    if (renders.length > 0) {
+      return false
+    }
+
+    if (settings.runInpaintingManually) {
+      if (curLineGroup.length === 0) {
+        return true
+      }
+    } else if (renders.length === 0) {
+      return true
+    }
+
+    return false
+  }
 
   useKeyPressEvent(
     'Tab',
@@ -661,7 +700,7 @@ export default function Editor(props: EditorProps) {
               </svg>
             }
             onClick={undo}
-            disabled={renders.length === 0}
+            disabled={disableUndo()}
           />
           <Button
             icon={<EyeIcon />}
