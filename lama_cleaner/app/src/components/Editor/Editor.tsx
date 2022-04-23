@@ -82,6 +82,7 @@ export default function Editor(props: EditorProps) {
   const [showOriginal, setShowOriginal] = useState(false)
   const [isInpaintingLoading, setIsInpaintingLoading] = useState(false)
   const [scale, setScale] = useState<number>(1)
+  const [panned, setPanned] = useState<boolean>(false)
   const [minScale, setMinScale] = useState<number>(1.0)
   const [sizeLimit, setSizeLimit] = useState<number>(1080)
   const windowSize = useWindowSize()
@@ -286,7 +287,8 @@ export default function Editor(props: EditorProps) {
     viewport.setTransform(offsetX, offsetY, minScale, 200, 'easeOutQuad')
     viewport.state.scale = minScale
     setScale(minScale)
-  }, [viewportRef, minScale, original, windowSize])
+    setPanned(false)
+  }, [viewportRef, minScale, original, windowSize, panned])
 
   useEffect(() => {
     window.addEventListener('resize', () => {
@@ -596,6 +598,11 @@ export default function Editor(props: EditorProps) {
         doubleClick={{ disabled: true }}
         initialScale={minScale}
         minScale={minScale}
+        onPanning={ref => {
+          if (!panned) {
+            setPanned(true)
+          }
+        }}
         onZoom={ref => {
           setScale(ref.state.scale)
         }}
@@ -681,7 +688,7 @@ export default function Editor(props: EditorProps) {
         <div className="editor-toolkit-btns">
           <Button
             icon={<ArrowsExpandIcon />}
-            disabled={scale === minScale}
+            disabled={scale === minScale && panned === false}
             onClick={resetZoom}
           />
           <Button
