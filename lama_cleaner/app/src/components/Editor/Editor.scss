@@ -55,7 +55,6 @@
   // width: 100%;
   position: fixed;
   bottom: 0.5rem;
-  // border: 1px solid rgb(100, 100, 120, 0.5);
   border-radius: 3rem;
   padding: 1rem 3rem;
   display: grid;
@@ -66,7 +65,8 @@
   backdrop-filter: blur(12px);
   background-color: var(--page-bg-light);
   animation: slideUp 0.2s ease-out;
-  border: 1px solid rgb(100, 100, 120, 0.4);
+  border: var(--editor-toolkit-panel-border);
+  box-shadow: 0 0 0 1px #0000001a, 0 3px 16px #00000014, 0 2px 6px 1px #00000017;
 
   @include mobile {
     padding: 1rem 2rem;
