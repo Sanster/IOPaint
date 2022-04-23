@@ -32,7 +32,7 @@ export const shortcutsState = atom<boolean>({
 
 export interface Settings {
   show: boolean
-  saveImageBesideOrigin: boolean
+  runInpaintingManually: boolean
   model: AIModel
 
   // For LaMa
@@ -47,7 +47,7 @@ export interface Settings {
 
 export const settingStateDefault = {
   show: false,
-  saveImageBesideOrigin: false,
+  runInpaintingManually: false,
   model: AIModel.LAMA,
   ldmSteps: 50,
   hdStrategy: HDStrategy.RESIZE,

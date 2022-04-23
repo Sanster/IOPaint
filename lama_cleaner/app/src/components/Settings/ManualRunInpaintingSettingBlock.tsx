@@ -1,24 +1,24 @@
-import React, { ReactNode } from 'react'
+import React from 'react'
 import { useRecoilState } from 'recoil'
 import { settingState } from '../../store/Atoms'
 import { Switch, SwitchThumb } from '../shared/Switch'
 import SettingBlock from './SettingBlock'
 
-function SavePathSettingBlock() {
+const ManualRunInpaintingSettingBlock: React.FC = () => {
   const [setting, setSettingState] = useRecoilState(settingState)
 
   const onCheckChange = (checked: boolean) => {
     setSettingState(old => {
-      return { ...old, saveImageBesideOrigin: checked }
+      return { ...old, runInpaintingManually: checked }
     })
   }
 
   return (
     <SettingBlock
-      title="Download image beside origin image"
+      title="Run inpainting manually"
       input={
         <Switch
-          checked={setting.saveImageBesideOrigin}
+          checked={setting.runInpaintingManually}
           onCheckedChange={onCheckChange}
         >
           <SwitchThumb />
@@ -28,4 +28,4 @@ function SavePathSettingBlock() {
   )
 }
 
-export default SavePathSettingBlock
+export default ManualRunInpaintingSettingBlock

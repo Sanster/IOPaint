@@ -36,9 +36,11 @@ interface Line {
   pts: { x: number; y: number }[]
 }
 
+type LineGroup = Array<Line>
+
 function drawLines(
   ctx: CanvasRenderingContext2D,
-  lines: Line[],
+  lines: LineGroup,
   color = BRUSH_COLOR
 ) {
   ctx.strokeStyle = color
@@ -57,6 +59,11 @@ function drawLines(
   })
 }
 
+function mouseXY(ev: SyntheticEvent) {
+  const mouseEvent = ev.nativeEvent as MouseEvent
+  return { x: mouseEvent.offsetX, y: mouseEvent.offsetY }
+}
+
 export default function Editor(props: EditorProps) {
   const { file } = props
   const settings = useRecoilValue(settingState)
@@ -67,9 +74,8 @@ export default function Editor(props: EditorProps) {
   const [maskCanvas] = useState<HTMLCanvasElement>(() => {
     return document.createElement('canvas')
   })
-  const [lines, setLines] = useState<Line[]>([{ pts: [] }])
-  const [lines4Show, setLines4Show] = useState<Line[]>([{ pts: [] }])
-  const [historyLineCount, setHistoryLineCount] = useState<number[]>([])
+  const [lineGroups, setLineGroups] = useState<LineGroup[]>([])
+  const [curLineGroup, setCurLineGroup] = useState<LineGroup>([])
   const [{ x, y }, setCoords] = useState({ x: -1, y: -1 })
   const [showBrush, setShowBrush] = useState(false)
   const [isPanning, setIsPanning] = useState<boolean>(false)
@@ -88,27 +94,22 @@ export default function Editor(props: EditorProps) {
 
   const [sliderPos, setSliderPos] = useState<number>(0)
 
-  const draw = useCallback(() => {
+  const draw = (render: HTMLImageElement, lineGroup: LineGroup) => {
     if (!context) {
       return
     }
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
-    const currRender = renders[renders.length - 1]
-    if (currRender?.src) {
-      context.drawImage(
-        currRender,
-        0,
-        0,
-        original.naturalWidth,
-        original.naturalHeight
-      )
-    } else {
-      context.drawImage(original, 0, 0)
-    }
-    drawLines(context, lines4Show)
-  }, [context, lines4Show, original, renders])
+    context.drawImage(
+      render,
+      0,
+      0,
+      original.naturalWidth,
+      original.naturalHeight
+    )
+    drawLines(context, lineGroup)
+  }
 
-  const refreshCanvasMask = useCallback(() => {
+  const drawAllLinesOnMask = (_lineGroups: LineGroup[]) => {
     if (!context?.canvas.width || !context?.canvas.height) {
       throw new Error('canvas has invalid size')
     }
@@ -119,12 +120,23 @@ export default function Editor(props: EditorProps) {
       throw new Error('could not retrieve mask canvas')
     }
 
-    drawLines(ctx, lines, 'white')
-  }, [context?.canvas.height, context?.canvas.width, lines, maskCanvas])
+    _lineGroups.forEach(lineGroup => {
+      drawLines(ctx, lineGroup, 'white')
+    })
+  }
 
-  const runInpainting = useCallback(async () => {
+  const runInpainting = async () => {
+    if (!hadDrawSomething()) {
+      return
+    }
+
+    const newLineGroups = [...lineGroups, curLineGroup]
+    setLineGroups(newLineGroups)
+    setCurLineGroup([])
+    setIsDraging(false)
     setIsInpaintingLoading(true)
-    refreshCanvasMask()
+
+    drawAllLinesOnMask(newLineGroups)
     try {
       const res = await inpaint(
         file,
@@ -137,46 +149,35 @@ export default function Editor(props: EditorProps) {
       }
       const newRender = new Image()
       await loadImage(newRender, res)
-      renders.push(newRender)
-      lines.push({ pts: [] } as Line)
-      setRenders([...renders])
-      setLines([...lines])
-
-      historyLineCount.push(lines4Show.length)
-      setHistoryLineCount(historyLineCount)
-      lines4Show.length = 0
-      setLines4Show([{ pts: [] } as Line])
+      const newRenders = [...renders, newRender]
+      setRenders(newRenders)
+      draw(newRender, [])
     } catch (e: any) {
       // eslint-disable-next-line
       alert(e.message ? e.message : e.toString())
     }
     setIsInpaintingLoading(false)
-    draw()
-  }, [
-    draw,
-    file,
-    lines,
-    lines4Show,
-    maskCanvas,
-    refreshCanvasMask,
-    renders,
-    sizeLimit,
-    historyLineCount,
-    settings,
-  ])
+  }
 
   const hadDrawSomething = () => {
-    return lines4Show.length !== 0 && lines4Show[0].pts.length !== 0
+    return curLineGroup.length !== 0
   }
 
   const hadRunInpainting = () => {
     return renders.length !== 0
   }
 
+  const drawOnCurrentRender = (lineGroup: LineGroup) => {
+    if (renders.length === 0) {
+      draw(original, lineGroup)
+    } else {
+      draw(renders[renders.length - 1], lineGroup)
+    }
+  }
+
   const clearDrawing = () => {
     setIsDraging(false)
-    lines4Show.length = 0
-    setLines4Show([{ pts: [] } as Line])
+    setCurLineGroup([])
   }
 
   const handleMultiStrokeKeyDown = () => {
@@ -195,7 +196,8 @@ export default function Editor(props: EditorProps) {
     }
 
     setIsMultiStrokeKeyPressed(false)
-    if (hadDrawSomething()) {
+
+    if (!settings.runInpaintingManually) {
       runInpainting()
     }
   }
@@ -241,17 +243,22 @@ export default function Editor(props: EditorProps) {
     if (context?.canvas) {
       context.canvas.width = original.naturalWidth
       context.canvas.height = original.naturalHeight
+
+      context.drawImage(
+        original,
+        0,
+        0,
+        original.naturalWidth,
+        original.naturalHeight
+      )
     }
 
     if (!initialCentered) {
       viewportRef.current?.centerView(s, 1)
       setInitialCentered(true)
     }
-
-    draw()
   }, [
     context?.canvas,
-    draw,
     viewportRef,
     original,
     isOriginalLoaded,
@@ -312,16 +319,6 @@ export default function Editor(props: EditorProps) {
     ]
   )
 
-  const onPaint = (px: number, py: number) => {
-    const currShowLine = lines4Show[lines4Show.length - 1]
-    currShowLine.pts.push({ x: px, y: py })
-
-    const currLine = lines[lines.length - 1]
-    currLine.pts.push({ x: px, y: py })
-
-    draw()
-  }
-
   const onMouseMove = (ev: SyntheticEvent) => {
     const mouseEvent = ev.nativeEvent as MouseEvent
     setCoords({ x: mouseEvent.pageX, y: mouseEvent.pageY })
@@ -334,10 +331,13 @@ export default function Editor(props: EditorProps) {
     if (!isDraging) {
       return
     }
-    const mouseEvent = ev.nativeEvent as MouseEvent
-    const px = mouseEvent.offsetX
-    const py = mouseEvent.offsetY
-    onPaint(px, py)
+    if (curLineGroup.length === 0) {
+      return
+    }
+    const lineGroup = [...curLineGroup]
+    lineGroup[lineGroup.length - 1].pts.push(mouseXY(ev))
+    setCurLineGroup(lineGroup)
+    drawOnCurrentRender(lineGroup)
   }
 
   const onPointerUp = () => {
@@ -357,17 +357,15 @@ export default function Editor(props: EditorProps) {
     if (!isDraging) {
       return
     }
-    setIsDraging(false)
-    if (isMultiStrokeKeyPressed) {
-      lines.push({ pts: [] } as Line)
-      setLines([...lines])
 
-      lines4Show.push({ pts: [] } as Line)
-      setLines4Show([...lines4Show])
+    if (isMultiStrokeKeyPressed) {
+      setIsDraging(false)
       return
     }
 
-    if (lines4Show.length !== 0 && lines4Show[0].pts.length !== 0) {
+    if (settings.runInpaintingManually) {
+      setIsDraging(false)
+    } else {
       runInpainting()
     }
   }
@@ -387,36 +385,32 @@ export default function Editor(props: EditorProps) {
       return
     }
     setIsDraging(true)
-    const currLine4Show = lines4Show[lines4Show.length - 1]
-    currLine4Show.size = brushSize
-    const currLine = lines[lines.length - 1]
-    currLine.size = brushSize
 
-    const mouseEvent = ev.nativeEvent as MouseEvent
-    onPaint(mouseEvent.offsetX, mouseEvent.offsetY)
+    let lineGroup: LineGroup = []
+    if (isMultiStrokeKeyPressed || settings.runInpaintingManually) {
+      lineGroup = [...curLineGroup]
+    }
+    lineGroup.push({ size: brushSize, pts: [mouseXY(ev)] })
+    setCurLineGroup(lineGroup)
+    drawOnCurrentRender(lineGroup)
   }
 
   const undo = () => {
     if (!renders.length) {
       return
     }
-    if (!historyLineCount.length) {
-      return
+
+    const groups = lineGroups.slice(0, lineGroups.length - 1)
+    setLineGroups(groups)
+    setCurLineGroup([])
+    setIsDraging(false)
+    const newRenders = renders.slice(0, renders.length - 1)
+    setRenders(newRenders)
+    if (newRenders.length === 0) {
+      draw(original, [])
+    } else {
+      draw(newRenders[newRenders.length - 1], [])
     }
-
-    const l = lines
-    const count = historyLineCount[historyLineCount.length - 1]
-    for (let i = 0; i <= count; i += 1) {
-      l.pop()
-    }
-
-    setLines([...l, { pts: [] }])
-    historyLineCount.pop()
-    setHistoryLineCount(historyLineCount)
-
-    const r = renders
-    r.pop()
-    setRenders([...r])
   }
 
   // Handle Cmd+Z
@@ -688,16 +682,37 @@ export default function Editor(props: EditorProps) {
               }, 350)
             }}
             disabled={renders.length === 0}
-          >
-            {undefined}
-          </Button>
+          />
           <Button
             icon={<DownloadIcon />}
             disabled={!renders.length}
             onClick={download}
-          >
-            {undefined}
-          </Button>
+          />
+
+          {settings.runInpaintingManually && (
+            <Button
+              icon={
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M2 13L1.34921 12.2407C1.16773 12.3963 1.04797 12.6117 1.01163 12.8479L2 13ZM22.5 4L23.49 4.14142C23.5309 3.85444 23.4454 3.5638 23.2555 3.3448C23.0655 3.1258 22.7899 3 22.5 3V4ZM12.5 4V3C12.2613 3 12.0305 3.08539 11.8492 3.24074L12.5 4ZM1 19.5L0.0116283 19.3479C-0.0327373 19.6363 0.051055 19.9297 0.241035 20.1511C0.431014 20.3726 0.708231 20.5 1 20.5V19.5ZM11.5 19.5V20.5C11.7373 20.5 11.9668 20.4156 12.1476 20.2619L11.5 19.5ZM21.5 11L22.1476 11.7619C22.3337 11.6038 22.4554 11.3831 22.49 11.1414L21.5 11ZM2 14H12.5V12H2V14ZM13.169 13.7433L23.169 4.74329L21.831 3.25671L11.831 12.2567L13.169 13.7433ZM22.5 3H12.5V5H22.5V3ZM11.8492 3.24074L1.34921 12.2407L2.65079 13.7593L13.1508 4.75926L11.8492 3.24074ZM1.01163 12.8479L0.0116283 19.3479L1.98837 19.6521L2.98837 13.1521L1.01163 12.8479ZM1 20.5H11.5V18.5H1V20.5ZM12.4884 19.6521L13.4884 13.1521L11.5116 12.8479L10.5116 19.3479L12.4884 19.6521ZM21.51 3.85858L20.51 10.8586L22.49 11.1414L23.49 4.14142L21.51 3.85858ZM20.8524 10.2381L10.8524 18.7381L12.1476 20.2619L22.1476 11.7619L20.8524 10.2381Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              }
+              disabled={!hadDrawSomething() || isInpaintingLoading}
+              onClick={() => {
+                if (!isInpaintingLoading && hadDrawSomething()) {
+                  runInpainting()
+                }
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
