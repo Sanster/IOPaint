@@ -182,11 +182,6 @@ export default function Editor(props: EditorProps) {
     [original, renders, draw]
   )
 
-  const clearDrawing = () => {
-    setIsDraging(false)
-    setCurLineGroup([])
-  }
-
   const handleMultiStrokeKeyDown = () => {
     if (isInpaintingLoading) {
       return
@@ -306,7 +301,9 @@ export default function Editor(props: EditorProps) {
       return
     }
     if (isDraging || isMultiStrokeKeyPressed) {
-      clearDrawing()
+      setIsDraging(false)
+      setCurLineGroup([])
+      drawOnCurrentRender([])
     } else {
       resetZoom()
     }
@@ -323,7 +320,7 @@ export default function Editor(props: EditorProps) {
       isInpaintingLoading,
       isMultiStrokeKeyPressed,
       resetZoom,
-      clearDrawing,
+      drawOnCurrentRender,
     ]
   )
 
