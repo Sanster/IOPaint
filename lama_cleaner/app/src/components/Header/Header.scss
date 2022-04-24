@@ -10,6 +10,7 @@ header {
   z-index: 20;
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgb(100, 100, 120, 0.2);
+  background-color: var(--page-bg-light);
 }
 
 .shortcuts {
