@@ -245,14 +245,7 @@ export default function Editor(props: EditorProps) {
     if (context?.canvas) {
       context.canvas.width = original.naturalWidth
       context.canvas.height = original.naturalHeight
-
-      context.drawImage(
-        original,
-        0,
-        0,
-        original.naturalWidth,
-        original.naturalHeight
-      )
+      drawOnCurrentRender([])
     }
 
     if (!initialCentered) {
@@ -283,7 +276,7 @@ export default function Editor(props: EditorProps) {
     viewport.state.scale = minScale
     setScale(minScale)
     setPanned(false)
-  }, [viewportRef, minScale, original, windowSize, panned])
+  }, [viewportRef, minScale, original, windowSize])
 
   useEffect(() => {
     window.addEventListener('resize', () => {
@@ -495,9 +488,10 @@ export default function Editor(props: EditorProps) {
 
   function download() {
     const name = file.name.replace(/(\.[\w\d_-]+)$/i, '_cleanup$1')
-    const currRender = renders[renders.length - 1]
-    downloadImage(currRender.currentSrc, name)
+    const curRender = renders[renders.length - 1]
+    downloadImage(curRender.currentSrc, name)
   }
+
   const onSizeLimitChange = (_sizeLimit: number) => {
     setSizeLimit(_sizeLimit)
   }
