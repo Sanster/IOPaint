@@ -52,7 +52,7 @@ Blogs about diffusion models:
 
 Only needed if you plan to modify the frontend and recompile yourself.
 
-### Fronted
+### Frontend
 
 Frontend code are modified from [cleanup.pictures](https://github.com/initml/cleanup.pictures), You can experience their
 great online services [here](https://cleanup.pictures/).
