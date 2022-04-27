@@ -187,3 +187,8 @@ export function isRightClick(ev: SyntheticEvent) {
   const mouseEvent = ev.nativeEvent as MouseEvent
   return mouseEvent.button === 2
 }
+
+export function isMidClick(ev: SyntheticEvent) {
+  const mouseEvent = ev.nativeEvent as MouseEvent
+  return mouseEvent.button === 1
+}

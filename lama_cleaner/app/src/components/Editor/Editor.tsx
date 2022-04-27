@@ -21,7 +21,13 @@ import inpaint from '../../adapters/inpainting'
 import Button from '../shared/Button'
 import Slider from './Slider'
 import SizeSelector from './SizeSelector'
-import { downloadImage, isRightClick, loadImage, useImage } from '../../utils'
+import {
+  downloadImage,
+  isMidClick,
+  isRightClick,
+  loadImage,
+  useImage,
+} from '../../utils'
 import { settingState } from '../../store/Atoms'
 
 const TOOLBAR_SIZE = 200
@@ -341,7 +347,11 @@ export default function Editor(props: EditorProps) {
     drawOnCurrentRender(lineGroup)
   }
 
-  const onPointerUp = () => {
+  const onPointerUp = (ev: SyntheticEvent) => {
+    if (isMidClick(ev)) {
+      setIsPanning(false)
+    }
+
     if (isPanning) {
       return
     }
@@ -389,6 +399,12 @@ export default function Editor(props: EditorProps) {
     if (isRightClick(ev)) {
       return
     }
+
+    if (isMidClick(ev)) {
+      setIsPanning(true)
+      return
+    }
+
     setIsDraging(true)
 
     let lineGroup: LineGroup = []
