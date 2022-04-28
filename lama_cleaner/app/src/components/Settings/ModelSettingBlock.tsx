@@ -12,6 +12,7 @@ export enum AIModel {
 
 function ModelSettingBlock() {
   const [setting, setSettingState] = useRecoilState(settingState)
+  console.log(setting.model)
 
   const onModelChange = (value: AIModel) => {
     setSettingState(old => {

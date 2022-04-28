@@ -268,6 +268,7 @@ export default function Editor(props: EditorProps) {
     isOriginalLoaded,
     windowSize,
     initialCentered,
+    drawOnCurrentRender,
   ])
 
   // Zoom reset
