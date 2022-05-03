@@ -1,6 +1,6 @@
 import { XIcon } from '@heroicons/react/outline'
 import React, { ReactNode, useRef } from 'react'
-import { useClickAway, useKey, useKeyPress, useKeyPressEvent } from 'react-use'
+import { useClickAway, useKeyPressEvent } from 'react-use'
 import Button from './Button'
 
 export interface ModalProps {
@@ -21,7 +21,7 @@ export default function Modal(props: ModalProps) {
     }
   })
 
-  useKeyPressEvent('Escape', e => {
+  useKeyPressEvent('Escape', () => {
     if (show) {
       onClose?.()
     }

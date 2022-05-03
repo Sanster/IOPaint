@@ -4,7 +4,7 @@ import Editor from './Editor/Editor'
 import ShortcutsModal from './Shortcuts/ShortcutsModal'
 import SettingModal from './Settings/SettingsModal'
 import Toast from './shared/Toast'
-import { Settings, settingState, toastState } from '../store/Atoms'
+import { settingState, toastState } from '../store/Atoms'
 import {
   currentModel,
   modelDownloaded,
@@ -79,7 +79,7 @@ const Workspace = ({ file }: WorkspaceProps) => {
           return { ...old, model: model as AIModel }
         })
       })
-  }, [])
+  }, [setSettingState])
 
   return (
     <>

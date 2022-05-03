@@ -1,4 +1,4 @@
-import React, { MutableRefObject, useCallback, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useClickAway, useKeyPressEvent } from 'react-use'
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/outline'
 

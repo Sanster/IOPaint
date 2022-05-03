@@ -34,23 +34,26 @@ export default function ShortcutsModal() {
       show={shortcutsShow}
     >
       <div className="shortcut-options">
-        <ShortCut content="Enable multi-stroke mask drawing">
+        <ShortCut content="Enable Multi-Stroke Mask Drawing">
           <p>Hold Cmd/Ctrl</p>
         </ShortCut>
-        <ShortCut content="Undo inpainting">
+        <ShortCut content="Undo Inpainting">
           <p>Cmd/Ctrl + Z</p>
         </ShortCut>
         <ShortCut content="Pan">
           <p>Space & Drag</p>
         </ShortCut>
-        <ShortCut content="View original image">
+        <ShortCut content="View Original Image">
           <p>Hold Tab</p>
         </ShortCut>
-        <ShortCut content="Reset zoom/pan">
+        <ShortCut content="Reset Zoom/Pan">
           <p>Esc</p>
         </ShortCut>
-        <ShortCut content="Cancel mask drawing">
+        <ShortCut content="Cancel Mask Drawing">
           <p>Esc</p>
+        </ShortCut>
+        <ShortCut content="Run Inpainting Manually">
+          <p>Shift + R</p>
         </ShortCut>
         <ShortCut content="Decrease Brush Size">
           <p>[</p>

@@ -259,6 +259,7 @@ export default function Editor(props: EditorProps) {
     isOriginalLoaded,
     windowSize,
     initialCentered,
+    drawOnCurrentRender,
   ])
 
   // Zoom reset
@@ -529,6 +530,13 @@ export default function Editor(props: EditorProps) {
     setBrushSize(currentBrushSize => {
       return currentBrushSize + 10
     })
+  })
+
+  // Manual Inpainting Hotkey
+  useKeyPressEvent('R', () => {
+    if (settings.runInpaintingManually && hadDrawSomething()) {
+      runInpainting()
+    }
   })
 
   // Toggle clean/zoom tool on spacebar.

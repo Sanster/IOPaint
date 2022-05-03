@@ -127,14 +127,13 @@
   @include accented-display(var(white));
   user-select: none;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   cursor: pointer;
   outline: none;
   gap: 8px;
   width: 128px;
-
-  border: 1px solid var(--editor-size-border-color);
+  background-color: var(--editor-options-bg);
   color: var(--options-text-color);
 
   svg {
@@ -149,14 +148,14 @@
   width: 128px;
   padding: 0;
   display: grid;
-  justify-self: center;
+  justify-self: start;
+  width: max-content;
   position: fixed;
   bottom: 4rem;
   cursor: pointer;
 
   color: var(--options-text-color);
-  background-color: var(--page-bg);
-  border: 1px solid var(--editor-size-border-color);
+  background-color: var(--editor-options-bg);
 
   border-radius: 0.6rem;
 
