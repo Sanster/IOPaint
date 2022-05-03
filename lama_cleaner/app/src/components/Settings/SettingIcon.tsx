@@ -14,6 +14,8 @@ const SettingIcon = () => {
     <div>
       <Button
         onClick={onClick}
+        toolTip="Settings"
+        tooltipPosition="bottom"
         style={{ border: 0 }}
         icon={
           <svg

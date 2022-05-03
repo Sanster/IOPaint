@@ -1,0 +1,28 @@
+$tooltip-translate: 100%;
+$tooltip-margin: 1.5rem;
+
+.info-tooltip {    
+    &:hover:before {
+        content: attr(data-tooltip);
+        position: absolute;
+        background-color: var(--tooltip-bg);
+        color: var(--tooltip-text-color);
+        padding: 0.5rem;
+        border-radius: 0.3rem;
+        z-index: 2;
+    }
+}
+
+.info-tooltip-top {
+    &:hover:before {
+        transform: translateY(calc($tooltip-translate * -1));
+        margin-bottom: $tooltip-margin;        
+    }
+}
+
+.info-tooltip-bottom {
+    &:hover:before {
+        transform: translateY($tooltip-translate);
+        margin-top: $tooltip-margin;
+    }
+}
