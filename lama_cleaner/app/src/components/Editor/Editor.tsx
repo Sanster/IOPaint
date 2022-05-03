@@ -555,6 +555,13 @@ export default function Editor(props: EditorProps) {
     })
   })
 
+  // Manual Inpainting Hotkey
+  useKeyPressEvent('R', () => {
+    if (settings.runInpaintingManually && hadDrawSomething()) {
+      runInpainting()
+    }
+  })
+
   // Toggle clean/zoom tool on spacebar.
   useKeyPressEvent(
     ' ',
