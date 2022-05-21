@@ -5,6 +5,8 @@ interface ButtonProps {
   children?: ReactNode
   className?: string
   icon?: ReactNode
+  toolTip?: string
+  tooltipPosition?: string
   onKeyDown?: () => void
   onClick?: () => void
   onDown?: (ev: PointerEvent) => void
@@ -18,6 +20,8 @@ const Button: React.FC<ButtonProps> = props => {
     className,
     disabled,
     icon,
+    toolTip,
+    tooltipPosition,
     onKeyDown,
     onClick,
     onDown,
@@ -33,6 +37,7 @@ const Button: React.FC<ButtonProps> = props => {
   return (
     <div
       role="button"
+      data-tooltip={toolTip}
       style={style}
       onKeyDown={onKeyDown}
       onClick={blurOnClick}
@@ -47,6 +52,8 @@ const Button: React.FC<ButtonProps> = props => {
         'btn-primary',
         children ? 'btn-primary-content' : '',
         disabled === true ? 'btn-primary-disabled' : '',
+        toolTip ? 'info-tooltip' : '',
+        tooltipPosition ? `info-tooltip-${tooltipPosition}` : '',
         className,
       ].join(' ')}
     >

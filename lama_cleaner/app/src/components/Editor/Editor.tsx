@@ -731,11 +731,15 @@ export default function Editor(props: EditorProps) {
         />
         <div className="editor-toolkit-btns">
           <Button
+            toolTip="Show Full"
+            tooltipPosition="top"
             icon={<ArrowsExpandIcon />}
             disabled={scale === minScale && panned === false}
             onClick={resetZoom}
           />
           <Button
+            toolTip="Undo"
+            tooltipPosition="top"
             icon={
               <svg
                 width="19"
@@ -754,6 +758,8 @@ export default function Editor(props: EditorProps) {
             disabled={disableUndo()}
           />
           <Button
+            toolTip="Show Original"
+            tooltipPosition="top"
             icon={<EyeIcon />}
             className={showOriginal ? 'eyeicon-active' : ''}
             onDown={ev => {
@@ -774,6 +780,8 @@ export default function Editor(props: EditorProps) {
             disabled={renders.length === 0}
           />
           <Button
+            toolTip="Save Image"
+            tooltipPosition="top"
             icon={<DownloadIcon />}
             disabled={!renders.length}
             onClick={download}
@@ -781,6 +789,8 @@ export default function Editor(props: EditorProps) {
 
           {settings.runInpaintingManually && (
             <Button
+              toolTip="Run Inpainting"
+              tooltipPosition="top"
               icon={
                 <svg
                   width="24"
