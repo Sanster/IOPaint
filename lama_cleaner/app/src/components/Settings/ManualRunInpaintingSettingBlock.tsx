@@ -15,7 +15,7 @@ const ManualRunInpaintingSettingBlock: React.FC = () => {
 
   return (
     <SettingBlock
-      title="Run inpainting manually"
+      title="Manual Inpainting Mode"
       input={
         <Switch
           checked={setting.runInpaintingManually}

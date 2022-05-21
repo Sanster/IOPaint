@@ -12,7 +12,6 @@ export enum AIModel {
 
 function ModelSettingBlock() {
   const [setting, setSettingState] = useRecoilState(settingState)
-  console.log(setting.model)
 
   const onModelChange = (value: AIModel) => {
     setSettingState(old => {
@@ -91,6 +90,7 @@ function ModelSettingBlock() {
       title="Inpainting Model"
       input={
         <Selector
+          width={80}
           value={setting.model as string}
           options={Object.values(AIModel)}
           onChange={val => onModelChange(val as AIModel)}

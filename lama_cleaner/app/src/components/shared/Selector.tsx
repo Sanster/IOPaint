@@ -5,7 +5,6 @@ import {
   ChevronUpIcon,
 } from '@heroicons/react/outline'
 import * as Select from '@radix-ui/react-select'
-import { relative } from 'path'
 
 type SelectorChevronDirection = 'up' | 'down'
 
