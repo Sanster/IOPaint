@@ -731,7 +731,7 @@ export default function Editor(props: EditorProps) {
         />
         <div className="editor-toolkit-btns">
           <Button
-            toolTip="Show Full"
+            toolTip="Reset Zoom & Pan"
             tooltipPosition="top"
             icon={<ArrowsExpandIcon />}
             disabled={scale === minScale && panned === false}
