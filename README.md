@@ -8,11 +8,11 @@ https://user-images.githubusercontent.com/3998421/153323093-b664bb68-2928-480b-b
 - [x] Support multiple model architectures
   1. [LaMa](https://github.com/saic-mdal/lama)
   1. [LDM](https://github.com/CompVis/latent-diffusion)
+- [x] Support CPU & GPU
 - [x] High resolution support
 - [x] Run as a desktop APP
 - [x] Multi stroke support. Press and hold the `cmd/ctrl` key to enable multi stroke mode.
 - [x] Zoom & Pan
-- [ ] Keep image EXIF data
 
 ## Install
 
