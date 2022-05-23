@@ -1,26 +1,14 @@
-@use '../../styles/Mixins' as *;
-
-.selector {
-  position: relative;
-  display: flex;
-  flex-direction: column;
+.select-trigger {
+  all: unset;
+  display: inline-flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.selector-main {
-  @include accented-display(var(white));
-  width: 100%;
-  user-select: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  outline: none;
+  border-radius: 0.5rem;
+  height: 38px;
   gap: 8px;
-  padding: 0.2rem 0.8rem;
-
+  padding: 0 0.8rem;
   border: 1px solid var(--border-color);
+  background-color: var(--page-bg);
   color: var(--options-text-color);
 
   svg {
@@ -28,47 +16,52 @@
     height: 1rem;
     margin-top: 0.25rem;
   }
+
+  &:hover {
+    border-color: var(--yellow-accent);
+  }
+
+  // &:focus-visible {
+  //   border-color: var(--yellow-accent);
+  // }
 }
 
-.selector-options {
-  @include accented-display(var(--btn-primary-bg));
-  width: 100%;
-  padding: 0;
-  display: grid;
-  justify-self: center;
-  position: absolute;
-  cursor: pointer;
-  top: 3rem;
-
-  color: var(--options-text-color);
+.select-content {
+  overflow: hidden;
   background-color: var(--page-bg);
+  border-radius: 0.5rem;
+}
+
+.select-viewport {
   border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 5px;
+}
 
-  border-radius: 0.6rem;
+.select-item {
+  all: unset;
+  background-color: var(--page-bg);
+  color: var(--options-text-color);
+  display: flex;
+  align-items: center;
+  border-radius: 0.5rem;
 
-  @include mobile {
-    bottom: 11.5rem;
+  padding: 6px 6px 6px 25px;
+  position: relative;
+  user-select: none;
+
+  &:focus {
+    color: var(--btn-text-hover-color);
+    background-color: var(--yellow-accent);
   }
+}
 
-  .selector-option {
-    display: flex;
-    align-items: center;
-    user-select: none;
-    padding: 0.5rem 0.8rem;
-
-    &:first-of-type {
-      border-top-right-radius: 0.5rem;
-      border-top-left-radius: 0.5rem;
-    }
-
-    &:last-of-type {
-      border-bottom-left-radius: 0.5rem;
-      border-bottom-right-radius: 0.5rem;
-    }
-
-    &:hover {
-      background-color: var(--yellow-accent);
-      color: var(--btn-text-hover-color);
-    }
-  }
+.select-item-indicator {
+  position: absolute;
+  left: 0;
+  width: 25px;
+  padding-right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

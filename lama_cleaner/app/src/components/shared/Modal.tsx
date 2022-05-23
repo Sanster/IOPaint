@@ -1,6 +1,6 @@
 import { XIcon } from '@heroicons/react/outline'
-import React, { ReactNode, useRef } from 'react'
-import { useClickAway, useKey, useKeyPress, useKeyPressEvent } from 'react-use'
+import React, { ReactNode } from 'react'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
 import Button from './Button'
 
 export interface ModalProps {
@@ -11,34 +11,35 @@ export interface ModalProps {
   className?: string
 }
 
-export default function Modal(props: ModalProps) {
+const Modal = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Root>,
+  ModalProps
+>((props, forwardedRef) => {
   const { show, children, onClose, className, title } = props
-  const ref = useRef(null)
 
-  useClickAway(ref, () => {
-    if (show) {
+  const onOpenChange = (open: boolean) => {
+    if (!open) {
       onClose?.()
     }
-  })
-
-  useKeyPressEvent('Escape', e => {
-    if (show) {
-      onClose?.()
-    }
-  })
+  }
 
   return (
-    <div
-      className="modal-mask"
-      style={{ visibility: show === true ? 'visible' : 'hidden' }}
-    >
-      <div ref={ref} className={`modal ${className}`}>
-        <div className="modal-header">
-          <h2>{title}</h2>
-          <Button icon={<XIcon />} onClick={onClose} />
-        </div>
-        {children}
-      </div>
-    </div>
+    <DialogPrimitive.Root open={show} onOpenChange={onOpenChange}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="modal-mask" />
+        <DialogPrimitive.Content
+          ref={forwardedRef}
+          className={`modal ${className}`}
+        >
+          <div className="modal-header">
+            <DialogPrimitive.Title>{title}</DialogPrimitive.Title>
+            <Button icon={<XIcon />} onClick={onClose} />
+          </div>
+          {children}
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
-}
+})
+
+export default Modal

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { SyntheticEvent, useEffect, useState } from 'react'
 
 export function dataURItoBlob(dataURI: string) {
   const mime = dataURI.split(',')[0].split(':')[1].split(';')[0]
@@ -181,4 +181,14 @@ export function keepGUIAlive() {
       setInterval(keepAliveServer, intervalRequest)
     })
   }
+}
+
+export function isRightClick(ev: SyntheticEvent) {
+  const mouseEvent = ev.nativeEvent as MouseEvent
+  return mouseEvent.button === 2
+}
+
+export function isMidClick(ev: SyntheticEvent) {
+  const mouseEvent = ev.nativeEvent as MouseEvent
+  return mouseEvent.button === 1
 }

@@ -1,86 +1,84 @@
-import React, { MutableRefObject, useCallback, useRef, useState } from 'react'
-import { useClickAway, useKeyPressEvent } from 'react-use'
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/outline'
+import React, { useRef } from 'react'
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+} from '@heroicons/react/outline'
+import * as Select from '@radix-ui/react-select'
 
 type SelectorChevronDirection = 'up' | 'down'
 
-type SelectorProps = {
-  minWidth?: number
-  chevronDirection?: SelectorChevronDirection
+interface Props {
+  width?: number
   value: string
   options: string[]
+  chevronDirection?: SelectorChevronDirection
+  autoFocusAfterClose?: boolean
   onChange: (value: string) => void
 }
 
-const selectorDefaultProps = {
-  minWidth: 128,
-  chevronDirection: 'down',
-}
+const Selector = (props: Props) => {
+  const {
+    width,
+    value,
+    chevronDirection,
+    options,
+    autoFocusAfterClose,
+    onChange,
+  } = props
 
-function Selector(props: SelectorProps) {
-  const { minWidth, chevronDirection, value, options, onChange } = props
-  const [showOptions, setShowOptions] = useState<boolean>(false)
-  const selectorRef = useRef<HTMLDivElement | null>(null)
+  const contentRef = useRef<HTMLButtonElement>(null)
 
-  const showOptionsHandler = () => {
-    // console.log(selectorRef.current?.focus)
-    // selectorRef?.current?.focus()
-    setShowOptions(currentShowOptionsState => !currentShowOptionsState)
-  }
-
-  useClickAway(selectorRef, () => {
-    setShowOptions(false)
-  })
-
-  // TODO: how to prevent Modal close?
-  // useKeyPressEvent('Escape', (e: KeyboardEvent) => {
-  //   if (showOptions === true) {
-  //     console.log(`selector ${e}`)
-  //     e.preventDefault()
-  //     e.stopPropagation()
-  //     setShowOptions(false)
-  //   }
-  // })
-
-  const onOptionClick = (e: any, newIndex: number) => {
-    const currentRes = e.target.textContent.split('x')
-    onChange(currentRes[0])
-    setShowOptions(false)
+  const onOpenChange = (open: boolean) => {
+    if (!open) {
+      if (!autoFocusAfterClose) {
+        // 如果使用 Select.Content 的 onCloseAutoFocus 来取消 focus（防止空格继续打开这个 select）
+        // 会导致其它快捷键失效，原因未知
+        window.setTimeout(() => {
+          contentRef?.current?.blur()
+        }, 100)
+      }
+    }
   }
 
   return (
-    <div className="selector" ref={selectorRef} style={{ minWidth }}>
-      <div
-        className="selector-main"
-        role="button"
-        onClick={showOptionsHandler}
-        aria-hidden="true"
+    <Select.Root
+      value={value}
+      onValueChange={onChange}
+      onOpenChange={onOpenChange}
+    >
+      <Select.Trigger
+        className="select-trigger"
+        style={{ width }}
+        ref={contentRef}
       >
-        <p>{value}</p>
-        <div className="selector-icon">
+        <Select.Value />
+        <Select.Icon>
           {chevronDirection === 'up' ? <ChevronUpIcon /> : <ChevronDownIcon />}
-        </div>
-      </div>
+        </Select.Icon>
+      </Select.Trigger>
 
-      {showOptions && (
-        <div className="selector-options">
-          {options.map((val, _index) => (
-            <div
-              className="selector-option"
-              role="button"
-              tabIndex={0}
-              key={val}
-              onClick={e => onOptionClick(e, _index)}
-              aria-hidden="true"
-            >
-              {val}
-            </div>
+      <Select.Content className="select-content">
+        <Select.Viewport className="select-viewport">
+          {options.map(val => (
+            <Select.Item value={val} className="select-item" key={val}>
+              <Select.ItemText>{val}</Select.ItemText>
+              <Select.ItemIndicator className="select-item-indicator">
+                <CheckIcon />
+              </Select.ItemIndicator>
+            </Select.Item>
           ))}
-        </div>
-      )}
-    </div>
+        </Select.Viewport>
+      </Select.Content>
+    </Select.Root>
   )
 }
 
+const selectorDefaultProps = {
+  chevronDirection: 'down',
+  autoFocusAfterClose: true,
+}
+
 Selector.defaultProps = selectorDefaultProps
+
 export default Selector

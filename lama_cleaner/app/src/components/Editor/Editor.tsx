@@ -21,7 +21,13 @@ import inpaint from '../../adapters/inpainting'
 import Button from '../shared/Button'
 import Slider from './Slider'
 import SizeSelector from './SizeSelector'
-import { downloadImage, loadImage, useImage } from '../../utils'
+import {
+  downloadImage,
+  isMidClick,
+  isRightClick,
+  loadImage,
+  useImage,
+} from '../../utils'
 import { settingState } from '../../store/Atoms'
 
 const TOOLBAR_SIZE = 200
@@ -78,6 +84,7 @@ export default function Editor(props: EditorProps) {
   const [curLineGroup, setCurLineGroup] = useState<LineGroup>([])
   const [{ x, y }, setCoords] = useState({ x: -1, y: -1 })
   const [showBrush, setShowBrush] = useState(false)
+  const [showRefBrush, setShowRefBrush] = useState(false)
   const [isPanning, setIsPanning] = useState<boolean>(false)
   const [showOriginal, setShowOriginal] = useState(false)
   const [isInpaintingLoading, setIsInpaintingLoading] = useState(false)
@@ -86,6 +93,8 @@ export default function Editor(props: EditorProps) {
   const [minScale, setMinScale] = useState<number>(1.0)
   const [sizeLimit, setSizeLimit] = useState<number>(1080)
   const windowSize = useWindowSize()
+  const windowCenterX = windowSize.width / 2
+  const windowCenterY = windowSize.height / 2
   const viewportRef = useRef<ReactZoomPanPinchRef | undefined | null>()
   // Indicates that the image has been loaded and is centered on first load
   const [initialCentered, setInitialCentered] = useState(false)
@@ -259,6 +268,7 @@ export default function Editor(props: EditorProps) {
     isOriginalLoaded,
     windowSize,
     initialCentered,
+    drawOnCurrentRender,
   ])
 
   // Zoom reset
@@ -338,7 +348,11 @@ export default function Editor(props: EditorProps) {
     drawOnCurrentRender(lineGroup)
   }
 
-  const onPointerUp = () => {
+  const onPointerUp = (ev: SyntheticEvent) => {
+    if (isMidClick(ev)) {
+      setIsPanning(false)
+    }
+
     if (isPanning) {
       return
     }
@@ -382,6 +396,16 @@ export default function Editor(props: EditorProps) {
     if (isInpaintingLoading) {
       return
     }
+
+    if (isRightClick(ev)) {
+      return
+    }
+
+    if (isMidClick(ev)) {
+      setIsPanning(true)
+      return
+    }
+
     setIsDraging(true)
 
     let lineGroup: LineGroup = []
@@ -531,6 +555,13 @@ export default function Editor(props: EditorProps) {
     })
   })
 
+  // Manual Inpainting Hotkey
+  useKeyPressEvent('R', () => {
+    if (settings.runInpaintingManually && hadDrawSomething()) {
+      runInpainting()
+    }
+  })
+
   // Toggle clean/zoom tool on spacebar.
   useKeyPressEvent(
     ' ',
@@ -556,14 +587,25 @@ export default function Editor(props: EditorProps) {
     return s!
   }
 
-  const getBrushStyle = () => {
+  const getBrushStyle = (_x: number, _y: number) => {
     const curScale = getCurScale()
     return {
       width: `${brushSize * curScale}px`,
       height: `${brushSize * curScale}px`,
-      left: `${x}px`,
-      top: `${y}px`,
+      left: `${_x}px`,
+      top: `${_y}px`,
       transform: 'translate(-50%, -50%)',
+    }
+  }
+
+  const handleSliderChange = (value: number) => {
+    setBrushSize(value)
+
+    if (!showRefBrush) {
+      setShowRefBrush(true)
+      window.setTimeout(() => {
+        setShowRefBrush(false)
+      }, 10000)
     }
   }
 
@@ -615,7 +657,10 @@ export default function Editor(props: EditorProps) {
               onContextMenu={e => {
                 e.preventDefault()
               }}
-              onMouseOver={() => toggleShowBrush(true)}
+              onMouseOver={() => {
+                toggleShowBrush(true)
+                setShowRefBrush(false)
+              }}
               onFocus={() => toggleShowBrush(true)}
               onMouseLeave={() => toggleShowBrush(false)}
               onMouseDown={onMouseDown}
@@ -660,7 +705,14 @@ export default function Editor(props: EditorProps) {
       </TransformWrapper>
 
       {showBrush && !isInpaintingLoading && !isPanning && (
-        <div className="brush-shape" style={getBrushStyle()} />
+        <div className="brush-shape" style={getBrushStyle(x, y)} />
+      )}
+
+      {showRefBrush && (
+        <div
+          className="brush-shape"
+          style={getBrushStyle(windowCenterX, windowCenterY)}
+        />
       )}
 
       <div className="editor-toolkit-panel">
@@ -674,15 +726,20 @@ export default function Editor(props: EditorProps) {
           min={10}
           max={150}
           value={brushSize}
-          onChange={setBrushSize}
+          onChange={handleSliderChange}
+          onClick={() => setShowRefBrush(false)}
         />
         <div className="editor-toolkit-btns">
           <Button
+            toolTip="Reset Zoom & Pan"
+            tooltipPosition="top"
             icon={<ArrowsExpandIcon />}
             disabled={scale === minScale && panned === false}
             onClick={resetZoom}
           />
           <Button
+            toolTip="Undo"
+            tooltipPosition="top"
             icon={
               <svg
                 width="19"
@@ -701,6 +758,8 @@ export default function Editor(props: EditorProps) {
             disabled={disableUndo()}
           />
           <Button
+            toolTip="Show Original"
+            tooltipPosition="top"
             icon={<EyeIcon />}
             className={showOriginal ? 'eyeicon-active' : ''}
             onDown={ev => {
@@ -721,6 +780,8 @@ export default function Editor(props: EditorProps) {
             disabled={renders.length === 0}
           />
           <Button
+            toolTip="Save Image"
+            tooltipPosition="top"
             icon={<DownloadIcon />}
             disabled={!renders.length}
             onClick={download}
@@ -728,6 +789,8 @@ export default function Editor(props: EditorProps) {
 
           {settings.runInpaintingManually && (
             <Button
+              toolTip="Run Inpainting"
+              tooltipPosition="top"
               icon={
                 <svg
                   width="24"

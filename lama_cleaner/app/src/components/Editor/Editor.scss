@@ -52,7 +52,6 @@
 }
 
 .editor-toolkit-panel {
-  // width: 100%;
   position: fixed;
   bottom: 0.5rem;
   border-radius: 3rem;
@@ -109,81 +108,4 @@
   background-color: #ffcc00bb;
   border: 1px solid var(--yellow-accent);
   pointer-events: none;
-}
-
-.editor-size-selector-options {
-  position: fixed;
-  display: grid;
-}
-
-.editor-size-selector {
-  grid-area: toolkit-size-selector;
-  display: grid;
-  grid-template-columns: repeat(2, max-content);
-  align-items: center;
-}
-
-.editor-size-selector-main {
-  @include accented-display(var(white));
-  user-select: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  outline: none;
-  gap: 8px;
-  width: 128px;
-
-  border: 1px solid var(--editor-size-border-color);
-  color: var(--options-text-color);
-
-  svg {
-    width: 1rem;
-    height: 1rem;
-    margin-top: 0.25rem;
-  }
-}
-
-.editor-size-options {
-  @include accented-display(var(--btn-primary-bg));
-  width: 128px;
-  padding: 0;
-  display: grid;
-  justify-self: center;
-  position: fixed;
-  bottom: 4rem;
-  cursor: pointer;
-
-  color: var(--options-text-color);
-  background-color: var(--page-bg);
-  border: 1px solid var(--editor-size-border-color);
-
-  border-radius: 0.6rem;
-
-  @include mobile {
-    bottom: 11.5rem;
-  }
-
-  .editor-size-option {
-    display: flex;
-    align-items: center;
-    height: 40px;
-    user-select: none;
-    padding: 0.2rem 0.8rem;
-
-    &:first-of-type {
-      border-top-right-radius: 0.5rem;
-      border-top-left-radius: 0.5rem;
-    }
-
-    &:last-of-type {
-      border-bottom-left-radius: 0.5rem;
-      border-bottom-right-radius: 0.5rem;
-    }
-
-    &:hover {
-      background-color: var(--yellow-accent);
-      color: var(--btn-text-hover-color);
-    }
-  }
 }

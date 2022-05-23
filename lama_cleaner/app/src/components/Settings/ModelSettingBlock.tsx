@@ -90,6 +90,7 @@ function ModelSettingBlock() {
       title="Inpainting Model"
       input={
         <Selector
+          width={80}
           value={setting.model as string}
           options={Object.values(AIModel)}
           onChange={val => onModelChange(val as AIModel)}

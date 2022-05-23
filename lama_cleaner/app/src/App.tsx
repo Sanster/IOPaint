@@ -29,8 +29,12 @@ function App() {
     setTheme(newTheme)
   })
 
+  useEffect(() => {
+    document.body.setAttribute('data-theme', theme)
+  }, [theme])
+
   return (
-    <div className="lama-cleaner" data-theme={theme}>
+    <div className="lama-cleaner">
       <Header />
       {file ? <Workspace file={file} /> : <LandingPage />}
     </div>

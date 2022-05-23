@@ -26,15 +26,15 @@ const Header = () => {
             {resolution === 'desktop' ? 'Start New' : undefined}
           </Button>
         </div>
+
         <div className="header-icons-wrapper">
-          <div
-            className="header-icons"
-            style={{ visibility: file ? 'visible' : 'hidden' }}
-          >
-            <SettingIcon />
-            <Shortcuts />
-          </div>
           <ThemeChanger />
+          {file && (
+            <div className="header-icons">
+              <Shortcuts />
+              <SettingIcon />
+            </div>
+          )}
         </div>
       </header>
     )

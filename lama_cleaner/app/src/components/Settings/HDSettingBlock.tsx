@@ -119,6 +119,7 @@ function HDSettingBlock() {
       title="High Resolution Strategy"
       input={
         <Selector
+          width={80}
           value={setting.hdStrategy as string}
           options={Object.values(HDStrategy)}
           onChange={val => onStrategyChange(val as HDStrategy)}

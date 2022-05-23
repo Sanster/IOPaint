@@ -34,11 +34,10 @@
 
   .shortcut-key {
     justify-self: end;
-    font-family: 'WorkSans-Bold';
     border: 1px solid var(--modal-hotkey-border-color);
-    padding: 0.4rem 1rem;
+    padding: 0.4rem 0.4rem;
     width: max-content;
-    border-radius: 0.4rem;
+    border-radius: 0.2rem;
 
     @include mobile {
       padding: 0.2rem 0.4rem;
@@ -48,7 +47,6 @@
   .shortcut-description {
     justify-self: start;
     text-align: left;
-    width: 18rem;
 
     @include mobile {
       text-align: left;
