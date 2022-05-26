@@ -2,6 +2,8 @@
 
 ![downloads](https://img.shields.io/pypi/dm/lama-cleaner)
 ![version](https://img.shields.io/pypi/v/lama-cleaner)
+<a href="https://colab.research.google.com/drive/1e3ZkAJxvkK3uzaTGu91N9TvI_Mahs0Wb?usp=sharing" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/></a>
+
 
 https://user-images.githubusercontent.com/3998421/153323093-b664bb68-2928-480b-b59b-7c1ee24a4507.mp4
 
