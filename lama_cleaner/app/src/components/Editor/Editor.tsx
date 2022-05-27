@@ -248,9 +248,6 @@ export default function Editor(props: EditorProps) {
     setMinScale(s)
     setScale(s)
 
-    const imageSizeLimit = Math.max(original.width, original.height)
-    setSizeLimit(imageSizeLimit)
-
     if (context?.canvas) {
       context.canvas.width = original.naturalWidth
       context.canvas.height = original.naturalHeight
@@ -260,6 +257,8 @@ export default function Editor(props: EditorProps) {
     if (!initialCentered) {
       viewportRef.current?.centerView(s, 1)
       setInitialCentered(true)
+      const imageSizeLimit = Math.max(original.width, original.height)
+      setSizeLimit(imageSizeLimit)
     }
   }, [
     context?.canvas,
