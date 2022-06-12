@@ -49,8 +49,8 @@ Select the inpainting model to use, and set the configs corresponding to the mod
 LaMa model has no configs that can be specified at runtime. 
 
 LDM model has two configs to control the quality of final result:
-1. steps: You can get better result with large steps, but it will be more time-consuming
-2. sampler: ddim or [plms](https://arxiv.org/abs/2202.09778). In general plms can get better results with fewer steps
+1. Steps: You can get better result with large steps, but it will be more time-consuming
+2. Sampler: ddim or [plms](https://arxiv.org/abs/2202.09778). In general plms can get better results with fewer steps
 
 
 ### High Resolution Strategy
