@@ -15,7 +15,7 @@ import {
   TransformComponent,
   TransformWrapper,
 } from 'react-zoom-pan-pinch'
-import { useRecoilValue } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import { useWindowSize, useKey, useKeyPressEvent } from 'react-use'
 import inpaint from '../../adapters/inpainting'
 import Button from '../shared/Button'
@@ -28,7 +28,7 @@ import {
   loadImage,
   useImage,
 } from '../../utils'
-import { settingState } from '../../store/Atoms'
+import { settingState, toastState } from '../../store/Atoms'
 
 const TOOLBAR_SIZE = 200
 const BRUSH_COLOR = '#ffcc00bb'
@@ -73,6 +73,7 @@ function mouseXY(ev: SyntheticEvent) {
 export default function Editor(props: EditorProps) {
   const { file } = props
   const settings = useRecoilValue(settingState)
+  const [toastVal, setToastState] = useRecoilState(toastState)
   const [brushSize, setBrushSize] = useState(40)
   const [original, isOriginalLoaded] = useImage(file)
   const [renders, setRenders] = useState<HTMLImageElement[]>([])
@@ -144,12 +145,11 @@ export default function Editor(props: EditorProps) {
     }
 
     const newLineGroups = [...lineGroups, curLineGroup]
-    setLineGroups(newLineGroups)
     setCurLineGroup([])
     setIsDraging(false)
     setIsInpaintingLoading(true)
-
     drawAllLinesOnMask(newLineGroups)
+
     try {
       const res = await inpaint(
         file,
@@ -165,9 +165,16 @@ export default function Editor(props: EditorProps) {
       const newRenders = [...renders, newRender]
       setRenders(newRenders)
       draw(newRender, [])
+      // Only append new LineGroup after inpainting success
+      setLineGroups(newLineGroups)
     } catch (e: any) {
-      // eslint-disable-next-line
-      alert(e.message ? e.message : e.toString())
+      setToastState({
+        open: true,
+        desc: e.message ? e.message : e.toString(),
+        state: 'error',
+        duration: 2000,
+      })
+      drawOnCurrentRender([])
     }
     setIsInpaintingLoading(false)
   }

@@ -34,7 +34,11 @@ export default async function inpaint(
     method: 'POST',
     body: fd,
   }).then(async r => {
-    return r.blob()
+    console.log(r)
+    if (r.ok) {
+      return r.blob()
+    }
+    throw new Error('Something went wrong on server side.')
   })
 
   return URL.createObjectURL(res)
