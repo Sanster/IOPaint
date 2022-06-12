@@ -1,5 +1,5 @@
 import { atom } from 'recoil'
-import { HDStrategy } from '../components/Settings/HDSettingBlock'
+import { HDStrategy, LDMSampler } from '../components/Settings/HDSettingBlock'
 import { AIModel } from '../components/Settings/ModelSettingBlock'
 import { ToastState } from '../components/shared/Toast'
 
@@ -43,6 +43,7 @@ export interface Settings {
 
   // For LDM
   ldmSteps: number
+  ldmSampler: LDMSampler
 }
 
 export const settingStateDefault = {
@@ -50,6 +51,7 @@ export const settingStateDefault = {
   runInpaintingManually: false,
   model: AIModel.LAMA,
   ldmSteps: 50,
+  ldmSampler: LDMSampler.plms,
   hdStrategy: HDStrategy.RESIZE,
   hdStrategyResizeLimit: 2048,
   hdStrategyCropTrigerSize: 2048,

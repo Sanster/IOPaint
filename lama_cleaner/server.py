@@ -93,6 +93,7 @@ def process():
 
     config = Config(
         ldm_steps=form["ldmSteps"],
+        ldm_sampler=form["ldmSampler"],
         hd_strategy=form["hdStrategy"],
         hd_strategy_crop_margin=form["hdStrategyCropMargin"],
         hd_strategy_crop_trigger_size=form["hdStrategyCropTrigerSize"],

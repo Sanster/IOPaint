@@ -11,6 +11,11 @@ export enum HDStrategy {
   CROP = 'Crop',
 }
 
+export enum LDMSampler {
+  ddim = 'ddim',
+  plms = 'plms',
+}
+
 function HDSettingBlock() {
   const [setting, setSettingState] = useRecoilState(settingState)
 

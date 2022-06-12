@@ -36,10 +36,40 @@ Available commands:
 | --port     | Port for flask web server                        | 8080     |
 | --debug    | Enable debug mode for flask web server           |          |
 
+## Settings
+
+You can change the configs of inpainting process in the settings interface of the web page.
+
+<img src="./assets/settings.png" width="400px">
+
+###  Inpainting Model
+
+Select the inpainting model to use, and set the configs corresponding to the model.
+
+LaMa model has no configs that can be specified at runtime. 
+
+LDM model has two configs to control the quality of final result:
+1. Steps: You can get better result with large steps, but it will be more time-consuming
+2. Sampler: ddim or [plms](https://arxiv.org/abs/2202.09778). In general plms can get better results with fewer steps
+
+
+### High Resolution Strategy
+
+There are three strategies for handling high-resolution images.
+
+- **Original**: Use the original resolution of the picture, suitable for picture size below 2K.
+- **Resize**: Resize the longer side of the image to a specific size(keep ratio), then do inpainting on the resized image. 
+The inpainting result will be pasted back on the original image to make sure other part of image not loss quality.
+- **Crop**: Crop masking area from the original image to do inpainting, and paste the result back.
+Mainly for performance and memory reasons on high resolution image. This strategy may give better results for ldm model.
+
+
 ## Model Comparison
 
-Diffusion model(ldm) is **MUCH MORE** slower than GANs(lama)(1080x720 image takes 8s on 3090), but it's possible to get better
-result, see below example:
+| Model | Pron                                                                                                                                    | Corn                                                                                           |
+|-------|-----------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
+| LaMa  | - Perform will on high resolution image(~2k)<br/> - Faster than diffusion model                                                         |                                                                                                |
+| LDM   | - It's possible to get better and more detail result, see example below<br/> - The balance of time and quality can be achieved by steps | - Slower than GAN model<br/> - Need more GPU memory<br/> - Not good for high resolution images |
 
 | Original Image                                                                                                                            | LaMa                                                                                                                                                   | LDM                                                                                                                                                   |
 | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
