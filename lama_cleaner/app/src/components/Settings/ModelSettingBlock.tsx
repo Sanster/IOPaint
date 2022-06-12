@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react'
 import { useRecoilState } from 'recoil'
 import { settingState } from '../../store/Atoms'
 import Selector from '../shared/Selector'
+import { LDMSampler } from './HDSettingBlock'
 import NumberInputSetting from './NumberInputSetting'
 import SettingBlock from './SettingBlock'
 
@@ -16,6 +17,12 @@ function ModelSettingBlock() {
   const onModelChange = (value: AIModel) => {
     setSettingState(old => {
       return { ...old, model: value }
+    })
+  }
+
+  const onLDMSamplerChange = (value: LDMSampler) => {
+    setSettingState(old => {
+      return { ...old, ldmSampler: value }
     })
   }
 
@@ -64,6 +71,19 @@ function ModelSettingBlock() {
               return { ...old, ldmSteps: val }
             })
           }}
+        />
+
+        <SettingBlock
+          className="sub-setting-block"
+          title="Sampler"
+          input={
+            <Selector
+              width={80}
+              value={setting.ldmSampler as string}
+              options={Object.values(LDMSampler)}
+              onChange={val => onLDMSamplerChange(val as LDMSampler)}
+            />
+          }
         />
       </div>
     )

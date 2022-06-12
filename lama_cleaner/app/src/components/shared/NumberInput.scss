@@ -2,8 +2,9 @@
   all: unset;
   flex: 1 0 auto;
   border-radius: 0.5rem;
-  padding: 0.4rem 0.8rem;
+  padding: 0 0.8rem;
   outline: 1px solid var(--border-color);
+  height: 36px;
 
   &:focus-visible {
     outline: 1px solid var(--yellow-accent);
