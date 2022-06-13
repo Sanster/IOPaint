@@ -26,6 +26,7 @@ import {
   isMidClick,
   isRightClick,
   loadImage,
+  srcToFile,
   useImage,
 } from '../../utils'
 import { settingState, toastState } from '../../store/Atoms'
@@ -150,9 +151,16 @@ export default function Editor(props: EditorProps) {
     setIsInpaintingLoading(true)
     drawAllLinesOnMask(newLineGroups)
 
+    let targetFile = file
+    if (settings.graduallyInpainting === true && renders.length > 0) {
+      console.info('gradually inpainting on last result')
+      const lastRender = renders[renders.length - 1]
+      targetFile = await srcToFile(lastRender.currentSrc, file.name, file.type)
+    }
+
     try {
       const res = await inpaint(
-        file,
+        targetFile,
         maskCanvas.toDataURL(),
         settings,
         sizeLimit.toString()

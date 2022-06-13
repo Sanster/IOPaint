@@ -10,7 +10,7 @@
   --border-color: rgb(100, 100, 120);
   --border-color-light: rgba(100, 100, 120, 0.5);
   --tooltip-bg: rgb(230, 230, 234);
-  --tooltip-text-color: rgb(0, 0,0);
+  --tooltip-text-color: rgb(0, 0, 0);
 
   --error-color: rgb(239, 68, 68);
   --success-color: rgb(16, 185, 129);
@@ -44,4 +44,7 @@
   --switch-root-background-color: rgb(223, 225, 228);
   --switch-thumb-color: var(--page-bg);
   --switch-thumb-checked-color: var(--page-bg);
+
+  // tooltip
+  --tooltip-bg: var(--page-bg);
 }

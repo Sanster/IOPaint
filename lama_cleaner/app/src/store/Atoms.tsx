@@ -32,6 +32,7 @@ export const shortcutsState = atom<boolean>({
 
 export interface Settings {
   show: boolean
+  graduallyInpainting: boolean
   runInpaintingManually: boolean
   model: AIModel
 
@@ -48,6 +49,7 @@ export interface Settings {
 
 export const settingStateDefault = {
   show: false,
+  graduallyInpainting: false,
   runInpaintingManually: false,
   model: AIModel.LAMA,
   ldmSteps: 50,

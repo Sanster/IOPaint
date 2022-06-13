@@ -9,6 +9,7 @@
     "@radix-ui/react-select": "0.1.2-rc.27",
     "@radix-ui/react-switch": "^0.1.5",
     "@radix-ui/react-toast": "^0.1.1",
+    "@radix-ui/react-tooltip": "^0.1.7",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
