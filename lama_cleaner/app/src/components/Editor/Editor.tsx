@@ -287,20 +287,30 @@ export default function Editor(props: EditorProps) {
 
   // Zoom reset
   const resetZoom = useCallback(() => {
-    if (!minScale || !original || !windowSize) {
+    if (!minScale) {
       return
     }
     const viewport = viewportRef.current
     if (!viewport) {
-      throw new Error('no viewport')
+      return
     }
     const offsetX = (windowSize.width - original.width * minScale) / 2
     const offsetY = (windowSize.height - original.height * minScale) / 2
-    viewport.setTransform(offsetX, offsetY, minScale, 200, 'easeOutQuad')
+    viewport.setTransform(offsetX, offsetY, minScale, 0, 'easeOutQuad')
     viewport.state.scale = minScale
+
     setScale(minScale)
     setPanned(false)
-  }, [viewportRef, minScale, original, windowSize])
+  }, [viewportRef, windowSize, original.width, windowSize.height, minScale])
+
+  useEffect(() => {
+    setLineGroups([])
+    setCurLineGroup([])
+    setRenders([])
+    resetZoom()
+    const imageSizeLimit = Math.max(original.width, original.height)
+    setSizeLimit(imageSizeLimit)
+  }, [resetZoom, file, original])
 
   useEffect(() => {
     window.addEventListener('resize', () => {

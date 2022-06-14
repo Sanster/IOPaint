@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Selector from '../shared/Selector'
 
 const sizes = ['720', '1080', '2000', 'Original']
@@ -13,6 +13,10 @@ export default function SizeSelector(props: SizeSelectorProps) {
   const { originalHeight, originalWidth, onChange } = props
   const [activeSize, setActiveSize] = useState<string>('Original')
   const longSide: number = Math.max(originalWidth, originalHeight)
+
+  useEffect(() => {
+    setActiveSize('Original')
+  }, [originalHeight, originalWidth])
 
   const getSizeShowName = useCallback(
     (size: string) => {
