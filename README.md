@@ -1,6 +1,7 @@
 # Lama-cleaner: Image inpainting tool powered by SOTA AI model
 
-![downloads](https://img.shields.io/pypi/dm/lama-cleaner)
+[![Downloads](https://pepy.tech/badge/lama-cleaner)](https://pepy.tech/project/lama-cleaner)
+[![Downloads](https://pepy.tech/badge/lama-cleaner/month)](https://pepy.tech/project/lama-cleaner)
 ![version](https://img.shields.io/pypi/v/lama-cleaner)
 <a href="https://colab.research.google.com/drive/1e3ZkAJxvkK3uzaTGu91N9TvI_Mahs0Wb?usp=sharing" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/></a>
 
