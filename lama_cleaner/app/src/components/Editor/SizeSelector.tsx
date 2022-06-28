@@ -14,10 +14,6 @@ export default function SizeSelector(props: SizeSelectorProps) {
   const [activeSize, setActiveSize] = useState<string>('Original')
   const longSide: number = Math.max(originalWidth, originalHeight)
 
-  useEffect(() => {
-    setActiveSize('Original')
-  }, [originalHeight, originalWidth])
-
   const getSizeShowName = useCallback(
     (size: string) => {
       if (size === 'Original') {

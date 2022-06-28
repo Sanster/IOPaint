@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useKeyPressEvent } from 'react-use'
 import { useRecoilState } from 'recoil'
+import { nanoid } from 'nanoid'
 import useInputImage from './hooks/useInputImage'
 import LandingPage from './components/LandingPage/LandingPage'
 import { themeState } from './components/Header/ThemeChanger'
@@ -33,10 +34,18 @@ function App() {
     document.body.setAttribute('data-theme', theme)
   }, [theme])
 
+  const getWorkspaceKey = useCallback(() => {
+    return nanoid()
+  }, [file])
+
   return (
     <div className="lama-cleaner">
       <Header />
-      {file ? <Workspace file={file} /> : <LandingPage />}
+      {file ? (
+        <Workspace file={file} key={getWorkspaceKey()} />
+      ) : (
+        <LandingPage />
+      )}
     </div>
   )
 }
