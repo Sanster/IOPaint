@@ -67,7 +67,7 @@ const localStorageEffect =
     if (savedValue != null) {
       const storageSettings = JSON.parse(savedValue)
       storageSettings.show = false
-      setSelf(storageSettings)
+      setSelf({ ...settingStateDefault, ...storageSettings })
     }
 
     onSet((newValue: Settings, _: string, isReset: boolean) =>
