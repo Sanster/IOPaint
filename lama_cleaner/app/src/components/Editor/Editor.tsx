@@ -129,7 +129,7 @@ export default function Editor(props: EditorProps) {
     [context, original]
   )
 
-  const drawAllLinesOnMask = (_lineGroups: LineGroup[]) => {
+  const drawLinesOnMask = (_lineGroups: LineGroup[]) => {
     if (!context?.canvas.width || !context?.canvas.height) {
       throw new Error('canvas has invalid size')
     }
@@ -154,7 +154,11 @@ export default function Editor(props: EditorProps) {
     setCurLineGroup([])
     setIsDraging(false)
     setIsInpaintingLoading(true)
-    drawAllLinesOnMask(newLineGroups)
+    if (settings.graduallyInpainting) {
+      drawLinesOnMask([curLineGroup])
+    } else {
+      drawLinesOnMask(newLineGroups)
+    }
 
     let targetFile = file
     if (settings.graduallyInpainting === true && renders.length > 0) {

@@ -49,7 +49,7 @@ export interface Settings {
 
 export const settingStateDefault = {
   show: false,
-  graduallyInpainting: false,
+  graduallyInpainting: true,
   runInpaintingManually: false,
   model: AIModel.LAMA,
   ldmSteps: 50,
