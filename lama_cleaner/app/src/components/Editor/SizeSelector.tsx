@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Selector from '../shared/Selector'
 
 const sizes = ['720', '1080', '2000', 'Original']

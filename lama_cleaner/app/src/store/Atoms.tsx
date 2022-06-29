@@ -32,6 +32,7 @@ export const shortcutsState = atom<boolean>({
 
 export interface Settings {
   show: boolean
+  graduallyInpainting: boolean
   runInpaintingManually: boolean
   model: AIModel
 
@@ -48,6 +49,7 @@ export interface Settings {
 
 export const settingStateDefault = {
   show: false,
+  graduallyInpainting: true,
   runInpaintingManually: false,
   model: AIModel.LAMA,
   ldmSteps: 50,
@@ -65,7 +67,7 @@ const localStorageEffect =
     if (savedValue != null) {
       const storageSettings = JSON.parse(savedValue)
       storageSettings.show = false
-      setSelf(storageSettings)
+      setSelf({ ...settingStateDefault, ...storageSettings })
     }
 
     onSet((newValue: Settings, _: string, isReset: boolean) =>

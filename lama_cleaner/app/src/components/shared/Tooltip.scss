@@ -31,3 +31,40 @@ $tooltip-margin: 1.5rem;
     margin-top: $tooltip-margin;
   }
 }
+
+// radix-ui
+.tooltip-trigger {
+  all: unset;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tooltip-content {
+  color: var(--tooltip-text-color);
+  background-color: var(--tooltip-bg);
+  padding: 10px 15px;
+  border-radius: 4px;
+  box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
+    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation-duration: 400ms;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    animation-fill-mode: forwards;
+    will-change: transform, opacity;
+
+    &[data-state='delayed-open'] {
+      &[data-side='top'] {
+        animation-name: slideDownAndFade;
+      }
+      &[data-side='bottom'] {
+        animation-name: slideUpAndFade;
+      }
+    }
+  }
+}
+
+.tooltip-arrow {
+  fill: var(--tooltip-bg);
+}

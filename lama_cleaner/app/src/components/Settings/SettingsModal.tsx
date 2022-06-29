@@ -6,6 +6,7 @@ import Modal from '../shared/Modal'
 import ManualRunInpaintingSettingBlock from './ManualRunInpaintingSettingBlock'
 import HDSettingBlock from './HDSettingBlock'
 import ModelSettingBlock from './ModelSettingBlock'
+import GraduallyInpaintingSettingBlock from './GraduallyInpaintingSettingBlock'
 
 interface SettingModalProps {
   onClose: () => void
@@ -29,6 +30,7 @@ export default function SettingModal(props: SettingModalProps) {
       show={setting.show}
     >
       <ManualRunInpaintingSettingBlock />
+      <GraduallyInpaintingSettingBlock />
       <ModelSettingBlock />
       <HDSettingBlock />
     </Modal>

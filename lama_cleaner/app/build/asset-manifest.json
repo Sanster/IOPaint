@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/static/css/main.bdd774f1.chunk.css",
-    "main.js": "/static/js/main.9f4ed6dc.chunk.js",
+    "main.css": "/static/css/main.4c6c667e.chunk.css",
+    "main.js": "/static/js/main.6b34bb53.chunk.js",
     "runtime-main.js": "/static/js/runtime-main.5e86ac81.js",
-    "static/js/2.1b1d3019.chunk.js": "/static/js/2.1b1d3019.chunk.js",
+    "static/js/2.918f0adb.chunk.js": "/static/js/2.918f0adb.chunk.js",
     "index.html": "/index.html",
-    "static/js/2.1b1d3019.chunk.js.LICENSE.txt": "/static/js/2.1b1d3019.chunk.js.LICENSE.txt",
+    "static/js/2.918f0adb.chunk.js.LICENSE.txt": "/static/js/2.918f0adb.chunk.js.LICENSE.txt",
     "static/media/_index.scss": "/static/media/WorkSans-SemiBold.1e98db4e.ttf"
   },
   "entrypoints": [
     "static/js/runtime-main.5e86ac81.js",
-    "static/js/2.1b1d3019.chunk.js",
-    "static/css/main.bdd774f1.chunk.css",
-    "static/js/main.9f4ed6dc.chunk.js"
+    "static/js/2.918f0adb.chunk.js",
+    "static/css/main.4c6c667e.chunk.css",
+    "static/js/main.6b34bb53.chunk.js"
   ]
 }

@@ -26,6 +26,7 @@ import {
   isMidClick,
   isRightClick,
   loadImage,
+  srcToFile,
   useImage,
 } from '../../utils'
 import { settingState, toastState } from '../../store/Atoms'
@@ -105,6 +106,11 @@ export default function Editor(props: EditorProps) {
 
   const [sliderPos, setSliderPos] = useState<number>(0)
 
+  // redo 相关
+  const [redoRenders, setRedoRenders] = useState<HTMLImageElement[]>([])
+  const [redoCurLines, setRedoCurLines] = useState<Line[]>([])
+  const [redoLineGroups, setRedoLineGroups] = useState<LineGroup[]>([])
+
   const draw = useCallback(
     (render: HTMLImageElement, lineGroup: LineGroup) => {
       if (!context) {
@@ -123,7 +129,7 @@ export default function Editor(props: EditorProps) {
     [context, original]
   )
 
-  const drawAllLinesOnMask = (_lineGroups: LineGroup[]) => {
+  const drawLinesOnMask = (_lineGroups: LineGroup[]) => {
     if (!context?.canvas.width || !context?.canvas.height) {
       throw new Error('canvas has invalid size')
     }
@@ -148,11 +154,22 @@ export default function Editor(props: EditorProps) {
     setCurLineGroup([])
     setIsDraging(false)
     setIsInpaintingLoading(true)
-    drawAllLinesOnMask(newLineGroups)
+    if (settings.graduallyInpainting) {
+      drawLinesOnMask([curLineGroup])
+    } else {
+      drawLinesOnMask(newLineGroups)
+    }
+
+    let targetFile = file
+    if (settings.graduallyInpainting === true && renders.length > 0) {
+      console.info('gradually inpainting on last result')
+      const lastRender = renders[renders.length - 1]
+      targetFile = await srcToFile(lastRender.currentSrc, file.name, file.type)
+    }
 
     try {
       const res = await inpaint(
-        file,
+        targetFile,
         maskCanvas.toDataURL(),
         settings,
         sizeLimit.toString()
@@ -167,6 +184,9 @@ export default function Editor(props: EditorProps) {
       draw(newRender, [])
       // Only append new LineGroup after inpainting success
       setLineGroups(newLineGroups)
+
+      // clear redo stack
+      resetRedoState()
     } catch (e: any) {
       setToastState({
         open: true,
@@ -284,15 +304,29 @@ export default function Editor(props: EditorProps) {
     }
     const viewport = viewportRef.current
     if (!viewport) {
-      throw new Error('no viewport')
+      return
     }
     const offsetX = (windowSize.width - original.width * minScale) / 2
     const offsetY = (windowSize.height - original.height * minScale) / 2
     viewport.setTransform(offsetX, offsetY, minScale, 200, 'easeOutQuad')
     viewport.state.scale = minScale
+
     setScale(minScale)
     setPanned(false)
-  }, [viewportRef, minScale, original, windowSize])
+  }, [
+    viewportRef,
+    windowSize,
+    original,
+    original.width,
+    windowSize.height,
+    minScale,
+  ])
+
+  const resetRedoState = () => {
+    setRedoCurLines([])
+    setRedoLineGroups([])
+    setRedoRenders([])
+  }
 
   useEffect(() => {
     window.addEventListener('resize', () => {
@@ -427,28 +461,43 @@ export default function Editor(props: EditorProps) {
     if (curLineGroup.length === 0) {
       return
     }
-    const newLineGroup = curLineGroup.slice(0, curLineGroup.length - 1)
+
+    const lastLine = curLineGroup.pop()!
+    const newRedoCurLines = [...redoCurLines, lastLine]
+    setRedoCurLines(newRedoCurLines)
+
+    const newLineGroup = [...curLineGroup]
     setCurLineGroup(newLineGroup)
     drawOnCurrentRender(newLineGroup)
-  }, [curLineGroup, drawOnCurrentRender])
+  }, [curLineGroup, redoCurLines, drawOnCurrentRender])
 
   const undoRender = useCallback(() => {
     if (!renders.length) {
       return
     }
 
-    const groups = lineGroups.slice(0, lineGroups.length - 1)
-    setLineGroups(groups)
+    // save line Group
+    const lastLineGroup = lineGroups.pop()!
+    setRedoLineGroups([...redoLineGroups, lastLineGroup])
+    // If render is undo, clear strokes
+    setRedoCurLines([])
+
+    setLineGroups([...lineGroups])
     setCurLineGroup([])
     setIsDraging(false)
-    const newRenders = renders.slice(0, renders.length - 1)
+
+    // save render
+    const lastRender = renders.pop()!
+    setRedoRenders([...redoRenders, lastRender])
+
+    const newRenders = [...renders]
     setRenders(newRenders)
     if (newRenders.length === 0) {
       draw(original, [])
     } else {
       draw(newRenders[newRenders.length - 1], [])
     }
-  }, [draw, renders, lineGroups, original])
+  }, [draw, renders, redoRenders, redoLineGroups, lineGroups, original])
 
   const undo = () => {
     if (settings.runInpaintingManually && curLineGroup.length !== 0) {
@@ -460,13 +509,15 @@ export default function Editor(props: EditorProps) {
 
   // Handle Cmd+Z
   const undoPredicate = (event: KeyboardEvent) => {
-    const isCmdZ = (event.metaKey || event.ctrlKey) && event.key === 'z'
+    const isCmdZ =
+      (event.metaKey || event.ctrlKey) && !event.shiftKey && event.key === 'z'
     // Handle tab switch
     if (event.key === 'Tab') {
       event.preventDefault()
     }
     if (isCmdZ) {
       event.preventDefault()
+      console.log('undo')
       return true
     }
     return false
@@ -475,6 +526,9 @@ export default function Editor(props: EditorProps) {
   useKey(undoPredicate, undo, undefined, [undoStroke, undoRender])
 
   const disableUndo = () => {
+    if (isInpaintingLoading) {
+      return true
+    }
     if (renders.length > 0) {
       return false
     }
@@ -484,6 +538,80 @@ export default function Editor(props: EditorProps) {
         return true
       }
     } else if (renders.length === 0) {
+      return true
+    }
+
+    return false
+  }
+
+  const redoStroke = useCallback(() => {
+    if (redoCurLines.length === 0) {
+      return
+    }
+    const line = redoCurLines.pop()!
+    setRedoCurLines([...redoCurLines])
+
+    const newLineGroup = [...curLineGroup, line]
+    setCurLineGroup(newLineGroup)
+    drawOnCurrentRender(newLineGroup)
+  }, [curLineGroup, redoCurLines, drawOnCurrentRender])
+
+  const redoRender = useCallback(() => {
+    if (redoRenders.length === 0) {
+      return
+    }
+    const lineGroup = redoLineGroups.pop()!
+    setRedoLineGroups([...redoLineGroups])
+
+    setLineGroups([...lineGroups, lineGroup])
+    setCurLineGroup([])
+    setIsDraging(false)
+
+    const render = redoRenders.pop()!
+    const newRenders = [...renders, render]
+    setRenders(newRenders)
+    draw(newRenders[newRenders.length - 1], [])
+  }, [draw, renders, redoRenders, redoLineGroups, lineGroups, original])
+
+  const redo = () => {
+    if (settings.runInpaintingManually && redoCurLines.length !== 0) {
+      redoStroke()
+    } else {
+      redoRender()
+    }
+  }
+
+  // Handle Cmd+shift+Z
+  const redoPredicate = (event: KeyboardEvent) => {
+    const isCmdZ =
+      (event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'z'
+    // Handle tab switch
+    if (event.key === 'Tab') {
+      event.preventDefault()
+    }
+    if (isCmdZ) {
+      event.preventDefault()
+      console.log('redo')
+      return true
+    }
+    return false
+  }
+
+  useKey(redoPredicate, redo, undefined, [redoStroke, redoRender])
+
+  const disableRedo = () => {
+    if (isInpaintingLoading) {
+      return true
+    }
+    if (redoRenders.length > 0) {
+      return false
+    }
+
+    if (settings.runInpaintingManually) {
+      if (redoCurLines.length === 0) {
+        return true
+      }
+    } else if (redoRenders.length === 0) {
       return true
     }
 
@@ -762,6 +890,27 @@ export default function Editor(props: EditorProps) {
             }
             onClick={undo}
             disabled={disableUndo()}
+          />
+          <Button
+            toolTip="Redo"
+            tooltipPosition="top"
+            icon={
+              <svg
+                width="19"
+                height="9"
+                viewBox="0 0 19 9"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                transform="scale(-1,1)"
+              >
+                <path
+                  d="M2 1C2 0.447715 1.55228 0 1 0C0.447715 0 0 0.447715 0 1H2ZM1 8H0V9H1V8ZM8 9C8.55228 9 9 8.55229 9 8C9 7.44771 8.55228 7 8 7V9ZM16.5963 7.42809C16.8327 7.92721 17.429 8.14016 17.9281 7.90374C18.4272 7.66731 18.6402 7.07103 18.4037 6.57191L16.5963 7.42809ZM16.9468 5.83205L17.8505 5.40396L16.9468 5.83205ZM0 1V8H2V1H0ZM1 9H8V7H1V9ZM1.66896 8.74329L6.66896 4.24329L5.33104 2.75671L0.331035 7.25671L1.66896 8.74329ZM16.043 6.26014L16.5963 7.42809L18.4037 6.57191L17.8505 5.40396L16.043 6.26014ZM6.65079 4.25926C9.67554 1.66661 14.3376 2.65979 16.043 6.26014L17.8505 5.40396C15.5805 0.61182 9.37523 -0.710131 5.34921 2.74074L6.65079 4.25926Z"
+                  fill="currentColor"
+                />
+              </svg>
+            }
+            onClick={redo}
+            disabled={disableRedo()}
           />
           <Button
             toolTip="Show Original"

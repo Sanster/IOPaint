@@ -35,7 +35,6 @@ export default async function inpaint(
     method: 'POST',
     body: fd,
   }).then(async r => {
-    console.log(r)
     if (r.ok) {
       return r.blob()
     }
