@@ -1,11 +1,11 @@
 #
 # Lama Cleaner Dockerfile
-# @author Loreto Parisi (loretoparisi at gmail dot com)
+# @author Reddexx
 #
 
-FROM python:3.7.4-slim-buster
-
-LABEL maintainer Loreto Parisi loretoparisi@gmail.com
+FROM python:3.8.13-slim-bullseye
+ENV LAMA_CLEANER_VERSION=0.14.0
+LABEL maintainer Reddexx
 
 WORKDIR app
 
@@ -16,9 +16,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     npm
 
 # python requirements
-COPY . .
-COPY requirements.txt /etc/tmp/requirements.txt
-RUN pip install -r /etc/tmp/requirements.txt
+
+RUN pip install torch>=1.8.2 opencv-python flask_cors flask==1.1.4 flaskwebgui tqdm pydantic loguru pytest markupsafe==2.0.1
 
 # nodejs
 RUN npm install n -g && \
@@ -26,10 +25,15 @@ RUN npm install n -g && \
 # yarn
 RUN npm install -g yarn
 
+#Create Directory
+RUN mkdir -p /lama_cleaner && cd /lama_cleaner
+
 # webapp
-RUN cd lama_cleaner/app/ && \
-    yarn && \
-    yarn build
+RUN set -x; curl -SL -o lama-cleaner.tar.gz https://github.com/Sanster/lama-cleaner/archive/refs/tags/${LAMA_CLEANER_VERSION}.tar.gz && \
+tar xvf lama-cleaner.tar.gz -C /lama_cleaner --strip-components=1 && \
+rm lama-cleaner.tar.gz
+
+RUN cd /lama_cleaner/lama_cleaner/app && yarn && yarn build
 
 EXPOSE 8080
 
