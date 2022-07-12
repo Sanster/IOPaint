@@ -17,7 +17,7 @@ function SettingBlock(props: SettingBlockProps) {
         <div className="setting-block-content-title">
           <span>{title}</span>
           {desc && (
-            <Tooltip content={<div style={{ width: 400 }}>{desc}</div>}>
+            <Tooltip content={<div style={{ maxWidth: 400 }}>{desc}</div>}>
               <svg
                 width="18"
                 height="18"

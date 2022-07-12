@@ -32,6 +32,7 @@ export const shortcutsState = atom<boolean>({
 
 export interface Settings {
   show: boolean
+  downloadMask: boolean
   graduallyInpainting: boolean
   runInpaintingManually: boolean
   model: AIModel
@@ -49,6 +50,7 @@ export interface Settings {
 
 export const settingStateDefault = {
   show: false,
+  downloadMask: false,
   graduallyInpainting: true,
   runInpaintingManually: false,
   model: AIModel.LAMA,

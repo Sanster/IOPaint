@@ -7,6 +7,7 @@ import ManualRunInpaintingSettingBlock from './ManualRunInpaintingSettingBlock'
 import HDSettingBlock from './HDSettingBlock'
 import ModelSettingBlock from './ModelSettingBlock'
 import GraduallyInpaintingSettingBlock from './GraduallyInpaintingSettingBlock'
+import DownloadMaskSettingBlock from './DownloadMaskSettingBlock'
 
 interface SettingModalProps {
   onClose: () => void
@@ -31,6 +32,7 @@ export default function SettingModal(props: SettingModalProps) {
     >
       <ManualRunInpaintingSettingBlock />
       <GraduallyInpaintingSettingBlock />
+      <DownloadMaskSettingBlock />
       <ModelSettingBlock />
       <HDSettingBlock />
     </Modal>

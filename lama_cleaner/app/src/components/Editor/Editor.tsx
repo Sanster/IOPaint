@@ -22,6 +22,7 @@ import Button from '../shared/Button'
 import Slider from './Slider'
 import SizeSelector from './SizeSelector'
 import {
+  dataURItoBlob,
   downloadImage,
   isMidClick,
   isRightClick,
@@ -648,6 +649,20 @@ export default function Editor(props: EditorProps) {
     const name = file.name.replace(/(\.[\w\d_-]+)$/i, '_cleanup$1')
     const curRender = renders[renders.length - 1]
     downloadImage(curRender.currentSrc, name)
+    if (settings.downloadMask) {
+      let maskFileName = file.name.replace(/(\.[\w\d_-]+)$/i, '_mask$1')
+      maskFileName = maskFileName.replace(/\.[^/.]+$/, '.jpg')
+
+      drawLinesOnMask(lineGroups)
+      // Create a link
+      const aDownloadLink = document.createElement('a')
+      // Add the name of the file to the link
+      aDownloadLink.download = maskFileName
+      // Attach the data to the link
+      aDownloadLink.href = maskCanvas.toDataURL('image/jpeg')
+      // Get the code to click the download link
+      aDownloadLink.click()
+    }
   }
 
   const onSizeLimitChange = (_sizeLimit: number) => {
