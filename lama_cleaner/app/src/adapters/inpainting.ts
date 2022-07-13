@@ -17,6 +17,7 @@ export default async function inpaint(
 
   fd.append('ldmSteps', settings.ldmSteps.toString())
   fd.append('ldmSampler', settings.ldmSampler.toString())
+  fd.append('zitsWireframe', settings.zitsWireframe.toString())
   fd.append('hdStrategy', settings.hdStrategy)
   fd.append('hdStrategyCropMargin', settings.hdStrategyCropMargin.toString())
   fd.append(

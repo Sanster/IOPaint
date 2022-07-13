@@ -46,6 +46,9 @@ export interface Settings {
   // For LDM
   ldmSteps: number
   ldmSampler: LDMSampler
+
+  // For ZITS
+  zitsWireframe: boolean
 }
 
 export const settingStateDefault = {
@@ -54,8 +57,12 @@ export const settingStateDefault = {
   graduallyInpainting: true,
   runInpaintingManually: false,
   model: AIModel.LAMA,
+
   ldmSteps: 50,
   ldmSampler: LDMSampler.plms,
+
+  zitsWireframe: true,
+
   hdStrategy: HDStrategy.RESIZE,
   hdStrategyResizeLimit: 2048,
   hdStrategyCropTrigerSize: 2048,

@@ -95,6 +95,7 @@ def process():
         ldm_steps=form["ldmSteps"],
         ldm_sampler=form["ldmSampler"],
         hd_strategy=form["hdStrategy"],
+        zits_wireframe=form["zitsWireframe"],
         hd_strategy_crop_margin=form["hdStrategyCropMargin"],
         hd_strategy_crop_trigger_size=form["hdStrategyCropTrigerSize"],
         hd_strategy_resize_limit=form["hdStrategyResizeLimit"],

@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react'
 import { useRecoilState } from 'recoil'
 import { settingState } from '../../store/Atoms'
 import Selector from '../shared/Selector'
+import { Switch, SwitchThumb } from '../shared/Switch'
 import { LDMSampler } from './HDSettingBlock'
 import NumberInputSetting from './NumberInputSetting'
 import SettingBlock from './SettingBlock'
@@ -9,6 +10,7 @@ import SettingBlock from './SettingBlock'
 export enum AIModel {
   LAMA = 'lama',
   LDM = 'ldm',
+  ZITS = 'ZITS',
 }
 
 function ModelSettingBlock() {
@@ -39,7 +41,7 @@ function ModelSettingBlock() {
           target="_blank"
           rel="noreferrer noopener"
         >
-          {name}
+          Paper: {name}
         </a>
 
         <a
@@ -48,7 +50,7 @@ function ModelSettingBlock() {
           target="_blank"
           rel="noreferrer noopener"
         >
-          {githubUrl}
+          Offical Repository: {githubUrl}
         </a>
       </div>
     )
@@ -89,6 +91,34 @@ function ModelSettingBlock() {
     )
   }
 
+  const renderZITSModelDesc = () => {
+    return (
+      <div>
+        {renderModelDesc(
+          'Incremental Transformer Structure Enhanced Image Inpainting with Masking Positional Encoding',
+          'https://arxiv.org/abs/2203.00867',
+          'https://github.com/DQiaole/ZITS_inpainting'
+        )}
+        <SettingBlock
+          className="sub-setting-block"
+          title="Wireframe"
+          input={
+            <Switch
+              checked={setting.zitsWireframe}
+              onCheckedChange={checked => {
+                setSettingState(old => {
+                  return { ...old, zitsWireframe: checked }
+                })
+              }}
+            >
+              <SwitchThumb />
+            </Switch>
+          }
+        />
+      </div>
+    )
+  }
+
   const renderOptionDesc = (): ReactNode => {
     switch (setting.model) {
       case AIModel.LAMA:
@@ -99,6 +129,8 @@ function ModelSettingBlock() {
         )
       case AIModel.LDM:
         return renderLDMModelDesc()
+      case AIModel.ZITS:
+        return renderZITSModelDesc()
       default:
         return <></>
     }
