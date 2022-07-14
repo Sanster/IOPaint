@@ -11,7 +11,7 @@ from lama_cleaner.schema import Config, LDMSampler
 
 torch.manual_seed(42)
 import torch.nn as nn
-from lama_cleaner.helper import download_model, norm_img, get_cache_path_by_url
+from lama_cleaner.helper import download_model, norm_img, get_cache_path_by_url, load_jit_model
 from lama_cleaner.model.utils import (
     make_beta_schedule,
     timestep_embedding,
@@ -217,14 +217,6 @@ class LatentDiffusion(DDPM):
         t_emb = timestep_embedding(x_noisy.device, t, 256, repeat_only=False)
         x_recon = self.diffusion_model(x_noisy, t_emb, cond)
         return x_recon
-
-
-def load_jit_model(url, device):
-    model_path = download_model(url)
-    logger.info(f"Load LDM model from: {model_path}")
-    model = torch.jit.load(model_path).to(device)
-    model.eval()
-    return model
 
 
 class LDM(InpaintModel):

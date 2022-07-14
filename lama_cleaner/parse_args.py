@@ -7,7 +7,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", default=8080, type=int)
-    parser.add_argument("--model", default="lama", choices=["lama", "ldm"])
+    parser.add_argument("--model", default="lama", choices=["lama", "ldm", "zits"])
     parser.add_argument("--device", default="cuda", type=str, choices=["cuda", "cpu"])
     parser.add_argument("--gui", action="store_true", help="Launch as desktop app")
     parser.add_argument(

@@ -16,7 +16,8 @@ class LDMSampler(str, Enum):
 
 class Config(BaseModel):
     ldm_steps: int
-    ldm_sampler: str
+    ldm_sampler: str = LDMSampler.plms
+    zits_wireframe: bool = True
     hd_strategy: str
     hd_strategy_crop_margin: int
     hd_strategy_crop_trigger_size: int

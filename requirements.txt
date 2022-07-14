@@ -7,4 +7,6 @@ tqdm
 pydantic
 loguru
 pytest
+yacs
 markupsafe==2.0.1
+scikit-image==0.17.2

@@ -1,11 +1,12 @@
 import os
 import sys
-from typing import List
+from typing import List, Optional
 
 from urllib.parse import urlparse
 import cv2
 import numpy as np
 import torch
+from loguru import logger
 from torch.hub import download_url_to_file, get_dir
 
 
@@ -33,6 +34,17 @@ def ceil_modulo(x, mod):
     if x % mod == 0:
         return x
     return (x // mod + 1) * mod
+
+
+def load_jit_model(url_or_path, device):
+    if os.path.exists(url_or_path):
+        model_path = url_or_path
+    else:
+        model_path = download_model(url_or_path)
+    logger.info(f"Load model from: {model_path}")
+    model = torch.jit.load(model_path).to(device)
+    model.eval()
+    return model
 
 
 def numpy_to_bytes(image_numpy: np.ndarray, ext: str) -> bytes:
@@ -83,12 +95,14 @@ def resize_max_size(
         return np_img
 
 
-def pad_img_to_modulo(img: np.ndarray, mod: int):
+def pad_img_to_modulo(img: np.ndarray, mod: int, square: bool = False, min_size: Optional[int] = None):
     """
 
     Args:
         img: [H, W, C]
         mod:
+        square: 是否为正方形
+        min_size:
 
     Returns:
 
@@ -98,6 +112,17 @@ def pad_img_to_modulo(img: np.ndarray, mod: int):
     height, width = img.shape[:2]
     out_height = ceil_modulo(height, mod)
     out_width = ceil_modulo(width, mod)
+
+    if min_size is not None:
+        assert min_size % mod == 0
+        out_width = max(min_size, out_width)
+        out_height = max(min_size, out_height)
+
+    if square:
+        max_size = max(out_height, out_width)
+        out_height = max_size
+        out_width = max_size
+
     return np.pad(
         img,
         ((0, out_height - height), (0, out_width - width), (0, 0)),
@@ -120,7 +145,7 @@ def boxes_from_mask(mask: np.ndarray) -> List[np.ndarray]:
     boxes = []
     for cnt in contours:
         x, y, w, h = cv2.boundingRect(cnt)
-        box = np.array([x, y, x + w, y + h]).astype(np.int)
+        box = np.array([x, y, x + w, y + h]).astype(int)
 
         box[::2] = np.clip(box[::2], 0, width)
         box[1::2] = np.clip(box[1::2], 0, height)
