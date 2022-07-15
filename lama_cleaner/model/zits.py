@@ -229,8 +229,8 @@ class ZITS(InpaintModel):
     def wireframe_edge_and_line(self, items, enable: bool):
         # 最终向 items 中添加 edge 和 line key
         if not enable:
-            items["edge"] = torch.zeros_like(items["mask_256"])
-            items["line"] = torch.zeros_like(items["mask_256"])
+            items["edge"] = torch.zeros_like(items["masks"])
+            items["line"] = torch.zeros_like(items["masks"])
             return
 
         start = time.time()
@@ -297,6 +297,7 @@ class ZITS(InpaintModel):
         masks: [H, W]
         return: BGR IMAGE
         """
+        mask = mask[:, :, 0]
         items = load_image(image, mask, device=self.device)
 
         self.wireframe_edge_and_line(items, config.zits_wireframe)

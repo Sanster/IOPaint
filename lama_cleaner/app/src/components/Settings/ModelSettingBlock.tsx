@@ -10,7 +10,7 @@ import SettingBlock from './SettingBlock'
 export enum AIModel {
   LAMA = 'lama',
   LDM = 'ldm',
-  ZITS = 'ZITS',
+  ZITS = 'zits',
 }
 
 function ModelSettingBlock() {
