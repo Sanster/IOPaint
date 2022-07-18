@@ -1,4 +1,8 @@
 .model-desc-link {
-  color: var(--text-color-gray);
+  background-color: var(--badge-background-color);
+  color: var(--badge-color);
+
+  padding: 3px 12px;
+  border-radius: 999px;
   text-decoration: none;
 }

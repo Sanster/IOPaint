@@ -3,6 +3,7 @@ import { useRecoilState } from 'recoil'
 import { settingState } from '../../store/Atoms'
 import Selector from '../shared/Selector'
 import { Switch, SwitchThumb } from '../shared/Switch'
+import Tooltip from '../shared/Tooltip'
 import { LDMSampler } from './HDSettingBlock'
 import NumberInputSetting from './NumberInputSetting'
 import SettingBlock from './SettingBlock'
@@ -34,39 +35,39 @@ function ModelSettingBlock() {
     githubUrl: string
   ) => {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <a
-          className="model-desc-link"
-          href={paperUrl}
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          Paper: {name}
-        </a>
+      <div style={{ display: 'flex', gap: '12px' }}>
+        <Tooltip content={name}>
+          <a
+            className="model-desc-link"
+            href={paperUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            Paper
+          </a>
+        </Tooltip>
 
-        <a
-          className="model-desc-link"
-          href={githubUrl}
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          Offical Repository: {githubUrl}
-        </a>
+        <Tooltip content={githubUrl}>
+          <a
+            className="model-desc-link"
+            href={githubUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            Code
+          </a>
+        </Tooltip>
       </div>
     )
   }
 
   const renderLDMModelDesc = () => {
     return (
-      <div>
-        {renderModelDesc(
-          'High-Resolution Image Synthesis with Latent Diffusion Models',
-          'https://arxiv.org/abs/2112.10752',
-          'https://github.com/CompVis/latent-diffusion'
-        )}
+      <>
         <NumberInputSetting
           title="Steps"
           value={`${setting.ldmSteps}`}
+          desc="Large steps result in better result, but more time-consuming"
           onValue={value => {
             const val = value.length === 0 ? 0 : parseInt(value, 10)
             setSettingState(old => {
@@ -87,21 +88,17 @@ function ModelSettingBlock() {
             />
           }
         />
-      </div>
+      </>
     )
   }
 
   const renderZITSModelDesc = () => {
     return (
       <div>
-        {renderModelDesc(
-          'Incremental Transformer Structure Enhanced Image Inpainting with Masking Positional Encoding',
-          'https://arxiv.org/abs/2203.00867',
-          'https://github.com/DQiaole/ZITS_inpainting'
-        )}
         <SettingBlock
           className="sub-setting-block"
           title="Wireframe"
+          desc="Enable edge and line detect"
           input={
             <Switch
               checked={setting.zitsWireframe}
@@ -122,11 +119,7 @@ function ModelSettingBlock() {
   const renderOptionDesc = (): ReactNode => {
     switch (setting.model) {
       case AIModel.LAMA:
-        return renderModelDesc(
-          'Resolution-robust Large Mask Inpainting with Fourier Convolutions',
-          'https://arxiv.org/abs/2109.07161',
-          'https://github.com/saic-mdal/lama'
-        )
+        return undefined
       case AIModel.LDM:
         return renderLDMModelDesc()
       case AIModel.ZITS:
@@ -136,10 +129,36 @@ function ModelSettingBlock() {
     }
   }
 
+  const renderPaperCodeBadge = (): ReactNode => {
+    switch (setting.model) {
+      case AIModel.LAMA:
+        return renderModelDesc(
+          'Resolution-robust Large Mask Inpainting with Fourier Convolutions',
+          'https://arxiv.org/abs/2109.07161',
+          'https://github.com/saic-mdal/lama'
+        )
+      case AIModel.LDM:
+        return renderModelDesc(
+          'High-Resolution Image Synthesis with Latent Diffusion Models',
+          'https://arxiv.org/abs/2112.10752',
+          'https://github.com/CompVis/latent-diffusion'
+        )
+      case AIModel.ZITS:
+        return renderModelDesc(
+          'Incremental Transformer Structure Enhanced Image Inpainting with Masking Positional Encoding',
+          'https://arxiv.org/abs/2203.00867',
+          'https://github.com/DQiaole/ZITS_inpainting'
+        )
+      default:
+        return <></>
+    }
+  }
+
   return (
     <SettingBlock
       className="model-setting-block"
       title="Inpainting Model"
+      titleSuffix={renderPaperCodeBadge()}
       input={
         <Selector
           width={80}

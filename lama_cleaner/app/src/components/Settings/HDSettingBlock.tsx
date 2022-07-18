@@ -66,7 +66,7 @@ function HDSettingBlock() {
 
   const renderResizeOptionDesc = () => {
     return (
-      <div>
+      <>
         <div>
           Resize the longer side of the image to a specific size(keep ratio),
           then do inpainting on the resized image.
@@ -77,13 +77,13 @@ function HDSettingBlock() {
           suffix="pixel"
           onValue={onResizeLimitChange}
         />
-      </div>
+      </>
     )
   }
 
   const renderCropOptionDesc = () => {
     return (
-      <div>
+      <>
         <div>
           Crop masking area from the original image to do inpainting, and paste
           the result back. Mainly for performance and memory reasons on high
@@ -101,7 +101,7 @@ function HDSettingBlock() {
           suffix="pixel"
           onValue={onCropMarginChange}
         />
-      </div>
+      </>
     )
   }
 

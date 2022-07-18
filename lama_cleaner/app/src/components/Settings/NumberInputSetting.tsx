@@ -4,18 +4,20 @@ import SettingBlock from './SettingBlock'
 
 interface NumberInputSettingProps {
   title: string
+  desc?: string
   value: string
   suffix?: string
   onValue: (val: string) => void
 }
 
 function NumberInputSetting(props: NumberInputSettingProps) {
-  const { title, value, suffix, onValue } = props
+  const { title, desc, value, suffix, onValue } = props
 
   return (
     <SettingBlock
       className="sub-setting-block"
       title={title}
+      desc={desc}
       input={
         <div
           style={{

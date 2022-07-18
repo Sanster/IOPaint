@@ -8,9 +8,11 @@
     border: 1px solid var(--border-color);
     border-radius: 0.3rem;
     padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 
     .sub-setting-block {
-      margin-top: 8px;
       color: var(--text-color);
     }
   }
