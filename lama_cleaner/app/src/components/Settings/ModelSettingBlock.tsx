@@ -1,18 +1,12 @@
 import React, { ReactNode } from 'react'
 import { useRecoilState } from 'recoil'
-import { settingState } from '../../store/Atoms'
+import { AIModel, settingState } from '../../store/Atoms'
 import Selector from '../shared/Selector'
 import { Switch, SwitchThumb } from '../shared/Switch'
 import Tooltip from '../shared/Tooltip'
 import { LDMSampler } from './HDSettingBlock'
 import NumberInputSetting from './NumberInputSetting'
 import SettingBlock from './SettingBlock'
-
-export enum AIModel {
-  LAMA = 'lama',
-  LDM = 'ldm',
-  ZITS = 'zits',
-}
 
 function ModelSettingBlock() {
   const [setting, setSettingState] = useRecoilState(settingState)

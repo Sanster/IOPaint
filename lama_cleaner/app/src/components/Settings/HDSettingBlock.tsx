@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
 import { useRecoilState } from 'recoil'
-import { settingState } from '../../store/Atoms'
+import { hdSettingsState, settingState } from '../../store/Atoms'
 import Selector from '../shared/Selector'
 import NumberInputSetting from './NumberInputSetting'
 import SettingBlock from './SettingBlock'
@@ -17,33 +17,25 @@ export enum LDMSampler {
 }
 
 function HDSettingBlock() {
-  const [setting, setSettingState] = useRecoilState(settingState)
+  const [hdSettings, setHDSettings] = useRecoilState(hdSettingsState)
 
   const onStrategyChange = (value: HDStrategy) => {
-    setSettingState(old => {
-      return { ...old, hdStrategy: value }
-    })
+    setHDSettings({ hdStrategy: value })
   }
 
   const onResizeLimitChange = (value: string) => {
     const val = value.length === 0 ? 0 : parseInt(value, 10)
-    setSettingState(old => {
-      return { ...old, hdStrategyResizeLimit: val }
-    })
+    setHDSettings({ hdStrategyResizeLimit: val })
   }
 
   const onCropTriggerSizeChange = (value: string) => {
     const val = value.length === 0 ? 0 : parseInt(value, 10)
-    setSettingState(old => {
-      return { ...old, hdStrategyCropTrigerSize: val }
-    })
+    setHDSettings({ hdStrategyCropTrigerSize: val })
   }
 
   const onCropMarginChange = (value: string) => {
     const val = value.length === 0 ? 0 : parseInt(value, 10)
-    setSettingState(old => {
-      return { ...old, hdStrategyCropMargin: val }
-    })
+    setHDSettings({ hdStrategyCropMargin: val })
   }
 
   const renderOriginalOptionDesc = () => {
@@ -73,7 +65,7 @@ function HDSettingBlock() {
         </div>
         <NumberInputSetting
           title="Size limit"
-          value={`${setting.hdStrategyResizeLimit}`}
+          value={`${hdSettings.hdStrategyResizeLimit}`}
           suffix="pixel"
           onValue={onResizeLimitChange}
         />
@@ -91,13 +83,13 @@ function HDSettingBlock() {
         </div>
         <NumberInputSetting
           title="Trigger size"
-          value={`${setting.hdStrategyCropTrigerSize}`}
+          value={`${hdSettings.hdStrategyCropTrigerSize}`}
           suffix="pixel"
           onValue={onCropTriggerSizeChange}
         />
         <NumberInputSetting
           title="Crop margin"
-          value={`${setting.hdStrategyCropMargin}`}
+          value={`${hdSettings.hdStrategyCropMargin}`}
           suffix="pixel"
           onValue={onCropMarginChange}
         />
@@ -106,7 +98,7 @@ function HDSettingBlock() {
   }
 
   const renderHDStrategyOptionDesc = (): ReactNode => {
-    switch (setting.hdStrategy) {
+    switch (hdSettings.hdStrategy) {
       case HDStrategy.ORIGINAL:
         return renderOriginalOptionDesc()
       case HDStrategy.CROP:
@@ -125,7 +117,7 @@ function HDSettingBlock() {
       input={
         <Selector
           width={80}
-          value={setting.hdStrategy as string}
+          value={hdSettings.hdStrategy as string}
           options={Object.values(HDStrategy)}
           onChange={val => onStrategyChange(val as HDStrategy)}
         />

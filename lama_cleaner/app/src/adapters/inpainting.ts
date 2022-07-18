@@ -15,16 +15,20 @@ export default async function inpaint(
   const mask = dataURItoBlob(maskBase64)
   fd.append('mask', mask)
 
+  const hdSettings = settings.hdSettings[settings.model]
   fd.append('ldmSteps', settings.ldmSteps.toString())
   fd.append('ldmSampler', settings.ldmSampler.toString())
   fd.append('zitsWireframe', settings.zitsWireframe.toString())
-  fd.append('hdStrategy', settings.hdStrategy)
-  fd.append('hdStrategyCropMargin', settings.hdStrategyCropMargin.toString())
+  fd.append('hdStrategy', hdSettings.hdStrategy)
+  fd.append('hdStrategyCropMargin', hdSettings.hdStrategyCropMargin.toString())
   fd.append(
     'hdStrategyCropTrigerSize',
-    settings.hdStrategyCropTrigerSize.toString()
+    hdSettings.hdStrategyCropTrigerSize.toString()
   )
-  fd.append('hdStrategyResizeLimit', settings.hdStrategyResizeLimit.toString())
+  fd.append(
+    'hdStrategyResizeLimit',
+    hdSettings.hdStrategyResizeLimit.toString()
+  )
 
   if (sizeLimit === undefined) {
     fd.append('sizeLimit', '1080')

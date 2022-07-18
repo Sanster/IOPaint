@@ -4,13 +4,12 @@ import Editor from './Editor/Editor'
 import ShortcutsModal from './Shortcuts/ShortcutsModal'
 import SettingModal from './Settings/SettingsModal'
 import Toast from './shared/Toast'
-import { settingState, toastState } from '../store/Atoms'
+import { AIModel, settingState, toastState } from '../store/Atoms'
 import {
   currentModel,
   modelDownloaded,
   switchModel,
 } from '../adapters/inpainting'
-import { AIModel } from './Settings/ModelSettingBlock'
 
 interface WorkspaceProps {
   file: File
