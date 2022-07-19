@@ -10,7 +10,6 @@
     display: grid;
     width: 100%;
     height: auto;
-    margin-top: -11rem;
     animation: slideDown 0.2s ease-out;
   }
 }
@@ -26,7 +25,6 @@
     align-items: center;
 
     @include mobile {
-      grid-template-columns: auto;
       column-gap: 0;
       row-gap: 0.6rem;
     }
@@ -34,10 +32,23 @@
 
   .shortcut-key {
     justify-self: end;
-    border: 1px solid var(--modal-hotkey-border-color);
-    padding: 0.4rem 0.4rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
     width: max-content;
-    border-radius: 0.2rem;
+    border-radius: 6px;
+    user-select: none;
+    white-space: nowrap;
+
+    color: var(--modal-text-color);
+    background-color: var(--page-bg);
+
+    box-sizing: border-box;
+    box-shadow: var(--box-shadow);
+
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+    font-family: inherit;
+    font-weight: 400;
+    line-height: 1.5;
 
     @include mobile {
       padding: 0.2rem 0.4rem;

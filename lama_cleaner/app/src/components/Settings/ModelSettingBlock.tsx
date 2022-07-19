@@ -151,7 +151,7 @@ function ModelSettingBlock() {
   return (
     <SettingBlock
       className="model-setting-block"
-      title="Inpainting Model"
+      title="Model"
       titleSuffix={renderPaperCodeBadge()}
       input={
         <Selector

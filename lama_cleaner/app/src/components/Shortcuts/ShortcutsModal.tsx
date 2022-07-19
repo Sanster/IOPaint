@@ -51,15 +51,16 @@ export default function ShortcutsModal() {
     >
       <div className="shortcut-options">
         <ShortCut
-          content="Enable Multi-Stroke Mask Drawing"
+          content="Multi-Stroke Mask Drawing"
           keys={[`Hold ${CmdOrCtrl}`]}
         />
-        <ShortCut content="Undo Inpainting" keys={[CmdOrCtrl, 'Z']} />
-        <ShortCut content="Pan" keys={['Space & Drag']} />
-        <ShortCut content="View Original Image" keys={['Hold Tab']} />
-        <ShortCut content="Reset Zoom/Pan" keys={['Esc']} />
         <ShortCut content="Cancel Mask Drawing" keys={['Esc']} />
         <ShortCut content="Run Inpainting Manually" keys={['Shift', 'R']} />
+        <ShortCut content="Undo Inpainting" keys={[CmdOrCtrl, 'Z']} />
+        <ShortCut content="Redo Inpainting" keys={[CmdOrCtrl, 'Shift', 'Z']} />
+        <ShortCut content="View Original Image" keys={['Hold Tab']} />
+        <ShortCut content="Pan" keys={['Space + Drag']} />
+        <ShortCut content="Reset Zoom/Pan" keys={['Esc']} />
         <ShortCut content="Decrease Brush Size" keys={['[']} />
         <ShortCut content="Increase Brush Size" keys={[']']} />
         <ShortCut content="Toggle Dark Mode" keys={['Shift', 'D']} />
