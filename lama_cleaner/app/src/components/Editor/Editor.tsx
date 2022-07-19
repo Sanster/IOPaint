@@ -585,7 +585,9 @@ export default function Editor(props: EditorProps) {
   // Handle Cmd+shift+Z
   const redoPredicate = (event: KeyboardEvent) => {
     const isCmdZ =
-      (event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'z'
+      (event.metaKey || event.ctrlKey) &&
+      event.shiftKey &&
+      event.key.toLowerCase() === 'z'
     // Handle tab switch
     if (event.key === 'Tab') {
       event.preventDefault()
