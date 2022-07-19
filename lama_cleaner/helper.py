@@ -42,17 +42,23 @@ def load_jit_model(url_or_path, device):
     else:
         model_path = download_model(url_or_path)
     logger.info(f"Load model from: {model_path}")
-    model = torch.jit.load(model_path).to(device)
+    try:
+        model = torch.jit.load(model_path).to(device)
+    except:
+        logger.error(
+            f"Failed to load {model_path}, delete model and restart lama-cleaner"
+        )
+        exit(-1)
     model.eval()
     return model
 
 
 def numpy_to_bytes(image_numpy: np.ndarray, ext: str) -> bytes:
-    data = cv2.imencode(f".{ext}", image_numpy,
-                        [
-                            int(cv2.IMWRITE_JPEG_QUALITY), 100,
-                            int(cv2.IMWRITE_PNG_COMPRESSION), 0
-                        ])[1]
+    data = cv2.imencode(
+        f".{ext}",
+        image_numpy,
+        [int(cv2.IMWRITE_JPEG_QUALITY), 100, int(cv2.IMWRITE_PNG_COMPRESSION), 0],
+    )[1]
     image_bytes = data.tobytes()
     return image_bytes
 
@@ -95,7 +101,9 @@ def resize_max_size(
         return np_img
 
 
-def pad_img_to_modulo(img: np.ndarray, mod: int, square: bool = False, min_size: Optional[int] = None):
+def pad_img_to_modulo(
+    img: np.ndarray, mod: int, square: bool = False, min_size: Optional[int] = None
+):
     """
 
     Args:
