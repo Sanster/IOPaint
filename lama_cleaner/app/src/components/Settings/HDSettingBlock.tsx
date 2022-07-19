@@ -41,17 +41,25 @@ function HDSettingBlock() {
   const renderOriginalOptionDesc = () => {
     return (
       <div>
-        Use the original resolution of the picture, suitable for picture size
-        below 2K. Try{' '}
+        Use original picture, suitable for picture size below 2K. Try{' '}
         <div
           tabIndex={0}
           role="button"
           className="inline-tip"
           onClick={() => onStrategyChange(HDStrategy.RESIZE)}
         >
-          Resize Strategy
+          Resize
+        </div>
+        {' or '}
+        <div
+          tabIndex={0}
+          role="button"
+          className="inline-tip"
+          onClick={() => onStrategyChange(HDStrategy.CROP)}
+        >
+          Crop
         </div>{' '}
-        if you do not get good results on high resolution images.
+        if you didn&apos;t get good results or have GPU memory issue.
       </div>
     )
   }
@@ -60,8 +68,8 @@ function HDSettingBlock() {
     return (
       <>
         <div>
-          Resize the longer side of the image to a specific size(keep ratio),
-          then do inpainting on the resized image.
+          Resize the longer side of the image to a specific size, then do
+          inpainting on the resized image.
         </div>
         <NumberInputSetting
           title="Size limit"
@@ -76,11 +84,7 @@ function HDSettingBlock() {
   const renderCropOptionDesc = () => {
     return (
       <>
-        <div>
-          Crop masking area from the original image to do inpainting, and paste
-          the result back. Mainly for performance and memory reasons on high
-          resolution image.
-        </div>
+        <div>Crop masking area from the original image to do inpainting.</div>
         <NumberInputSetting
           title="Trigger size"
           value={`${hdSettings.hdStrategyCropTrigerSize}`}
