@@ -39,12 +39,12 @@
   input[type='range']::-webkit-slider-runnable-track {
     border-radius: 2rem;
     height: 0.2rem;
-    background: var(--btn-primary-bg);
+    background: var(--slider-background-color);
   }
 
   input[type='range']::-moz-range-track {
     border-radius: 2rem;
-    background: var(--btn-primary-bg);
+    background: var(--slider-background-color);
   }
 
   input[type='range']::-moz-range-progress {

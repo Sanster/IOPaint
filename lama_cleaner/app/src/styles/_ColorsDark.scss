@@ -31,7 +31,6 @@
   --text-color-gray: rgb(138, 143, 152);
 
   // Shared
-  --btn-primary-bg: rgb(140, 140, 180);
   --btn-text-color: var(--text-color);
   --btn-text-hover-color: var(--page-bg);
   --btn-border-color: var(--yellow-accent);
@@ -42,6 +41,8 @@
   --switch-root-background-color: rgb(60, 63, 68);
   --switch-thumb-color: rgb(31, 32, 35);
   --switch-thumb-checked-color: white;
+
+  --slider-background-color: var(--switch-root-background-color);
 
   // tooltip
   --tooltip-bg: hsl(197 6.8% 13.6%);
