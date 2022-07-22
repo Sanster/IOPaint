@@ -1,5 +1,7 @@
 .model-desc-link {
-  background-color: var(--badge-background-color);
+  // background-color: var(--badge-background-color);
+  display: flex;
+  justify-items: center;
   color: var(--badge-color);
 
   padding-left: 5px;
