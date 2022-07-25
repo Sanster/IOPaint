@@ -91,6 +91,20 @@ There are three strategies for handling high-resolution images.
 - **Resize**: Resize the image to a smaller size, then do inpainting on the resized image. The inpainting area will be croped, upsampled and pasted back on the original image to make sure other part of image not loss quality.
 - **Crop**: Crop masking area from the original image to do inpainting, and paste the result back. Mainly for performance and memory reasons on high resolution image.
 
+## Download Model Mannually
+
+If you have problems downloading the model automatically when lama-cleaner start,
+you can download it manually. By default lama-cleaner will load model from `TORCH_HOME=~/.cache/torch/hub/checkpoints/`,
+you can set `TORCH_HOME` to other folder and put the models there.
+
+- Github:
+  - [LaMa](https://github.com/Sanster/models/releases/tag/add_big_lama)
+  - [LDM](https://github.com/Sanster/models/releases/tag/add_ldm)
+  - [ZITS](https://github.com/Sanster/models/releases/tag/add_zits)
+- Baidu:
+  - https://pan.baidu.com/s/1vUd3BVqIpK6e8N_EA_ZJfw
+  - passward: flsu
+
 ## Development
 
 Only needed if you plan to modify the frontend and recompile yourself.
