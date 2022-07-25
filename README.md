@@ -16,7 +16,7 @@
   </a>
 </p>
 
-![img](./assets/dark.png)
+![img](./assets/dark.jpg)
 
 ## Features
 
@@ -36,6 +36,7 @@
 | ---------------------- | --------------------------------------------- | --------------------------------------------------- |
 | Remove unwanted things | ![unwant_object2](./assets/unwant_object.jpg) | ![unwant_object2](./assets/unwant_object_clean.jpg) |
 | Remove unwanted person | ![unwant_person](./assets/unwant_person.jpg)  | ![unwant_person](./assets/unwant_person_clean.jpg)  |
+| Remove Text            | ![text](./assets/unwant_text.jpg)             | ![watermark_clean](./assets/unwant_text_clean.jpg)  |
 | Remove watermark       | ![watermark](./assets/watermark.jpg)          | ![watermark_clean](./assets/watermark_cleanup.jpg)  |
 | Fix old photo          | ![oldphoto](./assets/old_photo.jpg)           | ![oldphoto_clean](./assets/old_photo_clean.jpg)     |
 
