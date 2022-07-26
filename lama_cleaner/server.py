@@ -40,6 +40,9 @@ from lama_cleaner.helper import (
 
 NUM_THREADS = str(multiprocessing.cpu_count())
 
+# fix libomp problem on windows https://github.com/Sanster/lama-cleaner/issues/56
+os.environ["KMP_DUPLICATE_LIB_OK"]="True"
+
 os.environ["OMP_NUM_THREADS"] = NUM_THREADS
 os.environ["OPENBLAS_NUM_THREADS"] = NUM_THREADS
 os.environ["MKL_NUM_THREADS"] = NUM_THREADS
