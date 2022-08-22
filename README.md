@@ -26,6 +26,7 @@
   1. [LaMa](https://github.com/saic-mdal/lama)
   1. [LDM](https://github.com/CompVis/latent-diffusion)
   1. [ZITS](https://github.com/DQiaole/ZITS_inpainting)
+  1. [MAT](https://github.com/fenglinglwb/MAT)
 - Support CPU & GPU
 - Various high-resolution image processing [strategy](#high-resolution-strategy)
 - Run as a desktop APP
@@ -36,7 +37,7 @@
 | ---------------------- | --------------------------------------------- | --------------------------------------------------- |
 | Remove unwanted things | ![unwant_object2](./assets/unwant_object.jpg) | ![unwant_object2](./assets/unwant_object_clean.jpg) |
 | Remove unwanted person | ![unwant_person](./assets/unwant_person.jpg)  | ![unwant_person](./assets/unwant_person_clean.jpg)  |
-| Remove Text            | ![text](./assets/unwant_text.jpg)             | ![watermark_clean](./assets/unwant_text_clean.jpg)  |
+| Remove Text            | ![text](./assets/unwant_text.jpg)             | ![text](./assets/unwant_text_clean.jpg)             |
 | Remove watermark       | ![watermark](./assets/watermark.jpg)          | ![watermark_clean](./assets/watermark_cleanup.jpg)  |
 | Fix old photo          | ![oldphoto](./assets/old_photo.jpg)           | ![oldphoto_clean](./assets/old_photo_clean.jpg)     |
 
@@ -69,6 +70,7 @@ Available arguments:
 | LaMa  | :+1: Generalizes well on high resolutions(~2k)<br/>                                                                                                                                                                         |                                                                                                                                                                                                                                                                                   |
 | LDM   | :+1: Possiblablity to get better and more detail result <br/> :+1: The balance of time and quality can be achieved by adjusting `steps` <br/> :neutral_face: Slower than GAN model<br/> :neutral_face: Need more GPU memory | `Steps`: You can get better result with large steps, but it will be more time-consuming <br/> `Sampler`: ddim or [plms](https://arxiv.org/abs/2202.09778). In general plms can get [better results](https://github.com/Sanster/lama-cleaner/releases/tag/0.13.0) with fewer steps |
 | ZITS  | :+1: Better holistic structures compared with previous methods <br/> :neutral_face: Wireframe module is **very** slow on CPU                                                                                                | `Wireframe`: Enable edge and line detect                                                                                                                                                                                                                                          |
+| MAT   | TODO                                                                                                                                                                                                                        |                                                                                                                                                                                                                                                                                   |
 
 ### LaMa vs LDM
 

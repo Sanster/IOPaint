@@ -7,6 +7,7 @@ export enum AIModel {
   LAMA = 'lama',
   LDM = 'ldm',
   ZITS = 'zits',
+  MAT = 'mat',
 }
 
 export const fileState = atom<File | undefined>({
@@ -78,6 +79,12 @@ const defaultHDSettings: ModelsHDSettings = {
     hdStrategy: HDStrategy.CROP,
     hdStrategyResizeLimit: 1024,
     hdStrategyCropTrigerSize: 1024,
+    hdStrategyCropMargin: 128,
+  },
+  [AIModel.MAT]: {
+    hdStrategy: HDStrategy.CROP,
+    hdStrategyResizeLimit: 1024,
+    hdStrategyCropTrigerSize: 512,
     hdStrategyCropMargin: 128,
   },
 }

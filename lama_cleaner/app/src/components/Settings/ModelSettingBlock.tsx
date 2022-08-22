@@ -131,6 +131,8 @@ function ModelSettingBlock() {
         return renderLDMModelDesc()
       case AIModel.ZITS:
         return renderZITSModelDesc()
+      case AIModel.MAT:
+        return undefined
       default:
         return <></>
     }
@@ -155,6 +157,12 @@ function ModelSettingBlock() {
           'Incremental Transformer Structure Enhanced Image Inpainting with Masking Positional Encoding',
           'https://arxiv.org/abs/2203.00867',
           'https://github.com/DQiaole/ZITS_inpainting'
+        )
+      case AIModel.MAT:
+        return renderModelDesc(
+          'Mask-Aware Transformer for Large Hole Image Inpainting',
+          'https://arxiv.org/pdf/2203.15270.pdf',
+          'https://github.com/fenglinglwb/MAT'
         )
       default:
         return <></>

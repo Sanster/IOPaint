@@ -1,12 +1,14 @@
 from lama_cleaner.model.lama import LaMa
 from lama_cleaner.model.ldm import LDM
+from lama_cleaner.model.mat import MAT
 from lama_cleaner.model.zits import ZITS
 from lama_cleaner.schema import Config
 
 models = {
     'lama': LaMa,
     'ldm': LDM,
-    'zits': ZITS
+    'zits': ZITS,
+    'mat': MAT
 }
 
 
