@@ -120,10 +120,30 @@ class InpaintModel:
         w = box_w + config.hd_strategy_crop_margin * 2
         h = box_h + config.hd_strategy_crop_margin * 2
 
-        l = max(cx - w // 2, 0)
-        t = max(cy - h // 2, 0)
-        r = min(cx + w // 2, img_w)
-        b = min(cy + h // 2, img_h)
+        _l = cx - w // 2
+        _r = cx + w // 2
+        _t = cy - h // 2
+        _b = cy + h // 2
+
+        l = max(_l, 0)
+        r = min(_r, img_w)
+        t = max(_t, 0)
+        b = min(_b, img_h)
+
+        # try to get more context when crop around image edge 
+        if _l < 0:
+            r += abs(_l)
+        if _r > img_w:
+            l -= (_r - img_w)
+        if _t < 0:
+            b += abs(_t)
+        if _b > img_h:
+            t -= (_b - img_h)
+
+        l = max(l, 0)
+        r = min(r, img_w)
+        t = max(t, 0)
+        b = min(b, img_h)
 
         crop_img = image[t:b, l:r, :]
         crop_mask = mask[t:b, l:r]
