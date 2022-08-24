@@ -53,6 +53,26 @@ def load_jit_model(url_or_path, device):
     return model
 
 
+def load_model(model: torch.nn.Module, url_or_path, device):
+    if os.path.exists(url_or_path):
+        model_path = url_or_path
+    else:
+        model_path = download_model(url_or_path)
+
+    try:
+        state_dict = torch.load(model_path, map_location='cpu')
+        model.load_state_dict(state_dict, strict=True)
+        model.to(device)
+        logger.info(f"Load model from: {model_path}")
+    except:
+        logger.error(
+            f"Failed to load {model_path}, delete model and restart lama-cleaner"
+        )
+        exit(-1)
+    model.eval()
+    return model
+
+
 def numpy_to_bytes(image_numpy: np.ndarray, ext: str) -> bytes:
     data = cv2.imencode(
         f".{ext}",
