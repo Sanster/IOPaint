@@ -93,7 +93,7 @@ class InpaintModel:
                                             (origin_size[1], origin_size[0]),
                                             interpolation=cv2.INTER_CUBIC)
 
-                original_pixel_indices = mask != 255
+                original_pixel_indices = mask < 127
                 inpaint_result[original_pixel_indices] = image[:, :, ::-1][original_pixel_indices]
 
         if inpaint_result is None:

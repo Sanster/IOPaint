@@ -1126,8 +1126,7 @@ class Generator(torch.nn.Module):
 
 FCF_MODEL_URL = os.environ.get(
     "FCF_MODEL_URL",
-    # "https://github.com/Sanster/models/releases/download/add_mat/Places_512_FullData_G.pth",
-    "/Users/qing/code/github/FcF-Inpainting/places_512_G.pth"
+    "https://github.com/Sanster/models/releases/download/add_fcf/places_512_G.pth",
 )
 
 
