@@ -1,3 +1,4 @@
+from lama_cleaner.model.fcf import FcF
 from lama_cleaner.model.lama import LaMa
 from lama_cleaner.model.ldm import LDM
 from lama_cleaner.model.mat import MAT
@@ -8,7 +9,8 @@ models = {
     'lama': LaMa,
     'ldm': LDM,
     'zits': ZITS,
-    'mat': MAT
+    'mat': MAT,
+    'fcf': FcF
 }
 
 

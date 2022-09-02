@@ -4,6 +4,7 @@ from typing import Optional
 import cv2
 import torch
 from loguru import logger
+import numpy as np
 
 from lama_cleaner.helper import boxes_from_mask, resize_max_size, pad_img_to_modulo
 from lama_cleaner.schema import Config, HDStrategy
@@ -51,7 +52,7 @@ class InpaintModel:
         result = self.forward(pad_image, pad_mask, config)
         result = result[0:origin_height, 0:origin_width, :]
 
-        original_pixel_indices = mask != 255
+        original_pixel_indices = mask < 127
         result[original_pixel_indices] = image[:, :, ::-1][original_pixel_indices]
         return result
 

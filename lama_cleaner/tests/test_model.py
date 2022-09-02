@@ -1,8 +1,6 @@
-import os
 from pathlib import Path
 
 import cv2
-import numpy as np
 import pytest
 
 from lama_cleaner.model_manager import ModelManager
@@ -16,14 +14,9 @@ def get_data(fx=1, fy=1.0):
     img = cv2.cvtColor(img, cv2.COLOR_BGRA2RGB)
     mask = cv2.imread(str(current_dir / "mask.png"), cv2.IMREAD_GRAYSCALE)
 
-    # img = cv2.imread("/Users/qing/code/github/MAT/test_sets/Places/images/test1.jpg")
-    # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    # mask = cv2.imread("/Users/qing/code/github/MAT/test_sets/Places/masks/mask1.png", cv2.IMREAD_GRAYSCALE)
-    # mask = 255 - mask
-
     if fx != 1:
-        img = cv2.resize(img, None, fx=fx, fy=fy)
-        mask = cv2.resize(mask, None, fx=fx, fy=fy)
+        img = cv2.resize(img, None, fx=fx, fy=fy, interpolation=cv2.INTER_AREA)
+        mask = cv2.resize(mask, None, fx=fx, fy=fy, interpolation=cv2.INTER_NEAREST)
     return img, mask
 
 
@@ -133,4 +126,20 @@ def test_mat(strategy):
         model,
         cfg,
         f"mat_{strategy.capitalize()}_result.png",
+    )
+
+
+@pytest.mark.parametrize(
+    "strategy", [HDStrategy.ORIGINAL]
+)
+def test_fcf(strategy):
+    model = ModelManager(name="fcf", device="cpu")
+    cfg = get_config(strategy)
+
+    assert_equal(
+        model,
+        cfg,
+        f"fcf_{strategy.capitalize()}_result.png",
+        fx=2,
+        fy=2
     )
