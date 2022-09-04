@@ -30,17 +30,6 @@ function ModelSettingBlock() {
   ) => {
     return (
       <div style={{ display: 'flex', gap: '12px' }}>
-        {/* <Tooltip content={name}>
-          <a
-            className="model-desc-link"
-            href={paperUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            Paper
-          </a>
-        </Tooltip> */}
-
         <Tooltip content={githubUrl}>
           <a
             className="model-desc-link"
@@ -64,6 +53,17 @@ function ModelSettingBlock() {
             </svg>
           </a>
         </Tooltip>
+
+        {/* <Tooltip content={name}>
+          <a
+            className="model-desc-link"
+            href={paperUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            Paper
+          </a>
+        </Tooltip> */}
       </div>
     )
   }
@@ -123,6 +123,16 @@ function ModelSettingBlock() {
     )
   }
 
+  const renderFCFModelDesc = () => {
+    return (
+      <div>
+        FcF only support fixed size(512x512) image input. Lama Cleaner will take
+        care of resize and crop process, it still recommended applies to small
+        defects.
+      </div>
+    )
+  }
+
   const renderOptionDesc = (): ReactNode => {
     switch (setting.model) {
       case AIModel.LAMA:
@@ -133,6 +143,8 @@ function ModelSettingBlock() {
         return renderZITSModelDesc()
       case AIModel.MAT:
         return undefined
+      case AIModel.FCF:
+        return renderFCFModelDesc()
       default:
         return <></>
     }
@@ -161,8 +173,14 @@ function ModelSettingBlock() {
       case AIModel.MAT:
         return renderModelDesc(
           'Mask-Aware Transformer for Large Hole Image Inpainting',
-          'https://arxiv.org/pdf/2203.15270.pdf',
+          'https://arxiv.org/abs/2203.15270',
           'https://github.com/fenglinglwb/MAT'
+        )
+      case AIModel.FCF:
+        return renderModelDesc(
+          'Keys to Better Image Inpainting: Structure and Texture Go Hand in Hand',
+          'https://arxiv.org/abs/2208.03382',
+          'https://github.com/SHI-Labs/FcF-Inpainting'
         )
       default:
         return <></>

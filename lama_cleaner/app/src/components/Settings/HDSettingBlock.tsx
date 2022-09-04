@@ -18,6 +18,9 @@ export enum LDMSampler {
 
 function HDSettingBlock() {
   const [hdSettings, setHDSettings] = useRecoilState(hdSettingsState)
+  if (!hdSettings.enabled) {
+    return <></>
+  }
 
   const onStrategyChange = (value: HDStrategy) => {
     setHDSettings({ hdStrategy: value })

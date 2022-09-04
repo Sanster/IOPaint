@@ -8,6 +8,7 @@ export enum AIModel {
   LDM = 'ldm',
   ZITS = 'zits',
   MAT = 'mat',
+  FCF = 'fcf',
 }
 
 export const fileState = atom<File | undefined>({
@@ -42,6 +43,7 @@ export interface HDSettings {
   hdStrategyResizeLimit: number
   hdStrategyCropTrigerSize: number
   hdStrategyCropMargin: number
+  enabled: boolean
 }
 
 type ModelsHDSettings = { [key in AIModel]: HDSettings }
@@ -68,24 +70,35 @@ const defaultHDSettings: ModelsHDSettings = {
     hdStrategyResizeLimit: 2048,
     hdStrategyCropTrigerSize: 2048,
     hdStrategyCropMargin: 128,
+    enabled: true,
   },
   [AIModel.LDM]: {
     hdStrategy: HDStrategy.CROP,
     hdStrategyResizeLimit: 1080,
     hdStrategyCropTrigerSize: 1080,
     hdStrategyCropMargin: 128,
+    enabled: true,
   },
   [AIModel.ZITS]: {
     hdStrategy: HDStrategy.CROP,
     hdStrategyResizeLimit: 1024,
     hdStrategyCropTrigerSize: 1024,
     hdStrategyCropMargin: 128,
+    enabled: true,
   },
   [AIModel.MAT]: {
     hdStrategy: HDStrategy.CROP,
     hdStrategyResizeLimit: 1024,
     hdStrategyCropTrigerSize: 512,
     hdStrategyCropMargin: 128,
+    enabled: true,
+  },
+  [AIModel.FCF]: {
+    hdStrategy: HDStrategy.CROP,
+    hdStrategyResizeLimit: 512,
+    hdStrategyCropTrigerSize: 512,
+    hdStrategyCropMargin: 128,
+    enabled: false,
   },
 }
 

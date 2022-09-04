@@ -8,7 +8,7 @@ import torch.fft as fft
 
 from lama_cleaner.schema import Config
 
-from lama_cleaner.helper import load_model, get_cache_path_by_url, norm_img
+from lama_cleaner.helper import load_model, get_cache_path_by_url, norm_img, boxes_from_mask, resize_max_size
 from lama_cleaner.model.base import InpaintModel
 from torch import conv2d, nn
 import torch.nn.functional as F
@@ -1153,6 +1153,38 @@ class FcF(InpaintModel):
     @staticmethod
     def is_downloaded() -> bool:
         return os.path.exists(get_cache_path_by_url(FCF_MODEL_URL))
+
+    @torch.no_grad()
+    def __call__(self, image, mask, config: Config):
+        """
+        images: [H, W, C] RGB, not normalized
+        masks: [H, W]
+        return: BGR IMAGE
+        """
+        boxes = boxes_from_mask(mask)
+        crop_result = []
+        config.hd_strategy_crop_margin = 128
+        for box in boxes:
+            crop_image, crop_mask, crop_box = self._crop_box(image, mask, box, config)
+            origin_size = crop_image.shape[:2]
+            resize_image = resize_max_size(crop_image, size_limit=512)
+            resize_mask = resize_max_size(crop_mask, size_limit=512)
+            inpaint_result = self._pad_forward(resize_image, resize_mask, config)
+
+            # only paste masked area result
+            inpaint_result = cv2.resize(inpaint_result, (origin_size[1], origin_size[0]), interpolation=cv2.INTER_CUBIC)
+
+            original_pixel_indices = crop_mask < 127
+            inpaint_result[original_pixel_indices] = crop_image[:, :, ::-1][original_pixel_indices]
+
+            crop_result.append((inpaint_result, crop_box))
+
+        inpaint_result = image[:, :, ::-1]
+        for crop_image, crop_box in crop_result:
+            x1, y1, x2, y2 = crop_box
+            inpaint_result[y1:y2, x1:x2, :] = crop_image
+
+        return inpaint_result
 
     def forward(self, image, mask, config: Config):
         """Input images and output images have same size

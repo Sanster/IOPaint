@@ -4,7 +4,6 @@ from typing import Optional
 import cv2
 import torch
 from loguru import logger
-import numpy as np
 
 from lama_cleaner.helper import boxes_from_mask, resize_max_size, pad_img_to_modulo
 from lama_cleaner.schema import Config, HDStrategy
@@ -92,7 +91,6 @@ class InpaintModel:
                 inpaint_result = cv2.resize(inpaint_result,
                                             (origin_size[1], origin_size[0]),
                                             interpolation=cv2.INTER_CUBIC)
-
                 original_pixel_indices = mask < 127
                 inpaint_result[original_pixel_indices] = image[:, :, ::-1][original_pixel_indices]
 
@@ -101,7 +99,7 @@ class InpaintModel:
 
         return inpaint_result
 
-    def _run_box(self, image, mask, box, config: Config):
+    def _crop_box(self, image, mask, box, config: Config):
         """
 
         Args:
@@ -110,7 +108,7 @@ class InpaintModel:
             box: [left,top,right,bottom]
 
         Returns:
-            BGR IMAGE
+            BGR IMAGE, (l, r, r, b)
         """
         box_h = box[3] - box[1]
         box_w = box[2] - box[0]
@@ -131,7 +129,7 @@ class InpaintModel:
         t = max(_t, 0)
         b = min(_b, img_h)
 
-        # try to get more context when crop around image edge 
+        # try to get more context when crop around image edge
         if _l < 0:
             r += abs(_l)
         if _r > img_w:
@@ -150,5 +148,20 @@ class InpaintModel:
         crop_mask = mask[t:b, l:r]
 
         logger.info(f"box size: ({box_h},{box_w}) crop size: {crop_img.shape}")
+
+        return crop_img, crop_mask, [l, t, r, b]
+
+    def _run_box(self, image, mask, box, config: Config):
+        """
+
+        Args:
+            image: [H, W, C] RGB
+            mask: [H, W, 1]
+            box: [left,top,right,bottom]
+
+        Returns:
+            BGR IMAGE
+        """
+        crop_img, crop_mask, [l, t, r, b] = self._crop_box(image, mask, box, config)
 
         return self._pad_forward(crop_img, crop_mask, config), [l, t, r, b]

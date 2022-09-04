@@ -143,3 +143,11 @@ def test_fcf(strategy):
         fx=2,
         fy=2
     )
+
+    assert_equal(
+        model,
+        cfg,
+        f"fcf_{strategy.capitalize()}_result.png",
+        fx=3.8,
+        fy=2
+    )
