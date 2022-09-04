@@ -1161,6 +1161,9 @@ class FcF(InpaintModel):
         masks: [H, W]
         return: BGR IMAGE
         """
+        if image.shape[0] == 512 and image.shape[1] == 512:
+            return self._pad_forward(image, mask, config)
+
         boxes = boxes_from_mask(mask)
         crop_result = []
         config.hd_strategy_crop_margin = 128

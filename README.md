@@ -27,8 +27,9 @@
   1. [LDM](https://github.com/CompVis/latent-diffusion)
   1. [ZITS](https://github.com/DQiaole/ZITS_inpainting)
   1. [MAT](https://github.com/fenglinglwb/MAT)
+  1. [FcF](https://github.com/SHI-Labs/FcF-Inpainting)
 - Support CPU & GPU
-- Various high-resolution image processing [strategy](#high-resolution-strategy)
+- Various inpainting [strategy](#inpainting-strategy)
 - Run as a desktop APP
 
 ## Usage
@@ -71,6 +72,7 @@ Available arguments:
 | LDM   | :+1: Possiblablity to get better and more detail result <br/> :+1: The balance of time and quality can be achieved by adjusting `steps` <br/> :neutral_face: Slower than GAN model<br/> :neutral_face: Need more GPU memory | `Steps`: You can get better result with large steps, but it will be more time-consuming <br/> `Sampler`: ddim or [plms](https://arxiv.org/abs/2202.09778). In general plms can get [better results](https://github.com/Sanster/lama-cleaner/releases/tag/0.13.0) with fewer steps |
 | ZITS  | :+1: Better holistic structures compared with previous methods <br/> :neutral_face: Wireframe module is **very** slow on CPU                                                                                                | `Wireframe`: Enable edge and line detect                                                                                                                                                                                                                                          |
 | MAT   | TODO                                                                                                                                                                                                                        |                                                                                                                                                                                                                                                                                   |
+| FcF   | :+1: Better structure and texture generation <br/> :neutral_face: Only support fixed size (512x512) input                                                                                                                   |                                                                                                                                                                                                                                                                                   |
 
 ### LaMa vs LDM
 
@@ -86,13 +88,21 @@ Available arguments:
 
 Image is from [ZITS](https://github.com/DQiaole/ZITS_inpainting) paper. I didn't find a good example to show the advantages of ZITS and let me know if you have a good example. There can also be possible problems with my code, if you find them, please let me know too!
 
-## High Resolution Strategy
+### LaMa vs FcF
 
-There are three strategies for handling high-resolution images.
+| Original Image                                                                                                    | Lama                                                                                                                   | FcF                                                                                                                   |
+| ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| ![texture](https://user-images.githubusercontent.com/3998421/188305027-a4260545-c24e-4df7-9739-ac5dc3cae879.jpeg) | ![texture_lama](https://user-images.githubusercontent.com/3998421/188305024-2064ed3e-5af4-4843-ac10-7f9da71e15f8.jpeg) | ![texture_fcf](https://user-images.githubusercontent.com/3998421/188305006-a08d2896-a65f-43d5-b9a5-ef62c3129f0c.jpeg) |
 
-- **Original**: Use the original resolution of the picture, suitable for picture size below 2K.
-- **Resize**: Resize the image to a smaller size, then do inpainting on the resized image. The inpainting area will be croped, upsampled and pasted back on the original image to make sure other part of image not loss quality.
-- **Crop**: Crop masking area from the original image to do inpainting, and paste the result back. Mainly for performance and memory reasons on high resolution image.
+## Inpainting Strategy
+
+Lama Cleaner provides three ways to run inpainting model on images, you can change it in the settings dialog.
+
+| Strategy     | Description                                                                                                                                    | VRAM                 |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| **Original** | Use the resolution of the original image                                                                                                       | :tada:               |
+| **Resize**   | Resize the image to a smaller size before inpainting. Lama Cleaner will make sure that the area of the image outside the mask is not degraded. | :tada: :tada:        |
+| **Crop**     | Crop masking area from the original image to do inpainting                                                                                     | :tada: :tada: :tada: |
 
 ## Download Model Mannually
 
@@ -104,6 +114,8 @@ you can set `TORCH_HOME` to other folder and put the models there.
   - [LaMa](https://github.com/Sanster/models/releases/tag/add_big_lama)
   - [LDM](https://github.com/Sanster/models/releases/tag/add_ldm)
   - [ZITS](https://github.com/Sanster/models/releases/tag/add_zits)
+  - [MAT](https://github.com/Sanster/models/releases/tag/add_mat)
+  - [FcF](https://github.com/Sanster/models/releases/tag/add_fcf)
 - Baidu:
   - https://pan.baidu.com/s/1vUd3BVqIpK6e8N_EA_ZJfw
   - passward: flsu
