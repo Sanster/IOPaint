@@ -5,7 +5,7 @@ import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", default=8080, type=int)
     parser.add_argument("--model", default="lama", choices=["lama", "ldm", "zits", "mat", 'fcf'])
     parser.add_argument("--device", default="cuda", type=str, choices=["cuda", "cpu"])

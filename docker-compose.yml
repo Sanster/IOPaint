@@ -1,0 +1,15 @@
+version: "3.2"
+services:
+  lama-cleaner-flask:
+    container_name: lama-cleaner-flask
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - '8080:8080'
+    environment:
+      - CACHE_DIR=/app/models
+    command: python3 main.py --device=cpu --port=8080
+    restart: always
+    networks:
+      - default
