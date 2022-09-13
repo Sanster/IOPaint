@@ -7,7 +7,7 @@ FROM python:3.7.4-slim-buster
 
 LABEL maintainer Loreto Parisi loretoparisi@gmail.com
 
-WORKDIR app
+WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     software-properties-common \
@@ -19,18 +19,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY . .
 COPY requirements.txt /etc/tmp/requirements.txt
 RUN pip install -r /etc/tmp/requirements.txt
-
-# nodejs
-RUN npm install n -g && \
-    n lts
-# yarn
-RUN npm install -g yarn
-
-# webapp
-RUN cd lama_cleaner/app/ && \
-    yarn && \
-    yarn build
-
-EXPOSE 8080
 
 CMD ["bash"]
