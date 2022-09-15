@@ -22,7 +22,6 @@ import Button from '../shared/Button'
 import Slider from './Slider'
 import SizeSelector from './SizeSelector'
 import {
-  dataURItoBlob,
   downloadImage,
   isMidClick,
   isRightClick,
@@ -30,7 +29,18 @@ import {
   srcToFile,
   useImage,
 } from '../../utils'
-import { settingState, toastState } from '../../store/Atoms'
+import {
+  croperState,
+  isInpaintingState,
+  isSDState,
+  propmtState,
+  runManuallyState,
+  settingState,
+  toastState,
+} from '../../store/Atoms'
+import useHotKey from '../../hooks/useHotkey'
+import Croper from '../Croper/Croper'
+import emitter, { EVENT_PROMPT } from '../../event'
 
 const TOOLBAR_SIZE = 200
 const BRUSH_COLOR = '#ffcc00bb'
@@ -74,8 +84,14 @@ function mouseXY(ev: SyntheticEvent) {
 
 export default function Editor(props: EditorProps) {
   const { file } = props
+  const promptVal = useRecoilValue(propmtState)
   const settings = useRecoilValue(settingState)
+  const croperRect = useRecoilValue(croperState)
   const [toastVal, setToastState] = useRecoilState(toastState)
+  const [isInpainting, setIsInpainting] = useRecoilState(isInpaintingState)
+  const runMannually = useRecoilValue(runManuallyState)
+  const isSD = useRecoilValue(isSDState)
+
   const [brushSize, setBrushSize] = useState(40)
   const [original, isOriginalLoaded] = useImage(file)
   const [renders, setRenders] = useState<HTMLImageElement[]>([])
@@ -90,7 +106,6 @@ export default function Editor(props: EditorProps) {
   const [showRefBrush, setShowRefBrush] = useState(false)
   const [isPanning, setIsPanning] = useState<boolean>(false)
   const [showOriginal, setShowOriginal] = useState(false)
-  const [isInpaintingLoading, setIsInpaintingLoading] = useState(false)
   const [scale, setScale] = useState<number>(1)
   const [panned, setPanned] = useState<boolean>(false)
   const [minScale, setMinScale] = useState<number>(1.0)
@@ -130,83 +145,28 @@ export default function Editor(props: EditorProps) {
     [context, original]
   )
 
-  const drawLinesOnMask = (_lineGroups: LineGroup[]) => {
-    if (!context?.canvas.width || !context?.canvas.height) {
-      throw new Error('canvas has invalid size')
-    }
-    maskCanvas.width = context?.canvas.width
-    maskCanvas.height = context?.canvas.height
-    const ctx = maskCanvas.getContext('2d')
-    if (!ctx) {
-      throw new Error('could not retrieve mask canvas')
-    }
-
-    _lineGroups.forEach(lineGroup => {
-      drawLines(ctx, lineGroup, 'white')
-    })
-  }
-
-  const runInpainting = async () => {
-    if (!hadDrawSomething()) {
-      return
-    }
-
-    const newLineGroups = [...lineGroups, curLineGroup]
-    setCurLineGroup([])
-    setIsDraging(false)
-    setIsInpaintingLoading(true)
-    if (settings.graduallyInpainting) {
-      drawLinesOnMask([curLineGroup])
-    } else {
-      drawLinesOnMask(newLineGroups)
-    }
-
-    let targetFile = file
-    if (settings.graduallyInpainting === true && renders.length > 0) {
-      console.info('gradually inpainting on last result')
-      const lastRender = renders[renders.length - 1]
-      targetFile = await srcToFile(lastRender.currentSrc, file.name, file.type)
-    }
-
-    try {
-      const res = await inpaint(
-        targetFile,
-        maskCanvas.toDataURL(),
-        settings,
-        sizeLimit.toString()
-      )
-      if (!res) {
-        throw new Error('empty response')
+  const drawLinesOnMask = useCallback(
+    (_lineGroups: LineGroup[]) => {
+      if (!context?.canvas.width || !context?.canvas.height) {
+        throw new Error('canvas has invalid size')
       }
-      const newRender = new Image()
-      await loadImage(newRender, res)
-      const newRenders = [...renders, newRender]
-      setRenders(newRenders)
-      draw(newRender, [])
-      // Only append new LineGroup after inpainting success
-      setLineGroups(newLineGroups)
+      maskCanvas.width = context?.canvas.width
+      maskCanvas.height = context?.canvas.height
+      const ctx = maskCanvas.getContext('2d')
+      if (!ctx) {
+        throw new Error('could not retrieve mask canvas')
+      }
 
-      // clear redo stack
-      resetRedoState()
-    } catch (e: any) {
-      setToastState({
-        open: true,
-        desc: e.message ? e.message : e.toString(),
-        state: 'error',
-        duration: 2000,
+      _lineGroups.forEach(lineGroup => {
+        drawLines(ctx, lineGroup, 'white')
       })
-      drawOnCurrentRender([])
-    }
-    setIsInpaintingLoading(false)
-  }
+    },
+    [context, maskCanvas]
+  )
 
-  const hadDrawSomething = () => {
+  const hadDrawSomething = useCallback(() => {
     return curLineGroup.length !== 0
-  }
-
-  const hadRunInpainting = () => {
-    return renders.length !== 0
-  }
+  }, [curLineGroup])
 
   const drawOnCurrentRender = useCallback(
     (lineGroup: LineGroup) => {
@@ -219,8 +179,107 @@ export default function Editor(props: EditorProps) {
     [original, renders, draw]
   )
 
+  const runInpainting = useCallback(
+    async (prompt?: string) => {
+      console.log('runInpainting')
+      if (!hadDrawSomething()) {
+        return
+      }
+      console.log(prompt)
+
+      const newLineGroups = [...lineGroups, curLineGroup]
+      setCurLineGroup([])
+      setIsDraging(false)
+      setIsInpainting(true)
+      if (settings.graduallyInpainting) {
+        drawLinesOnMask([curLineGroup])
+      } else {
+        drawLinesOnMask(newLineGroups)
+      }
+
+      let targetFile = file
+      if (settings.graduallyInpainting === true && renders.length > 0) {
+        console.info('gradually inpainting on last result')
+        const lastRender = renders[renders.length - 1]
+        targetFile = await srcToFile(
+          lastRender.currentSrc,
+          file.name,
+          file.type
+        )
+      }
+
+      try {
+        const res = await inpaint(
+          targetFile,
+          maskCanvas.toDataURL(),
+          settings,
+          croperRect,
+          prompt,
+          sizeLimit.toString()
+        )
+        if (!res) {
+          throw new Error('empty response')
+        }
+        const newRender = new Image()
+        await loadImage(newRender, res)
+        const newRenders = [...renders, newRender]
+        setRenders(newRenders)
+        draw(newRender, [])
+        // Only append new LineGroup after inpainting success
+        setLineGroups(newLineGroups)
+
+        // clear redo stack
+        resetRedoState()
+      } catch (e: any) {
+        setToastState({
+          open: true,
+          desc: e.message ? e.message : e.toString(),
+          state: 'error',
+          duration: 4000,
+        })
+        drawOnCurrentRender([])
+      }
+      setIsInpainting(false)
+    },
+    [
+      lineGroups,
+      curLineGroup,
+      maskCanvas,
+      settings.graduallyInpainting,
+      settings,
+      croperRect,
+      sizeLimit,
+      promptVal,
+      drawOnCurrentRender,
+      hadDrawSomething,
+      drawLinesOnMask,
+    ]
+  )
+
+  useEffect(() => {
+    emitter.on(EVENT_PROMPT, () => {
+      if (hadDrawSomething()) {
+        runInpainting(promptVal)
+      } else {
+        setToastState({
+          open: true,
+          desc: 'Please draw mask on picture',
+          state: 'error',
+          duration: 1500,
+        })
+      }
+    })
+    return () => {
+      emitter.off(EVENT_PROMPT)
+    }
+  }, [hadDrawSomething, runInpainting, prompt])
+
+  const hadRunInpainting = () => {
+    return renders.length !== 0
+  }
+
   const handleMultiStrokeKeyDown = () => {
-    if (isInpaintingLoading) {
+    if (isInpainting) {
       return
     }
     setIsMultiStrokeKeyPressed(true)
@@ -230,13 +289,13 @@ export default function Editor(props: EditorProps) {
     if (!isMultiStrokeKeyPressed) {
       return
     }
-    if (isInpaintingLoading) {
+    if (isInpainting) {
       return
     }
 
     setIsMultiStrokeKeyPressed(false)
 
-    if (!settings.runInpaintingManually) {
+    if (!runMannually) {
       runInpainting()
     }
   }
@@ -246,7 +305,7 @@ export default function Editor(props: EditorProps) {
   }
 
   useKey(predicate, handleMultiStrokeKeyup, { event: 'keyup' }, [
-    isInpaintingLoading,
+    isInpainting,
     isMultiStrokeKeyPressed,
     hadDrawSomething,
   ])
@@ -257,7 +316,7 @@ export default function Editor(props: EditorProps) {
     {
       event: 'keydown',
     },
-    [isInpaintingLoading]
+    [isInpainting]
   )
 
   // Draw once the original image is loaded
@@ -341,7 +400,7 @@ export default function Editor(props: EditorProps) {
   }, [windowSize, resetZoom])
 
   const handleEscPressed = () => {
-    if (isInpaintingLoading) {
+    if (isInpainting) {
       return
     }
     if (isDraging || isMultiStrokeKeyPressed) {
@@ -361,7 +420,7 @@ export default function Editor(props: EditorProps) {
     },
     [
       isDraging,
-      isInpaintingLoading,
+      isInpainting,
       isMultiStrokeKeyPressed,
       resetZoom,
       drawOnCurrentRender,
@@ -404,7 +463,7 @@ export default function Editor(props: EditorProps) {
     if (!canvas) {
       return
     }
-    if (isInpaintingLoading) {
+    if (isInpainting) {
       return
     }
     if (!isDraging) {
@@ -416,11 +475,27 @@ export default function Editor(props: EditorProps) {
       return
     }
 
-    if (settings.runInpaintingManually) {
+    if (runMannually) {
       setIsDraging(false)
     } else {
       runInpainting()
     }
+  }
+
+  const isOutsideCroper = (clickPnt: { x: number; y: number }) => {
+    if (clickPnt.x < croperRect.x) {
+      return true
+    }
+    if (clickPnt.y < croperRect.y) {
+      return true
+    }
+    if (clickPnt.x > croperRect.x + croperRect.width) {
+      return true
+    }
+    if (clickPnt.y > croperRect.y + croperRect.height) {
+      return true
+    }
+    return false
   }
 
   const onMouseDown = (ev: SyntheticEvent) => {
@@ -434,7 +509,7 @@ export default function Editor(props: EditorProps) {
     if (!canvas) {
       return
     }
-    if (isInpaintingLoading) {
+    if (isInpainting) {
       return
     }
 
@@ -447,10 +522,14 @@ export default function Editor(props: EditorProps) {
       return
     }
 
+    if (isSD && settings.showCroper && isOutsideCroper(mouseXY(ev))) {
+      return
+    }
+
     setIsDraging(true)
 
     let lineGroup: LineGroup = []
-    if (isMultiStrokeKeyPressed || settings.runInpaintingManually) {
+    if (isMultiStrokeKeyPressed || runMannually) {
       lineGroup = [...curLineGroup]
     }
     lineGroup.push({ size: brushSize, pts: [mouseXY(ev)] })
@@ -501,7 +580,7 @@ export default function Editor(props: EditorProps) {
   }, [draw, renders, redoRenders, redoLineGroups, lineGroups, original])
 
   const undo = () => {
-    if (settings.runInpaintingManually && curLineGroup.length !== 0) {
+    if (runMannually && curLineGroup.length !== 0) {
       undoStroke()
     } else {
       undoRender()
@@ -527,14 +606,14 @@ export default function Editor(props: EditorProps) {
   useKey(undoPredicate, undo, undefined, [undoStroke, undoRender])
 
   const disableUndo = () => {
-    if (isInpaintingLoading) {
+    if (isInpainting) {
       return true
     }
     if (renders.length > 0) {
       return false
     }
 
-    if (settings.runInpaintingManually) {
+    if (runMannually) {
       if (curLineGroup.length === 0) {
         return true
       }
@@ -575,7 +654,7 @@ export default function Editor(props: EditorProps) {
   }, [draw, renders, redoRenders, redoLineGroups, lineGroups, original])
 
   const redo = () => {
-    if (settings.runInpaintingManually && redoCurLines.length !== 0) {
+    if (runMannually && redoCurLines.length !== 0) {
       redoStroke()
     } else {
       redoRender()
@@ -603,14 +682,14 @@ export default function Editor(props: EditorProps) {
   useKey(redoPredicate, redo, undefined, [redoStroke, redoRender])
 
   const disableRedo = () => {
-    if (isInpaintingLoading) {
+    if (isInpainting) {
       return true
     }
     if (redoRenders.length > 0) {
       return false
     }
 
-    if (settings.runInpaintingManually) {
+    if (runMannually) {
       if (redoCurLines.length === 0) {
         return true
       }
@@ -688,7 +767,7 @@ export default function Editor(props: EditorProps) {
   }, [showBrush, isPanning])
 
   // Standard Hotkeys for Brush Size
-  useKeyPressEvent('[', () => {
+  useHotKey('[', () => {
     setBrushSize(currentBrushSize => {
       if (currentBrushSize > 10) {
         return currentBrushSize - 10
@@ -700,18 +779,23 @@ export default function Editor(props: EditorProps) {
     })
   })
 
-  useKeyPressEvent(']', () => {
+  useHotKey(']', () => {
     setBrushSize(currentBrushSize => {
       return currentBrushSize + 10
     })
   })
 
   // Manual Inpainting Hotkey
-  useKeyPressEvent('R', () => {
-    if (settings.runInpaintingManually && hadDrawSomething()) {
-      runInpainting()
-    }
-  })
+  useHotKey(
+    'shift+r',
+    () => {
+      if (runMannually && hadDrawSomething()) {
+        runInpainting()
+      }
+    },
+    {},
+    [runMannually]
+  )
 
   // Toggle clean/zoom tool on spacebar.
   useKeyPressEvent(
@@ -792,7 +876,7 @@ export default function Editor(props: EditorProps) {
         }}
       >
         <TransformComponent
-          contentClass={isInpaintingLoading ? 'editor-canvas-loading' : ''}
+          contentClass={isInpainting ? 'editor-canvas-loading' : ''}
           contentStyle={{
             visibility: initialCentered ? 'visible' : 'hidden',
           }}
@@ -852,10 +936,22 @@ export default function Editor(props: EditorProps) {
               />
             </div>
           </div>
+
+          {settings.showCroper ? (
+            <Croper
+              maxHeight={original.naturalHeight}
+              maxWidth={original.naturalWidth}
+              minHeight={Math.min(256, original.naturalHeight)}
+              minWidth={Math.min(256, original.naturalWidth)}
+              scale={scale}
+            />
+          ) : (
+            <></>
+          )}
         </TransformComponent>
       </TransformWrapper>
 
-      {showBrush && !isInpaintingLoading && !isPanning && (
+      {showBrush && !isInpainting && !isPanning && (
         <div className="brush-shape" style={getBrushStyle(x, y)} />
       )}
 
@@ -867,11 +963,15 @@ export default function Editor(props: EditorProps) {
       )}
 
       <div className="editor-toolkit-panel">
-        <SizeSelector
-          onChange={onSizeLimitChange}
-          originalWidth={original.naturalWidth}
-          originalHeight={original.naturalHeight}
-        />
+        {isSD ? (
+          <></>
+        ) : (
+          <SizeSelector
+            onChange={onSizeLimitChange}
+            originalWidth={original.naturalWidth}
+            originalHeight={original.naturalHeight}
+          />
+        )}
         <Slider
           label="Brush"
           min={10}
@@ -977,9 +1077,9 @@ export default function Editor(props: EditorProps) {
                   />
                 </svg>
               }
-              disabled={!hadDrawSomething() || isInpaintingLoading}
+              disabled={!hadDrawSomething() || isInpainting}
               onClick={() => {
-                if (!isInpaintingLoading && hadDrawSomething()) {
+                if (!isInpainting && hadDrawSomething()) {
                   runInpainting()
                 }
               }}

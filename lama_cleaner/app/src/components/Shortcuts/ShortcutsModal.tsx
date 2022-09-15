@@ -64,7 +64,8 @@ export default function ShortcutsModal() {
         <ShortCut content="Decrease Brush Size" keys={['[']} />
         <ShortCut content="Increase Brush Size" keys={[']']} />
         <ShortCut content="Toggle Dark Mode" keys={['Shift', 'D']} />
-        <ShortCut content="Toggle Hotkeys Panel" keys={['H']} />
+        <ShortCut content="Toggle Hotkeys Dialog" keys={['H']} />
+        <ShortCut content="Toggle Settings Dialog" keys={['S']} />
       </div>
     </Modal>
   )

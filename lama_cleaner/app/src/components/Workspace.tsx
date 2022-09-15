@@ -10,6 +10,7 @@ import {
   modelDownloaded,
   switchModel,
 } from '../adapters/inpainting'
+import SidePanel from './SidePanel/SidePanel'
 
 interface WorkspaceProps {
   file: File
@@ -82,6 +83,7 @@ const Workspace = ({ file }: WorkspaceProps) => {
 
   return (
     <>
+      <SidePanel />
       <Editor file={file} />
       <SettingModal onClose={onSettingClose} />
       <ShortcutsModal />

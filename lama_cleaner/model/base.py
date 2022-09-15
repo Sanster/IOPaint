@@ -14,17 +14,17 @@ class InpaintModel:
     pad_mod = 8
     pad_to_square = False
 
-    def __init__(self, device):
+    def __init__(self, device, **kwargs):
         """
 
         Args:
             device:
         """
         self.device = device
-        self.init_model(device)
+        self.init_model(device, **kwargs)
 
     @abc.abstractmethod
-    def init_model(self, device):
+    def init_model(self, device, **kwargs):
         ...
 
     @staticmethod
@@ -36,15 +36,19 @@ class InpaintModel:
     def forward(self, image, mask, config: Config):
         """Input images and output images have same size
         images: [H, W, C] RGB
-        masks: [H, W] 255 为 masks 区域
+        masks: [H, W, 1] 255 为 masks 区域
         return: BGR IMAGE
         """
         ...
 
     def _pad_forward(self, image, mask, config: Config):
         origin_height, origin_width = image.shape[:2]
-        pad_image = pad_img_to_modulo(image, mod=self.pad_mod, square=self.pad_to_square, min_size=self.min_size)
-        pad_mask = pad_img_to_modulo(mask, mod=self.pad_mod, square=self.pad_to_square, min_size=self.min_size)
+        pad_image = pad_img_to_modulo(
+            image, mod=self.pad_mod, square=self.pad_to_square, min_size=self.min_size
+        )
+        pad_mask = pad_img_to_modulo(
+            mask, mod=self.pad_mod, square=self.pad_to_square, min_size=self.min_size
+        )
 
         logger.info(f"final forward pad size: {pad_image.shape}")
 
@@ -81,18 +85,30 @@ class InpaintModel:
         elif config.hd_strategy == HDStrategy.RESIZE:
             if max(image.shape) > config.hd_strategy_resize_limit:
                 origin_size = image.shape[:2]
-                downsize_image = resize_max_size(image, size_limit=config.hd_strategy_resize_limit)
-                downsize_mask = resize_max_size(mask, size_limit=config.hd_strategy_resize_limit)
+                downsize_image = resize_max_size(
+                    image, size_limit=config.hd_strategy_resize_limit
+                )
+                downsize_mask = resize_max_size(
+                    mask, size_limit=config.hd_strategy_resize_limit
+                )
 
-                logger.info(f"Run resize strategy, origin size: {image.shape} forward size: {downsize_image.shape}")
-                inpaint_result = self._pad_forward(downsize_image, downsize_mask, config)
+                logger.info(
+                    f"Run resize strategy, origin size: {image.shape} forward size: {downsize_image.shape}"
+                )
+                inpaint_result = self._pad_forward(
+                    downsize_image, downsize_mask, config
+                )
 
                 # only paste masked area result
-                inpaint_result = cv2.resize(inpaint_result,
-                                            (origin_size[1], origin_size[0]),
-                                            interpolation=cv2.INTER_CUBIC)
+                inpaint_result = cv2.resize(
+                    inpaint_result,
+                    (origin_size[1], origin_size[0]),
+                    interpolation=cv2.INTER_CUBIC,
+                )
                 original_pixel_indices = mask < 127
-                inpaint_result[original_pixel_indices] = image[:, :, ::-1][original_pixel_indices]
+                inpaint_result[original_pixel_indices] = image[:, :, ::-1][
+                    original_pixel_indices
+                ]
 
         if inpaint_result is None:
             inpaint_result = self._pad_forward(image, mask, config)
@@ -133,11 +149,11 @@ class InpaintModel:
         if _l < 0:
             r += abs(_l)
         if _r > img_w:
-            l -= (_r - img_w)
+            l -= _r - img_w
         if _t < 0:
             b += abs(_t)
         if _b > img_h:
-            t -= (_b - img_h)
+            t -= _b - img_h
 
         l = max(l, 0)
         r = min(r, img_w)

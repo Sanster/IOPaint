@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
 import { useRecoilState } from 'recoil'
-import { AIModel, settingState } from '../../store/Atoms'
+import { AIModel, SDSampler, settingState } from '../../store/Atoms'
 import Selector from '../shared/Selector'
 import { Switch, SwitchThumb } from '../shared/Switch'
 import Tooltip from '../shared/Tooltip'
@@ -145,6 +145,8 @@ function ModelSettingBlock() {
         return undefined
       case AIModel.FCF:
         return renderFCFModelDesc()
+      case AIModel.SD14:
+        return undefined
       default:
         return <></>
     }
@@ -181,6 +183,12 @@ function ModelSettingBlock() {
           'Keys to Better Image Inpainting: Structure and Texture Go Hand in Hand',
           'https://arxiv.org/abs/2208.03382',
           'https://github.com/SHI-Labs/FcF-Inpainting'
+        )
+      case AIModel.SD14:
+        return renderModelDesc(
+          'Stable Diffusion',
+          'https://ommer-lab.com/research/latent-diffusion-models/',
+          'https://github.com/CompVis/stable-diffusion'
         )
       default:
         return <></>

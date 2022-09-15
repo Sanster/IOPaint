@@ -1,7 +1,9 @@
 import { XIcon } from '@heroicons/react/outline'
 import React, { ReactNode } from 'react'
+import { useRecoilState } from 'recoil'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import Button from './Button'
+import { appState } from '../../store/Atoms'
 
 export interface ModalProps {
   show: boolean
@@ -16,10 +18,14 @@ const Modal = React.forwardRef<
   ModalProps
 >((props, forwardedRef) => {
   const { show, children, onClose, className, title } = props
+  const [_, setAppState] = useRecoilState(appState)
 
   const onOpenChange = (open: boolean) => {
     if (!open) {
       onClose?.()
+      setAppState(old => {
+        return { ...old, disableShortCuts: false }
+      })
     }
   }
 

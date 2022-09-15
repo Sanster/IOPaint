@@ -22,3 +22,19 @@ class Config(BaseModel):
     hd_strategy_crop_margin: int
     hd_strategy_crop_trigger_size: int
     hd_strategy_resize_limit: int
+
+    prompt: str = ''
+    # 始终是在原图尺度上的值
+    use_croper: bool = False
+    croper_x: int = None
+    croper_y: int = None
+    croper_height: int = None
+    croper_width: int = None
+
+    # sd
+    sd_strength: float = 0.75
+    sd_steps: int = 50
+    sd_guidance_scale: float = 7.5
+    sd_sampler: str = 'ddim'  # ddim/pndm
+    # -1 mean random seed
+    sd_seed: int = 42

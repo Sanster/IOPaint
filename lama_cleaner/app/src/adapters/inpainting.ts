@@ -1,4 +1,4 @@
-import { Settings } from '../store/Atoms'
+import { Rect, Settings } from '../store/Atoms'
 import { dataURItoBlob } from '../utils'
 
 export const API_ENDPOINT = `${process.env.REACT_APP_INPAINTING_URL}`
@@ -7,6 +7,8 @@ export default async function inpaint(
   imageFile: File,
   maskBase64: string,
   settings: Settings,
+  croperRect: Rect,
+  prompt?: string,
   sizeLimit?: string
 ) {
   // 1080, 2000, Original
@@ -29,6 +31,18 @@ export default async function inpaint(
     'hdStrategyResizeLimit',
     hdSettings.hdStrategyResizeLimit.toString()
   )
+
+  fd.append('prompt', prompt === undefined ? '' : prompt)
+  fd.append('croperX', croperRect.x.toString())
+  fd.append('croperY', croperRect.y.toString())
+  fd.append('croperHeight', croperRect.height.toString())
+  fd.append('croperWidth', croperRect.width.toString())
+  fd.append('useCroper', settings.showCroper ? 'true' : 'false')
+  fd.append('sdStrength', settings.sdStrength.toString())
+  fd.append('sdSteps', settings.sdSteps.toString())
+  fd.append('sdGuidanceScale', settings.sdGuidanceScale.toString())
+  fd.append('sdSampler', settings.sdSampler.toString())
+  fd.append('sdSeed', settings.sdSeedFixed ? settings.sdSeed.toString() : '-1')
 
   if (sizeLimit === undefined) {
     fd.append('sizeLimit', '1080')

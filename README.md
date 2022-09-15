@@ -28,6 +28,7 @@
   1. [ZITS](https://github.com/DQiaole/ZITS_inpainting)
   1. [MAT](https://github.com/fenglinglwb/MAT)
   1. [FcF](https://github.com/SHI-Labs/FcF-Inpainting)
+  1. [SD](https://github.com/CompVis/stable-diffusion)
 - Support CPU & GPU
 - Various inpainting [strategy](#inpainting-strategy)
 - Run as a desktop APP
@@ -54,15 +55,16 @@ lama-cleaner --model=lama --device=cpu --port=8080
 
 Available arguments:
 
-| Name       | Description                                                      | Default  |
-| ---------- | ---------------------------------------------------------------- | -------- |
-| --model    | lama/ldm/zits. See details in [Inpaint Model](#inpainting-model) | lama     |
-| --device   | cuda or cpu                                                      | cuda     |
-| --port     | Port for backend flask web server                                | 8080     |
-| --gui      | Launch lama-cleaner as a desktop application                     |          |
-| --gui_size | Set the window size for the application                          | 1200 900 |
-| --input    | Path to image you want to load by default                        | None     |
-| --debug    | Enable debug mode for flask web server                           |          |
+| Name              | Description                                                                                              | Default  |
+| ----------------- | -------------------------------------------------------------------------------------------------------- | -------- |
+| --model           | lama/ldm/zits/mat/fcf/sd. See details in [Inpaint Model](#inpainting-model)                              | lama     |
+| --hf_access_token | stable-diffusion(sd) model need huggingface access token https://huggingface.co/docs/hub/security-tokens |          |
+| --device          | cuda or cpu                                                                                              | cuda     |
+| --port            | Port for backend flask web server                                                                        | 8080     |
+| --gui             | Launch lama-cleaner as a desktop application                                                             |          |
+| --gui_size        | Set the window size for the application                                                                  | 1200 900 |
+| --input           | Path to image you want to load by default                                                                | None     |
+| --debug           | Enable debug mode for flask web server                                                                   |          |
 
 ## Inpainting Model
 
@@ -73,6 +75,7 @@ Available arguments:
 | ZITS  | :+1: Better holistic structures compared with previous methods <br/> :neutral_face: Wireframe module is **very** slow on CPU                                                                                                | `Wireframe`: Enable edge and line detect                                                                                                                                                                                                                                          |
 | MAT   | TODO                                                                                                                                                                                                                        |                                                                                                                                                                                                                                                                                   |
 | FcF   | :+1: Better structure and texture generation <br/> :neutral_face: Only support fixed size (512x512) input                                                                                                                   |                                                                                                                                                                                                                                                                                   |
+| SD    | :+1: SOTA text-to-image diffusion model                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                   |
 
 ### LaMa vs LDM
 

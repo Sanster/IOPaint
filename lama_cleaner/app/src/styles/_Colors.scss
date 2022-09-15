@@ -6,6 +6,7 @@
   --page-bg-light: rgb(255, 255, 255, 0.5);
   --page-text-color: #040404;
   --yellow-accent: #ffcc00;
+  --yellow-accent-light: #ffcc0055;
   --link-color: rgb(0, 0, 0);
   --border-color: rgb(100, 100, 120);
   --border-color-light: rgba(100, 100, 120, 0.5);
@@ -57,4 +58,6 @@
   --box-shadow: inset 0 0.5px rgba(255, 255, 255, 0.1),
     inset 0 1px 5px hsl(210 16.7% 97.6%), 0px 0px 0px 0.5px hsl(205 10.7% 78%),
     0px 2px 1px -1px hsl(205 10.7% 78%), 0 1px hsl(205 10.7% 78%);
+
+  --croper-bg: rgba(0, 0, 0, 0.5);
 }

@@ -227,7 +227,7 @@ class LDM(InpaintModel):
         super().__init__(device)
         self.device = device
 
-    def init_model(self, device):
+    def init_model(self, device, **kwargs):
         self.diffusion_model = load_jit_model(LDM_DIFFUSION_MODEL_URL, device)
         self.cond_stage_model_decode = load_jit_model(LDM_DECODE_MODEL_URL, device)
         self.cond_stage_model_encode = load_jit_model(LDM_ENCODE_MODEL_URL, device)

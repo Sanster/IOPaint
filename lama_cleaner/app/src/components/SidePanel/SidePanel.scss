@@ -1,0 +1,57 @@
+@use '../../styles/Mixins/' as *;
+
+.side-panel {
+  position: absolute;
+  top: 68px;
+  right: 1.5rem;
+  padding: 0.3rem 0.3rem;
+  z-index: 4;
+
+  border-radius: 0.8rem;
+  border-style: solid;
+  border-color: var(--border-color);
+  border-width: 1px;
+}
+
+.side-panel-trigger {
+  font-family: 'WorkSans', sans-serif;
+  font-size: 16px;
+  border: 0px;
+}
+
+.side-panel-content {
+  position: relative;
+  font-family: 'WorkSans', sans-serif;
+  font-size: 14px;
+  top: 1rem;
+  right: 1.5rem;
+  padding: 1rem 1rem;
+  z-index: 9;
+
+  // backdrop-filter: blur(12px);
+  color: var(--text-color);
+  background-color: var(--page-bg);
+
+  border-radius: 0.8rem;
+  border-style: solid;
+  border-color: var(--border-color);
+  border-width: 1px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .setting-block-content {
+    gap: 1rem;
+  }
+
+  // input {
+  //   height: 24px;
+  //   // border-radius: 4px;
+  // }
+
+  // button {
+  //   height: 28px;
+  //   // border-radius: 4px;
+  // }
+}

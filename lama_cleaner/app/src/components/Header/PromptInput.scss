@@ -1,17 +1,18 @@
-.number-input {
+.prompt-wrapper {
+  display: flex;
+  gap: 12px;
+}
+
+.prompt-wrapper input {
   all: unset;
-  flex: 1 0 auto;
+  border-width: 0;
   border-radius: 0.5rem;
+  min-width: 600px;
   padding: 0 0.8rem;
   outline: 1px solid var(--border-color);
-  height: 32px;
-  text-align: right;
 
   &:focus-visible {
+    border-width: 0;
     outline: 1px solid var(--yellow-accent);
-  }
-
-  &:disabled {
-    color: var(--border-color);
   }
 }

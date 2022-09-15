@@ -9,11 +9,95 @@ export enum AIModel {
   ZITS = 'zits',
   MAT = 'mat',
   FCF = 'fcf',
+  SD14 = 'sd1.4',
 }
 
 export const fileState = atom<File | undefined>({
   key: 'fileState',
   default: undefined,
+})
+
+export interface Rect {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+interface AppState {
+  disableShortCuts: boolean
+  isInpainting: boolean
+}
+
+export const appState = atom<AppState>({
+  key: 'appState',
+  default: {
+    disableShortCuts: false,
+    isInpainting: false,
+  },
+})
+
+export const propmtState = atom<string>({
+  key: 'promptState',
+  default: '',
+})
+
+export const isInpaintingState = selector({
+  key: 'isInpainting',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.isInpainting
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, isInpainting: newValue })
+  },
+})
+
+export const croperState = atom<Rect>({
+  key: 'croperState',
+  default: {
+    x: 0,
+    y: 0,
+    width: 512,
+    height: 512,
+  },
+})
+
+export const croperX = selector({
+  key: 'croperX',
+  get: ({ get }) => get(croperState).x,
+  set: ({ get, set }, newValue: any) => {
+    const rect = get(croperState)
+    set(croperState, { ...rect, x: newValue })
+  },
+})
+
+export const croperY = selector({
+  key: 'croperY',
+  get: ({ get }) => get(croperState).y,
+  set: ({ get, set }, newValue: any) => {
+    const rect = get(croperState)
+    set(croperState, { ...rect, y: newValue })
+  },
+})
+
+export const croperHeight = selector({
+  key: 'croperHeight',
+  get: ({ get }) => get(croperState).height,
+  set: ({ get, set }, newValue: any) => {
+    const rect = get(croperState)
+    set(croperState, { ...rect, height: newValue })
+  },
+})
+
+export const croperWidth = selector({
+  key: 'croperWidth',
+  get: ({ get }) => get(croperState).width,
+  set: ({ get, set }, newValue: any) => {
+    const rect = get(croperState)
+    set(croperState, { ...rect, width: newValue })
+  },
 })
 
 interface ToastAtomState {
@@ -50,6 +134,7 @@ type ModelsHDSettings = { [key in AIModel]: HDSettings }
 
 export interface Settings {
   show: boolean
+  showCroper: boolean
   downloadMask: boolean
   graduallyInpainting: boolean
   runInpaintingManually: boolean
@@ -62,6 +147,16 @@ export interface Settings {
 
   // For ZITS
   zitsWireframe: boolean
+
+  // For SD
+  sdMode: SDMode
+  sdStrength: number
+  sdSteps: number
+  sdGuidanceScale: number
+  sdSampler: SDSampler
+  sdSeed: number
+  sdSeedFixed: boolean // true: use sdSeed, false: random generate seed on backend
+  sdNumSamples: number
 }
 
 const defaultHDSettings: ModelsHDSettings = {
@@ -100,10 +195,28 @@ const defaultHDSettings: ModelsHDSettings = {
     hdStrategyCropMargin: 128,
     enabled: false,
   },
+  [AIModel.SD14]: {
+    hdStrategy: HDStrategy.ORIGINAL,
+    hdStrategyResizeLimit: 768,
+    hdStrategyCropTrigerSize: 512,
+    hdStrategyCropMargin: 128,
+    enabled: true,
+  },
+}
+
+export enum SDSampler {
+  ddim = 'ddim',
+}
+
+export enum SDMode {
+  text2img = 'text2img',
+  img2img = 'img2img',
+  inpainting = 'inpainting',
 }
 
 export const settingStateDefault: Settings = {
   show: false,
+  showCroper: false,
   downloadMask: false,
   graduallyInpainting: true,
   runInpaintingManually: false,
@@ -114,6 +227,16 @@ export const settingStateDefault: Settings = {
   ldmSampler: LDMSampler.plms,
 
   zitsWireframe: true,
+
+  // SD
+  sdMode: SDMode.inpainting,
+  sdStrength: 0.75,
+  sdSteps: 50,
+  sdGuidanceScale: 7.5,
+  sdSampler: SDSampler.ddim,
+  sdSeed: 42,
+  sdSeedFixed: true,
+  sdNumSamples: 1,
 }
 
 const localStorageEffect =
@@ -162,5 +285,22 @@ export const hdSettingsState = selector({
       ...settings,
       hdSettings: { ...settings.hdSettings, [settings.model]: newHDSettings },
     })
+  },
+})
+
+export const isSDState = selector({
+  key: 'isSD',
+  get: ({ get }) => {
+    const settings = get(settingState)
+    return settings.model === AIModel.SD14
+  },
+})
+
+export const runManuallyState = selector({
+  key: 'runManuallyState',
+  get: ({ get }) => {
+    const settings = get(settingState)
+    const isSD = get(isSDState)
+    return settings.runInpaintingManually || isSD
   },
 })

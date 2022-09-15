@@ -18,16 +18,7 @@ LAMA_MODEL_URL = os.environ.get(
 class LaMa(InpaintModel):
     pad_mod = 8
 
-    def __init__(self, device):
-        """
-
-        Args:
-            device:
-        """
-        super().__init__(device)
-        self.device = device
-
-    def init_model(self, device):
+    def init_model(self, device, **kwargs):
         if os.environ.get("LAMA_MODEL"):
             model_path = os.environ.get("LAMA_MODEL")
             if not os.path.exists(model_path):

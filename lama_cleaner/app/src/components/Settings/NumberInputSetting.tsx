@@ -4,14 +4,28 @@ import SettingBlock from './SettingBlock'
 
 interface NumberInputSettingProps {
   title: string
+  allowFloat?: boolean
   desc?: string
   value: string
   suffix?: string
+  width?: number
+  widthUnit?: string
+  disable?: boolean
   onValue: (val: string) => void
 }
 
 function NumberInputSetting(props: NumberInputSettingProps) {
-  const { title, desc, value, suffix, onValue } = props
+  const {
+    title,
+    allowFloat,
+    desc,
+    value,
+    suffix,
+    onValue,
+    width,
+    widthUnit,
+    disable,
+  } = props
 
   return (
     <SettingBlock
@@ -28,8 +42,10 @@ function NumberInputSetting(props: NumberInputSettingProps) {
           }}
         >
           <NumberInput
-            style={{ width: '80px' }}
+            allowFloat={allowFloat}
+            style={{ width: `${width}${widthUnit}` }}
             value={`${value}`}
+            disabled={disable}
             onValue={onValue}
           />
           {suffix && <span>{suffix}</span>}
@@ -37,6 +53,13 @@ function NumberInputSetting(props: NumberInputSettingProps) {
       }
     />
   )
+}
+
+NumberInputSetting.defaultProps = {
+  allowFloat: false,
+  width: 80,
+  widthUnit: 'px',
+  disable: false,
 }
 
 export default NumberInputSetting
