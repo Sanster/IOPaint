@@ -35,6 +35,7 @@ import {
   isSDState,
   propmtState,
   runManuallyState,
+  seedState,
   settingState,
   toastState,
 } from '../../store/Atoms'
@@ -86,6 +87,7 @@ export default function Editor(props: EditorProps) {
   const { file } = props
   const promptVal = useRecoilValue(propmtState)
   const settings = useRecoilValue(settingState)
+  const [seedVal, setSeed] = useRecoilState(seedState)
   const croperRect = useRecoilValue(croperState)
   const [toastVal, setToastState] = useRecoilState(toastState)
   const [isInpainting, setIsInpainting] = useRecoilState(isInpaintingState)
@@ -220,8 +222,12 @@ export default function Editor(props: EditorProps) {
         if (!res) {
           throw new Error('empty response')
         }
+        const { blob, seed } = res
+        if (seed) {
+          setSeed(parseInt(seed, 10))
+        }
         const newRender = new Image()
-        await loadImage(newRender, res)
+        await loadImage(newRender, blob)
         const newRenders = [...renders, newRender]
         setRenders(newRenders)
         draw(newRender, [])

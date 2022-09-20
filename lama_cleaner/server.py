@@ -26,7 +26,7 @@ try:
 except:
     pass
 
-from flask import Flask, request, send_file, cli
+from flask import Flask, request, send_file, cli, make_response
 
 # Disable ability for Flask to display warning about using a development server in a production environment.
 # https://gist.github.com/jerblack/735b9953ba1ab6234abb43174210d356
@@ -112,14 +112,12 @@ def process():
         hd_strategy_crop_margin=form["hdStrategyCropMargin"],
         hd_strategy_crop_trigger_size=form["hdStrategyCropTrigerSize"],
         hd_strategy_resize_limit=form["hdStrategyResizeLimit"],
-
-        prompt=form['prompt'],
-        use_croper=form['useCroper'],
-        croper_x=form['croperX'],
-        croper_y=form['croperY'],
-        croper_height=form['croperHeight'],
-        croper_width=form['croperWidth'],
-
+        prompt=form["prompt"],
+        use_croper=form["useCroper"],
+        croper_x=form["croperX"],
+        croper_y=form["croperY"],
+        croper_height=form["croperHeight"],
+        croper_width=form["croperWidth"],
         sd_strength=form["sdStrength"],
         sd_steps=form["sdSteps"],
         sd_guidance_scale=form["sdGuidanceScale"],
@@ -153,10 +151,15 @@ def process():
         )
 
     ext = get_image_ext(origin_image_bytes)
-    return send_file(
-        io.BytesIO(numpy_to_bytes(res_np_img, ext)),
-        mimetype=f"image/{ext}",
+
+    response = make_response(
+        send_file(
+            io.BytesIO(numpy_to_bytes(res_np_img, ext)),
+            mimetype=f"image/{ext}",
+        )
     )
+    response.headers["X-Seed"] = str(config.sd_seed)
+    return response
 
 
 @app.route("/model")
@@ -210,8 +213,12 @@ def main(args):
     device = torch.device(args.device)
     input_image_path = args.input
 
-    model = ModelManager(name=args.model, device=device, hf_access_token=args.hf_access_token,
-                         callbacks=[diffuser_callback])
+    model = ModelManager(
+        name=args.model,
+        device=device,
+        hf_access_token=args.hf_access_token,
+        callbacks=[diffuser_callback],
+    )
 
     if args.gui:
         app_width, app_height = args.gui_size

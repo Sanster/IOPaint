@@ -270,6 +270,18 @@ export const settingState = atom<Settings>({
   effects: [localStorageEffect(ROOT_STATE_KEY)],
 })
 
+export const seedState = selector({
+  key: 'seed',
+  get: ({ get }) => {
+    const settings = get(settingState)
+    return settings.sdSeed
+  },
+  set: ({ get, set }, newValue: any) => {
+    const settings = get(settingState)
+    set(settingState, { ...settings, sdSeed: newValue })
+  },
+})
+
 export const hdSettingsState = selector({
   key: 'hdSettings',
   get: ({ get }) => {

@@ -50,17 +50,19 @@ export default async function inpaint(
     fd.append('sizeLimit', sizeLimit)
   }
 
-  const res = await fetch(`${API_ENDPOINT}/inpaint`, {
-    method: 'POST',
-    body: fd,
-  }).then(async r => {
-    if (r.ok) {
-      return r.blob()
+  try {
+    const res = await fetch(`${API_ENDPOINT}/inpaint`, {
+      method: 'POST',
+      body: fd,
+    })
+    if (res.ok) {
+      const blob = await res.blob()
+      const seed = res.headers.get('x-seed')
+      return { blob: URL.createObjectURL(blob), seed }
     }
+  } catch {
     throw new Error('Something went wrong on server side.')
-  })
-
-  return URL.createObjectURL(res)
+  }
 }
 
 export function switchModel(name: string) {

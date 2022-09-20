@@ -44,7 +44,7 @@ function NumberInputSetting(props: NumberInputSettingProps) {
           <NumberInput
             allowFloat={allowFloat}
             style={{ width: `${width}${widthUnit}` }}
-            value={`${value}`}
+            value={value}
             disabled={disable}
             onValue={onValue}
           />

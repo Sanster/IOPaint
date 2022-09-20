@@ -1,4 +1,9 @@
-import React, { FormEvent, InputHTMLAttributes, useState } from 'react'
+import React, {
+  FormEvent,
+  InputHTMLAttributes,
+  useEffect,
+  useState,
+} from 'react'
 import TextInput from './Input'
 
 interface NumberInputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -11,6 +16,10 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
   (props: NumberInputProps, forwardedRef) => {
     const { value, allowFloat, onValue, ...itemProps } = props
     const [innerValue, setInnerValue] = useState(value)
+
+    useEffect(() => {
+      setInnerValue(value)
+    }, [value])
 
     const handleOnInput = (evt: FormEvent<HTMLInputElement>) => {
       const target = evt.target as HTMLInputElement
