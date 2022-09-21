@@ -1,11 +1,12 @@
-import React, { FocusEvent, InputHTMLAttributes } from 'react'
+import React, { FocusEvent, InputHTMLAttributes, RefObject } from 'react'
+import { useClickAway } from 'react-use'
 import { useRecoilState } from 'recoil'
 import { appState } from '../../store/Atoms'
 
 const TextInput = React.forwardRef<
   HTMLInputElement,
   InputHTMLAttributes<HTMLInputElement>
->((props: InputHTMLAttributes<HTMLInputElement>, forwardedRef) => {
+>((props, ref) => {
   const { onFocus, onBlur, ...itemProps } = props
   const [_, setAppState] = useRecoilState(appState)
 
@@ -26,7 +27,7 @@ const TextInput = React.forwardRef<
   return (
     <input
       {...itemProps}
-      ref={forwardedRef}
+      ref={ref}
       type="text"
       onFocus={handleOnFocus}
       onBlur={handleOnBlur}

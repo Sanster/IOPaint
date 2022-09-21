@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useRef } from 'react'
+import { useClickAway } from 'react-use'
 import NumberInput from '../shared/NumberInput'
 import SettingBlock from './SettingBlock'
 
@@ -27,6 +28,15 @@ function NumberInputSetting(props: NumberInputSettingProps) {
     disable,
   } = props
 
+  const ref = useRef(null)
+
+  useClickAway<MouseEvent>(ref, () => {
+    if (ref?.current) {
+      const input = ref.current as HTMLInputElement
+      input.blur()
+    }
+  })
+
   return (
     <SettingBlock
       className="sub-setting-block"
@@ -47,6 +57,7 @@ function NumberInputSetting(props: NumberInputSettingProps) {
             value={value}
             disabled={disable}
             onValue={onValue}
+            ref={ref}
           />
           {suffix && <span>{suffix}</span>}
         </div>
