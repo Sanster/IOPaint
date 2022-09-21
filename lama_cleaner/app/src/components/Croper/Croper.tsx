@@ -83,43 +83,78 @@ const Croper = (props: Props) => {
     }
     const curX = e.clientX
     const curY = e.clientY
+
+    const offsetY = Math.round((curY - evData.startResizeY) / scale)
+    const offsetX = Math.round((curX - evData.startResizeX) / scale)
+
+    const moveTop = () => {
+      const newHeight = evData.initHeight - offsetY
+      const newY = evData.initY + offsetY
+      if (checkTopBottomLimit(newY, newHeight)) {
+        setHeight(newHeight)
+        setY(newY)
+      }
+    }
+
+    const moveBottom = () => {
+      const newHeight = evData.initHeight + offsetY
+      if (checkTopBottomLimit(evData.initY, newHeight)) {
+        setHeight(newHeight)
+      }
+    }
+
+    const moveLeft = () => {
+      const newWidth = evData.initWidth - offsetX
+      const newX = evData.initX + offsetX
+      if (checkLeftRightLimit(newX, newWidth)) {
+        setWidth(newWidth)
+        setX(newX)
+      }
+    }
+
+    const moveRight = () => {
+      const newWidth = evData.initWidth + offsetX
+      if (checkLeftRightLimit(evData.initX, newWidth)) {
+        setWidth(newWidth)
+      }
+    }
+
     if (isResizing) {
       switch (evData.ord) {
+        case 'topleft': {
+          moveTop()
+          moveLeft()
+          break
+        }
+        case 'topright': {
+          moveTop()
+          moveRight()
+          break
+        }
+        case 'bottomleft': {
+          moveBottom()
+          moveLeft()
+          break
+        }
+        case 'bottomright': {
+          moveBottom()
+          moveRight()
+          break
+        }
         case 'top': {
-          // TODO: 添加四个角以及 drag bar handle
-          const offset = Math.round((curY - evData.startResizeY) / scale)
-          const newHeight = evData.initHeight - offset
-          const newY = evData.initY + offset
-          if (checkTopBottomLimit(newY, newHeight)) {
-            setHeight(newHeight)
-            setY(newY)
-          }
+          moveTop()
           break
         }
         case 'right': {
-          const offset = Math.round((curX - evData.startResizeX) / scale)
-          const newWidth = evData.initWidth + offset
-          if (checkLeftRightLimit(evData.initX, newWidth)) {
-            setWidth(newWidth)
-          }
+          moveRight()
           break
         }
         case 'bottom': {
-          const offset = Math.round((curY - evData.startResizeY) / scale)
-          const newHeight = evData.initHeight + offset
-          if (checkTopBottomLimit(evData.initY, newHeight)) {
-            setHeight(newHeight)
-          }
+          moveBottom()
           break
         }
         case 'left': {
-          const offset = Math.round((curX - evData.startResizeX) / scale)
-          const newWidth = evData.initWidth - offset
-          const newX = evData.initX + offset
-          if (checkLeftRightLimit(newX, newWidth)) {
-            setWidth(newWidth)
-            setX(newX)
-          }
+          moveLeft()
           break
         }
 
@@ -129,8 +164,6 @@ const Croper = (props: Props) => {
     }
 
     if (isMoving) {
-      const offsetX = Math.round((curX - evData.startResizeX) / scale)
-      const offsetY = Math.round((curY - evData.startResizeY) / scale)
       const newX = evData.initX + offsetX
       const newY = evData.initY + offsetY
       if (
@@ -197,6 +230,27 @@ const Croper = (props: Props) => {
         onFocus={onDragFocus}
         onPointerDown={onCropPointerDown}
       >
+        <div
+          className="drag-bar ord-top"
+          data-ord="top"
+          style={{ transform: `scale(${1 / scale})` }}
+        />
+        <div
+          className="drag-bar ord-right"
+          data-ord="right"
+          style={{ transform: `scale(${1 / scale})` }}
+        />
+        <div
+          className="drag-bar ord-bottom"
+          data-ord="bottom"
+          style={{ transform: `scale(${1 / scale})` }}
+        />
+        <div
+          className="drag-bar ord-left"
+          data-ord="left"
+          style={{ transform: `scale(${1 / scale})` }}
+        />
+
         <div
           className="drag-handle ord-topleft"
           data-ord="topleft"
@@ -289,7 +343,8 @@ const Croper = (props: Props) => {
         onPointerDown={onInfoBarPointerDown}
         style={{
           transform: `scale(${1 / scale})`,
-          top: `${-28 / scale - 14}px`,
+          top: `${10 / scale}px`,
+          left: `${10 / scale}px`,
         }}
       >
         <div className="crop-size">

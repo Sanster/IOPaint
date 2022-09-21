@@ -2,9 +2,11 @@
 
 $drag-handle-shortside: 12px;
 $drag-handle-longside: 40px;
+$drag-bar-size: 12px;
 
 $half-handle-shortside: math.div($drag-handle-shortside, 2);
 $half-handle-longside: math.div($drag-handle-longside, 2);
+$half-drag-bar-size: math.div($drag-bar-size, 2);
 
 .crop-border {
   outline-color: var(--yellow-accent);
@@ -50,11 +52,50 @@ $half-handle-longside: math.div($drag-handle-longside, 2);
   z-index: 2;
   pointer-events: none;
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  // display: flex;
+  // flex-direction: column;
+  // align-items: center;
 
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+}
+
+.drag-bar {
+  position: absolute;
+  pointer-events: auto;
+  // display: none;
+
+  &.ord-top {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: $drag-bar-size;
+    margin-top: -$half-drag-bar-size;
+    cursor: ns-resize;
+  }
+  &.ord-right {
+    right: 0;
+    top: 0;
+    width: $drag-bar-size;
+    height: 100%;
+    margin-right: -$half-drag-bar-size;
+    cursor: ew-resize;
+  }
+  &.ord-bottom {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: $drag-bar-size;
+    margin-bottom: -$half-drag-bar-size;
+    cursor: ns-resize;
+  }
+  &.ord-left {
+    top: 0;
+    left: 0;
+    width: $drag-bar-size;
+    height: 100%;
+    margin-left: -$half-drag-bar-size;
+    cursor: ew-resize;
+  }
 }
 
 .drag-handle {
@@ -71,56 +112,56 @@ $half-handle-longside: math.div($drag-handle-longside, 2);
   &:hover {
     background-color: var(--yellow-accent);
   }
-}
 
-.ord-topleft {
-  cursor: nw-resize;
-  top: (-$half-handle-shortside)-1px;
-  left: (-$half-handle-shortside)-1px;
-}
+  &.ord-topleft {
+    cursor: nw-resize;
+    top: (-$half-handle-shortside)-1px;
+    left: (-$half-handle-shortside)-1px;
+  }
 
-.ord-topright {
-  cursor: ne-resize;
-  top: -($half-handle-shortside)-1px;
-  right: -($half-handle-shortside)-1px;
-}
+  &.ord-topright {
+    cursor: ne-resize;
+    top: -($half-handle-shortside)-1px;
+    right: -($half-handle-shortside)-1px;
+  }
 
-.ord-bottomright {
-  cursor: se-resize;
-  bottom: -($half-handle-shortside)-1px;
-  right: -($half-handle-shortside)-1px;
-}
+  &.ord-bottomright {
+    cursor: se-resize;
+    bottom: -($half-handle-shortside)-1px;
+    right: -($half-handle-shortside)-1px;
+  }
 
-.ord-bottomleft {
-  cursor: sw-resize;
-  bottom: -($half-handle-shortside)-1px;
-  left: -($half-handle-shortside)-1px;
-}
+  &.ord-bottomleft {
+    cursor: sw-resize;
+    bottom: -($half-handle-shortside)-1px;
+    left: -($half-handle-shortside)-1px;
+  }
 
-.ord-top,
-.ord-bottom {
-  left: calc(50% - $half-handle-shortside);
-  cursor: ns-resize;
-}
+  &.ord-top,
+  &.ord-bottom {
+    left: calc(50% - $half-handle-shortside);
+    cursor: ns-resize;
+  }
 
-.ord-top {
-  top: (-$half-handle-shortside)-1px;
-}
+  &.ord-top {
+    top: (-$half-handle-shortside)-1px;
+  }
 
-.ord-bottom {
-  bottom: -($half-handle-shortside)-1px;
-}
+  &.ord-bottom {
+    bottom: -($half-handle-shortside)-1px;
+  }
 
-.ord-left,
-.ord-right {
-  top: calc(50% - $half-handle-shortside);
-  cursor: ew-resize;
-}
+  &.ord-left,
+  &.ord-right {
+    top: calc(50% - $half-handle-shortside);
+    cursor: ew-resize;
+  }
 
-.ord-left {
-  left: (-$half-handle-shortside)-1px;
-}
+  &.ord-left {
+    left: (-$half-handle-shortside)-1px;
+  }
 
-.ord-right {
-  right: -($half-handle-shortside)-1px;
+  &.ord-right {
+    right: -($half-handle-shortside)-1px;
+  }
 }
