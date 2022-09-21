@@ -261,7 +261,7 @@ const localStorageEffect =
     )
   }
 
-const ROOT_STATE_KEY = 'settingsState2'
+const ROOT_STATE_KEY = 'settingsState3'
 // Each atom can reference an array of these atom effect functions which are called in priority order when the atom is initialized
 // https://recoiljs.org/docs/guides/atom-effects/#local-storage-persistence
 export const settingState = atom<Settings>({

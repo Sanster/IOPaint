@@ -45,7 +45,7 @@ export default function SettingModal(props: SettingModalProps) {
     >
       {isSD ? <></> : <ManualRunInpaintingSettingBlock />}
 
-      <GraduallyInpaintingSettingBlock />
+      {/* <GraduallyInpaintingSettingBlock /> */}
       <DownloadMaskSettingBlock />
       <ModelSettingBlock />
       {isSD ? <></> : <HDSettingBlock />}
