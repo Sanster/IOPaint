@@ -9,7 +9,8 @@ export default async function inpaint(
   settings: Settings,
   croperRect: Rect,
   prompt?: string,
-  sizeLimit?: string
+  sizeLimit?: string,
+  seed?: number
 ) {
   // 1080, 2000, Original
   const fd = new FormData()
@@ -42,7 +43,8 @@ export default async function inpaint(
   fd.append('sdSteps', settings.sdSteps.toString())
   fd.append('sdGuidanceScale', settings.sdGuidanceScale.toString())
   fd.append('sdSampler', settings.sdSampler.toString())
-  fd.append('sdSeed', settings.sdSeedFixed ? settings.sdSeed.toString() : '-1')
+  // fd.append('sdSeed', settings.sdSeedFixed ? settings.sdSeed.toString() : '-1')
+  fd.append('sdSeed', seed ? seed.toString() : '-1')
 
   if (sizeLimit === undefined) {
     fd.append('sizeLimit', '1080')
@@ -57,8 +59,8 @@ export default async function inpaint(
     })
     if (res.ok) {
       const blob = await res.blob()
-      const seed = res.headers.get('x-seed')
-      return { blob: URL.createObjectURL(blob), seed }
+      const newSeed = res.headers.get('x-seed')
+      return { blob: URL.createObjectURL(blob), seed: newSeed }
     }
   } catch {
     throw new Error('Something went wrong on server side.')

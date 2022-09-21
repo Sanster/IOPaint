@@ -8,7 +8,7 @@ import SettingBlock from '../Settings/SettingBlock'
 import Selector from '../shared/Selector'
 import { Switch, SwitchThumb } from '../shared/Switch'
 import Button from '../shared/Button'
-import emitter, { EVENT_PROMPT } from '../../event'
+import emitter, { EVENT_RERUN } from '../../event'
 
 const INPUT_WIDTH = 30
 
@@ -18,7 +18,7 @@ const SidePanel = () => {
   const [setting, setSettingState] = useRecoilState(settingState)
 
   const onReRunBtnClick = () => {
-    emitter.emit(EVENT_PROMPT)
+    emitter.emit(EVENT_RERUN)
   }
 
   return (

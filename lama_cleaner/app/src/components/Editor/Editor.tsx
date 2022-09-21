@@ -41,7 +41,7 @@ import {
 } from '../../store/Atoms'
 import useHotKey from '../../hooks/useHotkey'
 import Croper from '../Croper/Croper'
-import emitter, { EVENT_PROMPT } from '../../event'
+import emitter, { EVENT_PROMPT, EVENT_RERUN } from '../../event'
 
 const TOOLBAR_SIZE = 200
 const BRUSH_COLOR = '#ffcc00bb'
@@ -102,6 +102,7 @@ export default function Editor(props: EditorProps) {
     return document.createElement('canvas')
   })
   const [lineGroups, setLineGroups] = useState<LineGroup[]>([])
+  const [lastLineGroup, setLastLineGroup] = useState<LineGroup>([])
   const [curLineGroup, setCurLineGroup] = useState<LineGroup>([])
   const [{ x, y }, setCoords] = useState({ x: -1, y: -1 })
   const [showBrush, setShowBrush] = useState(false)
@@ -182,32 +183,65 @@ export default function Editor(props: EditorProps) {
   )
 
   const runInpainting = useCallback(
-    async (prompt?: string) => {
+    async (prompt?: string, useLastLineGroup?: boolean) => {
+      // useLastLineGroup 的影响
+      // 1. 使用上一次的 mask
+      // 2. 结果替换当前 render
       console.log('runInpainting')
-      if (!hadDrawSomething()) {
-        return
-      }
-      console.log(prompt)
 
-      const newLineGroups = [...lineGroups, curLineGroup]
+      let maskLineGroup = []
+      if (useLastLineGroup === true) {
+        if (lastLineGroup.length === 0) {
+          return
+        }
+        maskLineGroup = lastLineGroup
+      } else {
+        if (!hadDrawSomething()) {
+          return
+        }
+
+        setLastLineGroup(curLineGroup)
+        maskLineGroup = curLineGroup
+      }
+
+      const newLineGroups = [...lineGroups, maskLineGroup]
+
       setCurLineGroup([])
       setIsDraging(false)
       setIsInpainting(true)
       if (settings.graduallyInpainting) {
-        drawLinesOnMask([curLineGroup])
+        drawLinesOnMask([maskLineGroup])
       } else {
         drawLinesOnMask(newLineGroups)
       }
 
       let targetFile = file
-      if (settings.graduallyInpainting === true && renders.length > 0) {
-        console.info('gradually inpainting on last result')
-        const lastRender = renders[renders.length - 1]
-        targetFile = await srcToFile(
-          lastRender.currentSrc,
-          file.name,
-          file.type
-        )
+      if (settings.graduallyInpainting === true) {
+        if (useLastLineGroup === true) {
+          // renders.length == 1 还是用原来的
+          if (renders.length > 1) {
+            const lastRender = renders[renders.length - 2]
+            targetFile = await srcToFile(
+              lastRender.currentSrc,
+              file.name,
+              file.type
+            )
+          }
+        } else if (renders.length > 0) {
+          console.info('gradually inpainting on last result')
+
+          const lastRender = renders[renders.length - 1]
+          targetFile = await srcToFile(
+            lastRender.currentSrc,
+            file.name,
+            file.type
+          )
+        }
+      }
+
+      let sdSeed = settings.sdSeedFixed ? settings.sdSeed : -1
+      if (useLastLineGroup === true) {
+        sdSeed = -1
       }
 
       try {
@@ -217,7 +251,8 @@ export default function Editor(props: EditorProps) {
           settings,
           croperRect,
           prompt,
-          sizeLimit.toString()
+          sizeLimit.toString(),
+          sdSeed
         )
         if (!res) {
           throw new Error('empty response')
@@ -228,8 +263,16 @@ export default function Editor(props: EditorProps) {
         }
         const newRender = new Image()
         await loadImage(newRender, blob)
-        const newRenders = [...renders, newRender]
-        setRenders(newRenders)
+
+        if (useLastLineGroup === true) {
+          const prevRenders = renders.slice(0, -1)
+          const newRenders = [...prevRenders, newRender]
+          setRenders(newRenders)
+        } else {
+          const newRenders = [...renders, newRender]
+          setRenders(newRenders)
+        }
+
         draw(newRender, [])
         // Only append new LineGroup after inpainting success
         setLineGroups(newLineGroups)
@@ -279,6 +322,26 @@ export default function Editor(props: EditorProps) {
       emitter.off(EVENT_PROMPT)
     }
   }, [hadDrawSomething, runInpainting, prompt])
+
+  useEffect(() => {
+    emitter.on(EVENT_RERUN, () => {
+      if (hadDrawSomething()) {
+        runInpainting(promptVal)
+      } else if (lastLineGroup.length !== 0) {
+        runInpainting(promptVal, true)
+      } else {
+        setToastState({
+          open: true,
+          desc: 'Please draw mask on picture',
+          state: 'error',
+          duration: 1500,
+        })
+      }
+    })
+    return () => {
+      emitter.off(EVENT_RERUN)
+    }
+  }, [lastLineGroup, hadDrawSomething, runInpainting, prompt])
 
   const hadRunInpainting = () => {
     return renders.length !== 0
@@ -547,6 +610,7 @@ export default function Editor(props: EditorProps) {
     if (curLineGroup.length === 0) {
       return
     }
+    setLastLineGroup([])
 
     const lastLine = curLineGroup.pop()!
     const newRedoCurLines = [...redoCurLines, lastLine]
@@ -563,8 +627,8 @@ export default function Editor(props: EditorProps) {
     }
 
     // save line Group
-    const lastLineGroup = lineGroups.pop()!
-    setRedoLineGroups([...redoLineGroups, lastLineGroup])
+    const latestLineGroup = lineGroups.pop()!
+    setRedoLineGroups([...redoLineGroups, latestLineGroup])
     // If render is undo, clear strokes
     setRedoCurLines([])
 
