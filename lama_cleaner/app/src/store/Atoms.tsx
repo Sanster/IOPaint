@@ -231,7 +231,7 @@ export const settingStateDefault: Settings = {
   zitsWireframe: true,
 
   // SD
-  sdMaskBlur: 0,
+  sdMaskBlur: 5,
   sdMode: SDMode.inpainting,
   sdStrength: 0.75,
   sdSteps: 50,

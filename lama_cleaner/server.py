@@ -118,6 +118,7 @@ def process():
         croper_y=form["croperY"],
         croper_height=form["croperHeight"],
         croper_width=form["croperWidth"],
+        sd_mask_blur=form["sdMaskBlur"],
         sd_strength=form["sdStrength"],
         sd_steps=form["sdSteps"],
         sd_guidance_scale=form["sdGuidanceScale"],

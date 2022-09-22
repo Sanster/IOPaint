@@ -39,11 +39,11 @@ export default async function inpaint(
   fd.append('croperHeight', croperRect.height.toString())
   fd.append('croperWidth', croperRect.width.toString())
   fd.append('useCroper', settings.showCroper ? 'true' : 'false')
+  fd.append('sdMaskBlur', settings.sdMaskBlur.toString())
   fd.append('sdStrength', settings.sdStrength.toString())
   fd.append('sdSteps', settings.sdSteps.toString())
   fd.append('sdGuidanceScale', settings.sdGuidanceScale.toString())
   fd.append('sdSampler', settings.sdSampler.toString())
-  // fd.append('sdSeed', settings.sdSeedFixed ? settings.sdSeed.toString() : '-1')
   fd.append('sdSeed', seed ? seed.toString() : '-1')
 
   if (sizeLimit === undefined) {

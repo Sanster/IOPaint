@@ -48,7 +48,7 @@ class SD(InpaintModel):
 
         self.model = StableDiffusionInpaintPipeline.from_pretrained(
             self.model_id_or_path,
-            revision="fp16" if torch.cuda.is_available() else 'main',
+            revision="fp16" if torch.cuda.is_available() else "main",
             torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
             use_auth_token=kwargs["hf_access_token"],
         )
@@ -75,7 +75,7 @@ class SD(InpaintModel):
         #
         # image = torch.from_numpy(image).unsqueeze(0).to(self.device)
         # mask = torch.from_numpy(mask).unsqueeze(0).to(self.device)
-       
+
         if config.sd_sampler == SDSampler.ddim:
             scheduler = DDIMScheduler(
                 beta_start=0.00085,
@@ -91,7 +91,7 @@ class SD(InpaintModel):
                 "beta_start": 0.00085,
                 "beta_end": 0.012,
                 "num_train_timesteps": 1000,
-                "skip_prk_steps": True
+                "skip_prk_steps": True,
             }
             scheduler = PNDMScheduler(**PNDM_kwargs)
         else:
@@ -104,6 +104,10 @@ class SD(InpaintModel):
         np.random.seed(seed)
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
+
+        if config.sd_mask_blur != 0:
+            k = 2 * config.sd_mask_blur + 1
+            mask = cv2.GaussianBlur(mask, (k, k), 0)[:, :, np.newaxis]
 
         output = self.model(
             prompt=config.prompt,

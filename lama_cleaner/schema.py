@@ -4,19 +4,19 @@ from pydantic import BaseModel
 
 
 class HDStrategy(str, Enum):
-    ORIGINAL = 'Original'
-    RESIZE = 'Resize'
-    CROP = 'Crop'
+    ORIGINAL = "Original"
+    RESIZE = "Resize"
+    CROP = "Crop"
 
 
 class LDMSampler(str, Enum):
-    ddim = 'ddim'
-    plms = 'plms'
+    ddim = "ddim"
+    plms = "plms"
 
 
 class SDSampler(str, Enum):
-    ddim = 'ddim'
-    pndm = 'pndm'
+    ddim = "ddim"
+    pndm = "pndm"
 
 
 class Config(BaseModel):
@@ -28,7 +28,7 @@ class Config(BaseModel):
     hd_strategy_crop_trigger_size: int
     hd_strategy_resize_limit: int
 
-    prompt: str = ''
+    prompt: str = ""
     # 始终是在原图尺度上的值
     use_croper: bool = False
     croper_x: int = None
@@ -37,6 +37,7 @@ class Config(BaseModel):
     croper_width: int = None
 
     # sd
+    sd_mask_blur: int = 0
     sd_strength: float = 0.75
     sd_steps: int = 50
     sd_guidance_scale: float = 7.5
