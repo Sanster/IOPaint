@@ -14,6 +14,11 @@ class LDMSampler(str, Enum):
     plms = 'plms'
 
 
+class SDSampler(str, Enum):
+    ddim = 'ddim'
+    pndm = 'pndm'
+
+
 class Config(BaseModel):
     ldm_steps: int
     ldm_sampler: str = LDMSampler.plms
@@ -35,6 +40,6 @@ class Config(BaseModel):
     sd_strength: float = 0.75
     sd_steps: int = 50
     sd_guidance_scale: float = 7.5
-    sd_sampler: str = 'ddim'  # ddim/pndm
+    sd_sampler: str = SDSampler.ddim
     # -1 mean random seed
     sd_seed: int = 42
