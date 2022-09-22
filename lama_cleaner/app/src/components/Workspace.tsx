@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import Editor from './Editor/Editor'
 import ShortcutsModal from './Shortcuts/ShortcutsModal'
 import SettingModal from './Settings/SettingsModal'
 import Toast from './shared/Toast'
-import { AIModel, settingState, toastState } from '../store/Atoms'
+import { AIModel, isSDState, settingState, toastState } from '../store/Atoms'
 import {
   currentModel,
   modelDownloaded,
@@ -19,6 +19,7 @@ interface WorkspaceProps {
 const Workspace = ({ file }: WorkspaceProps) => {
   const [settings, setSettingState] = useRecoilState(settingState)
   const [toastVal, setToastState] = useRecoilState(toastState)
+  const isSD = useRecoilValue(isSDState)
 
   const onSettingClose = async () => {
     const curModel = await currentModel().then(res => res.text())
@@ -83,7 +84,7 @@ const Workspace = ({ file }: WorkspaceProps) => {
 
   return (
     <>
-      <SidePanel />
+      {isSD ? <SidePanel /> : <></>}
       <Editor file={file} />
       <SettingModal onClose={onSettingClose} />
       <ShortcutsModal />
