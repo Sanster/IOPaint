@@ -206,7 +206,7 @@ class ZITS(InpaintModel):
     pad_mod = 32
     pad_to_square = True
 
-    def __init__(self, device):
+    def __init__(self, device, **kwargs):
         """
 
         Args:
