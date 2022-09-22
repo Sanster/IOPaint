@@ -640,6 +640,10 @@ export default function Editor(props: EditorProps) {
 
   // Handle Cmd+Z
   const undoPredicate = (event: KeyboardEvent) => {
+    // TODO: fix prompt input ctrl+z
+    if (isSD) {
+      return false
+    }
     const isCmdZ =
       (event.metaKey || event.ctrlKey) && !event.shiftKey && event.key === 'z'
     // Handle tab switch
@@ -654,7 +658,7 @@ export default function Editor(props: EditorProps) {
     return false
   }
 
-  useKey(undoPredicate, undo, undefined, [undoStroke, undoRender])
+  useKey(undoPredicate, undo, undefined, [undoStroke, undoRender, isSD])
 
   const disableUndo = () => {
     if (isInpainting) {
@@ -714,6 +718,9 @@ export default function Editor(props: EditorProps) {
 
   // Handle Cmd+shift+Z
   const redoPredicate = (event: KeyboardEvent) => {
+    if (isSD) {
+      return false
+    }
     const isCmdZ =
       (event.metaKey || event.ctrlKey) &&
       event.shiftKey &&
@@ -730,7 +737,7 @@ export default function Editor(props: EditorProps) {
     return false
   }
 
-  useKey(redoPredicate, redo, undefined, [redoStroke, redoRender])
+  useKey(redoPredicate, redo, undefined, [redoStroke, redoRender, isSD])
 
   const disableRedo = () => {
     if (isInpainting) {

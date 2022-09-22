@@ -32,12 +32,19 @@ const PromptInput = () => {
     }
   })
 
+  const onKeyUp = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleRepaintClick()
+    }
+  }
+
   return (
     <div className="prompt-wrapper">
       <TextInput
         ref={ref}
         value={prompt}
         onInput={handleOnInput}
+        onKeyUp={onKeyUp}
         placeholder="I want to repaint of..."
       />
       <Button

@@ -12,7 +12,7 @@ const INPUT_WIDTH = 30
 
 // TODO: 添加收起来的按钮
 const SidePanel = () => {
-  const [open, toggleOpen] = useToggle(false)
+  const [open, toggleOpen] = useToggle(true)
   const [setting, setSettingState] = useRecoilState(settingState)
 
   return (
