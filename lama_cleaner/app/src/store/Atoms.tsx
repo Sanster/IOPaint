@@ -149,6 +149,7 @@ export interface Settings {
   zitsWireframe: boolean
 
   // For SD
+  sdMaskBlur: number
   sdMode: SDMode
   sdStrength: number
   sdSteps: number
@@ -206,6 +207,7 @@ const defaultHDSettings: ModelsHDSettings = {
 
 export enum SDSampler {
   ddim = 'ddim',
+  pndm = 'pndm',
 }
 
 export enum SDMode {
@@ -229,6 +231,7 @@ export const settingStateDefault: Settings = {
   zitsWireframe: true,
 
   // SD
+  sdMaskBlur: 0,
   sdMode: SDMode.inpainting,
   sdStrength: 0.75,
   sdSteps: 50,

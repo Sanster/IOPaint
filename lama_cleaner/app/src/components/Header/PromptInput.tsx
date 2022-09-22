@@ -45,7 +45,7 @@ const PromptInput = () => {
         onClick={handleRepaintClick}
         disabled={prompt.length === 0 || app.isInpainting}
       >
-        RePaint
+        Dream
       </Button>
     </div>
   )

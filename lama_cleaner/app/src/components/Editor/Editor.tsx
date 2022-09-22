@@ -41,7 +41,7 @@ import {
 } from '../../store/Atoms'
 import useHotKey from '../../hooks/useHotkey'
 import Croper from '../Croper/Croper'
-import emitter, { EVENT_PROMPT, EVENT_RERUN } from '../../event'
+import emitter, { EVENT_PROMPT } from '../../event'
 
 const TOOLBAR_SIZE = 200
 const BRUSH_COLOR = '#ffcc00bb'
@@ -309,6 +309,8 @@ export default function Editor(props: EditorProps) {
     emitter.on(EVENT_PROMPT, () => {
       if (hadDrawSomething()) {
         runInpainting(promptVal)
+      } else if (lastLineGroup.length !== 0) {
+        runInpainting(promptVal, true)
       } else {
         setToastState({
           open: true,
@@ -322,26 +324,6 @@ export default function Editor(props: EditorProps) {
       emitter.off(EVENT_PROMPT)
     }
   }, [hadDrawSomething, runInpainting, prompt])
-
-  useEffect(() => {
-    emitter.on(EVENT_RERUN, () => {
-      if (hadDrawSomething()) {
-        runInpainting(promptVal)
-      } else if (lastLineGroup.length !== 0) {
-        runInpainting(promptVal, true)
-      } else {
-        setToastState({
-          open: true,
-          desc: 'Please draw mask on picture',
-          state: 'error',
-          duration: 1500,
-        })
-      }
-    })
-    return () => {
-      emitter.off(EVENT_RERUN)
-    }
-  }, [lastLineGroup, hadDrawSomething, runInpainting, prompt])
 
   const hadRunInpainting = () => {
     return renders.length !== 0
