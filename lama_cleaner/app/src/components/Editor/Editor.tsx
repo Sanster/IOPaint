@@ -239,10 +239,7 @@ export default function Editor(props: EditorProps) {
         }
       }
 
-      let sdSeed = settings.sdSeedFixed ? settings.sdSeed : -1
-      if (useLastLineGroup === true) {
-        sdSeed = -1
-      }
+      const sdSeed = settings.sdSeedFixed ? settings.sdSeed : -1
 
       try {
         const res = await inpaint(
@@ -258,7 +255,9 @@ export default function Editor(props: EditorProps) {
           throw new Error('empty response')
         }
         const { blob, seed } = res
-        if (seed) {
+        console.log(seed)
+        console.log(settings.sdSeedFixed)
+        if (seed && !settings.sdSeedFixed) {
           setSeed(parseInt(seed, 10))
         }
         const newRender = new Image()
