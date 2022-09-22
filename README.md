@@ -28,7 +28,7 @@
   1. [ZITS](https://github.com/DQiaole/ZITS_inpainting)
   1. [MAT](https://github.com/fenglinglwb/MAT)
   1. [FcF](https://github.com/SHI-Labs/FcF-Inpainting)
-  1. [SD](https://github.com/CompVis/stable-diffusion)
+  1. [SD1.4](https://github.com/CompVis/stable-diffusion)
 - Support CPU & GPU
 - Various inpainting [strategy](#inpainting-strategy)
 - Run as a desktop APP
@@ -42,6 +42,7 @@
 | Remove Text            | ![text](./assets/unwant_text.jpg)             | ![text](./assets/unwant_text_clean.jpg)             |
 | Remove watermark       | ![watermark](./assets/watermark.jpg)          | ![watermark_clean](./assets/watermark_cleanup.jpg)  |
 | Fix old photo          | ![oldphoto](./assets/old_photo.jpg)           | ![oldphoto_clean](./assets/old_photo_clean.jpg)     |
+| Text Driven Inpainting | ![dog](./assets/dog.jpg)                      | ![fox](./assets/fox.jpg)                            |
 
 ## Quick Start
 
@@ -75,7 +76,7 @@ Available arguments:
 | ZITS  | :+1: Better holistic structures compared with previous methods <br/> :neutral_face: Wireframe module is **very** slow on CPU                                                                                                | `Wireframe`: Enable edge and line detect                                                                                                                                                                                                                                          |
 | MAT   | TODO                                                                                                                                                                                                                        |                                                                                                                                                                                                                                                                                   |
 | FcF   | :+1: Better structure and texture generation <br/> :neutral_face: Only support fixed size (512x512) input                                                                                                                   |                                                                                                                                                                                                                                                                                   |
-| SD    | :+1: SOTA text-to-image diffusion model                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                   |
+| SD1.4 | :+1: SOTA text-to-image diffusion model                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                   |
 
 ### LaMa vs LDM
 
