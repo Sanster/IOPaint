@@ -12,6 +12,7 @@ const Switch = React.forwardRef<
       {...itemProps}
       ref={forwardedRef}
       className={`switch-root ${className}`}
+      onKeyDown={e => e.preventDefault()}
     />
   )
 })

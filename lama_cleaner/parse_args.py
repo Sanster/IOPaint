@@ -7,7 +7,16 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", default=8080, type=int)
-    parser.add_argument("--model", default="lama", choices=["lama", "ldm", "zits", "mat", 'fcf'])
+    parser.add_argument(
+        "--model",
+        default="lama",
+        choices=["lama", "ldm", "zits", "mat", "fcf", "sd1.4"],
+    )
+    parser.add_argument(
+        "--hf_access_token",
+        default="",
+        help="huggingface access token. Check how to get token from: https://huggingface.co/docs/hub/security-tokens",
+    )
     parser.add_argument("--device", default="cuda", type=str, choices=["cuda", "cpu"])
     parser.add_argument("--gui", action="store_true", help="Launch as desktop app")
     parser.add_argument(
@@ -28,5 +37,11 @@ def parse_args():
             parser.error(f"invalid --input: {args.input} not exists")
         if imghdr.what(args.input) is None:
             parser.error(f"invalid --input: {args.input} is not a valid image file")
+
+    if args.model.startswith("sd"):
+        if not args.hf_access_token.startswith("hf_"):
+            parser.error(
+                f"sd(stable-diffusion) model requires huggingface access token. Check how to get token from: https://huggingface.co/docs/hub/security-tokens"
+            )
 
     return args

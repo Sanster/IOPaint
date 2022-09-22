@@ -4,6 +4,7 @@ import io
 import logging
 import multiprocessing
 import os
+import random
 import time
 import imghdr
 from pathlib import Path
@@ -25,7 +26,7 @@ try:
 except:
     pass
 
-from flask import Flask, request, send_file, cli
+from flask import Flask, request, send_file, cli, make_response
 
 # Disable ability for Flask to display warning about using a development server in a production environment.
 # https://gist.github.com/jerblack/735b9953ba1ab6234abb43174210d356
@@ -41,7 +42,7 @@ from lama_cleaner.helper import (
 NUM_THREADS = str(multiprocessing.cpu_count())
 
 # fix libomp problem on windows https://github.com/Sanster/lama-cleaner/issues/56
-os.environ["KMP_DUPLICATE_LIB_OK"]="True"
+os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 
 os.environ["OMP_NUM_THREADS"] = NUM_THREADS
 os.environ["OPENBLAS_NUM_THREADS"] = NUM_THREADS
@@ -64,6 +65,10 @@ logging.getLogger("werkzeug").addFilter(NoFlaskwebgui())
 app = Flask(__name__, static_folder=os.path.join(BUILD_DIR, "static"))
 app.config["JSON_AS_ASCII"] = False
 CORS(app, expose_headers=["Content-Disposition"])
+# MAX_BUFFER_SIZE = 50 * 1000 * 1000  # 50 MB
+# async_mode 优先级: eventlet/gevent_uwsgi/gevent/threading
+# only threading works on macOS
+# socketio = SocketIO(app, max_http_buffer_size=MAX_BUFFER_SIZE, async_mode='threading')
 
 model: ModelManager = None
 device = None
@@ -75,6 +80,11 @@ def get_image_ext(img_bytes):
     if w is None:
         w = "jpeg"
     return w
+
+
+def diffuser_callback(step: int):
+    pass
+    # socketio.emit('diffusion_step', {'diffusion_step': step})
 
 
 @app.route("/inpaint", methods=["POST"])
@@ -102,7 +112,22 @@ def process():
         hd_strategy_crop_margin=form["hdStrategyCropMargin"],
         hd_strategy_crop_trigger_size=form["hdStrategyCropTrigerSize"],
         hd_strategy_resize_limit=form["hdStrategyResizeLimit"],
+        prompt=form["prompt"],
+        use_croper=form["useCroper"],
+        croper_x=form["croperX"],
+        croper_y=form["croperY"],
+        croper_height=form["croperHeight"],
+        croper_width=form["croperWidth"],
+        sd_mask_blur=form["sdMaskBlur"],
+        sd_strength=form["sdStrength"],
+        sd_steps=form["sdSteps"],
+        sd_guidance_scale=form["sdGuidanceScale"],
+        sd_sampler=form["sdSampler"],
+        sd_seed=form["sdSeed"],
     )
+
+    if config.sd_seed == -1:
+        config.sd_seed = random.randint(1, 9999999)
 
     logger.info(f"Origin image shape: {original_shape}")
     image = resize_max_size(image, size_limit=size_limit, interpolation=interpolation)
@@ -127,10 +152,15 @@ def process():
         )
 
     ext = get_image_ext(origin_image_bytes)
-    return send_file(
-        io.BytesIO(numpy_to_bytes(res_np_img, ext)),
-        mimetype=f"image/{ext}",
+
+    response = make_response(
+        send_file(
+            io.BytesIO(numpy_to_bytes(res_np_img, ext)),
+            mimetype=f"image/{ext}",
+        )
     )
+    response.headers["X-Seed"] = str(config.sd_seed)
+    return response
 
 
 @app.route("/model")
@@ -184,7 +214,12 @@ def main(args):
     device = torch.device(args.device)
     input_image_path = args.input
 
-    model = ModelManager(name=args.model, device=device)
+    model = ModelManager(
+        name=args.model,
+        device=device,
+        hf_access_token=args.hf_access_token,
+        callbacks=[diffuser_callback],
+    )
 
     if args.gui:
         app_width, app_height = args.gui_size
@@ -195,4 +230,5 @@ def main(args):
         )
         ui.run()
     else:
+        # TODO: socketio
         app.run(host=args.host, port=args.port, debug=args.debug)

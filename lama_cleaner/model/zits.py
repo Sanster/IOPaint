@@ -206,7 +206,7 @@ class ZITS(InpaintModel):
     pad_mod = 32
     pad_to_square = True
 
-    def __init__(self, device):
+    def __init__(self, device, **kwargs):
         """
 
         Args:
@@ -216,7 +216,7 @@ class ZITS(InpaintModel):
         self.device = device
         self.sample_edge_line_iterations = 1
 
-    def init_model(self, device):
+    def init_model(self, device, **kwargs):
         self.wireframe = load_jit_model(ZITS_WIRE_FRAME_MODEL_URL, device)
         self.edge_line = load_jit_model(ZITS_EDGE_LINE_MODEL_URL, device)
         self.structure_upsample = load_jit_model(

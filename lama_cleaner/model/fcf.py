@@ -1135,7 +1135,7 @@ class FcF(InpaintModel):
     pad_mod = 512
     pad_to_square = True
 
-    def init_model(self, device):
+    def init_model(self, device, **kwargs):
         seed = 0
         random.seed(seed)
         np.random.seed(seed)

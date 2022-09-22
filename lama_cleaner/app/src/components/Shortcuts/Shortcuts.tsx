@@ -1,6 +1,6 @@
 import React from 'react'
-import { useKeyPressEvent } from 'react-use'
 import { useRecoilState } from 'recoil'
+import useHotKey from '../../hooks/useHotkey'
 import { shortcutsState } from '../../store/Atoms'
 import Button from '../shared/Button'
 
@@ -13,8 +13,7 @@ const Shortcuts = () => {
     })
   }
 
-  useKeyPressEvent('h', ev => {
-    ev?.preventDefault()
+  useHotKey('h', () => {
     shortcutStateHandler()
   })
 

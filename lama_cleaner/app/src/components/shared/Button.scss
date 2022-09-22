@@ -4,6 +4,7 @@
   display: grid;
   grid-auto-flow: column;
   column-gap: 1rem;
+  background-color: var(--page-bg);
   color: var(--btn-text-color);
   font-family: 'WorkSans', sans-serif;
   width: max-content;
@@ -25,6 +26,13 @@
 }
 
 .btn-primary-disabled {
+  background-color: var(--page-bg);
   pointer-events: none;
   opacity: 0.5;
+}
+
+.btn-border {
+  border-color: var(--btn-border-color);
+  border-width: 1px;
+  border-style: solid;
 }

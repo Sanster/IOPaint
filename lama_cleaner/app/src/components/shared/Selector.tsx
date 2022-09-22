@@ -51,6 +51,7 @@ const Selector = (props: Props) => {
         className="select-trigger"
         style={{ width }}
         ref={contentRef}
+        onKeyDown={e => e.preventDefault()}
       >
         <Select.Value />
         <Select.Icon>

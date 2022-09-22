@@ -1,13 +1,14 @@
 import React from 'react'
 
-import { useRecoilState } from 'recoil'
-import { settingState } from '../../store/Atoms'
+import { useRecoilState, useRecoilValue } from 'recoil'
+import { isSDState, settingState } from '../../store/Atoms'
 import Modal from '../shared/Modal'
 import ManualRunInpaintingSettingBlock from './ManualRunInpaintingSettingBlock'
 import HDSettingBlock from './HDSettingBlock'
 import ModelSettingBlock from './ModelSettingBlock'
 import GraduallyInpaintingSettingBlock from './GraduallyInpaintingSettingBlock'
 import DownloadMaskSettingBlock from './DownloadMaskSettingBlock'
+import useHotKey from '../../hooks/useHotkey'
 
 interface SettingModalProps {
   onClose: () => void
@@ -15,6 +16,7 @@ interface SettingModalProps {
 export default function SettingModal(props: SettingModalProps) {
   const { onClose } = props
   const [setting, setSettingState] = useRecoilState(settingState)
+  const isSD = useRecoilValue(isSDState)
 
   const handleOnClose = () => {
     setSettingState(old => {
@@ -23,6 +25,17 @@ export default function SettingModal(props: SettingModalProps) {
     onClose()
   }
 
+  useHotKey(
+    's',
+    () => {
+      setSettingState(old => {
+        return { ...old, show: !old.show }
+      })
+    },
+    {},
+    []
+  )
+
   return (
     <Modal
       onClose={handleOnClose}
@@ -30,11 +43,12 @@ export default function SettingModal(props: SettingModalProps) {
       className="modal-setting"
       show={setting.show}
     >
-      <ManualRunInpaintingSettingBlock />
-      <GraduallyInpaintingSettingBlock />
+      {isSD ? <></> : <ManualRunInpaintingSettingBlock />}
+
+      {/* <GraduallyInpaintingSettingBlock /> */}
       <DownloadMaskSettingBlock />
       <ModelSettingBlock />
-      <HDSettingBlock />
+      {isSD ? <></> : <HDSettingBlock />}
     </Modal>
   )
 }

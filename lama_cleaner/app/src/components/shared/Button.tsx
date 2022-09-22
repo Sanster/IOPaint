@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react'
 
 interface ButtonProps {
+  border?: boolean
   disabled?: boolean
   children?: ReactNode
   className?: string
@@ -17,6 +18,7 @@ interface ButtonProps {
 const Button: React.FC<ButtonProps> = props => {
   const {
     children,
+    border,
     className,
     disabled,
     icon,
@@ -55,6 +57,7 @@ const Button: React.FC<ButtonProps> = props => {
         toolTip ? 'info-tooltip' : '',
         tooltipPosition ? `info-tooltip-${tooltipPosition}` : '',
         className,
+        border ? `btn-border` : '',
       ].join(' ')}
     >
       {icon}
@@ -65,6 +68,7 @@ const Button: React.FC<ButtonProps> = props => {
 
 Button.defaultProps = {
   disabled: false,
+  border: false,
 }
 
 export default Button

@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo } from 'react'
-import { useKeyPressEvent } from 'react-use'
 import { useRecoilState } from 'recoil'
 import { nanoid } from 'nanoid'
 import useInputImage from './hooks/useInputImage'
@@ -9,6 +8,7 @@ import Workspace from './components/Workspace'
 import { fileState } from './store/Atoms'
 import { keepGUIAlive } from './utils'
 import Header from './components/Header/Header'
+import useHotKey from './hooks/useHotkey'
 
 // Keeping GUI Window Open
 keepGUIAlive()
@@ -24,11 +24,15 @@ function App() {
   }, [userInputImage, setFile])
 
   // Dark Mode Hotkey
-  useKeyPressEvent('D', ev => {
-    ev?.preventDefault()
-    const newTheme = theme === 'light' ? 'dark' : 'light'
-    setTheme(newTheme)
-  })
+  useHotKey(
+    'shift+d',
+    () => {
+      const newTheme = theme === 'light' ? 'dark' : 'light'
+      setTheme(newTheme)
+    },
+    {},
+    [theme]
+  )
 
   useEffect(() => {
     document.body.setAttribute('data-theme', theme)

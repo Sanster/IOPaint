@@ -9,9 +9,12 @@
 @use '../components/Editor/Editor';
 @use '../components/LandingPage/LandingPage';
 @use '../components/Header/Header';
+@use '../components/Header/PromptInput';
 @use '../components/Header/ThemeChanger';
 @use '../components/Shortcuts/Shortcuts';
 @use '../components/Settings/Settings.scss';
+@use '../components/SidePanel/SidePanel.scss';
+@use '../components/Croper/Croper.scss';
 
 // Shared
 @use '../components/FileSelect/FileSelect';
