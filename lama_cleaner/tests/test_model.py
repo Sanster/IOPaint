@@ -176,6 +176,14 @@ def test_sd(strategy, sampler, capfd):
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
 
+    assert_equal(
+        model,
+        cfg,
+        f"sd_{strategy.capitalize()}_{sampler}_blur_mask_result.png",
+        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask_blur.png",
+    )
+
     # captured = capfd.readouterr()
     # for i in range(sd_steps):
     #     assert f'sd_step_{i}' in captured.out
