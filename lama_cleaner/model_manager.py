@@ -4,9 +4,10 @@ from lama_cleaner.model.ldm import LDM
 from lama_cleaner.model.mat import MAT
 from lama_cleaner.model.sd import SD14
 from lama_cleaner.model.zits import ZITS
+from lama_cleaner.model.opencv2 import OpenCV2
 from lama_cleaner.schema import Config
 
-models = {"lama": LaMa, "ldm": LDM, "zits": ZITS, "mat": MAT, "fcf": FcF, "sd1.4": SD14}
+models = {"lama": LaMa, "ldm": LDM, "zits": ZITS, "mat": MAT, "fcf": FcF, "sd1.4": SD14, "cv2": OpenCV2}
 
 
 class ModelManager:

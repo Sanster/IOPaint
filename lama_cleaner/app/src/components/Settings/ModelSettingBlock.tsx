@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
 import { useRecoilState } from 'recoil'
-import { AIModel, SDSampler, settingState } from '../../store/Atoms'
+import { AIModel, CV2Flag, SDSampler, settingState } from '../../store/Atoms'
 import Selector from '../shared/Selector'
 import { Switch, SwitchThumb } from '../shared/Switch'
 import Tooltip from '../shared/Tooltip'
@@ -133,6 +133,42 @@ function ModelSettingBlock() {
     )
   }
 
+  const renderOpenCV2Desc = () => {
+    return (
+      <>
+        <NumberInputSetting
+          title="Radius"
+          value={`${setting.cv2Radius}`}
+          desc="Radius of a circular neighborhood of each point inpainted that is considered by the algorithm."
+          onValue={value => {
+            const val = value.length === 0 ? 0 : parseInt(value, 10)
+            setSettingState(old => {
+              return { ...old, cv2Radius: val }
+            })
+          }}
+        />
+
+        <SettingBlock
+          className="sub-setting-block"
+          title="Flag"
+          desc="Inpainting method"
+          input={
+            <Selector
+              width={140}
+              value={setting.cv2Flag as string}
+              options={Object.values(CV2Flag)}
+              onChange={val => {
+                setSettingState(old => {
+                  return { ...old, cv2Flag: val as CV2Flag }
+                })
+              }}
+            />
+          }
+        />
+      </>
+    )
+  }
+
   const renderOptionDesc = (): ReactNode => {
     switch (setting.model) {
       case AIModel.LAMA:
@@ -147,6 +183,8 @@ function ModelSettingBlock() {
         return renderFCFModelDesc()
       case AIModel.SD14:
         return undefined
+      case AIModel.CV2:
+        return renderOpenCV2Desc()
       default:
         return <></>
     }
@@ -189,6 +227,12 @@ function ModelSettingBlock() {
           'Stable Diffusion',
           'https://ommer-lab.com/research/latent-diffusion-models/',
           'https://github.com/CompVis/stable-diffusion'
+        )
+      case AIModel.CV2:
+        return renderModelDesc(
+          'OpenCV Image Inpainting',
+          'https://docs.opencv.org/4.6.0/df/d3d/tutorial_py_inpainting.html',
+          'https://docs.opencv.org/4.6.0/df/d3d/tutorial_py_inpainting.html'
         )
       default:
         return <></>

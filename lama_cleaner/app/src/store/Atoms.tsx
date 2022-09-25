@@ -10,6 +10,7 @@ export enum AIModel {
   MAT = 'mat',
   FCF = 'fcf',
   SD14 = 'sd1.4',
+  CV2 = 'cv2',
 }
 
 export const fileState = atom<File | undefined>({
@@ -132,6 +133,11 @@ export interface HDSettings {
 
 type ModelsHDSettings = { [key in AIModel]: HDSettings }
 
+export enum CV2Flag {
+  INPAINT_NS = 'INPAINT_NS',
+  INPAINT_TELEA = 'INPAINT_TELEA',
+}
+
 export interface Settings {
   show: boolean
   showCroper: boolean
@@ -158,6 +164,10 @@ export interface Settings {
   sdSeed: number
   sdSeedFixed: boolean // true: use sdSeed, false: random generate seed on backend
   sdNumSamples: number
+
+  // For OpenCV2
+  cv2Radius: number
+  cv2Flag: CV2Flag
 }
 
 const defaultHDSettings: ModelsHDSettings = {
@@ -203,6 +213,13 @@ const defaultHDSettings: ModelsHDSettings = {
     hdStrategyCropMargin: 128,
     enabled: true,
   },
+  [AIModel.CV2]: {
+    hdStrategy: HDStrategy.RESIZE,
+    hdStrategyResizeLimit: 1080,
+    hdStrategyCropTrigerSize: 512,
+    hdStrategyCropMargin: 128,
+    enabled: true,
+  },
 }
 
 export enum SDSampler {
@@ -240,6 +257,10 @@ export const settingStateDefault: Settings = {
   sdSeed: 42,
   sdSeedFixed: true,
   sdNumSamples: 1,
+
+  // CV2
+  cv2Radius: 5,
+  cv2Flag: CV2Flag.INPAINT_NS,
 }
 
 const localStorageEffect =
