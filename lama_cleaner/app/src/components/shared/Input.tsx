@@ -35,6 +35,9 @@ const TextInput = React.forwardRef<
         if (e.key === 'Escape') {
           e.currentTarget.blur()
         }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+          e.stopPropagation()
+        }
       }}
     />
   )
