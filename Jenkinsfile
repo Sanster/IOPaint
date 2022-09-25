@@ -1,5 +1,5 @@
 pipeline {
-    agent {
+  agent {
     kubernetes {
       yaml """
 kind: Pod
@@ -15,9 +15,6 @@ spec:
     tty: true
   - name: kaniko
     image: gcr.io/kaniko-project/executor:debug
-    envFrom:
-          - secretRef:
-                name: github-token
     resources:
       requests:
         cpu: "2"
@@ -32,134 +29,107 @@ spec:
     volumeMounts:
       - name: docker-config
         mountPath: /kaniko/.docker
+      - name: ecr-profile
+        mountPath: /root/.aws
   volumes:
     - name: docker-config
       configMap:
         name: docker-config
+    - name: ecr-profile
+      configMap:
+        name: ecr-profile
 """
     }
   }
     environment {
         APP="huspy-lama-cleaner-service"
-        PHASE=branchToConfig(BRANCH_NAME)
         ENV=environment(BRANCH_NAME)
         AWS_PROFILE="huspy-tools"
         ECR="151712667821.dkr.ecr.eu-central-1.amazonaws.com"
-        TIMESTAMP="${sh(script: 'date "+%Y%m%d%H%M%S"', returnStdout: true).trim()}"
-        APP_VERSION="${PHASE}_${TIMESTAMP}_v${BUILD_NUMBER}_${GIT_COMMIT}"
+        APP_VERSION="${ENV}_v${BUILD_NUMBER}_${GIT_COMMIT}"
     }
+
     stages {
-        stage("Build with kaniko") {
+        stage("Build with Kaniko") {
             when {
-                anyOf{
-                    expression { BRANCH_NAME ==~ /(release.*|fix.*|feature.*|bug.*)/ }
-                    buildingTag()
-                }
+              anyOf {
+               expression { BRANCH_NAME ==~ /(release.*|development|fix.*|feature.*|bug.*|main)/ }
+              }
             }
             steps {
-                script {
-                    env.GIT_COMMIT_MSG = sh (script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
-                    env.GIT_AUTHOR = sh (script: 'git log -1 --pretty=%ce ${GIT_COMMIT}', returnStdout: true).trim()
-                }
                 container(name: 'kaniko') {
-                sh '''
-                /kaniko/executor --cache=true --cache-repo=${ECR}/${APP}/cache --dockerfile `pwd`/Dockerfile --context `pwd` --destination=${ECR}/${APP}:${APP_VERSION}
-                '''
-                }
-            }
-            post {
-               success {
-                   slackSend (channel: "#${slackChannel}", color: '#3380C7', message: "*Lama Cleaner Service*: Image built on <${env.BUILD_URL}|#${env.BUILD_NUMBER}> branch ${env.BRANCH_NAME}")
-                   echo 'Compile Stage Successful'
-               }
-               failure {
-                   slackSend (channel: "#${slackChannel}", color: '#F44336', message: "*Lama Cleaner Service*: Image build failed <${env.BUILD_URL}|#${env.BUILD_NUMBER}> branch ${env.BRANCH_NAME}")
-                   echo 'Compile Stage Failed'
-                   sh "exit 1"
-               }
-           }
-        }
-
-        stage("Deploy") {
-            when {
-                anyOf{
-                expression { BRANCH_NAME ==~ /(release.*|fix.*|feature.*|bug.*)/ }
-                buildingTag()
-                }
-            }
-            steps{
-                script{
-                    container(name: 'kubectl') {
-                        sh "kubectl set image deployment ${APP} ${APP}=${ECR}/${APP}:${APP_VERSION} --namespace ${PHASE}"
-                        sh "kubectl rollout status deployment ${APP} --namespace ${PHASE}"
-                    }
-                }
-            }
-            post {
-                success {
-                    slackSend (channel: "#${slackChannel}", color: '#4CAF50', message: "*Lama Cleaner Service*: Deployment completed <${env.BUILD_URL}|#${env.BUILD_NUMBER}> commit ${env.GIT_COMMIT[0..6]} branch ${env.BRANCH_NAME}")
-                    echo 'Deploy Stage Successful'
-                }
-
-                failure {
-                    slackSend (channel: "#${slackChannel}", color: '#F44336', message: "*Lama Cleaner Service*: Deployment failed <${env.BUILD_URL}|#${env.BUILD_NUMBER}>")
-                    echo 'Deploy Stage Failed'
-                    sh "exit 1"
+                sh """
+                /kaniko/executor --dockerfile `pwd`/Dockerfile --context `pwd` --destination=${ECR}/${APP}:${APP_VERSION}
+                """
                 }
             }
         }
 
-        stage('Anchore Scan') {
+        stage("Update image in argocd") {
             when {
-                expression { BRANCH_NAME ==~ /(release.*)/ }
+              anyOf {
+                expression { BRANCH_NAME ==~ /(release.*|development|fix.*|feature.*|bug.*|main)/ }
+              }
             }
             steps {
-                script {
-                    writeFile file: 'anchore_images_backend', text: "${ECR}/${APP}:${APP_VERSION}"
-                    anchore bailOnFail: false, engineRetries: '1200', name: 'anchore_images_backend'
+                container(name: 'alpine') {
+                  dir('huspy-services') {
+                    git branch: 'main', credentialsId: 'yahiakhidr', url: 'https://github.com/huspy/huspy-services.git'
+                  }
+                  sh """
+                  apk add yq git
+                  cd huspy-services
+                  yq e -i '.microservice.image.tag = "${APP_VERSION}"' helm/${APP}/${ENV}.yaml
+                  git config --global --add safe.directory ${WORKSPACE}/huspy-services
+                  git config --global user.email "github_actor@users.noreply.github.com"
+                  git config --global user.name "github_actor"
+                  git checkout main
+                  git add helm/${APP}/${ENV}.yaml
+                  git commit -m "Update ${APP} image in ${ENV}"
+                  """
+                  withCredentials([gitUsernamePassword(credentialsId: 'yahiakhidr')]) {
+                    dir('huspy-services') {
+                      sh 'git push origin main'
+                    }
+                  }
                 }
             }
-            post {
-               success {
-                   slackSend (channel: "#${slackChannel}", color: '#3380C7', message: "*Lama Cleaner Service*: Security scan completed <${env.BUILD_URL}|#${env.BUILD_NUMBER}> branch ${env.BRANCH_NAME}")
-                   echo 'Compile Stage Successful'
-               }
-               failure {
-                   slackSend (channel: "#${slackChannel}", color: '#F44336', message: "*Lama Cleaner Service*: Security scan failed <${env.BUILD_URL}|#${env.BUILD_NUMBER}> branch ${env.BRANCH_NAME}")
-                   echo 'Compile Stage Failed'
-                   sh "exit 1"
-               }
-           }
         }
     }
+}
+
+def environment(branch) {
+  script {
+    if (branch ==~ /main|v\d+\.\d+\.\d+/) {
+      return "prod"
+    }
+    if (branch ==~ /feature.*|development|fix.*|bug.*/ ) {
+      return "dev"
+    }
+    if (branch ==~ /release.*/ ) {
+      return "qa"
+    }
+  }
 }
 
 def branchToConfig(branch) {
-     script {
-        result = "NULL"
-        if (branch ==~ /v\d+\.\d+\.\d+/) {
-        result ="production"
-        slackChannel = "alerts-prod-deployments"
-        echo "BRANCH:${branch} -> CONFIGURATION:${result}"
-        }
-        if (branch ==~ /release.*/) {
-        result = "qa"
-        slackChannel = "alerts-dev-deployments"
-        echo "BRANCH:${branch} -> CONFIGURATION:${result}"
-        }
-        if (branch ==~ /feature.*|fix.*|bug.*/ ) {
-        properties([
-            parameters([
-                choice(choices: ['','sandbox','QA'], description: 'Select an Environment to Build on it', name: 'ENV_NAME')
-            ])
-        ])
-        result = params.ENV_NAME
-        if(params.ENV_NAME == '' ){
-            error "Please select an environment..."
-        }
-        result = "sandbox"
-        slackChannel = "alerts-dev-deployments"
-        }
-        return result
-}
+  script {
+    result = "NULL"
+    if (branch == 'main') {
+      result = "production"
+      slackChannel = "alerts-prod-deployments"
+      echo "BRANCH:${branch} -> CONFIGURATION:${result}"
+    }
+    if (branch ==~ /feature.*|development|fix.*|bug.*/) {
+      result = "development"
+      slackChannel = "alerts-prod-deployments"
+      echo "BRANCH:${branch} -> CONFIGURATION:${result}"
+    }
+    if (branch ==~ /release.*/) {
+      result = "qa"
+      slackChannel = "alerts-prod-deployments"
+      echo "BRANCH:${branch} -> CONFIGURATION:${result}"
+    }
+    return result
+  }
 }
