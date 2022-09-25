@@ -1,0 +1,12 @@
+# Ignore everything:
+**
+
+# Except:
+!public
+!src
+!.env
+!.eslintrc.json
+!.prettierrc
+!package.json
+!tsconfig.json
+!yarn.lock

@@ -1,0 +1,33 @@
+version: "3.2"
+services:
+  api:
+    container_name: lama-cleaner-flask-backend
+    build: .
+    ports:
+      - '8080:8080'
+    environment:
+      - CACHE_DIR=/app/models
+    command: python3 main.py --device=cpu --port=8080
+    restart: always
+    networks:
+      - default
+  client:
+    build:
+      context: lama_cleaner/app/
+    environment:
+      - REACT_APP_INPAINTING_URL=http://localhost:8080
+      - PROXY=http://api:8080
+    image: react-app-client
+    restart: always
+    command: yarn start
+    ports:
+      - "3000:3000"
+    networks:
+      - default
+    depends_on:
+      - api
+    volumes:
+      - ./lama_cleaner/app/:/client
+networks:
+  default:
+    driver: bridge
