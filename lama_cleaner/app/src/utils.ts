@@ -202,3 +202,43 @@ export function srcToFile(src: string, fileName: string, mimeType: string) {
       return new File([buf], fileName, { type: mimeType })
     })
 }
+
+export async function askWritePermission() {
+  try {
+    // The clipboard-write permission is granted automatically to pages
+    // when they are the active tab. So it's not required, but it's more safe.
+    const { state } = await navigator.permissions.query({
+      name: 'clipboard-write' as PermissionName,
+    })
+    return state === 'granted'
+  } catch (error) {
+    // Browser compatibility / Security error (ONLY HTTPS) ...
+    return false
+  }
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, mime: string): Promise<any> {
+  return new Promise((resolve, reject) =>
+    canvas.toBlob(async d => {
+      if (d) {
+        resolve(d)
+      } else {
+        reject(new Error('Expected toBlob() to be defined'))
+      }
+    }, mime)
+  )
+}
+
+const setToClipboard = async (blob: any) => {
+  const data = [new ClipboardItem({ [blob.type]: blob })]
+  await navigator.clipboard.write(data)
+}
+
+export async function copyCanvasImage(canvas: HTMLCanvasElement) {
+  const blob = await canvasToBlob(canvas, 'image/png')
+  try {
+    await setToClipboard(blob)
+  } catch {
+    console.log('Copy image failed!')
+  }
+}

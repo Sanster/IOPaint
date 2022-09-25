@@ -22,6 +22,8 @@ import Button from '../shared/Button'
 import Slider from './Slider'
 import SizeSelector from './SizeSelector'
 import {
+  askWritePermission,
+  copyCanvasImage,
   downloadImage,
   isMidClick,
   isRightClick,
@@ -846,7 +848,27 @@ export default function Editor(props: EditorProps) {
       }
     },
     {},
-    [runMannually]
+    [runMannually, runInpainting, hadDrawSomething]
+  )
+
+  useHotKey(
+    'ctrl+c, cmd+c',
+    async () => {
+      const hasPermission = await askWritePermission()
+      if (hasPermission && renders.length > 0) {
+        if (context?.canvas) {
+          await copyCanvasImage(context?.canvas)
+          setToastState({
+            open: true,
+            desc: 'Copy inpainting result to clipboard',
+            state: 'success',
+            duration: 3000,
+          })
+        }
+      }
+    },
+    {},
+    [renders, context]
   )
 
   // Toggle clean/zoom tool on spacebar.
