@@ -22,6 +22,7 @@
 
 - Completely free and open-source
 - Fully self-hosted
+- Classical image inpainting algorithm powered by [cv2](https://docs.opencv.org/3.4/df/d3d/tutorial_py_inpainting.html)
 - Multiple SOTA AI models
   1. [LaMa](https://github.com/saic-mdal/lama)
   1. [LDM](https://github.com/CompVis/latent-diffusion)
@@ -35,14 +36,14 @@
 
 ## Usage
 
-| Usage                  | Before                                        | After                                               |
-| ---------------------- | --------------------------------------------- | --------------------------------------------------- |
-| Remove unwanted things | ![unwant_object2](./assets/unwant_object.jpg) | ![unwant_object2](./assets/unwant_object_clean.jpg) |
-| Remove unwanted person | ![unwant_person](./assets/unwant_person.jpg)  | ![unwant_person](./assets/unwant_person_clean.jpg)  |
-| Remove Text            | ![text](./assets/unwant_text.jpg)             | ![text](./assets/unwant_text_clean.jpg)             |
-| Remove watermark       | ![watermark](./assets/watermark.jpg)          | ![watermark_clean](./assets/watermark_cleanup.jpg)  |
-| Fix old photo          | ![oldphoto](./assets/old_photo.jpg)           | ![oldphoto_clean](./assets/old_photo_clean.jpg)     |
-| Text Driven Inpainting | ![dog](./assets/dog.jpg)                      | ![fox](./assets/fox.jpg)                            |
+| Usage                  | Before                                        | After                                                          |
+| ---------------------- | --------------------------------------------- | -------------------------------------------------------------- |
+| Remove unwanted things | ![unwant_object2](./assets/unwant_object.jpg) | ![unwant_object2](./assets/unwant_object_clean.jpg)            |
+| Remove unwanted person | ![unwant_person](./assets/unwant_person.jpg)  | ![unwant_person](./assets/unwant_person_clean.jpg)             |
+| Remove Text            | ![text](./assets/unwant_text.jpg)             | ![text](./assets/unwant_text_clean.jpg)                        |
+| Remove watermark       | ![watermark](./assets/watermark.jpg)          | ![watermark_clean](./assets/watermark_cleanup.jpg)             |
+| Fix old photo          | ![oldphoto](./assets/old_photo.jpg)           | ![oldphoto_clean](./assets/old_photo_clean.jpg)                |
+| Text Driven Inpainting | ![dog](./assets/dog.jpg)                      | Prompt: a fox sitting on a bench<br/> ![fox](./assets/fox.jpg) |
 
 ## Quick Start
 
@@ -69,14 +70,15 @@ Available arguments:
 
 ## Inpainting Model
 
-| Model | Description                                                                                                                                                                                                                 | Config                                                                                                                                                                                                                                                                            |
-| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| LaMa  | :+1: Generalizes well on high resolutions(~2k)<br/>                                                                                                                                                                         |                                                                                                                                                                                                                                                                                   |
+| Model | Description                                                                                                                                                                                                            | Config                                                                                                                                                                                                                                                                            |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| cv2   | :+1: No GPU is required, and for simple backgrounds, the results may even be better than AI models.                                                                                                                    |                                                                                                                                                                                                                                                                                   |
+| LaMa  | :+1: Generalizes well on high resolutions(~2k)<br/>                                                                                                                                                                    |                                                                                                                                                                                                                                                                                   |
 | LDM   | :+1: Possible to get better and more detail result <br/> :+1: The balance of time and quality can be achieved by adjusting `steps` <br/> :neutral_face: Slower than GAN model<br/> :neutral_face: Need more GPU memory | `Steps`: You can get better result with large steps, but it will be more time-consuming <br/> `Sampler`: ddim or [plms](https://arxiv.org/abs/2202.09778). In general plms can get [better results](https://github.com/Sanster/lama-cleaner/releases/tag/0.13.0) with fewer steps |
-| ZITS  | :+1: Better holistic structures compared with previous methods <br/> :neutral_face: Wireframe module is **very** slow on CPU                                                                                                | `Wireframe`: Enable edge and line detect                                                                                                                                                                                                                                          |
-| MAT   | TODO                                                                                                                                                                                                                        |                                                                                                                                                                                                                                                                                   |
-| FcF   | :+1: Better structure and texture generation <br/> :neutral_face: Only support fixed size (512x512) input                                                                                                                   |                                                                                                                                                                                                                                                                                   |
-| SD1.4 | :+1: SOTA text-to-image diffusion model                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                   |
+| ZITS  | :+1: Better holistic structures compared with previous methods <br/> :neutral_face: Wireframe module is **very** slow on CPU                                                                                           | `Wireframe`: Enable edge and line detect                                                                                                                                                                                                                                          |
+| MAT   | TODO                                                                                                                                                                                                                   |                                                                                                                                                                                                                                                                                   |
+| FcF   | :+1: Better structure and texture generation <br/> :neutral_face: Only support fixed size (512x512) input                                                                                                              |                                                                                                                                                                                                                                                                                   |
+| SD1.4 | :+1: SOTA text-to-image diffusion model                                                                                                                                                                                |                                                                                                                                                                                                                                                                                   |
 
 ### LaMa vs LDM
 
