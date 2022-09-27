@@ -40,7 +40,7 @@ from lama_cleaner.schema import Config, SDSampler
 
 
 class SD(InpaintModel):
-    pad_mod = 32
+    pad_mod = 64 # current diffusers only support 64 https://github.com/huggingface/diffusers/pull/505
     min_size = 512
 
     def init_model(self, device: torch.device, **kwargs):
