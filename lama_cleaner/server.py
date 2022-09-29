@@ -218,6 +218,7 @@ def main(args):
         name=args.model,
         device=device,
         hf_access_token=args.hf_access_token,
+        sd_disable_nsfw=args.sd_disable_nsfw,
         callbacks=[diffuser_callback],
     )
 

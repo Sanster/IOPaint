@@ -17,6 +17,11 @@ def parse_args():
         default="",
         help="huggingface access token. Check how to get token from: https://huggingface.co/docs/hub/security-tokens",
     )
+    parser.add_argument(
+        "--sd-disable-nsfw",
+        action="store_true",
+        help="disable stable diffusion nsfw checker",
+    )
     parser.add_argument("--device", default="cuda", type=str, choices=["cuda", "cpu"])
     parser.add_argument("--gui", action="store_true", help="Launch as desktop app")
     parser.add_argument(
