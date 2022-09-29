@@ -20,12 +20,17 @@ def parse_args():
     parser.add_argument(
         "--sd-disable-nsfw",
         action="store_true",
-        help="Disable Stable Diffusion nsfw checker",
+        help="Disable Stable Diffusion NSFW checker",
     )
     parser.add_argument(
         "--sd-cpu-textencoder",
         action="store_true",
         help="Always run Stable Diffusion TextEncoder model on CPU",
+    )
+    parser.add_argument(
+        "--sd-run-local",
+        action="store_true",
+        help="After first time Stable Diffusion model downloaded, you can add this arg and remove --hf_access_token",
     )
     parser.add_argument("--device", default="cuda", type=str, choices=["cuda", "cpu"])
     parser.add_argument("--gui", action="store_true", help="Launch as desktop app")
@@ -48,7 +53,7 @@ def parse_args():
         if imghdr.what(args.input) is None:
             parser.error(f"invalid --input: {args.input} is not a valid image file")
 
-    if args.model.startswith("sd"):
+    if args.model.startswith("sd") and not args.sd_run_local:
         if not args.hf_access_token.startswith("hf_"):
             parser.error(
                 f"sd(stable-diffusion) model requires huggingface access token. Check how to get token from: https://huggingface.co/docs/hub/security-tokens"

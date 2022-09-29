@@ -70,7 +70,7 @@ class SD(InpaintModel):
     def init_model(self, device: torch.device, **kwargs):
         from .sd_pipeline import StableDiffusionInpaintPipeline
 
-        model_kwargs = {}
+        model_kwargs = {"local_files_only": kwargs['sd_run_local']}
         if kwargs['sd_disable_nsfw']:
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(dict(
