@@ -153,13 +153,15 @@ docker build -f Dockerfile -t lamacleaner .
 ### Run Docker (cpu)
 
 ```
-docker run -p 8080:8080 -e CACHE_DIR=/app/models -v  $(pwd)/models:/app/models -v $(pwd):/app --rm lamacleaner python3 main.py --device=cpu --port=8080
+docker run -p 8080:8080 -e CACHE_DIR=/app/models -v  $(pwd)/models:/app/models -v $(pwd):/app --rm lamacleaner \
+python3 main.py --device=cpu --port=8080 --host=0.0.0.0
 ```
 
 ### Run Docker (gpu)
 
 ```
-docker run --gpus all -p 8080:8080 -e CACHE_DIR=/app/models -v $(pwd)/models:/app/models -v $(pwd):/app --rm lamacleaner python3 main.py --device=cuda --port=8080
+docker run --gpus all -p 8080:8080 -e CACHE_DIR=/app/models -v $(pwd)/models:/app/models -v $(pwd):/app --rm lamacleaner \
+python3 main.py --device=cuda --port=8080 --host=0.0.0.0
 ```
 
 Then open [http://localhost:8080](http://localhost:8080)
