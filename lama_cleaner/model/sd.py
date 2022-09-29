@@ -71,8 +71,7 @@ class SD(InpaintModel):
         from .sd_pipeline import StableDiffusionInpaintPipeline
 
         model_kwargs = {}
-        sd_disable_nsfw = kwargs.pop('sd_disable_nsfw', False)
-        if sd_disable_nsfw:
+        if kwargs['sd_disable_nsfw']:
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(dict(
                 feature_extractor=DummyFeatureExtractor(),
@@ -89,6 +88,11 @@ class SD(InpaintModel):
         # https://huggingface.co/docs/diffusers/v0.3.0/en/api/pipelines/stable_diffusion#diffusers.StableDiffusionInpaintPipeline.enable_attention_slicing
         self.model.enable_attention_slicing()
         self.model = self.model.to(device)
+
+        if kwargs['sd_cpu_textencoder']:
+            logger.info("Run Stable Diffusion TextEncoder on CPU")
+            self.model.text_encoder = self.model.text_encoder.to(torch.device('cpu'))
+
         self.callbacks = kwargs.pop("callbacks", None)
 
     @torch.cuda.amp.autocast()

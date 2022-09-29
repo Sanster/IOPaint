@@ -219,6 +219,7 @@ def main(args):
         device=device,
         hf_access_token=args.hf_access_token,
         sd_disable_nsfw=args.sd_disable_nsfw,
+        sd_cpu_textencoder=args.sd_cpu_textencoder,
         callbacks=[diffuser_callback],
     )
 

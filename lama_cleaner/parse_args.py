@@ -15,12 +15,17 @@ def parse_args():
     parser.add_argument(
         "--hf_access_token",
         default="",
-        help="huggingface access token. Check how to get token from: https://huggingface.co/docs/hub/security-tokens",
+        help="Huggingface access token. Check how to get token from: https://huggingface.co/docs/hub/security-tokens",
     )
     parser.add_argument(
         "--sd-disable-nsfw",
         action="store_true",
-        help="disable stable diffusion nsfw checker",
+        help="Disable Stable Diffusion nsfw checker",
+    )
+    parser.add_argument(
+        "--sd-cpu-textencoder",
+        action="store_true",
+        help="Always run Stable Diffusion TextEncoder model on CPU",
     )
     parser.add_argument("--device", default="cuda", type=str, choices=["cuda", "cpu"])
     parser.add_argument("--gui", action="store_true", help="Launch as desktop app")
