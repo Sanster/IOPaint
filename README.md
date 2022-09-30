@@ -57,16 +57,19 @@ lama-cleaner --model=lama --device=cpu --port=8080
 
 Available arguments:
 
-| Name              | Description                                                                                              | Default  |
-| ----------------- | -------------------------------------------------------------------------------------------------------- | -------- |
-| --model           | lama/ldm/zits/mat/fcf/sd. See details in [Inpaint Model](#inpainting-model)                              | lama     |
-| --hf_access_token | stable-diffusion(sd) model need huggingface access token https://huggingface.co/docs/hub/security-tokens |          |
-| --device          | cuda or cpu                                                                                              | cuda     |
-| --port            | Port for backend flask web server                                                                        | 8080     |
-| --gui             | Launch lama-cleaner as a desktop application                                                             |          |
-| --gui_size        | Set the window size for the application                                                                  | 1200 900 |
-| --input           | Path to image you want to load by default                                                                | None     |
-| --debug           | Enable debug mode for flask web server                                                                   |          |
+| Name              | Description                                                                                                                   | Default  |
+|-------------------|-------------------------------------------------------------------------------------------------------------------------------| -------- |
+| --model           | lama/ldm/zits/mat/fcf/sd1.4 See details in [Inpaint Model](#inpainting-model)                                                 | lama     |
+| --hf_access_token | stable-diffusion(sd) model need [huggingface access token](https://huggingface.co/docs/hub/security-tokens) to download model |          |
+| --sd-run-local    | Once the model as downloaded, you can pass this arg and remove `--hf_access_token`                                            |          |
+| --sd-disable-nsfw | Disable stable-diffusion NSFW checker.                                                                                        |          |
+| --sd-cpu-textencoder | Always run stable-diffusion TextEncoder model on CPU.                                                                         |          |
+| --device          | cuda or cpu                                                                                                                   | cuda     |
+| --port            | Port for backend flask web server                                                                                             | 8080     |
+| --gui             | Launch lama-cleaner as a desktop application                                                                                  |          |
+| --gui_size        | Set the window size for the application                                                                                       | 1200 900 |
+| --input           | Path to image you want to load by default                                                                                     | None     |
+| --debug           | Enable debug mode for flask web server                                                                                        |          |
 
 ## Inpainting Model
 

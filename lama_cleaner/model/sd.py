@@ -6,6 +6,7 @@ import numpy as np
 import torch
 from diffusers import PNDMScheduler, DDIMScheduler
 from loguru import logger
+from transformers import FeatureExtractionMixin, ImageFeatureExtractionMixin
 
 from lama_cleaner.helper import norm_img
 
@@ -38,23 +39,61 @@ from lama_cleaner.schema import Config, SDSampler
 #     mask = torch.from_numpy(mask)
 #     return mask
 
+class DummyFeatureExtractorOutput:
+    def __init__(self, pixel_values):
+        self.pixel_values = pixel_values
+
+    def to(self, device):
+        return self
+
+
+class DummyFeatureExtractor(FeatureExtractionMixin, ImageFeatureExtractionMixin):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def __call__(self, *args, **kwargs):
+        return DummyFeatureExtractorOutput(torch.empty(0, 3))
+
+
+class DummySafetyChecker:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, clip_input, images):
+        return images, False
+
 
 class SD(InpaintModel):
-    pad_mod = 64 # current diffusers only support 64 https://github.com/huggingface/diffusers/pull/505
+    pad_mod = 64  # current diffusers only support 64 https://github.com/huggingface/diffusers/pull/505
     min_size = 512
 
     def init_model(self, device: torch.device, **kwargs):
         from .sd_pipeline import StableDiffusionInpaintPipeline
+
+        model_kwargs = {"local_files_only": kwargs['sd_run_local']}
+        if kwargs['sd_disable_nsfw']:
+            logger.info("Disable Stable Diffusion Model NSFW checker")
+            model_kwargs.update(dict(
+                feature_extractor=DummyFeatureExtractor(),
+                safety_checker=DummySafetyChecker(),
+            ))
 
         self.model = StableDiffusionInpaintPipeline.from_pretrained(
             self.model_id_or_path,
             revision="fp16" if torch.cuda.is_available() else "main",
             torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
             use_auth_token=kwargs["hf_access_token"],
+            **model_kwargs
         )
         # https://huggingface.co/docs/diffusers/v0.3.0/en/api/pipelines/stable_diffusion#diffusers.StableDiffusionInpaintPipeline.enable_attention_slicing
         self.model.enable_attention_slicing()
         self.model = self.model.to(device)
+
+        if kwargs['sd_cpu_textencoder']:
+            logger.info("Run Stable Diffusion TextEncoder on CPU")
+            self.model.text_encoder = self.model.text_encoder.to(torch.device('cpu'), non_blocking=True)
+            self.model.text_encoder = self.model.text_encoder.to(torch.float32, non_blocking=True )
+
         self.callbacks = kwargs.pop("callbacks", None)
 
     @torch.cuda.amp.autocast()
