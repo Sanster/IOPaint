@@ -1,4 +1,4 @@
-torch>=1.8.2
+torch>=1.9.0
 opencv-python
 flask_cors
 flask==1.1.4

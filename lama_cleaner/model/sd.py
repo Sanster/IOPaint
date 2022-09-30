@@ -91,7 +91,8 @@ class SD(InpaintModel):
 
         if kwargs['sd_cpu_textencoder']:
             logger.info("Run Stable Diffusion TextEncoder on CPU")
-            self.model.text_encoder = self.model.text_encoder.to(torch.device('cpu'))
+            self.model.text_encoder = self.model.text_encoder.to(torch.device('cpu'), non_blocking=True)
+            self.model.text_encoder = self.model.text_encoder.to(torch.float32, non_blocking=True )
 
         self.callbacks = kwargs.pop("callbacks", None)
 
