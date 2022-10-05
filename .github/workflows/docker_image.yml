@@ -1,10 +1,9 @@
 name: Publish Docker image
 
 on:
-  - release:
+  release:
     types: [published]
 
-on:
   workflow_dispatch:
     inputs:
       tags:
