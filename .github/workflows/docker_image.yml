@@ -3,12 +3,14 @@ name: Publish Docker image
 on:
   - release:
     types: [published]
-  - workflow_dispatch:
-      inputs:
-        tags:
-          description: "Test scenario tags"
-          required: true
-          type: string
+
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: "Test scenario tags"
+        required: true
+        type: string
 
 jobs:
   push_to_registry:
