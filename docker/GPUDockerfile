@@ -1,0 +1,14 @@
+FROM nvidia/cuda:11.6.1-runtime-ubuntu20.04
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    libsm6 libxext6 ffmpeg libfontconfig1 libxrender1 libgl1-mesa-glx \
+    curl python3-pip
+
+RUN pip3 install --upgrade pip && \
+    pip3 install torch==1.12.1 --extra-index-url https://download.pytorch.org/whl/cu116
+RUN pip3 install lama-cleaner
+
+EXPOSE 8080
+
+CMD ["bash"]

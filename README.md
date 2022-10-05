@@ -33,40 +33,65 @@
 
 ## Usage
 
-| Usage                  | Before                                        | After                                                          |
-| ---------------------- | --------------------------------------------- | -------------------------------------------------------------- |
-| Remove unwanted things | ![unwant_object2](./assets/unwant_object.jpg) | ![unwant_object2](./assets/unwant_object_clean.jpg)            |
-| Remove unwanted person | ![unwant_person](./assets/unwant_person.jpg)  | ![unwant_person](./assets/unwant_person_clean.jpg)             |
-| Remove Text            | ![text](./assets/unwant_text.jpg)             | ![text](./assets/unwant_text_clean.jpg)                        |
-| Remove watermark       | ![watermark](./assets/watermark.jpg)          | ![watermark_clean](./assets/watermark_cleanup.jpg)             |
-| Fix old photo          | ![oldphoto](./assets/old_photo.jpg)           | ![oldphoto_clean](./assets/old_photo_clean.jpg)                |
-| Text Driven Inpainting | ![dog](./assets/dog.jpg)                      | Prompt: a fox sitting on a bench<br/> ![fox](./assets/fox.jpg) |
+<details>
+<summary>1. Remove any unwanted things on the image</summary>
+
+| Usage                  | Before                                        | After                                               |
+| ---------------------- | --------------------------------------------- | --------------------------------------------------- |
+| Remove unwanted things | ![unwant_object2](./assets/unwant_object.jpg) | ![unwant_object2](./assets/unwant_object_clean.jpg) |
+| Remove unwanted person | ![unwant_person](./assets/unwant_person.jpg)  | ![unwant_person](./assets/unwant_person_clean.jpg)  |
+| Remove Text            | ![text](./assets/unwant_text.jpg)             | ![text](./assets/unwant_text_clean.jpg)             |
+| Remove watermark       | ![watermark](./assets/watermark.jpg)          | ![watermark_clean](./assets/watermark_cleanup.jpg)  |
+
+</details>
+
+<details>
+<summary>2. Fix old photo</summary>
+
+| Usage         | Before                              | After                                           |
+| ------------- | ----------------------------------- | ----------------------------------------------- |
+| Fix old photo | ![oldphoto](./assets/old_photo.jpg) | ![oldphoto_clean](./assets/old_photo_clean.jpg) |
+
+</details>
+
+<details>
+<summary>3. Replace something on the image </summary>
+
+| Usage                  | Before                   | After                                                          |
+| ---------------------- | ------------------------ | -------------------------------------------------------------- |
+| Text Driven Inpainting | ![dog](./assets/dog.jpg) | Prompt: a fox sitting on a bench<br/> ![fox](./assets/fox.jpg) |
+
+</details>
 
 ## Quick Start
+
+The easiest way to use Lama Cleaner is to install it using `pip`:
 
 ```bash
 pip install lama-cleaner
 
-# Model will be downloaded automatically
+# Models will be downloaded at first time used
 lama-cleaner --model=lama --device=cpu --port=8080
 # Lama Cleaner is now running at http://localhost:8080
 ```
 
-Available arguments:
+If you prefer to use docker, you can check out [docker](#docker)
 
-| Name              | Description                                                                                                                   | Default  |
-|-------------------|-------------------------------------------------------------------------------------------------------------------------------| -------- |
-| --model           | lama/ldm/zits/mat/fcf/sd1.4 See details in [Inpaint Model](#inpainting-model)                                                 | lama     |
-| --hf_access_token | stable-diffusion(sd) model need [huggingface access token](https://huggingface.co/docs/hub/security-tokens) to download model |          |
-| --sd-run-local    | Once the model as downloaded, you can pass this arg and remove `--hf_access_token`                                            |          |
-| --sd-disable-nsfw | Disable stable-diffusion NSFW checker.                                                                                        |          |
+Available command line arguments:
+
+| Name                 | Description                                                                                                                   | Default  |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------- |
+| --model              | lama/ldm/zits/mat/fcf/sd1.4 See details in [Inpaint Model](#inpainting-model)                                                 | lama     |
+| --hf_access_token    | stable-diffusion(sd) model need [huggingface access token](https://huggingface.co/docs/hub/security-tokens) to download model |          |
+| --sd-run-local       | Once the model as downloaded, you can pass this arg and remove `--hf_access_token`                                            |          |
+| --sd-disable-nsfw    | Disable stable-diffusion NSFW checker.                                                                                        |          |
 | --sd-cpu-textencoder | Always run stable-diffusion TextEncoder model on CPU.                                                                         |          |
-| --device          | cuda or cpu                                                                                                                   | cuda     |
-| --port            | Port for backend flask web server                                                                                             | 8080     |
-| --gui             | Launch lama-cleaner as a desktop application                                                                                  |          |
-| --gui_size        | Set the window size for the application                                                                                       | 1200 900 |
-| --input           | Path to image you want to load by default                                                                                     | None     |
-| --debug           | Enable debug mode for flask web server                                                                                        |          |
+| --device             | cuda or cpu                                                                                                                   | cuda     |
+| --port               | Port for backend flask web server                                                                                             | 8080     |
+| --gui                | Launch lama-cleaner as a desktop application                                                                                  |          |
+| --gui_size           | Set the window size for the application                                                                                       | 1200 900 |
+| --input              | Path to image you want to load by default                                                                                     | None     |
+| --debug              | Enable debug mode for flask web server                                                                                        |          |
 
 ## Inpainting Model
 
@@ -141,27 +166,53 @@ great online services [here](https://cleanup.pictures/).
 
 ## Docker
 
-Run within a Docker container. Set the `CACHE_DIR` to models location path. Optionally add a `-d` option to
-the `docker run` command below to run as a daemon.
+You can use [pre-build docker image]() to run Lama Cleaner. The model will be downloaded to the cache directory when first time used.
+You can mount existing cache directory to start the container,
+so you don't have to download the model every time you start the container.
 
-### Build Docker image
+The cache directories for different models correspond as follows:
 
-```
-docker build -f Dockerfile -t lamacleaner .
-```
+- lama/ldm/zits/mat/fcf: /root/.cache/torch
+- sd1.4: /root/.cache/huggingface
 
 ### Run Docker (cpu)
 
 ```
-docker run -p 8080:8080 -e CACHE_DIR=/app/models -v  $(pwd)/models:/app/models -v $(pwd):/app --rm lamacleaner \
-python3 main.py --device=cpu --port=8080 --host=0.0.0.0
+docker run -p 8080:8080 \
+-v /path/to/torch_cache:/root/.cache/torch \
+-v /path/to/huggingface_cache:/root/.cache/huggingface \
+--rm lamacleaner \
+lama-cleaner --device=cpu --port=8080 --host=0.0.0.0
 ```
 
 ### Run Docker (gpu)
 
 ```
-docker run --gpus all -p 8080:8080 -e CACHE_DIR=/app/models -v $(pwd)/models:/app/models -v $(pwd):/app --rm lamacleaner \
-python3 main.py --device=cuda --port=8080 --host=0.0.0.0
+docker run --gpus all -p 8080:8080 \
+-v /path/to/torch_cache:/root/.cache/torch \
+-v /path/to/huggingface_cache:/root/.cache/huggingface \
+lama-cleaner --device=cuda --port=8080 --host=0.0.0.0
 ```
 
 Then open [http://localhost:8080](http://localhost:8080)
+
+### Build Docker image
+
+cpu only
+
+```
+docker build -f ./docker/CPUDockerfile -t lamacleaner .
+```
+
+gpu & cpu
+
+- cuda11.6
+- pytorch1.12.1
+
+```
+docker build -f ./docker/GPUDockerfile -t lamacleaner .
+```
+
+## One Click Installer
+
+TODO

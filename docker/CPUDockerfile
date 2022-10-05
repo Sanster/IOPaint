@@ -1,0 +1,14 @@
+FROM python:3.7.4-slim-buster
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    libsm6 libxext6 ffmpeg libfontconfig1 libxrender1 libgl1-mesa-glx \
+    curl
+
+RUN pip install --upgrade pip && \
+    pip install torch==1.12.1 --extra-index-url https://download.pytorch.org/whl/cpu
+RUN pip install lama-cleaner
+
+EXPOSE 8080
+
+CMD ["bash"]
