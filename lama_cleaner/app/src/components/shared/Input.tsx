@@ -31,6 +31,7 @@ const TextInput = React.forwardRef<
       type="text"
       onFocus={handleOnFocus}
       onBlur={handleOnBlur}
+      onPaste={evt => evt.stopPropagation()}
       onKeyDown={e => {
         if (e.key === 'Escape') {
           e.currentTarget.blur()

@@ -1,10 +1,16 @@
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import Editor from './Editor/Editor'
 import ShortcutsModal from './Shortcuts/ShortcutsModal'
 import SettingModal from './Settings/SettingsModal'
 import Toast from './shared/Toast'
-import { AIModel, isSDState, settingState, toastState } from '../store/Atoms'
+import {
+  AIModel,
+  fileState,
+  isSDState,
+  settingState,
+  toastState,
+} from '../store/Atoms'
 import {
   currentModel,
   modelDownloaded,
@@ -13,6 +19,7 @@ import {
 import SidePanel from './SidePanel/SidePanel'
 
 const Workspace = () => {
+  const [file, setFile] = useRecoilState(fileState)
   const [settings, setSettingState] = useRecoilState(settingState)
   const [toastVal, setToastState] = useRecoilState(toastState)
   const isSD = useRecoilValue(isSDState)

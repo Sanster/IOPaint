@@ -22,12 +22,12 @@ const SidePanel = () => {
           className="btn-primary side-panel-trigger"
           onClick={() => toggleOpen()}
         >
-          Stable Diffusion
+          Configurations
         </PopoverPrimitive.Trigger>
         <PopoverPrimitive.Portal>
           <PopoverPrimitive.Content className="side-panel-content">
             <SettingBlock
-              title="Show Croper"
+              title="Croper"
               input={
                 <Switch
                   checked={setting.showCroper}

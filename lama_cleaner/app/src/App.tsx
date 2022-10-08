@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRecoilState } from 'recoil'
 import { nanoid } from 'nanoid'
 import useInputImage from './hooks/useInputImage'
@@ -26,6 +26,8 @@ function App() {
   const [theme, setTheme] = useRecoilState(themeState)
   const [toastVal, setToastState] = useRecoilState(toastState)
   const userInputImage = useInputImage()
+  const [openPasteImageAlertDialog, setOpenPasteImageAlertDialog] =
+    useState(false)
 
   // Set Input Image
   useEffect(() => {
@@ -60,6 +62,7 @@ function App() {
     event.preventDefault()
     event.stopPropagation()
   }, [])
+
   const handleDragIn = React.useCallback(event => {
     event.preventDefault()
     event.stopPropagation()
@@ -68,6 +71,7 @@ function App() {
       setIsDragging(true)
     }
   }, [])
+
   const handleDragOut = React.useCallback(event => {
     event.preventDefault()
     event.stopPropagation()
@@ -75,6 +79,7 @@ function App() {
     if (dragCounter.current > 0) return
     setIsDragging(false)
   }, [])
+
   const handleDrop = React.useCallback(event => {
     event.preventDefault()
     event.stopPropagation()
@@ -105,20 +110,51 @@ function App() {
     }
   }, [])
 
+  const onPaste = useCallback((event: any) => {
+    // TODO: when sd side panel open, ctrl+v not work
+    // https://htmldom.dev/paste-an-image-from-the-clipboard/
+    if (!event.clipboardData) {
+      return
+    }
+    const clipboardItems = event.clipboardData.items
+    const items: DataTransferItem[] = [].slice
+      .call(clipboardItems)
+      .filter((item: DataTransferItem) => {
+        // Filter the image items only
+        return item.type.indexOf('image') !== -1
+      })
+
+    if (items.length === 0) {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+
+    // TODO: add confirm dialog
+
+    const item = items[0]
+    // Get the blob of image
+    const blob = item.getAsFile()
+    if (blob) {
+      setFile(blob)
+    }
+  }, [])
+
   React.useEffect(() => {
     window.addEventListener('dragenter', handleDragIn)
     window.addEventListener('dragleave', handleDragOut)
     window.addEventListener('dragover', handleDrag)
     window.addEventListener('drop', handleDrop)
+    window.addEventListener('paste', onPaste)
     return function cleanUp() {
       window.removeEventListener('dragenter', handleDragIn)
       window.removeEventListener('dragleave', handleDragOut)
       window.removeEventListener('dragover', handleDrag)
       window.removeEventListener('drop', handleDrop)
+      window.removeEventListener('paste', onPaste)
     }
   })
-
-  ///
 
   return (
     <div className="lama-cleaner">
