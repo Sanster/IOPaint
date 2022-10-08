@@ -972,7 +972,7 @@ export default function Editor() {
               style={{
                 cursor: getCursor(),
                 clipPath: `inset(0 ${sliderPos}% 0 0)`,
-                transition: 'clip-path 350ms ease-in-out',
+                transition: 'clip-path 300ms cubic-bezier(0.4, 0, 0.2, 1)',
               }}
               onContextMenu={e => {
                 e.preventDefault()
@@ -1143,7 +1143,7 @@ export default function Editor() {
               setSliderPos(0)
               window.setTimeout(() => {
                 setShowOriginal(false)
-              }, 350)
+              }, 300)
             }}
             disabled={renders.length === 0}
           />
