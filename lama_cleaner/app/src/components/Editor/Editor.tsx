@@ -950,7 +950,7 @@ export default function Editor() {
         limitToBounds={false}
         doubleClick={{ disabled: true }}
         initialScale={minScale}
-        minScale={minScale}
+        minScale={minScale * 0.6}
         onPanning={ref => {
           if (!panned) {
             setPanned(true)
