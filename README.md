@@ -11,6 +11,9 @@
   <a href="https://colab.research.google.com/drive/1e3ZkAJxvkK3uzaTGu91N9TvI_Mahs0Wb?usp=sharing">
     <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg" />
   </a>
+  <a href="https://hub.docker.com/r/cwq1913/lama-cleaner">
+    <img alt="version" src="https://img.shields.io/docker/pulls/cwq1913/lama-cleaner" />
+  </a>
 </p>
 
 ![img](./assets/dark.jpg)
@@ -181,16 +184,21 @@ The cache directories for different models correspond as follows:
 docker run -p 8080:8080 \
 -v /path/to/torch_cache:/root/.cache/torch \
 -v /path/to/huggingface_cache:/root/.cache/huggingface \
---rm lamacleaner \
+--rm lama-cleaner:cpu-0.21.0 \
 lama-cleaner --device=cpu --port=8080 --host=0.0.0.0
 ```
 
 ### Run Docker (gpu)
 
+- cuda11.6
+- pytorch1.12.1
+- minimum nvidia driver 510.39.01+
+
 ```
 docker run --gpus all -p 8080:8080 \
 -v /path/to/torch_cache:/root/.cache/torch \
 -v /path/to/huggingface_cache:/root/.cache/huggingface \
+--rm lama-cleaner:cpu-0.21.0 \
 lama-cleaner --device=cuda --port=8080 --host=0.0.0.0
 ```
 
@@ -205,9 +213,6 @@ docker build -f ./docker/CPUDockerfile -t lamacleaner .
 ```
 
 gpu & cpu
-
-- cuda11.6
-- pytorch1.12.1
 
 ```
 docker build -f ./docker/GPUDockerfile -t lamacleaner .
