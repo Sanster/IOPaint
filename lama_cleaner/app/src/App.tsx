@@ -123,7 +123,7 @@ function App() {
   return (
     <div className="lama-cleaner">
       <Header />
-      {file ? <Workspace file={file} key={workspaceId} /> : <LandingPage />}
+      <Workspace key={workspaceId} />
     </div>
   )
 }

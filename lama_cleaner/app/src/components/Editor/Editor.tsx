@@ -33,6 +33,7 @@ import {
 } from '../../utils'
 import {
   croperState,
+  fileState,
   isInpaintingState,
   isSDState,
   propmtState,
@@ -44,13 +45,10 @@ import {
 import useHotKey from '../../hooks/useHotkey'
 import Croper from '../Croper/Croper'
 import emitter, { EVENT_PROMPT } from '../../event'
+import FileSelect from '../FileSelect/FileSelect'
 
 const TOOLBAR_SIZE = 200
 const BRUSH_COLOR = '#ffcc00bb'
-
-interface EditorProps {
-  file: File
-}
 
 interface Line {
   size?: number
@@ -85,8 +83,8 @@ function mouseXY(ev: SyntheticEvent) {
   return { x: mouseEvent.offsetX, y: mouseEvent.offsetY }
 }
 
-export default function Editor(props: EditorProps) {
-  const { file } = props
+export default function Editor() {
+  const [file, setFile] = useRecoilState(fileState)
   const promptVal = useRecoilValue(propmtState)
   const settings = useRecoilValue(settingState)
   const [seedVal, setSeed] = useRecoilState(seedState)
@@ -186,6 +184,9 @@ export default function Editor(props: EditorProps) {
 
   const runInpainting = useCallback(
     async (prompt?: string, useLastLineGroup?: boolean) => {
+      if (file === undefined) {
+        return
+      }
       // useLastLineGroup 的影响
       // 1. 使用上一次的 mask
       // 2. 结果替换当前 render
@@ -781,6 +782,9 @@ export default function Editor(props: EditorProps) {
   )
 
   function download() {
+    if (file === undefined) {
+      return
+    }
     const name = file.name.replace(/(\.[\w\d_-]+)$/i, '_cleanup$1')
     const curRender = renders[renders.length - 1]
     downloadImage(curRender.currentSrc, name)
@@ -918,13 +922,20 @@ export default function Editor(props: EditorProps) {
     }
   }
 
-  return (
-    <div
-      className="editor-container"
-      aria-hidden="true"
-      onMouseMove={onMouseMove}
-      onMouseUp={onPointerUp}
-    >
+  const renderFileSelect = () => {
+    return (
+      <div className="landing-file-selector">
+        <FileSelect
+          onSelection={async f => {
+            setFile(f)
+          }}
+        />
+      </div>
+    )
+  }
+
+  const renderCanvas = () => {
+    return (
       <TransformWrapper
         ref={r => {
           if (r) {
@@ -1024,6 +1035,17 @@ export default function Editor(props: EditorProps) {
           )}
         </TransformComponent>
       </TransformWrapper>
+    )
+  }
+
+  return (
+    <div
+      className="editor-container"
+      aria-hidden="true"
+      onMouseMove={onMouseMove}
+      onMouseUp={onPointerUp}
+    >
+      {file === undefined ? renderFileSelect() : renderCanvas()}
 
       {showBrush && !isInpainting && !isPanning && (
         <div className="brush-shape" style={getBrushStyle(x, y)} />
@@ -1037,7 +1059,7 @@ export default function Editor(props: EditorProps) {
       )}
 
       <div className="editor-toolkit-panel">
-        {isSD ? (
+        {isSD || file === undefined ? (
           <></>
         ) : (
           <SizeSelector

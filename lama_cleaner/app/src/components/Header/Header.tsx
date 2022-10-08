@@ -18,7 +18,7 @@ const Header = () => {
   const renderHeader = () => {
     return (
       <header>
-        <div style={{ visibility: file ? 'visible' : 'hidden' }}>
+        <div>
           <label htmlFor={uploadElemId}>
             <Button icon={<UploadIcon />} style={{ border: 0 }}>
               <input

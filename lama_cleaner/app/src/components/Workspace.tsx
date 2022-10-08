@@ -12,11 +12,7 @@ import {
 } from '../adapters/inpainting'
 import SidePanel from './SidePanel/SidePanel'
 
-interface WorkspaceProps {
-  file: File
-}
-
-const Workspace = ({ file }: WorkspaceProps) => {
+const Workspace = () => {
   const [settings, setSettingState] = useRecoilState(settingState)
   const [toastVal, setToastState] = useRecoilState(toastState)
   const isSD = useRecoilValue(isSDState)
@@ -85,7 +81,7 @@ const Workspace = ({ file }: WorkspaceProps) => {
   return (
     <>
       {isSD ? <SidePanel /> : <></>}
-      <Editor file={file} />
+      <Editor />
       <SettingModal onClose={onSettingClose} />
       <ShortcutsModal />
       <Toast

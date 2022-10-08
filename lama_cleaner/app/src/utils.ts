@@ -74,11 +74,14 @@ export function loadImage(image: HTMLImageElement, src: string) {
   })
 }
 
-export function useImage(file: File): [HTMLImageElement, boolean] {
+export function useImage(file?: File): [HTMLImageElement, boolean] {
   const [image] = useState(new Image())
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
+    if (file === undefined) {
+      return
+    }
     image.onload = () => {
       setIsLoaded(true)
     }
