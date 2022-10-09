@@ -48,6 +48,8 @@ import emitter, { EVENT_PROMPT } from '../../event'
 import FileSelect from '../FileSelect/FileSelect'
 
 const TOOLBAR_SIZE = 200
+const MIN_BRUSH_SIZE = 10
+const MAX_BRUSH_SIZE = 200
 const BRUSH_COLOR = '#ffcc00bb'
 
 interface Line {
@@ -108,6 +110,14 @@ export default function Editor() {
   const [showBrush, setShowBrush] = useState(false)
   const [showRefBrush, setShowRefBrush] = useState(false)
   const [isPanning, setIsPanning] = useState<boolean>(false)
+  const [isChangingBrushSizeByMouse, setIsChangingBrushSizeByMouse] =
+    useState<boolean>(false)
+  const [changeBrushSizeByMouseInit, setChangeBrushSizeByMouseInit] = useState({
+    x: -1,
+    y: -1,
+    brushSize: 20,
+  })
+
   const [showOriginal, setShowOriginal] = useState(false)
   const [scale, setScale] = useState<number>(1)
   const [panned, setPanned] = useState<boolean>(false)
@@ -486,6 +496,15 @@ export default function Editor() {
   }
 
   const onMouseDrag = (ev: SyntheticEvent) => {
+    if (isChangingBrushSizeByMouse) {
+      const initX = changeBrushSizeByMouseInit.x
+      // move right: increase brush size
+      const newSize = changeBrushSizeByMouseInit.brushSize + (x - initX)
+      if (newSize <= MAX_BRUSH_SIZE && newSize >= MIN_BRUSH_SIZE) {
+        setBrushSize(newSize)
+      }
+      return
+    }
     if (isPanning) {
       return
     }
@@ -552,6 +571,9 @@ export default function Editor() {
   }
 
   const onMouseDown = (ev: SyntheticEvent) => {
+    if (isChangingBrushSizeByMouse) {
+      return
+    }
     if (isPanning) {
       return
     }
@@ -892,6 +914,21 @@ export default function Editor() {
     }
   )
 
+  useKeyPressEvent(
+    'Alt',
+    ev => {
+      ev?.preventDefault()
+      ev?.stopPropagation()
+      setIsChangingBrushSizeByMouse(true)
+      setChangeBrushSizeByMouseInit({ x, y, brushSize })
+    },
+    ev => {
+      ev?.preventDefault()
+      ev?.stopPropagation()
+      setIsChangingBrushSizeByMouse(false)
+    }
+  )
+
   const getCurScale = (): number => {
     let s = minScale
     if (viewportRef.current?.state.scale !== undefined) {
@@ -1070,8 +1107,8 @@ export default function Editor() {
         )}
         <Slider
           label="Brush"
-          min={10}
-          max={150}
+          min={MIN_BRUSH_SIZE}
+          max={MAX_BRUSH_SIZE}
           value={brushSize}
           onChange={handleSliderChange}
           onClick={() => setShowRefBrush(false)}
