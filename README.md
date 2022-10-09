@@ -11,6 +11,9 @@
   <a href="https://colab.research.google.com/drive/1e3ZkAJxvkK3uzaTGu91N9TvI_Mahs0Wb?usp=sharing">
     <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg" />
   </a>
+  <a href="https://www.python.org/downloads/">
+    <img alt="python version" src="https://img.shields.io/badge/python-3.7+-blue.svg" />
+  </a>
   <a href="https://hub.docker.com/r/cwq1913/lama-cleaner">
     <img alt="version" src="https://img.shields.io/docker/pulls/cwq1913/lama-cleaner" />
   </a>

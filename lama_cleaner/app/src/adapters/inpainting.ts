@@ -46,6 +46,9 @@ export default async function inpaint(
   fd.append('sdSampler', settings.sdSampler.toString())
   fd.append('sdSeed', seed ? seed.toString() : '-1')
 
+  fd.append('cv2Radius', settings.cv2Radius.toString())
+  fd.append('cv2Flag', settings.cv2Flag.toString())
+
   if (sizeLimit === undefined) {
     fd.append('sizeLimit', '1080')
   } else {

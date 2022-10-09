@@ -228,3 +228,22 @@ def test_sd_run_local(strategy, sampler, disable_nsfw):
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask_blur.png",
     )
 
+
+@pytest.mark.parametrize(
+    "strategy", [HDStrategy.ORIGINAL, HDStrategy.RESIZE, HDStrategy.CROP]
+)
+@pytest.mark.parametrize("cv2_flag", ['INPAINT_NS', 'INPAINT_TELEA'])
+@pytest.mark.parametrize("cv2_radius", [3, 15])
+def test_cv2(strategy, cv2_flag, cv2_radius):
+    model = ModelManager(
+        name="cv2",
+        device=device,
+    )
+    cfg = get_config(strategy, cv2_flag=cv2_flag, cv2_radius=cv2_radius)
+    assert_equal(
+        model,
+        cfg,
+        f"sd_{strategy.capitalize()}_{cv2_flag}_{cv2_radius}.png",
+        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
+    )
