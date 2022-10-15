@@ -462,6 +462,17 @@ export default function Editor() {
     }
   }, [windowSize, resetZoom])
 
+  useEffect(() => {
+    window.addEventListener('blur', () => {
+      setIsChangingBrushSizeByMouse(false)
+    })
+    return () => {
+      window.removeEventListener('blur', () => {
+        setIsChangingBrushSizeByMouse(false)
+      })
+    }
+  }, [])
+
   const handleEscPressed = () => {
     if (isInpainting) {
       return
