@@ -82,7 +82,7 @@ def get_image_ext(img_bytes):
     return w
 
 
-def diffuser_callback(step: int):
+def diffuser_callback(i, t, latents):
     pass
     # socketio.emit('diffusion_step', {'diffusion_step': step})
 
@@ -129,7 +129,7 @@ def process():
     )
 
     if config.sd_seed == -1:
-        config.sd_seed = random.randint(1, 9999999)
+        config.sd_seed = random.randint(1, 999999999)
 
     logger.info(f"Origin image shape: {original_shape}")
     image = resize_max_size(image, size_limit=size_limit, interpolation=interpolation)
@@ -223,7 +223,7 @@ def main(args):
         sd_disable_nsfw=args.sd_disable_nsfw,
         sd_cpu_textencoder=args.sd_cpu_textencoder,
         sd_run_local=args.sd_run_local,
-        callbacks=[diffuser_callback],
+        callback=diffuser_callback,
     )
 
     if args.gui:

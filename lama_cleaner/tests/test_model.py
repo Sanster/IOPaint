@@ -171,7 +171,7 @@ def test_sd(strategy, sampler):
                          sd_run_local=False,
                          sd_disable_nsfw=False,
                          sd_cpu_textencoder=False,
-                         callbacks=[callback])
+                         callback=callback)
     cfg = get_config(strategy, prompt='a cat sitting on a bench', sd_steps=sd_steps)
     cfg.sd_sampler = sampler
 
@@ -193,9 +193,10 @@ def test_sd(strategy, sampler):
 
 
 @pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
-@pytest.mark.parametrize("sampler", [SDSampler.ddim])
+@pytest.mark.parametrize("sampler", [SDSampler.ddim, SDSampler.pndm, SDSampler.k_lms])
 @pytest.mark.parametrize("disable_nsfw", [True, False])
-def test_sd_run_local(strategy, sampler, disable_nsfw):
+@pytest.mark.parametrize("cpu_textencoder", [True, False])
+def test_sd_run_local(strategy, sampler, disable_nsfw, cpu_textencoder):
     def callback(step: int):
         print(f"sd_step_{step}")
 
@@ -207,7 +208,7 @@ def test_sd_run_local(strategy, sampler, disable_nsfw):
         hf_access_token=None,
         sd_run_local=True,
         sd_disable_nsfw=disable_nsfw,
-        sd_cpu_textencoder=True,
+        sd_cpu_textencoder=cpu_textencoder,
     )
     cfg = get_config(strategy, prompt='a cat sitting on a bench', sd_steps=sd_steps)
     cfg.sd_sampler = sampler
@@ -215,17 +216,9 @@ def test_sd_run_local(strategy, sampler, disable_nsfw):
     assert_equal(
         model,
         cfg,
-        f"sd_{strategy.capitalize()}_{sampler}_local_result.png",
+        f"sd_{strategy.capitalize()}_{sampler}_local_disablensfw_{disable_nsfw}_cputextencoder_{cpu_textencoder}_result.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
-    )
-
-    assert_equal(
-        model,
-        cfg,
-        f"sd_{strategy.capitalize()}_{sampler}_blur_mask_local_result.png",
-        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
-        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask_blur.png",
     )
 
 

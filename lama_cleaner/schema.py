@@ -17,6 +17,7 @@ class LDMSampler(str, Enum):
 class SDSampler(str, Enum):
     ddim = "ddim"
     pndm = "pndm"
+    k_lms = "k_lms"
 
 
 class Config(BaseModel):
