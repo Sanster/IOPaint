@@ -225,6 +225,7 @@ const defaultHDSettings: ModelsHDSettings = {
 export enum SDSampler {
   ddim = 'ddim',
   pndm = 'pndm',
+  klms = 'k_lms',
 }
 
 export enum SDMode {
@@ -253,7 +254,7 @@ export const settingStateDefault: Settings = {
   sdStrength: 0.75,
   sdSteps: 50,
   sdGuidanceScale: 7.5,
-  sdSampler: SDSampler.ddim,
+  sdSampler: SDSampler.klms,
   sdSeed: 42,
   sdSeedFixed: true,
   sdNumSamples: 1,
