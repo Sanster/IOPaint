@@ -10,5 +10,5 @@ pytest
 yacs
 markupsafe==2.0.1
 scikit-image==0.19.3
-diffusers==0.5.1
+diffusers==0.6.0
 transformers==4.21.0

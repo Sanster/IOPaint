@@ -159,10 +159,10 @@ def test_fcf(strategy):
 
 
 @pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
-@pytest.mark.parametrize("sampler", [SDSampler.ddim, SDSampler.pndm])
+@pytest.mark.parametrize("sampler", [SDSampler.ddim, SDSampler.pndm, SDSampler.k_lms])
 def test_sd(strategy, sampler):
-    def callback(step: int):
-        print(f"sd_step_{step}")
+    def callback(i, t, latents):
+        print(f"sd_step_{i}")
 
     sd_steps = 50
     model = ModelManager(name="sd1.4",
@@ -197,8 +197,8 @@ def test_sd(strategy, sampler):
 @pytest.mark.parametrize("disable_nsfw", [True, False])
 @pytest.mark.parametrize("cpu_textencoder", [True, False])
 def test_sd_run_local(strategy, sampler, disable_nsfw, cpu_textencoder):
-    def callback(step: int):
-        print(f"sd_step_{step}")
+    def callback(i, t, latents):
+        print(f"sd_step_{i}")
 
     sd_steps = 50
     model = ModelManager(
@@ -219,6 +219,40 @@ def test_sd_run_local(strategy, sampler, disable_nsfw, cpu_textencoder):
         f"sd_{strategy.capitalize()}_{sampler}_local_disablensfw_{disable_nsfw}_cputextencoder_{cpu_textencoder}_result.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
+    )
+
+
+@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
+@pytest.mark.parametrize("sampler", [SDSampler.ddim, SDSampler.pndm, SDSampler.k_lms])
+def test_runway_sd_1_5(strategy, sampler):
+    def callback(i, t, latents):
+        print(f"sd_step_{i}")
+
+    sd_steps = 20
+    model = ModelManager(name="sd1.5",
+                         device=device,
+                         hf_access_token=None,
+                         sd_run_local=True,
+                         sd_disable_nsfw=True,
+                         sd_cpu_textencoder=True,
+                         callback=callback)
+    cfg = get_config(strategy, prompt='a cat sitting on a bench', sd_steps=sd_steps)
+    cfg.sd_sampler = sampler
+
+    assert_equal(
+        model,
+        cfg,
+        f"runway_sd_{strategy.capitalize()}_{sampler}_result.png",
+        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
+    )
+
+    assert_equal(
+        model,
+        cfg,
+        f"runway_sd_{strategy.capitalize()}_{sampler}_blur_mask_result.png",
+        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask_blur.png",
     )
 
 
