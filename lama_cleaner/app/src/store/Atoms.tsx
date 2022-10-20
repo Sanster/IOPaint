@@ -254,7 +254,7 @@ export const settingStateDefault: Settings = {
   sdStrength: 0.75,
   sdSteps: 50,
   sdGuidanceScale: 7.5,
-  sdSampler: SDSampler.klms,
+  sdSampler: SDSampler.pndm,
   sdSeed: 42,
   sdSeedFixed: true,
   sdNumSamples: 1,
