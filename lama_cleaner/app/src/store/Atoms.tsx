@@ -9,7 +9,7 @@ export enum AIModel {
   ZITS = 'zits',
   MAT = 'mat',
   FCF = 'fcf',
-  SD14 = 'sd1.4',
+  SD15 = 'sd1.5',
   CV2 = 'cv2',
 }
 
@@ -206,7 +206,7 @@ const defaultHDSettings: ModelsHDSettings = {
     hdStrategyCropMargin: 128,
     enabled: false,
   },
-  [AIModel.SD14]: {
+  [AIModel.SD15]: {
     hdStrategy: HDStrategy.ORIGINAL,
     hdStrategyResizeLimit: 768,
     hdStrategyCropTrigerSize: 512,
@@ -329,7 +329,7 @@ export const isSDState = selector({
   key: 'isSD',
   get: ({ get }) => {
     const settings = get(settingState)
-    return settings.model === AIModel.SD14
+    return settings.model === AIModel.SD15
   },
 })
 

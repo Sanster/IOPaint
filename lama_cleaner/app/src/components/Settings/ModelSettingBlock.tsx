@@ -181,7 +181,7 @@ function ModelSettingBlock() {
         return undefined
       case AIModel.FCF:
         return renderFCFModelDesc()
-      case AIModel.SD14:
+      case AIModel.SD15:
         return undefined
       case AIModel.CV2:
         return renderOpenCV2Desc()
@@ -222,7 +222,7 @@ function ModelSettingBlock() {
           'https://arxiv.org/abs/2208.03382',
           'https://github.com/SHI-Labs/FcF-Inpainting'
         )
-      case AIModel.SD14:
+      case AIModel.SD15:
         return renderModelDesc(
           'Stable Diffusion',
           'https://ommer-lab.com/research/latent-diffusion-models/',
