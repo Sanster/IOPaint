@@ -19,7 +19,7 @@
   </a>
 </p>
 
-![img](./assets/dark.jpg)
+https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-965f-5c6683141375.mp4
 
 ## Features
 
