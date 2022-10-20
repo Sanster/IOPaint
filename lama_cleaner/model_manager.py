@@ -7,7 +7,7 @@ from lama_cleaner.model.zits import ZITS
 from lama_cleaner.model.opencv2 import OpenCV2
 from lama_cleaner.schema import Config
 
-models = {"lama": LaMa, "ldm": LDM, "zits": ZITS, "mat": MAT, "fcf": FcF, "sd1.4": SD14, "sd1.5": SD15, "cv2": OpenCV2}
+models = {"lama": LaMa, "ldm": LDM, "zits": ZITS, "mat": MAT, "fcf": FcF, "sd1.5": SD15, "cv2": OpenCV2}
 
 
 class ModelManager:
