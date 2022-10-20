@@ -1096,7 +1096,13 @@ export default function Editor() {
       {file === undefined ? renderFileSelect() : renderCanvas()}
 
       {showBrush && !isInpainting && !isPanning && (
-        <div className="brush-shape" style={getBrushStyle(x, y)} />
+        <div
+          className="brush-shape"
+          style={getBrushStyle(
+            isChangingBrushSizeByMouse ? changeBrushSizeByMouseInit.x : x,
+            isChangingBrushSizeByMouse ? changeBrushSizeByMouseInit.y : y
+          )}
+        />
       )}
 
       {showRefBrush && (
