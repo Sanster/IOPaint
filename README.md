@@ -92,7 +92,7 @@ Available command line arguments:
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------- |
 | --model              | lama/ldm/zits/mat/fcf/sd1.5 See details in [Inpaint Model](#inpainting-model)                                                 | lama     |
 | --hf_access_token    | stable-diffusion need [huggingface access token](https://huggingface.co/docs/hub/security-tokens) to download model |          |
-| --sd-run-local       | Once the model as downloaded, you can pass this arg and remove `--hf_access_token`                                            |          |
+| --sd-run-local       | Once the model is downloaded, you can pass this arg and remove `--hf_access_token`                                            |          |
 | --sd-disable-nsfw    | Disable stable-diffusion NSFW checker.                                                                                        |          |
 | --sd-cpu-textencoder | Always run stable-diffusion TextEncoder model on CPU.                                                                         |          |
 | --device             | cuda or cpu                                                                                                                   | cuda     |
