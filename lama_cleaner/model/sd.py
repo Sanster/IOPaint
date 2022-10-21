@@ -134,6 +134,8 @@ class SD(InpaintModel):
             self.image_key: PIL.Image.fromarray(image),
         }
 
+        img_h, img_w = image.shape[:2]
+
         output = self.model(
             prompt=config.prompt,
             mask_image=PIL.Image.fromarray(mask[:, :, -1], mode="L"),
@@ -142,6 +144,8 @@ class SD(InpaintModel):
             guidance_scale=config.sd_guidance_scale,
             output_type="np.array",
             callback=self.callback,
+            height=img_h,
+            width=img_w,
             **_kwargs
         ).images[0]
 
