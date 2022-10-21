@@ -81,6 +81,9 @@ lama-cleaner --model=lama --device=cpu --port=8080
 # Lama Cleaner is now running at http://localhost:8080
 ```
 
+For stable-diffusion model, you need to [accepting the terms to access](https://huggingface.co/runwayml/stable-diffusion-inpainting), and
+get an access token from here [huggingface access token](https://huggingface.co/docs/hub/security-tokens)
+
 If you prefer to use docker, you can check out [docker](#docker)
 
 Available command line arguments:
@@ -88,7 +91,7 @@ Available command line arguments:
 | Name                 | Description                                                                                                                   | Default  |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------- |
 | --model              | lama/ldm/zits/mat/fcf/sd1.5 See details in [Inpaint Model](#inpainting-model)                                                 | lama     |
-| --hf_access_token    | stable-diffusion(sd) model need [huggingface access token](https://huggingface.co/docs/hub/security-tokens) to download model |          |
+| --hf_access_token    | stable-diffusion need [huggingface access token](https://huggingface.co/docs/hub/security-tokens) to download model |          |
 | --sd-run-local       | Once the model as downloaded, you can pass this arg and remove `--hf_access_token`                                            |          |
 | --sd-disable-nsfw    | Disable stable-diffusion NSFW checker.                                                                                        |          |
 | --sd-cpu-textencoder | Always run stable-diffusion TextEncoder model on CPU.                                                                         |          |
