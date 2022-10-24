@@ -57,7 +57,7 @@ BUILD_DIR = os.environ.get("LAMA_CLEANER_BUILD_DIR", "app/build")
 
 class NoFlaskwebgui(logging.Filter):
     def filter(self, record):
-        return "GET //flaskwebgui-keep-server-alive" not in record.getMessage()
+        return "GET /flaskwebgui-keep-server-alive" not in record.getMessage()
 
 
 logging.getLogger("werkzeug").addFilter(NoFlaskwebgui())
