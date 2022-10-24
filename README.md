@@ -86,21 +86,23 @@ get an access token from here [huggingface access token](https://huggingface.co/
 
 If you prefer to use docker, you can check out [docker](#docker)
 
+If you hava no idea what is docker or pip, please check [One Click Installer](./scripts/README.md)
+
 Available command line arguments:
 
-| Name                 | Description                                                                                                                   | Default  |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------- |
-| --model              | lama/ldm/zits/mat/fcf/sd1.5 See details in [Inpaint Model](#inpainting-model)                                                 | lama     |
+| Name                 | Description                                                                                                         | Default  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------- | -------- |
+| --model              | lama/ldm/zits/mat/fcf/sd1.5 See details in [Inpaint Model](#inpainting-model)                                       | lama     |
 | --hf_access_token    | stable-diffusion need [huggingface access token](https://huggingface.co/docs/hub/security-tokens) to download model |          |
-| --sd-run-local       | Once the model as downloaded, you can pass this arg and remove `--hf_access_token`                                            |          |
-| --sd-disable-nsfw    | Disable stable-diffusion NSFW checker.                                                                                        |          |
-| --sd-cpu-textencoder | Always run stable-diffusion TextEncoder model on CPU.                                                                         |          |
-| --device             | cuda or cpu                                                                                                                   | cuda     |
-| --port               | Port for backend flask web server                                                                                             | 8080     |
-| --gui                | Launch lama-cleaner as a desktop application                                                                                  |          |
-| --gui_size           | Set the window size for the application                                                                                       | 1200 900 |
-| --input              | Path to image you want to load by default                                                                                     | None     |
-| --debug              | Enable debug mode for flask web server                                                                                        |          |
+| --sd-run-local       | Once the model as downloaded, you can pass this arg and remove `--hf_access_token`                                  |          |
+| --sd-disable-nsfw    | Disable stable-diffusion NSFW checker.                                                                              |          |
+| --sd-cpu-textencoder | Always run stable-diffusion TextEncoder model on CPU.                                                               |          |
+| --device             | cuda or cpu                                                                                                         | cuda     |
+| --port               | Port for backend flask web server                                                                                   | 8080     |
+| --gui                | Launch lama-cleaner as a desktop application                                                                        |          |
+| --gui_size           | Set the window size for the application                                                                             | 1200 900 |
+| --input              | Path to image you want to load by default                                                                           | None     |
+| --debug              | Enable debug mode for flask web server                                                                              |          |
 
 ## Inpainting Model
 
@@ -228,7 +230,3 @@ gpu & cpu
 ```
 docker build -f ./docker/GPUDockerfile -t lamacleaner .
 ```
-
-## One Click Installer
-
-TODO

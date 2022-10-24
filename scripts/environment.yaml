@@ -4,4 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - conda
-
+  - git
+  - git-lfs
+  - invoke
+  - rich

@@ -1,11 +1,14 @@
 #!/bin/bash
+# Prepare basic python environment
 
 set -e
 
+# Ensuer not use user's python package
 export PYTHONNOUSERSITE=1
 
 BUILD_DIST=lama-cleaner
 BUILD_ENV=installer
+USER_SCRIPTS=user_scripts
 
 echo "Creating a distributable package.."
 
@@ -20,9 +23,8 @@ conda pack --n-threads -1 --prefix $BUILD_ENV --format tar
 
 mkdir -p ${BUILD_DIST}/$BUILD_ENV
 
-echo "Copy project file.."
-chmod u+x start.sh
-cp start.sh $BUILD_DIST
+echo "Copy user scripts file ${USER_SCRIPTS}"
+cp ${USER_SCRIPTS}/* $BUILD_DIST
 
 cd $BUILD_DIST
 tar -xf ../${BUILD_ENV}.tar -C $BUILD_ENV
@@ -31,5 +33,6 @@ cd ..
 rm -rf $BUILD_ENV
 rm ${BUILD_ENV}.tar
 
-zip -r $BUILD_DIST.zip $BUILD_DIST
+echo "zip ${BUILD_DIST}.zip"
+zip -q -r $BUILD_DIST.zip $BUILD_DIST
 
