@@ -10,6 +10,7 @@ export interface ModalProps {
   children?: ReactNode
   onClose?: () => void
   title: string
+  showCloseIcon?: boolean
   className?: string
 }
 
@@ -17,7 +18,7 @@ const Modal = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Root>,
   ModalProps
 >((props, forwardedRef) => {
-  const { show, children, onClose, className, title } = props
+  const { show, children, onClose, className, title, showCloseIcon } = props
   const [_, setAppState] = useRecoilState(appState)
 
   const onOpenChange = (open: boolean) => {
@@ -39,7 +40,11 @@ const Modal = React.forwardRef<
         >
           <div className="modal-header">
             <DialogPrimitive.Title>{title}</DialogPrimitive.Title>
-            <Button icon={<XIcon />} onClick={onClose} />
+            {showCloseIcon ? (
+              <Button icon={<XIcon />} onClick={onClose} />
+            ) : (
+              <></>
+            )}
           </div>
           {children}
         </DialogPrimitive.Content>
@@ -47,5 +52,9 @@ const Modal = React.forwardRef<
     </DialogPrimitive.Root>
   )
 })
+
+Modal.defaultProps = {
+  showCloseIcon: true,
+}
 
 export default Modal

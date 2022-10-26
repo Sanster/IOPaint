@@ -8,6 +8,7 @@ import useResolution from '../../hooks/useResolution'
 import { ThemeChanger } from './ThemeChanger'
 import SettingIcon from '../Settings/SettingIcon'
 import PromptInput from './PromptInput'
+import CoffeeIcon from '../CoffeeIcon/CoffeeIcon'
 
 const Header = () => {
   const [file, setFile] = useRecoilState(fileState)
@@ -42,13 +43,12 @@ const Header = () => {
         {isSD && file ? <PromptInput /> : <></>}
 
         <div className="header-icons-wrapper">
+          <CoffeeIcon />
           <ThemeChanger />
-          {file && (
-            <div className="header-icons">
-              <Shortcuts />
-              <SettingIcon />
-            </div>
-          )}
+          <div className="header-icons">
+            <Shortcuts />
+            <SettingIcon />
+          </div>
         </div>
       </header>
     )
