@@ -172,10 +172,10 @@ export interface Settings {
 
 const defaultHDSettings: ModelsHDSettings = {
   [AIModel.LAMA]: {
-    hdStrategy: HDStrategy.RESIZE,
+    hdStrategy: HDStrategy.CROP,
     hdStrategyResizeLimit: 2048,
-    hdStrategyCropTrigerSize: 2048,
-    hdStrategyCropMargin: 128,
+    hdStrategyCropTrigerSize: 1280,
+    hdStrategyCropMargin: 196,
     enabled: true,
   },
   [AIModel.LDM]: {
