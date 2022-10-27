@@ -88,7 +88,7 @@ def config(c, disable_device_choice=False):
                 )
                 device = DEVICE.CPU
 
-    desktop = Confirm.ask("Start as desktop app?")
+    desktop = Confirm.ask("Start as desktop app?", default=True)
 
     configs = {
         "model": model,
