@@ -41,21 +41,25 @@ const CoffeeIcon = () => {
           }}
         >
           <Button onClick={() => setShow(false)}> No thanks </Button>
-          <Button border onClick={() => setShow(false)}>
-            <a
-              href="https://ko-fi.com/Z8Z1CZJGY"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              Sure <Coffee />
-            </a>
-          </Button>
+          <a
+            href="https://ko-fi.com/Z8Z1CZJGY"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Button border onClick={() => setShow(false)}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                Sure
+                <Coffee />
+              </div>
+            </Button>
+          </a>
         </div>
       </Modal>
     </div>
