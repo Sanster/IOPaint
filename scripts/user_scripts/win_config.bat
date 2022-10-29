@@ -6,8 +6,8 @@ set PATH=C:\Windows\System32;%PATH%
 
 @call conda-unpack
 
-@call conda install -y cudatoolkit=11.3
-@call pip3 install torch --extra-index-url https://download.pytorch.org/whl/cu113
+@call conda install -c pytorch -c conda-forge -y pytorch=1.12.1=py3.10_cuda11.6_cudnn8_0
+
 @call pip3 install -U lama-cleaner
 
 @call invoke config
