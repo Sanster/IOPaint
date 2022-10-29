@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
+import imghdr
 import io
 import logging
 import multiprocessing
 import os
 import random
 import time
-import imghdr
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 import cv2
-import torch
 import numpy as np
+import torch
 from loguru import logger
 
 from lama_cleaner.model_manager import ModelManager
@@ -26,18 +26,14 @@ try:
 except:
     pass
 
-from flask import Flask, request, send_file, cli, make_response
+from flask import Flask, Response, cli, make_response, request, send_file
 
 # Disable ability for Flask to display warning about using a development server in a production environment.
 # https://gist.github.com/jerblack/735b9953ba1ab6234abb43174210d356
 cli.show_server_banner = lambda *_: None
 from flask_cors import CORS
 
-from lama_cleaner.helper import (
-    load_img,
-    numpy_to_bytes,
-    resize_max_size,
-)
+from lama_cleaner.helper import load_img, numpy_to_bytes, resize_max_size
 
 NUM_THREADS = str(multiprocessing.cpu_count())
 
@@ -87,6 +83,30 @@ def diffuser_callback(i, t, latents):
     # socketio.emit('diffusion_step', {'diffusion_step': step})
 
 
+def wrap_result_to_response(
+    res_np_img: np.ndarray,
+    config: Config,
+    alpha_channel: Optional[np.ndarray] = None,
+    ext: str = "jpeg",
+) -> Response:
+    if alpha_channel is not None:
+        if alpha_channel.shape[:2] != res_np_img.shape[:2]:
+            alpha_channel = cv2.resize(
+                alpha_channel, dsize=(res_np_img.shape[1], res_np_img.shape[0])
+            )
+        res_np_img = np.concatenate(
+            (res_np_img, alpha_channel[:, :, np.newaxis]), axis=-1
+        )
+    response = make_response(
+        send_file(
+            io.BytesIO(numpy_to_bytes(res_np_img, ext)),
+            mimetype=f"image/{ext}",
+        )
+    )
+    response.headers["X-Seed"] = str(config.sd_seed)
+    return response
+
+
 @app.route("/inpaint", methods=["POST"])
 def process():
     input = request.files
@@ -94,6 +114,8 @@ def process():
     origin_image_bytes = input["image"].read()
 
     image, alpha_channel = load_img(origin_image_bytes)
+    ext = get_image_ext(origin_image_bytes)
+
     original_shape = image.shape
     interpolation = cv2.INTER_CUBIC
 
@@ -125,7 +147,7 @@ def process():
         sd_sampler=form["sdSampler"],
         sd_seed=form["sdSeed"],
         cv2_flag=form["cv2Flag"],
-        cv2_radius=form['cv2Radius']
+        cv2_radius=form["cv2Radius"],
     )
 
     if config.sd_seed == -1:
@@ -139,30 +161,16 @@ def process():
     mask = resize_max_size(mask, size_limit=size_limit, interpolation=interpolation)
 
     start = time.time()
-    res_np_img = model(image, mask, config)
+    try:
+        res_np_img = model(image, mask, config)
+    except RuntimeError as e:
+        logger.info(f"Error occurred in inference")
+        return wrap_result_to_response(image[:, :, ::-1], config, alpha_channel, ext)
     logger.info(f"process time: {(time.time() - start) * 1000}ms")
 
     torch.cuda.empty_cache()
 
-    if alpha_channel is not None:
-        if alpha_channel.shape[:2] != res_np_img.shape[:2]:
-            alpha_channel = cv2.resize(
-                alpha_channel, dsize=(res_np_img.shape[1], res_np_img.shape[0])
-            )
-        res_np_img = np.concatenate(
-            (res_np_img, alpha_channel[:, :, np.newaxis]), axis=-1
-        )
-
-    ext = get_image_ext(origin_image_bytes)
-
-    response = make_response(
-        send_file(
-            io.BytesIO(numpy_to_bytes(res_np_img, ext)),
-            mimetype=f"image/{ext}",
-        )
-    )
-    response.headers["X-Seed"] = str(config.sd_seed)
-    return response
+    return wrap_result_to_response(res_np_img, config, alpha_channel, ext)
 
 
 @app.route("/model")
