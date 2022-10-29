@@ -230,3 +230,13 @@ gpu & cpu
 ```
 docker build -f ./docker/GPUDockerfile -t lamacleaner .
 ```
+
+### Install with Conda
+
+```
+conda create -n lama-cleaner
+conda activate lama-cleaner
+conda install -c pytorch -c conda-forge -y pytorch=1.12.1=py3.10_cuda11.6_cudnn8.3.2_0
+pip install lama-cleaner
+```
+Then same as [QuickStart](#quick-start)

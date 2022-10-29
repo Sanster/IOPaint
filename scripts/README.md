@@ -11,8 +11,8 @@
 
 1. Download [lama-cleaner-win.zip](https://github.com/Sanster/lama-cleaner/releases/download/win_one_click_installer/lama-cleaner-win.zip)
 1. Unpack `lama-cleaner-win.zip`
-1. Double click `win_config.command`, follow the guide in the terminal to choice [model](#model-description) and set other configs.
-1. Double click `win_start.command` to start the server.
+1. Double click `win_config.bat`, follow the guide in the terminal to choice [model](#model-description) and set other configs.
+1. Double click `win_start.bat` to start the server.
 
 ## Model Description
 
