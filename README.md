@@ -197,7 +197,7 @@ The cache directories for different models correspond as follows:
 docker run -p 8080:8080 \
 -v /path/to/torch_cache:/root/.cache/torch \
 -v /path/to/huggingface_cache:/root/.cache/huggingface \
---rm lama-cleaner:cpu-0.21.0 \
+--rm lama-cleaner:cpu-0.24.4 \
 lama-cleaner --device=cpu --port=8080 --host=0.0.0.0
 ```
 
@@ -211,7 +211,7 @@ lama-cleaner --device=cpu --port=8080 --host=0.0.0.0
 docker run --gpus all -p 8080:8080 \
 -v /path/to/torch_cache:/root/.cache/torch \
 -v /path/to/huggingface_cache:/root/.cache/huggingface \
---rm lama-cleaner:cpu-0.21.0 \
+--rm lama-cleaner:gpu-0.24.4 \
 lama-cleaner --device=cuda --port=8080 --host=0.0.0.0
 ```
 
@@ -222,11 +222,11 @@ Then open [http://localhost:8080](http://localhost:8080)
 cpu only
 
 ```
-docker build -f ./docker/CPUDockerfile -t lamacleaner .
+docker build -f --build-arg version=0.x.0 ./docker/CPUDockerfile -t lamacleaner .
 ```
 
 gpu & cpu
 
 ```
-docker build -f ./docker/GPUDockerfile -t lamacleaner .
+docker build -f --build-arg version=0.x.0 ./docker/GPUDockerfile -t lamacleaner .
 ```

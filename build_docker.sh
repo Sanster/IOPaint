@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-GIT_TAG=`git describe --tags --abbrev=0`
+GIT_TAG=$1
 IMAGE_DESC="Image inpainting tool powered by SOTA AI Model" 
 GIT_REPO="https://github.com/Sanster/lama-cleaner"
 
@@ -14,6 +14,7 @@ docker buildx build \
 --label org.opencontainers.image.url=$GIT_REPO \
 --label org.opencontainers.image.source=$GIT_REPO \
 --label org.opencontainers.image.version=$GIT_TAG \
+--build-arg version=$GIT_TAG \
 --tag lama-cleaner:cpu-$GIT_TAG .
 
 
@@ -26,4 +27,5 @@ docker buildx build \
 --label org.opencontainers.image.url=$GIT_REPO \
 --label org.opencontainers.image.source=$GIT_REPO \
 --label org.opencontainers.image.version=$GIT_TAG \
+--build-arg version=$GIT_TAG \
 --tag lama-cleaner:gpu-$GIT_TAG .

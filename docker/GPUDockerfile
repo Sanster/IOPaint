@@ -6,8 +6,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl python3-pip
 
 RUN pip3 install --upgrade pip && \
-    pip3 install torch==1.12.1 --extra-index-url https://download.pytorch.org/whl/cu116
-RUN pip3 install lama-cleaner
+    pip3 install torch==1.12.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116
+    
+ARG version 
+
+RUN pip3 install lama-cleaner==$version
 
 EXPOSE 8080
 

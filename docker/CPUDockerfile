@@ -7,7 +7,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN pip install --upgrade pip && \
     pip install torch==1.12.1 --extra-index-url https://download.pytorch.org/whl/cpu
-RUN pip install lama-cleaner
+
+ARG version
+
+RUN pip install lama-cleaner==$version
 
 EXPOSE 8080
 
