@@ -151,7 +151,7 @@ Lama Cleaner provides three ways to run inpainting model on images, you can chan
 | **Resize**   | Resize the image to a smaller size before inpainting. The area outside the mask will not loss quality. | Midium | :zap: :zap:       |
 | **Crop**     | Crop masking area from the original image to do inpainting                                             | Low    | :zap: :zap: :zap: |
 
-## Download Model Mannually
+## Download Model Manually
 
 If you have problems downloading the model automatically when lama-cleaner start,
 you can download it manually. By default lama-cleaner will load model from `TORCH_HOME=~/.cache/torch/hub/checkpoints/`,
@@ -197,7 +197,7 @@ The cache directories for different models correspond as follows:
 docker run -p 8080:8080 \
 -v /path/to/torch_cache:/root/.cache/torch \
 -v /path/to/huggingface_cache:/root/.cache/huggingface \
---rm lama-cleaner:cpu-0.24.4 \
+--rm cwq1913/lama-cleaner:cpu-0.24.4 \
 lama-cleaner --device=cpu --port=8080 --host=0.0.0.0
 ```
 
@@ -211,7 +211,7 @@ lama-cleaner --device=cpu --port=8080 --host=0.0.0.0
 docker run --gpus all -p 8080:8080 \
 -v /path/to/torch_cache:/root/.cache/torch \
 -v /path/to/huggingface_cache:/root/.cache/huggingface \
---rm lama-cleaner:gpu-0.24.4 \
+--rm cwq1913/lama-cleaner:gpu-0.24.4 \
 lama-cleaner --device=cuda --port=8080 --host=0.0.0.0
 ```
 
