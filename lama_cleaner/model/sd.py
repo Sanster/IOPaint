@@ -47,7 +47,7 @@ class CPUTextEncoderWrapper:
 
 
 class SD(InpaintModel):
-    pad_mod = 8  # current diffusers only support 64 https://github.com/huggingface/diffusers/pull/505
+    pad_mod = 8
     min_size = 512
 
     def init_model(self, device: torch.device, **kwargs):
@@ -60,10 +60,12 @@ class SD(InpaintModel):
                 safety_checker=None,
             ))
 
+        use_gpu = device == torch.device('cuda') and torch.cuda.is_available()
+
         self.model = StableDiffusionInpaintPipeline.from_pretrained(
             self.model_id_or_path,
-            revision="fp16" if torch.cuda.is_available() else "main",
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+            revision="fp16" if use_gpu else "main",
+            torch_dtype=torch.float16 if use_gpu else torch.float32,
             use_auth_token=kwargs["hf_access_token"],
             **model_kwargs
         )
