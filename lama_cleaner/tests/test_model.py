@@ -160,7 +160,7 @@ def test_fcf(strategy):
     )
 
 
-@pytest.mark.parametrize("sd_device", ['cpu'])
+@pytest.mark.parametrize("sd_device", ['cpu', 'cuda'])
 @pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
 @pytest.mark.parametrize("sampler", [SDSampler.ddim, SDSampler.pndm, SDSampler.k_lms])
 @pytest.mark.parametrize("cpu_textencoder", [True, False])
@@ -168,6 +168,9 @@ def test_fcf(strategy):
 def test_runway_sd_1_5(sd_device, strategy, sampler, cpu_textencoder, disable_nsfw):
     def callback(i, t, latents):
         print(f"sd_step_{i}")
+
+    if sd_device == 'cuda' and not torch.cuda.is_available():
+        return
 
     sd_steps = 1
     model = ModelManager(name="sd1.5",
@@ -189,15 +192,6 @@ def test_runway_sd_1_5(sd_device, strategy, sampler, cpu_textencoder, disable_ns
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
         fx=1.3
-    )
-
-    assert_equal(
-        model,
-        cfg,
-        f"runway_sd_{strategy.capitalize()}_{name}_blur_mask.png",
-        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
-        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask_blur.png",
-        fy=1.3
     )
 
 
