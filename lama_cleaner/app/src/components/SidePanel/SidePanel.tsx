@@ -68,7 +68,7 @@ const SidePanel = () => {
               }}
             />
 
-            <NumberInputSetting
+            {/* <NumberInputSetting
               title="Strength"
               width={INPUT_WIDTH}
               allowFloat
@@ -81,7 +81,7 @@ const SidePanel = () => {
                   return { ...old, sdStrength: val }
                 })
               }}
-            />
+            /> */}
 
             <NumberInputSetting
               title="Guidance Scale"
