@@ -13,3 +13,10 @@
 1. Unpack `lama-cleaner-win.zip`
 1. Double click `win_config.bat`, follow the guide in the terminal to choice [model](#model-description) and set other configs.
 1. Double click `win_start.bat` to start the server.
+
+
+## Q&A
+
+1. How to update the version?
+
+Rerun `win_config.bat` will install the newest version of lama-cleaner
