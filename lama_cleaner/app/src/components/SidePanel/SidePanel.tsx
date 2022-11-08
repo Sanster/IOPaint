@@ -1,12 +1,13 @@
-import React, { useState } from 'react'
+import React, { FormEvent, useState } from 'react'
 import { useRecoilState } from 'recoil'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { useToggle } from 'react-use'
-import { SDSampler, settingState } from '../../store/Atoms'
+import { negativePropmtState, SDSampler, settingState } from '../../store/Atoms'
 import NumberInputSetting from '../Settings/NumberInputSetting'
 import SettingBlock from '../Settings/SettingBlock'
 import Selector from '../shared/Selector'
 import { Switch, SwitchThumb } from '../shared/Switch'
+import TextAreaInput from '../shared/Textarea'
 
 const INPUT_WIDTH = 30
 
@@ -14,6 +15,15 @@ const INPUT_WIDTH = 30
 const SidePanel = () => {
   const [open, toggleOpen] = useToggle(true)
   const [setting, setSettingState] = useRecoilState(settingState)
+  const [negativePrompt, setNegativePrompt] =
+    useRecoilState(negativePropmtState)
+
+  const handleOnInput = (evt: FormEvent<HTMLTextAreaElement>) => {
+    evt.preventDefault()
+    evt.stopPropagation()
+    const target = evt.target as HTMLTextAreaElement
+    setNegativePrompt(target.value)
+  }
 
   return (
     <div className="side-panel">
@@ -59,7 +69,7 @@ const SidePanel = () => {
               title="Steps"
               width={INPUT_WIDTH}
               value={`${setting.sdSteps}`}
-              desc="Large steps result in better result, but more time-consuming"
+              desc="The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference."
               onValue={value => {
                 const val = value.length === 0 ? 0 : parseInt(value, 10)
                 setSettingState(old => {
@@ -88,7 +98,7 @@ const SidePanel = () => {
               width={INPUT_WIDTH}
               allowFloat
               value={`${setting.sdGuidanceScale}`}
-              desc="TODO"
+              desc="Higher guidance scale encourages to generate images that are closely linked to the text prompt, usually at the expense of lower image quality."
               onValue={value => {
                 const val = value.length === 0 ? 0 : parseFloat(value)
                 setSettingState(old => {
@@ -101,7 +111,7 @@ const SidePanel = () => {
               title="Mask Blur"
               width={INPUT_WIDTH}
               value={`${setting.sdMaskBlur}`}
-              desc="TODO"
+              desc="Blur the edge of mask area. The higher the number the smoother blend with the original image"
               onValue={value => {
                 const val = value.length === 0 ? 0 : parseInt(value, 10)
                 setSettingState(old => {
@@ -165,6 +175,20 @@ const SidePanel = () => {
                     <SwitchThumb />
                   </Switch>
                 </div>
+              }
+            />
+
+            <SettingBlock
+              className="sub-setting-block"
+              title="Negative prompt"
+              layout="v"
+              input={
+                <TextAreaInput
+                  className="negative-prompt"
+                  value={negativePrompt}
+                  onInput={handleOnInput}
+                  placeholder=""
+                />
               }
             />
           </PopoverPrimitive.Content>

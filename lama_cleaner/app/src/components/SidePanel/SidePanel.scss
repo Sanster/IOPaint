@@ -55,3 +55,31 @@
   //   // border-radius: 4px;
   // }
 }
+
+.negative-prompt {
+  all: unset;
+  border-width: 0;
+  border-radius: 0.5rem;
+  min-height: 150px;
+  max-width: 200px;
+  width: 100%;
+  padding: 12px 0.8rem;
+  outline: 1px solid var(--border-color);
+
+  &:focus-visible {
+    border-width: 0;
+    outline: 1px solid var(--yellow-accent);
+  }
+
+  &:-webkit-input-placeholder {
+    padding-top: 10px;
+  }
+
+  &:-moz-input-placeholder {
+    padding-top: 10px;
+  }
+
+  &:-ms-input-placeholder {
+    padding-top: 10px;
+  }
+}

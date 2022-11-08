@@ -25,6 +25,14 @@
   gap: 12rem;
 }
 
+.setting-block-content-v {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
 .setting-block-content-title {
   display: flex;
   flex-direction: row;

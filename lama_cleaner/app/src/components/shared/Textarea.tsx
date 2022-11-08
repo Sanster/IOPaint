@@ -1,10 +1,10 @@
-import React, { FocusEvent, InputHTMLAttributes, RefObject } from 'react'
+import React, { FocusEvent, TextareaHTMLAttributes } from 'react'
 import { useRecoilState } from 'recoil'
 import { appState } from '../../store/Atoms'
 
-const TextInput = React.forwardRef<
-  HTMLInputElement,
-  InputHTMLAttributes<HTMLInputElement>
+const TextAreaInput = React.forwardRef<
+  HTMLTextAreaElement,
+  TextareaHTMLAttributes<HTMLTextAreaElement>
 >((props, ref) => {
   const { onFocus, onBlur, ...itemProps } = props
   const [_, setAppState] = useRecoilState(appState)
@@ -24,10 +24,9 @@ const TextInput = React.forwardRef<
   }
 
   return (
-    <input
+    <textarea
       {...itemProps}
       ref={ref}
-      type="text"
       onFocus={handleOnFocus}
       onBlur={handleOnBlur}
       onPaste={evt => evt.stopPropagation()}
@@ -43,4 +42,4 @@ const TextInput = React.forwardRef<
   )
 })
 
-export default TextInput
+export default TextAreaInput

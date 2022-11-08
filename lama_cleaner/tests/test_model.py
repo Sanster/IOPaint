@@ -195,6 +195,44 @@ def test_runway_sd_1_5(sd_device, strategy, sampler, cpu_textencoder, disable_ns
     )
 
 
+@pytest.mark.parametrize("sd_device", ['cuda'])
+@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
+@pytest.mark.parametrize("sampler", [SDSampler.ddim])
+def test_runway_sd_1_5_negative_prompt(sd_device, strategy, sampler):
+    def callback(i, t, latents):
+        pass
+
+    if sd_device == 'cuda' and not torch.cuda.is_available():
+        return
+
+    sd_steps = 50
+    model = ModelManager(name="sd1.5",
+                         device=sd_device,
+                         hf_access_token="",
+                         sd_run_local=True,
+                         sd_disable_nsfw=True,
+                         sd_cpu_textencoder=True,
+                         callback=callback)
+    cfg = get_config(
+        strategy,
+        sd_steps=sd_steps,
+        prompt='Face of a fox, high resolution, sitting on a park bench',
+        negative_prompt='orange, yellow, small',
+        sd_sampler=sampler
+    )
+
+    name = f"{sampler}_negative_prompt"
+
+    assert_equal(
+        model,
+        cfg,
+        f"runway_sd_{strategy.capitalize()}_{name}.png",
+        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
+        fx=1
+    )
+
+
 @pytest.mark.parametrize(
     "strategy", [HDStrategy.ORIGINAL, HDStrategy.RESIZE, HDStrategy.CROP]
 )

@@ -30,6 +30,7 @@ class Config(BaseModel):
     hd_strategy_resize_limit: int
 
     prompt: str = ""
+    negative_prompt: str = ""
     # 始终是在原图尺度上的值
     use_croper: bool = False
     croper_x: int = None

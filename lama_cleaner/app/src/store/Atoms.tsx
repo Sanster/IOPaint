@@ -43,6 +43,11 @@ export const propmtState = atom<string>({
   default: '',
 })
 
+export const negativePropmtState = atom<string>({
+  key: 'negativePromptState',
+  default: '',
+})
+
 export const isInpaintingState = selector({
   key: 'isInpainting',
   get: ({ get }) => {

@@ -36,6 +36,7 @@ import {
   fileState,
   isInpaintingState,
   isSDState,
+  negativePropmtState,
   propmtState,
   runManuallyState,
   seedState,
@@ -88,6 +89,7 @@ function mouseXY(ev: SyntheticEvent) {
 export default function Editor() {
   const [file, setFile] = useRecoilState(fileState)
   const promptVal = useRecoilValue(propmtState)
+  const negativePromptVal = useRecoilValue(negativePropmtState)
   const settings = useRecoilValue(settingState)
   const [seedVal, setSeed] = useRecoilState(seedState)
   const croperRect = useRecoilValue(croperState)
@@ -261,6 +263,7 @@ export default function Editor() {
           settings,
           croperRect,
           prompt,
+          negativePromptVal,
           sizeLimit.toString(),
           sdSeed
         )
@@ -311,6 +314,7 @@ export default function Editor() {
       croperRect,
       sizeLimit,
       promptVal,
+      negativePromptVal,
       drawOnCurrentRender,
       hadDrawSomething,
       drawLinesOnMask,

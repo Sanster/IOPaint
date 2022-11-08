@@ -113,6 +113,7 @@ def process():
         hd_strategy_crop_trigger_size=form["hdStrategyCropTrigerSize"],
         hd_strategy_resize_limit=form["hdStrategyResizeLimit"],
         prompt=form["prompt"],
+        negative_prompt=form["negativePrompt"],
         use_croper=form["useCroper"],
         croper_x=form["croperX"],
         croper_y=form["croperY"],

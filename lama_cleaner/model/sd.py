@@ -140,6 +140,7 @@ class SD(InpaintModel):
 
         output = self.model(
             prompt=config.prompt,
+            negative_prompt=config.negative_prompt,
             mask_image=PIL.Image.fromarray(mask[:, :, -1], mode="L"),
             strength=config.sd_strength,
             num_inference_steps=config.sd_steps,

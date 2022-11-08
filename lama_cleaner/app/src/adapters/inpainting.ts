@@ -9,6 +9,7 @@ export default async function inpaint(
   settings: Settings,
   croperRect: Rect,
   prompt?: string,
+  negativePrompt?: string,
   sizeLimit?: string,
   seed?: number
 ) {
@@ -34,6 +35,10 @@ export default async function inpaint(
   )
 
   fd.append('prompt', prompt === undefined ? '' : prompt)
+  fd.append(
+    'negativePrompt',
+    negativePrompt === undefined ? '' : negativePrompt
+  )
   fd.append('croperX', croperRect.x.toString())
   fd.append('croperY', croperRect.y.toString())
   fd.append('croperHeight', croperRect.height.toString())
