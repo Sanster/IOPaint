@@ -182,7 +182,7 @@ great online services [here](https://cleanup.pictures/).
 
 ## Docker
 
-You can use [pre-build docker image]() to run Lama Cleaner. The model will be downloaded to the cache directory when first time used.
+You can use [pre-build docker image](https://github.com/Sanster/lama-cleaner#run-docker-cpu) to run Lama Cleaner. The model will be downloaded to the cache directory when first time used.
 You can mount existing cache directory to start the container,
 so you don't have to download the model every time you start the container.
 
