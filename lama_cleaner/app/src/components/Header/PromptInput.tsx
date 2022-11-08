@@ -1,8 +1,8 @@
 import React, { FormEvent, useRef, useState } from 'react'
 import { useClickAway } from 'react-use'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import emitter, { EVENT_PROMPT } from '../../event'
-import { appState, propmtState } from '../../store/Atoms'
+import { appState, isInpaintingState, propmtState } from '../../store/Atoms'
 import Button from '../shared/Button'
 import TextInput from '../shared/Input'
 
@@ -10,6 +10,7 @@ import TextInput from '../shared/Input'
 const PromptInput = () => {
   const [app, setAppState] = useRecoilState(appState)
   const [prompt, setPrompt] = useRecoilState(propmtState)
+  const isInpainting = useRecoilValue(isInpaintingState)
   const ref = useRef(null)
 
   const handleOnInput = (evt: FormEvent<HTMLInputElement>) => {
@@ -33,7 +34,7 @@ const PromptInput = () => {
   })
 
   const onKeyUp = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !isInpainting) {
       handleRepaintClick()
     }
   }
