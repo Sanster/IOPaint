@@ -37,13 +37,14 @@ from lama_cleaner.schema import Config, SDSampler
 #     return mask
 
 class CPUTextEncoderWrapper:
-    def __init__(self, text_encoder):
+    def __init__(self, text_encoder, torch_dtype):
         self.text_encoder = text_encoder.to(torch.device('cpu'), non_blocking=True)
         self.text_encoder = self.text_encoder.to(torch.float32, non_blocking=True)
+        self.torch_dtype = torch_dtype
 
     def __call__(self, x):
         input_device = x.device
-        return [self.text_encoder(x.to(self.text_encoder.device))[0].to(input_device)]
+        return [self.text_encoder(x.to(self.text_encoder.device))[0].to(input_device).to(self.torch_dtype)]
 
 
 class SD(InpaintModel):
@@ -61,11 +62,11 @@ class SD(InpaintModel):
             ))
 
         use_gpu = device == torch.device('cuda') and torch.cuda.is_available()
-
+        torch_dtype = torch.float16 if use_gpu else torch.float32
         self.model = StableDiffusionInpaintPipeline.from_pretrained(
             self.model_id_or_path,
             revision="fp16" if use_gpu else "main",
-            torch_dtype=torch.float16 if use_gpu else torch.float32,
+            torch_dtype=torch_dtype,
             use_auth_token=kwargs["hf_access_token"],
             **model_kwargs
         )
@@ -75,11 +76,10 @@ class SD(InpaintModel):
 
         if kwargs['sd_cpu_textencoder']:
             logger.info("Run Stable Diffusion TextEncoder on CPU")
-            self.model.text_encoder = CPUTextEncoderWrapper(self.model.text_encoder)
+            self.model.text_encoder = CPUTextEncoderWrapper(self.model.text_encoder, torch_dtype)
 
         self.callback = kwargs.pop("callback", None)
 
-    @torch.cuda.amp.autocast()
     def forward(self, image, mask, config: Config):
         """Input image and output image have same size
         image: [H, W, C] RGB
