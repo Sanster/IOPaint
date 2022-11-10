@@ -3,6 +3,7 @@ from typing import Optional
 
 import cv2
 import torch
+import numpy as np
 from loguru import logger
 
 from lama_cleaner.helper import boxes_from_mask, resize_max_size, pad_img_to_modulo
@@ -55,8 +56,12 @@ class InpaintModel:
         result = self.forward(pad_image, pad_mask, config)
         result = result[0:origin_height, 0:origin_width, :]
 
-        original_pixel_indices = mask < 127
-        result[original_pixel_indices] = image[:, :, ::-1][original_pixel_indices]
+        if config.sd_mask_blur != 0:
+            k = 2 * config.sd_mask_blur + 1
+            mask = cv2.GaussianBlur(mask, (k, k), 0)
+
+        mask = mask[:, :, np.newaxis]
+        result = result * (mask / 255) + image[:, :, ::-1] * (1 - (mask / 255))
         return result
 
     @torch.no_grad()
