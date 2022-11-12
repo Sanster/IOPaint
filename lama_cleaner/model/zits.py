@@ -3,6 +3,7 @@ import time
 
 import cv2
 import skimage
+from skimage import color, feature
 import torch
 import torch.nn.functional as F
 
@@ -157,8 +158,8 @@ def load_image(img, mask, device, sigma256=3.0):
     # https://scikit-image.org/docs/stable/api/skimage.feature.html#skimage.feature.canny
     # low_threshold: Lower bound for hysteresis thresholding (linking edges). If None, low_threshold is set to 10% of dtype’s max.
     # high_threshold: Upper bound for hysteresis thresholding (linking edges). If None, high_threshold is set to 20% of dtype’s max.
-    gray_256 = skimage.color.rgb2gray(img_256)
-    edge_256 = skimage.feature.canny(gray_256, sigma=sigma256, mask=None).astype(float)
+    gray_256 = color.rgb2gray(img_256)
+    edge_256 = feature.canny(gray_256, sigma=sigma256, mask=None).astype(float)
     # cv2.imwrite("skimage_gray.jpg", (_gray_256*255).astype(np.uint8))
     # cv2.imwrite("skimage_edge.jpg", (_edge_256*255).astype(np.uint8))
 
