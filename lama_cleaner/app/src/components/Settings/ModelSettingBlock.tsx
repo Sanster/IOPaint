@@ -1,5 +1,6 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { useRecoilState } from 'recoil'
+import { getIsDisableModelSwitch } from '../../adapters/inpainting'
 import { AIModel, CV2Flag, SDSampler, settingState } from '../../store/Atoms'
 import Selector from '../shared/Selector'
 import { Switch, SwitchThumb } from '../shared/Switch'
@@ -10,6 +11,18 @@ import SettingBlock from './SettingBlock'
 
 function ModelSettingBlock() {
   const [setting, setSettingState] = useRecoilState(settingState)
+  const [isDisableModelSwitch, setIsDisableModelSwitch] = useState(false)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const isDisable: string = await getIsDisableModelSwitch().then(res =>
+        res.text()
+      )
+      setIsDisableModelSwitch(isDisable === 'true')
+    }
+
+    fetchData()
+  }, [])
 
   const onModelChange = (value: AIModel) => {
     setSettingState(old => {
@@ -250,6 +263,7 @@ function ModelSettingBlock() {
           value={setting.model as string}
           options={Object.values(AIModel)}
           onChange={val => onModelChange(val as AIModel)}
+          disabled={isDisableModelSwitch}
         />
       }
       optionDesc={renderOptionDesc()}

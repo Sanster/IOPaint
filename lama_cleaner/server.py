@@ -73,7 +73,7 @@ CORS(app, expose_headers=["Content-Disposition"])
 model: ModelManager = None
 device = None
 input_image_path: str = None
-
+is_disable_model_switch: bool = False
 
 def get_image_ext(img_bytes):
     w = imghdr.what("", img_bytes)
@@ -170,6 +170,11 @@ def process():
 def current_model():
     return model.name, 200
 
+@app.route("/is_disable_model_switch")
+def get_is_disable_model_switch():
+    res = 'true' if is_disable_model_switch else 'false'
+    return res, 200
+
 
 @app.route("/model_downloaded/<name>")
 def model_downloaded(name):
@@ -213,9 +218,13 @@ def main(args):
     global model
     global device
     global input_image_path
+    global is_disable_model_switch
 
     device = torch.device(args.device)
     input_image_path = args.input
+    is_disable_model_switch = args.disable_model_switch
+    if is_disable_model_switch:
+        logger.info(f"Start with --disable-model-switch, model switch on frontend is disable")
 
     model = ModelManager(
         name=args.model,

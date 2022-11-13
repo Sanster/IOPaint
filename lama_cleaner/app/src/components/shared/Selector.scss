@@ -24,6 +24,11 @@
   // &:focus-visible {
   //   border-color: var(--yellow-accent);
   // }
+
+  &:disabled {
+    color: var(--border-color);
+    border-color: var(--border-color);
+  }
 }
 
 .select-content {

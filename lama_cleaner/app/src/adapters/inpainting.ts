@@ -75,6 +75,12 @@ export default async function inpaint(
   }
 }
 
+export function getIsDisableModelSwitch() {
+  return fetch(`${API_ENDPOINT}/is_disable_model_switch`, {
+    method: 'GET',
+  })
+}
+
 export function switchModel(name: string) {
   const fd = new FormData()
   fd.append('name', name)

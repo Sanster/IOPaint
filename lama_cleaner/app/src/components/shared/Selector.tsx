@@ -15,6 +15,7 @@ interface Props {
   chevronDirection?: SelectorChevronDirection
   autoFocusAfterClose?: boolean
   onChange: (value: string) => void
+  disabled?: boolean
 }
 
 const Selector = (props: Props) => {
@@ -25,6 +26,7 @@ const Selector = (props: Props) => {
     options,
     autoFocusAfterClose,
     onChange,
+    disabled,
   } = props
 
   const contentRef = useRef<HTMLButtonElement>(null)
@@ -52,6 +54,7 @@ const Selector = (props: Props) => {
         style={{ width }}
         ref={contentRef}
         onKeyDown={e => e.preventDefault()}
+        disabled={disabled}
       >
         <Select.Value />
         <Select.Icon>
@@ -78,6 +81,7 @@ const Selector = (props: Props) => {
 const selectorDefaultProps = {
   chevronDirection: 'down',
   autoFocusAfterClose: true,
+  disabled: false,
 }
 
 Selector.defaultProps = selectorDefaultProps

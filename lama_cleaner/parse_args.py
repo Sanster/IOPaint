@@ -44,6 +44,7 @@ def parse_args():
     parser.add_argument(
         "--input", type=str, help="Path to image you want to load by default"
     )
+    parser.add_argument("--disable-model-switch", action="store_true", help="Disable model switch in frontend")
     parser.add_argument("--debug", action="store_true")
 
     args = parser.parse_args()
