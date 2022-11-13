@@ -1074,7 +1074,7 @@ export default function Editor() {
             </div>
           </div>
 
-          {settings.showCroper ? (
+          {isSD && settings.showCroper ? (
             <Croper
               maxHeight={original.naturalHeight}
               maxWidth={original.naturalWidth}
