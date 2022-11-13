@@ -45,7 +45,11 @@ import {
 } from '../../store/Atoms'
 import useHotKey from '../../hooks/useHotkey'
 import Croper from '../Croper/Croper'
-import emitter, { EVENT_PROMPT } from '../../event'
+import emitter, {
+  EVENT_PROMPT,
+  EVENT_CUSTOM_MASK,
+  CustomMaskEventData,
+} from '../../event'
 import FileSelect from '../FileSelect/FileSelect'
 
 const TOOLBAR_SIZE = 200
@@ -195,22 +199,23 @@ export default function Editor() {
   )
 
   const runInpainting = useCallback(
-    async (prompt?: string, useLastLineGroup?: boolean) => {
+    async (useLastLineGroup?: boolean, customMask?: File) => {
       if (file === undefined) {
         return
       }
+      const useCustomMask = customMask !== undefined
       // useLastLineGroup 的影响
       // 1. 使用上一次的 mask
       // 2. 结果替换当前 render
       console.log('runInpainting')
 
-      let maskLineGroup = []
+      let maskLineGroup: LineGroup = []
       if (useLastLineGroup === true) {
         if (lastLineGroup.length === 0) {
           return
         }
         maskLineGroup = lastLineGroup
-      } else {
+      } else if (!useCustomMask) {
         if (!hadDrawSomething()) {
           return
         }
@@ -256,23 +261,23 @@ export default function Editor() {
 
       const sdSeed = settings.sdSeedFixed ? settings.sdSeed : -1
 
+      console.log({ useCustomMask })
       try {
         const res = await inpaint(
           targetFile,
-          maskCanvas.toDataURL(),
           settings,
           croperRect,
-          prompt,
+          promptVal,
           negativePromptVal,
           sizeLimit.toString(),
-          sdSeed
+          sdSeed,
+          useCustomMask ? undefined : maskCanvas.toDataURL(),
+          useCustomMask ? customMask : undefined
         )
         if (!res) {
-          throw new Error('empty response')
+          throw new Error('Something went wrong on server side.')
         }
         const { blob, seed } = res
-        console.log(seed)
-        console.log(settings.sdSeedFixed)
         if (seed && !settings.sdSeedFixed) {
           setSeed(parseInt(seed, 10))
         }
@@ -324,9 +329,9 @@ export default function Editor() {
   useEffect(() => {
     emitter.on(EVENT_PROMPT, () => {
       if (hadDrawSomething()) {
-        runInpainting(promptVal)
+        runInpainting()
       } else if (lastLineGroup.length !== 0) {
-        runInpainting(promptVal, true)
+        runInpainting(true)
       } else {
         setToastState({
           open: true,
@@ -336,10 +341,21 @@ export default function Editor() {
         })
       }
     })
+
     return () => {
       emitter.off(EVENT_PROMPT)
     }
-  }, [hadDrawSomething, runInpainting, prompt])
+  }, [hadDrawSomething, runInpainting, promptVal])
+
+  useEffect(() => {
+    emitter.on(EVENT_CUSTOM_MASK, (data: any) => {
+      runInpainting(false, data.mask)
+    })
+
+    return () => {
+      emitter.off(EVENT_CUSTOM_MASK)
+    }
+  }, [runInpainting])
 
   const hadRunInpainting = () => {
     return renders.length !== 0

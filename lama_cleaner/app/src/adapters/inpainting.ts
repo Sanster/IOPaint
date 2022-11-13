@@ -5,19 +5,23 @@ export const API_ENDPOINT = `${process.env.REACT_APP_INPAINTING_URL}`
 
 export default async function inpaint(
   imageFile: File,
-  maskBase64: string,
   settings: Settings,
   croperRect: Rect,
   prompt?: string,
   negativePrompt?: string,
   sizeLimit?: string,
-  seed?: number
+  seed?: number,
+  maskBase64?: string,
+  customMask?: File
 ) {
   // 1080, 2000, Original
   const fd = new FormData()
   fd.append('image', imageFile)
-  const mask = dataURItoBlob(maskBase64)
-  fd.append('mask', mask)
+  if (maskBase64 !== undefined) {
+    fd.append('mask', dataURItoBlob(maskBase64))
+  } else if (customMask !== undefined) {
+    fd.append('mask', customMask)
+  }
 
   const hdSettings = settings.hdSettings[settings.model]
   fd.append('ldmSteps', settings.ldmSteps.toString())
@@ -70,8 +74,10 @@ export default async function inpaint(
       const newSeed = res.headers.get('x-seed')
       return { blob: URL.createObjectURL(blob), seed: newSeed }
     }
-  } catch {
-    throw new Error('Something went wrong on server side.')
+    const errMsg = await res.text()
+    throw new Error(errMsg)
+  } catch (error) {
+    throw new Error(`Something went wrong: ${error}`)
   }
 }
 

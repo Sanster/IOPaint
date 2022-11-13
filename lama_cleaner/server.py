@@ -94,6 +94,10 @@ def process():
     origin_image_bytes = input["image"].read()
 
     image, alpha_channel = load_img(origin_image_bytes)
+    mask, _ = load_img(input["mask"].read(), gray=True)
+    if image.shape[:2] != mask.shape[:2]:
+        return f"Mask shape{mask.shape[:2]} not queal to Image shape{image.shape[:2]}", 400
+
     original_shape = image.shape
     interpolation = cv2.INTER_CUBIC
 
@@ -136,14 +140,18 @@ def process():
     image = resize_max_size(image, size_limit=size_limit, interpolation=interpolation)
     logger.info(f"Resized image shape: {image.shape}")
 
-    mask, _ = load_img(input["mask"].read(), gray=True)
     mask = resize_max_size(mask, size_limit=size_limit, interpolation=interpolation)
 
     start = time.time()
-    res_np_img = model(image, mask, config)
-    logger.info(f"process time: {(time.time() - start) * 1000}ms")
-
-    torch.cuda.empty_cache()
+    try:
+        res_np_img = model(image, mask, config)
+    except RuntimeError as e:
+        # NOTE: the string may change?
+        if "CUDA out of memory. " in str(e):
+            return "CUDA out of memory", 500
+    finally:
+        logger.info(f"process time: {(time.time() - start) * 1000}ms")
+        torch.cuda.empty_cache()
 
     if alpha_channel is not None:
         if alpha_channel.shape[:2] != res_np_img.shape[:2]:
