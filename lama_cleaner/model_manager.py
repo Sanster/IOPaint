@@ -1,3 +1,5 @@
+import torch
+
 from lama_cleaner.model.fcf import FcF
 from lama_cleaner.model.lama import LaMa
 from lama_cleaner.model.ldm import LDM
@@ -11,7 +13,7 @@ models = {"lama": LaMa, "ldm": LDM, "zits": ZITS, "mat": MAT, "fcf": FcF, "sd1.5
 
 
 class ModelManager:
-    def __init__(self, name: str, device, **kwargs):
+    def __init__(self, name: str, device: torch.device, **kwargs):
         self.name = name
         self.device = device
         self.kwargs = kwargs

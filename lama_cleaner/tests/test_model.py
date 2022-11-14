@@ -12,6 +12,7 @@ current_dir = Path(__file__).parent.absolute().resolve()
 save_dir = current_dir / 'result'
 save_dir.mkdir(exist_ok=True, parents=True)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = torch.device(device)
 
 
 def get_data(fx: float = 1, fy: float = 1.0, img_p=current_dir / "image.png", mask_p=current_dir / "mask.png"):
@@ -172,9 +173,9 @@ def test_runway_sd_1_5(sd_device, strategy, sampler, cpu_textencoder, disable_ns
     if sd_device == 'cuda' and not torch.cuda.is_available():
         return
 
-    sd_steps = 1
+    sd_steps = 50
     model = ModelManager(name="sd1.5",
-                         device=sd_device,
+                         device=torch.device(sd_device),
                          hf_access_token="",
                          sd_run_local=True,
                          sd_disable_nsfw=disable_nsfw,
@@ -207,7 +208,7 @@ def test_runway_sd_1_5_negative_prompt(sd_device, strategy, sampler):
 
     sd_steps = 50
     model = ModelManager(name="sd1.5",
-                         device=sd_device,
+                         device=torch.device(sd_device),
                          hf_access_token="",
                          sd_run_local=True,
                          sd_disable_nsfw=True,
@@ -241,7 +242,7 @@ def test_runway_sd_1_5_negative_prompt(sd_device, strategy, sampler):
 def test_cv2(strategy, cv2_flag, cv2_radius):
     model = ModelManager(
         name="cv2",
-        device=device,
+        device=torch.device(device),
     )
     cfg = get_config(strategy, cv2_flag=cv2_flag, cv2_radius=cv2_radius)
     assert_equal(
