@@ -18,6 +18,8 @@ class SDSampler(str, Enum):
     ddim = "ddim"
     pndm = "pndm"
     k_lms = "k_lms"
+    k_euler = 'k_euler'
+    k_euler_a = 'k_euler_a'
 
 
 class Config(BaseModel):

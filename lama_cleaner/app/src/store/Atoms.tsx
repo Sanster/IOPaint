@@ -231,6 +231,8 @@ export enum SDSampler {
   ddim = 'ddim',
   pndm = 'pndm',
   klms = 'k_lms',
+  kEuler = 'k_euler',
+  kEulerA = 'k_euler_a',
 }
 
 export enum SDMode {
