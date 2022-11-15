@@ -1229,7 +1229,7 @@ export default function Editor() {
             onClick={download}
           />
 
-          {settings.runInpaintingManually && (
+          {settings.runInpaintingManually && !isSD && (
             <Button
               toolTip="Run Inpainting"
               tooltipPosition="top"

@@ -18,6 +18,11 @@ export const fileState = atom<File | undefined>({
   default: undefined,
 })
 
+export const maskState = atom<File | undefined>({
+  key: 'maskState',
+  default: undefined,
+})
+
 export interface Rect {
   x: number
   y: number
