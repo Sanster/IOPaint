@@ -157,7 +157,7 @@ If you have problems downloading the model automatically when lama-cleaner start
 you can download it manually. By default lama-cleaner will load model from `TORCH_HOME=~/.cache/torch/hub/checkpoints/`,
 you can set `TORCH_HOME` to other folder and put the models there.
 
-- Github:
+- GitHub:
   - [LaMa](https://github.com/Sanster/models/releases/tag/add_big_lama)
   - [LDM](https://github.com/Sanster/models/releases/tag/add_ldm)
   - [ZITS](https://github.com/Sanster/models/releases/tag/add_zits)
