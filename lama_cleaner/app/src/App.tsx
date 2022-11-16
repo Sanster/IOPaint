@@ -9,6 +9,7 @@ import { fileState, toastState } from './store/Atoms'
 import { keepGUIAlive } from './utils'
 import Header from './components/Header/Header'
 import useHotKey from './hooks/useHotkey'
+import { isDesktop } from './adapters/inpainting'
 
 const SUPPORTED_FILE_TYPE = [
   'image/jpeg',
@@ -17,9 +18,6 @@ const SUPPORTED_FILE_TYPE = [
   'image/bmp',
   'image/tiff',
 ]
-
-// Keeping GUI Window Open
-keepGUIAlive()
 
 function App() {
   const [file, setFile] = useRecoilState(fileState)
@@ -33,6 +31,17 @@ function App() {
   useEffect(() => {
     setFile(userInputImage)
   }, [userInputImage, setFile])
+
+  // Keeping GUI Window Open
+  useEffect(() => {
+    const fetchData = async () => {
+      const isRunDesktop = await isDesktop().then(res => res.text())
+      if (isRunDesktop === 'True') {
+        keepGUIAlive()
+      }
+    }
+    fetchData()
+  }, [])
 
   // Dark Mode Hotkey
   useHotKey(

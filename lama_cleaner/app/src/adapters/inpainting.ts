@@ -102,6 +102,12 @@ export function currentModel() {
   })
 }
 
+export function isDesktop() {
+  return fetch(`${API_ENDPOINT}/is_desktop`, {
+    method: 'GET',
+  })
+}
+
 export function modelDownloaded(name: string) {
   return fetch(`${API_ENDPOINT}/model_downloaded/${name}`, {
     method: 'GET',

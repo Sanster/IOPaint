@@ -74,6 +74,7 @@ model: ModelManager = None
 device = None
 input_image_path: str = None
 is_disable_model_switch: bool = False
+is_desktop: bool = False
 
 def get_image_ext(img_bytes):
     w = imghdr.what("", img_bytes)
@@ -188,6 +189,9 @@ def get_is_disable_model_switch():
 def model_downloaded(name):
     return str(model.is_downloaded(name)), 200
 
+@app.route("/is_desktop")
+def get_is_desktop():
+    return str(is_desktop), 200
 
 @app.route("/model", methods=["POST"])
 def switch_model():
@@ -227,10 +231,12 @@ def main(args):
     global device
     global input_image_path
     global is_disable_model_switch
+    global is_desktop
 
     device = torch.device(args.device)
     input_image_path = args.input
     is_disable_model_switch = args.disable_model_switch
+    is_desktop = args.gui
     if is_disable_model_switch:
         logger.info(f"Start with --disable-model-switch, model switch on frontend is disable")
 
