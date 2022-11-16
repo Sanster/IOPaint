@@ -81,7 +81,7 @@ The easiest way to use Lama Cleaner is to install it using `pip`:
 ```bash
 pip install lama-cleaner
 
-# Models will be downloaded at first time used
+# Models will be downloaded at first time used. Also, lama-cleaner can be added to the path
 lama-cleaner --model=lama --device=cpu --port=8080
 # Lama Cleaner is now running at http://localhost:8080
 ```
