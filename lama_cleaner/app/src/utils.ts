@@ -177,13 +177,9 @@ export function keepGUIAlive() {
     })
   }
 
-  if (!process.env.NODE_ENV || process.env.NODE_ENV === 'production') {
-    document.addEventListener('DOMContentLoaded', () => {
-      const intervalRequest = 3 * 1000
-      keepAliveServer()
-      setInterval(keepAliveServer, intervalRequest)
-    })
-  }
+  const intervalRequest = 3 * 1000
+  keepAliveServer()
+  setInterval(keepAliveServer, intervalRequest)
 }
 
 export function isRightClick(ev: SyntheticEvent) {
