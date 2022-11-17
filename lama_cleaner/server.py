@@ -208,7 +208,7 @@ def switch_model():
 
 @app.route("/")
 def index():
-    return send_file(os.path.join(BUILD_DIR, "index.html"))
+    return send_file(os.path.join(BUILD_DIR, "index.html"), cache_timeout=0)
 
 
 @app.route("/inputimage")
