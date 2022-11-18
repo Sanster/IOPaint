@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from loguru import logger
 
-from lama_cleaner.helper import pad_img_to_modulo, download_model, norm_img, get_cache_path_by_url
+from lama_cleaner.helper import  download_model, norm_img, get_cache_path_by_url
 from lama_cleaner.model.base import InpaintModel
 from lama_cleaner.schema import Config
 

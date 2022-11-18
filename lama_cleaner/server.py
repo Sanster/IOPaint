@@ -76,6 +76,7 @@ input_image_path: str = None
 is_disable_model_switch: bool = False
 is_desktop: bool = False
 
+
 def get_image_ext(img_bytes):
     w = imghdr.what("", img_bytes)
     if w is None:
@@ -147,9 +148,13 @@ def process():
     try:
         res_np_img = model(image, mask, config)
     except RuntimeError as e:
-        # NOTE: the string may change?
+        torch.cuda.empty_cache()
         if "CUDA out of memory. " in str(e):
+            # NOTE: the string may change?
             return "CUDA out of memory", 500
+        else:
+            logger.exception(e)
+            return "Internal Server Error", 500
     finally:
         logger.info(f"process time: {(time.time() - start) * 1000}ms")
         torch.cuda.empty_cache()
@@ -179,6 +184,7 @@ def process():
 def current_model():
     return model.name, 200
 
+
 @app.route("/is_disable_model_switch")
 def get_is_disable_model_switch():
     res = 'true' if is_disable_model_switch else 'false'
@@ -189,9 +195,11 @@ def get_is_disable_model_switch():
 def model_downloaded(name):
     return str(model.is_downloaded(name)), 200
 
+
 @app.route("/is_desktop")
 def get_is_desktop():
     return str(is_desktop), 200
+
 
 @app.route("/model", methods=["POST"])
 def switch_model():

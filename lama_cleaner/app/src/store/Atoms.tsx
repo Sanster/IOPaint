@@ -11,6 +11,7 @@ export enum AIModel {
   FCF = 'fcf',
   SD15 = 'sd1.5',
   CV2 = 'cv2',
+  Mange = 'manga',
 }
 
 export const fileState = atom<File | undefined>({
@@ -221,6 +222,13 @@ const defaultHDSettings: ModelsHDSettings = {
     hdStrategyResizeLimit: 768,
     hdStrategyCropTrigerSize: 512,
     hdStrategyCropMargin: 128,
+    enabled: true,
+  },
+  [AIModel.Mange]: {
+    hdStrategy: HDStrategy.CROP,
+    hdStrategyResizeLimit: 1280,
+    hdStrategyCropTrigerSize: 1024,
+    hdStrategyCropMargin: 196,
     enabled: true,
   },
   [AIModel.CV2]: {

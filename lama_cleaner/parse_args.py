@@ -10,7 +10,7 @@ def parse_args():
     parser.add_argument(
         "--model",
         default="lama",
-        choices=["lama", "ldm", "zits", "mat", "fcf", "sd1.5", "cv2"],
+        choices=["lama", "ldm", "zits", "mat", "fcf", "sd1.5", "cv2", "manga"],
     )
     parser.add_argument(
         "--hf_access_token",

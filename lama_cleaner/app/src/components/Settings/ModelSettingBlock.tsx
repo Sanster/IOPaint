@@ -196,6 +196,8 @@ function ModelSettingBlock() {
         return renderFCFModelDesc()
       case AIModel.SD15:
         return undefined
+      case AIModel.Mange:
+        return undefined
       case AIModel.CV2:
         return renderOpenCV2Desc()
       default:
@@ -240,6 +242,12 @@ function ModelSettingBlock() {
           'Stable Diffusion',
           'https://ommer-lab.com/research/latent-diffusion-models/',
           'https://github.com/CompVis/stable-diffusion'
+        )
+      case AIModel.Mange:
+        return renderModelDesc(
+          'Manga Inpainting',
+          'https://www.cse.cuhk.edu.hk/~ttwong/papers/mangainpaint/mangainpaint.html',
+          'https://github.com/msxie92/MangaInpainting'
         )
       case AIModel.CV2:
         return renderModelDesc(
