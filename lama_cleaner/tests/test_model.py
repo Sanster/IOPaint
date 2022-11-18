@@ -179,3 +179,19 @@ def test_cv2(strategy, cv2_flag, cv2_radius):
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
+
+
+@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL, HDStrategy.RESIZE, HDStrategy.CROP])
+def test_manga(strategy):
+    model = ModelManager(
+        name="manga",
+        device=torch.device(device),
+    )
+    cfg = get_config(strategy)
+    assert_equal(
+        model,
+        cfg,
+        f"sd_{strategy.capitalize()}.png",
+        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
+    )
