@@ -104,7 +104,7 @@ class Manga(InpaintModel):
 
         mask = torch.from_numpy(mask[np.newaxis, :, :, :]).to(self.device)
         mask = mask.permute(0, 3, 1, 2)
-        mask = torch.where(mask > 0.5, torch.tensor(1.0), torch.tensor(0.0))
+        mask = torch.where(mask > 0.5, 1.0, 0.0)
         noise = torch.randn_like(mask)
 
         gray_img = gray_img / 255 * 2 - 1.0
