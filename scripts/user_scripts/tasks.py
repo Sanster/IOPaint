@@ -99,13 +99,13 @@ def config(c, disable_device_choice=False):
     log.info(f"Save config to {CONFIG_PATH}")
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(configs, f, indent=2, ensure_ascii=False)
-    log.info(f"Config finish, you can close this window.")
+    Confirm.ask("Config finish, you can close this window")
 
 
 @task(pre=[info])
 def start(c):
     if not os.path.exists(CONFIG_PATH):
-        log.info("Config file not exists, please run config.sh first")
+        Confirm.ask("Config file not exists, please run config scritp first")
         exit()
 
     log.info(f"Load config from {CONFIG_PATH}")
