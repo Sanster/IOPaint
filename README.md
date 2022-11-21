@@ -11,11 +11,11 @@
   <a href="https://colab.research.google.com/drive/1e3ZkAJxvkK3uzaTGu91N9TvI_Mahs0Wb?usp=sharing">
     <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg" />
   </a>
-  
+
   <a href="https://huggingface.co/spaces/Sanster/Lama-Cleaner-lama">
     <img alt="Hugging Face Spaces" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue" />
   </a>
-  
+
   <a href="https://www.python.org/downloads/">
     <img alt="python version" src="https://img.shields.io/badge/python-3.7+-blue.svg" />
   </a>
@@ -32,12 +32,13 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
 - Fully self-hosted
 - Classical image inpainting algorithm powered by [cv2](https://docs.opencv.org/3.4/df/d3d/tutorial_py_inpainting.html)
 - Multiple SOTA AI models
-  1. [LaMa](https://github.com/saic-mdal/lama)
-  1. [LDM](https://github.com/CompVis/latent-diffusion)
-  1. [ZITS](https://github.com/DQiaole/ZITS_inpainting)
-  1. [MAT](https://github.com/fenglinglwb/MAT)
-  1. [FcF](https://github.com/SHI-Labs/FcF-Inpainting)
-  1. [SD1.5](https://github.com/runwayml/stable-diffusion)
+    1. [LaMa](https://github.com/saic-mdal/lama)
+    1. [LDM](https://github.com/CompVis/latent-diffusion)
+    1. [ZITS](https://github.com/DQiaole/ZITS_inpainting)
+    1. [MAT](https://github.com/fenglinglwb/MAT)
+    1. [FcF](https://github.com/SHI-Labs/FcF-Inpainting)
+    1. [SD1.5](https://github.com/runwayml/stable-diffusion)
+    1. [Manga](https://github.com/msxie92/MangaInpainting)
 - Support CPU & GPU
 - Various inpainting [strategy](#inpainting-strategy)
 - Run as a desktop APP
@@ -47,12 +48,13 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
 <details>
 <summary>1. Remove any unwanted things on the image</summary>
 
-| Usage                  | Before                                        | After                                               |
-| ---------------------- | --------------------------------------------- | --------------------------------------------------- |
-| Remove unwanted things | ![unwant_object2](./assets/unwant_object.jpg) | ![unwant_object2](./assets/unwant_object_clean.jpg) |
-| Remove unwanted person | ![unwant_person](./assets/unwant_person.jpg)  | ![unwant_person](./assets/unwant_person_clean.jpg)  |
-| Remove Text            | ![text](./assets/unwant_text.jpg)             | ![text](./assets/unwant_text_clean.jpg)             |
-| Remove watermark       | ![watermark](./assets/watermark.jpg)          | ![watermark_clean](./assets/watermark_cleanup.jpg)  |
+| Usage                         | Before                                        | After                                               |
+|-------------------------------|-----------------------------------------------|-----------------------------------------------------|
+| Remove unwanted things        | ![unwant_object2](./assets/unwant_object.jpg) | ![unwant_object2](./assets/unwant_object_clean.jpg) |
+| Remove unwanted person        | ![unwant_person](./assets/unwant_person.jpg)  | ![unwant_person](./assets/unwant_person_clean.jpg)  |
+| Remove text                   | ![text](./assets/unwant_text.jpg)             | ![text](./assets/unwant_text_clean.jpg)             |
+| Remove watermark              | ![watermark](./assets/watermark.jpg)          | ![watermark_clean](./assets/watermark_cleanup.jpg)  |
+| Remove text balloons on manga | ![manga](./assets/manga.png)                  | ![manga_clean](./assets/manga_clean.png)            |
 
 </details>
 
@@ -86,7 +88,8 @@ lama-cleaner --model=lama --device=cpu --port=8080
 # Lama Cleaner is now running at http://localhost:8080
 ```
 
-For stable-diffusion model, you need to [accepting the terms to access](https://huggingface.co/runwayml/stable-diffusion-inpainting), and
+For stable-diffusion model, you need
+to [accepting the terms to access](https://huggingface.co/runwayml/stable-diffusion-inpainting), and
 get an access token from here [huggingface access token](https://huggingface.co/docs/hub/security-tokens)
 
 If you prefer to use docker, you can check out [docker](#docker)
@@ -96,8 +99,8 @@ If you hava no idea what is docker or pip, please check [One Click Installer](./
 Available command line arguments:
 
 | Name                 | Description                                                                                                         | Default  |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------- | -------- |
-| --model              | lama/ldm/zits/mat/fcf/sd1.5 See details in [Inpaint Model](#inpainting-model)                                       | lama     |
+| -------------------- |---------------------------------------------------------------------------------------------------------------------| -------- |
+| --model              | lama/ldm/zits/mat/fcf/sd1.5/manga See details in [Inpaint Model](#inpainting-model)                                 | lama     |
 | --hf_access_token    | stable-diffusion need [huggingface access token](https://huggingface.co/docs/hub/security-tokens) to download model |          |
 | --sd-run-local       | Once the model as downloaded, you can pass this arg and remove `--hf_access_token`                                  |          |
 | --sd-disable-nsfw    | Disable stable-diffusion NSFW checker.                                                                              |          |
@@ -136,13 +139,27 @@ Available command line arguments:
 | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | ![zits_original](https://user-images.githubusercontent.com/3998421/180464918-eb13ebfb-8718-461c-9e8b-7f6d8bb7a84f.png) | ![zits_compare_zits](https://user-images.githubusercontent.com/3998421/180464914-4db722c9-047f-48fe-9bb4-916ba09eb5c6.png) | ![zits_compare_lama](https://user-images.githubusercontent.com/3998421/180464903-ffb5f770-4372-4488-ba76-4b4a8c3323f5.png) |
 
-Image is from [ZITS](https://github.com/DQiaole/ZITS_inpainting) paper. I didn't find a good example to show the advantages of ZITS and let me know if you have a good example. There can also be possible problems with my code, if you find them, please let me know too!
+Image is from [ZITS](https://github.com/DQiaole/ZITS_inpainting) paper. I didn't find a good example to show the
+advantages of ZITS and let me know if you have a good example. There can also be possible problems with my code, if you
+find them, please let me know too!
 
 **LaMa vs FcF**
 
-| Original Image                                                                                                    | Lama                                                                                                                   | FcF                                                                                                                   |
+| Original Image                                                                                                    | LaMa                                                                                                                   | FcF                                                                                                                   |
 | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | ![texture](https://user-images.githubusercontent.com/3998421/188305027-a4260545-c24e-4df7-9739-ac5dc3cae879.jpeg) | ![texture_lama](https://user-images.githubusercontent.com/3998421/188305024-2064ed3e-5af4-4843-ac10-7f9da71e15f8.jpeg) | ![texture_fcf](https://user-images.githubusercontent.com/3998421/188305006-a08d2896-a65f-43d5-b9a5-ef62c3129f0c.jpeg) |
+
+**LaMa vs Manga**
+
+Manga model works better on high-quality manga image then LaMa model.
+
+Original Image
+![manga](./assets/manga.png)
+
+| Model |  1080x740  |  1470x1010 |
+|--------|------------|------------|
+|Manga|![manga_1080x740](https://user-images.githubusercontent.com/3998421/202676629-54f40f20-c55b-4e6d-bcc7-0a4e81fbb27d.png)|![manga_1470x1010](https://user-images.githubusercontent.com/3998421/202675839-4f8012d5-1c10-47ea-9628-20512e86f192.png)|
+|[LaMa](https://github.com/saic-mdal/lama)|![lama_1080x740](https://user-images.githubusercontent.com/3998421/202675704-53fa7a3d-ec74-4044-a19c-c673d74bdd28.png)|![lama_1470x1010](https://user-images.githubusercontent.com/3998421/202675746-1e642367-f5d0-4b48-aa8b-5d82f2e29082.png)|
 
 </details>
 
@@ -163,14 +180,14 @@ you can download it manually. By default lama-cleaner will load model from `TORC
 you can set `TORCH_HOME` to other folder and put the models there.
 
 - GitHub:
-  - [LaMa](https://github.com/Sanster/models/releases/tag/add_big_lama)
-  - [LDM](https://github.com/Sanster/models/releases/tag/add_ldm)
-  - [ZITS](https://github.com/Sanster/models/releases/tag/add_zits)
-  - [MAT](https://github.com/Sanster/models/releases/tag/add_mat)
-  - [FcF](https://github.com/Sanster/models/releases/tag/add_fcf)
+    - [LaMa](https://github.com/Sanster/models/releases/tag/add_big_lama)
+    - [LDM](https://github.com/Sanster/models/releases/tag/add_ldm)
+    - [ZITS](https://github.com/Sanster/models/releases/tag/add_zits)
+    - [MAT](https://github.com/Sanster/models/releases/tag/add_mat)
+    - [FcF](https://github.com/Sanster/models/releases/tag/add_fcf)
 - Baidu:
-  - https://pan.baidu.com/s/1vUd3BVqIpK6e8N_EA_ZJfw
-  - passward: flsu
+    - https://pan.baidu.com/s/1vUd3BVqIpK6e8N_EA_ZJfw
+    - passward: flsu
 
 ## Development
 
@@ -187,7 +204,8 @@ great online services [here](https://cleanup.pictures/).
 
 ## Docker
 
-You can use [pre-build docker image](https://github.com/Sanster/lama-cleaner#run-docker-cpu) to run Lama Cleaner. The model will be downloaded to the cache directory when first time used.
+You can use [pre-build docker image](https://github.com/Sanster/lama-cleaner#run-docker-cpu) to run Lama Cleaner. The
+model will be downloaded to the cache directory when first time used.
 You can mount existing cache directory to start the container,
 so you don't have to download the model every time you start the container.
 
