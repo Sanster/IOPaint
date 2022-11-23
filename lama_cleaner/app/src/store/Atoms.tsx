@@ -175,6 +175,7 @@ export interface Settings {
   sdSeed: number
   sdSeedFixed: boolean // true: use sdSeed, false: random generate seed on backend
   sdNumSamples: number
+  sdMatchHistograms: boolean
 
   // For OpenCV2
   cv2Radius: number
@@ -278,6 +279,7 @@ export const settingStateDefault: Settings = {
   sdSeed: 42,
   sdSeedFixed: true,
   sdNumSamples: 1,
+  sdMatchHistograms: false,
 
   // CV2
   cv2Radius: 5,

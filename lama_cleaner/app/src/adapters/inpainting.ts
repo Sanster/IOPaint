@@ -54,6 +54,7 @@ export default async function inpaint(
   fd.append('sdGuidanceScale', settings.sdGuidanceScale.toString())
   fd.append('sdSampler', settings.sdSampler.toString())
   fd.append('sdSeed', seed ? seed.toString() : '-1')
+  fd.append('sdMatchHistograms', settings.sdMatchHistograms ? 'true' : 'false')
 
   fd.append('cv2Radius', settings.cv2Radius.toString())
   fd.append('cv2Flag', settings.cv2Flag.toString())

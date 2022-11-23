@@ -48,6 +48,7 @@ class Config(BaseModel):
     sd_sampler: str = SDSampler.ddim
     # -1 mean random seed
     sd_seed: int = 42
+    sd_match_histograms: bool = False
 
     # cv2
     cv2_flag: str = 'INPAINT_NS'
