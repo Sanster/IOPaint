@@ -4,8 +4,13 @@ from pydantic import BaseModel
 
 
 class HDStrategy(str, Enum):
+    # Use original image size
     ORIGINAL = "Original"
+    # Resize the longer side of the image to a specific size(hd_strategy_resize_limit),
+    # then do inpainting on the resized image. Finally, resize the inpainting result to the original size.
+    # The area outside the mask will not lose quality.
     RESIZE = "Resize"
+    # Crop masking area(with a margin controlled by hd_strategy_crop_margin) from the original image to do inpainting
     CROP = "Crop"
 
 
@@ -23,32 +28,46 @@ class SDSampler(str, Enum):
 
 
 class Config(BaseModel):
+    # Configs for ldm model
     ldm_steps: int
     ldm_sampler: str = LDMSampler.plms
+
+    # Configs for zits model
     zits_wireframe: bool = True
-    hd_strategy: str
+
+    # Configs for High Resolution Strategy(different way to preprocess image)
+    hd_strategy: str  # See HDStrategy Enum
     hd_strategy_crop_margin: int
+    # If the longer side of the image is larger than this value, use crop strategy
     hd_strategy_crop_trigger_size: int
     hd_strategy_resize_limit: int
 
+    # Configs for Stable Diffusion 1.5
     prompt: str = ""
     negative_prompt: str = ""
-    # 始终是在原图尺度上的值
+    # Crop image to this size before doing sd inpainting
+    # The value is always on the original image scale
     use_croper: bool = False
     croper_x: int = None
     croper_y: int = None
     croper_height: int = None
     croper_width: int = None
 
-    # sd
+    # Blur the edge of mask area. The higher the number the smoother blend with the original image
     sd_mask_blur: int = 0
+    # Ignore this value, it's useless for inpainting
     sd_strength: float = 0.75
+    # The number of denoising steps. More denoising steps usually lead to a
+    # higher quality image at the expense of slower inference.
     sd_steps: int = 50
+    # Higher guidance scale encourages to generate images that are closely linked
+    # to the text prompt, usually at the expense of lower image quality.
     sd_guidance_scale: float = 7.5
     sd_sampler: str = SDSampler.ddim
     # -1 mean random seed
     sd_seed: int = 42
 
-    # cv2
+    # Configs for opencv inpainting
+    # opencv document https://docs.opencv.org/4.6.0/d7/d8b/group__photo__inpaint.html#gga8002a65f5a3328fbf15df81b842d3c3ca05e763003a805e6c11c673a9f4ba7d07
     cv2_flag: str = 'INPAINT_NS'
     cv2_radius: int = 4
