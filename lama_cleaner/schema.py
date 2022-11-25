@@ -66,6 +66,7 @@ class Config(BaseModel):
     sd_sampler: str = SDSampler.ddim
     # -1 mean random seed
     sd_seed: int = 42
+    sd_match_histograms: bool = False
 
     # Configs for opencv inpainting
     # opencv document https://docs.opencv.org/4.6.0/d7/d8b/group__photo__inpaint.html#gga8002a65f5a3328fbf15df81b842d3c3ca05e763003a805e6c11c673a9f4ba7d07

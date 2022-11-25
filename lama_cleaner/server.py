@@ -131,6 +131,7 @@ def process():
         sd_guidance_scale=form["sdGuidanceScale"],
         sd_sampler=form["sdSampler"],
         sd_seed=form["sdSeed"],
+        sd_match_histograms=form["sdMatchHistograms"],
         cv2_flag=form["cv2Flag"],
         cv2_radius=form['cv2Radius']
     )

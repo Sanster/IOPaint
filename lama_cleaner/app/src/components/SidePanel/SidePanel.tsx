@@ -121,6 +121,22 @@ const SidePanel = () => {
             />
 
             <SettingBlock
+              title="Match Histograms"
+              input={
+                <Switch
+                  checked={setting.sdMatchHistograms}
+                  onCheckedChange={value => {
+                    setSettingState(old => {
+                      return { ...old, sdMatchHistograms: value }
+                    })
+                  }}
+                >
+                  <SwitchThumb />
+                </Switch>
+              }
+            />
+
+            <SettingBlock
               className="sub-setting-block"
               title="Sampler"
               input={
