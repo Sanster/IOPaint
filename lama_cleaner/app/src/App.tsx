@@ -5,11 +5,11 @@ import useInputImage from './hooks/useInputImage'
 import LandingPage from './components/LandingPage/LandingPage'
 import { themeState } from './components/Header/ThemeChanger'
 import Workspace from './components/Workspace'
-import { fileState, toastState } from './store/Atoms'
+import { fileState, isDisableModelSwitchState, toastState } from './store/Atoms'
 import { keepGUIAlive } from './utils'
 import Header from './components/Header/Header'
 import useHotKey from './hooks/useHotkey'
-import { isDesktop } from './adapters/inpainting'
+import { getIsDisableModelSwitch, isDesktop } from './adapters/inpainting'
 
 const SUPPORTED_FILE_TYPE = [
   'image/jpeg',
@@ -24,8 +24,9 @@ function App() {
   const [theme, setTheme] = useRecoilState(themeState)
   const [toastVal, setToastState] = useRecoilState(toastState)
   const userInputImage = useInputImage()
-  const [openPasteImageAlertDialog, setOpenPasteImageAlertDialog] =
-    useState(false)
+  const [isDisableModelSwitch, setIsDisableModelSwitch] = useRecoilState(
+    isDisableModelSwitchState
+  )
 
   // Set Input Image
   useEffect(() => {
@@ -40,6 +41,17 @@ function App() {
         keepGUIAlive()
       }
     }
+    fetchData()
+  }, [])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const isDisable: string = await getIsDisableModelSwitch().then(res =>
+        res.text()
+      )
+      setIsDisableModelSwitch(isDisable === 'true')
+    }
+
     fetchData()
   }, [])
 

@@ -34,6 +34,7 @@ export interface Rect {
 interface AppState {
   disableShortCuts: boolean
   isInpainting: boolean
+  isDisableModelSwitch: boolean
 }
 
 export const appState = atom<AppState>({
@@ -41,6 +42,7 @@ export const appState = atom<AppState>({
   default: {
     disableShortCuts: false,
     isInpainting: false,
+    isDisableModelSwitch: false,
   },
 })
 
@@ -63,6 +65,18 @@ export const isInpaintingState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, isInpainting: newValue })
+  },
+})
+
+export const isDisableModelSwitchState = selector({
+  key: 'isDisableModelSwitchState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.isDisableModelSwitch
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, isDisableModelSwitch: newValue })
   },
 })
 

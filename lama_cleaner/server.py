@@ -204,6 +204,9 @@ def get_is_desktop():
 
 @app.route("/model", methods=["POST"])
 def switch_model():
+    if is_disable_model_switch:
+        return "Switch model is disabled", 400
+
     new_name = request.form.get("name")
     if new_name == model.name:
         return "Same model", 200
