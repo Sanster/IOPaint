@@ -109,7 +109,8 @@ def test_runway_sd_1_5_negative_prompt(sd_device, strategy, sampler):
         sd_steps=sd_steps,
         prompt='Face of a fox, high resolution, sitting on a park bench',
         negative_prompt='orange, yellow, small',
-        sd_sampler=sampler
+        sd_sampler=sampler,
+        sd_match_histograms=True
     )
 
     name = f"{sampler}_negative_prompt"

@@ -200,15 +200,19 @@ class SD(InpaintModel):
 
         return inpaint_result
 
+    def forward_post_process(self, result, image, mask, config):
+        if config.sd_match_histograms:
+            result = self._match_histograms(result, image[:, :, ::-1], mask)
+
+        if config.sd_mask_blur != 0:
+            k = 2 * config.sd_mask_blur + 1
+            mask = cv2.GaussianBlur(mask, (k, k), 0)
+        return result, image, mask
+
     @staticmethod
     def is_downloaded() -> bool:
         # model will be downloaded when app start, and can't switch in frontend settings
         return True
-
-
-class SD14(SD):
-    model_id_or_path = "CompVis/stable-diffusion-v1-4"
-    image_key = "init_image"
 
 
 class SD15(SD):
