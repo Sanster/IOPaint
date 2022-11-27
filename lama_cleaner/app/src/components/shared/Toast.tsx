@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as ToastPrimitive from '@radix-ui/react-toast'
 import { ToastProps } from '@radix-ui/react-toast'
-import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/outline'
+import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline'
 
 const LoadingIcon = () => {
   return (

@@ -1,4 +1,4 @@
-import { XIcon } from '@heroicons/react/outline'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 import React, { ReactNode } from 'react'
 import { useRecoilState } from 'recoil'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
@@ -41,7 +41,7 @@ const Modal = React.forwardRef<
           <div className="modal-header">
             <DialogPrimitive.Title>{title}</DialogPrimitive.Title>
             {showCloseIcon ? (
-              <Button icon={<XIcon />} onClick={onClose} />
+              <Button icon={<XMarkIcon />} onClick={onClose} />
             ) : (
               <></>
             )}

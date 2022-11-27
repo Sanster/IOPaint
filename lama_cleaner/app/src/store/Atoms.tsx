@@ -14,11 +14,6 @@ export enum AIModel {
   Mange = 'manga',
 }
 
-export const fileState = atom<File | undefined>({
-  key: 'fileState',
-  default: undefined,
-})
-
 export const maskState = atom<File | undefined>({
   key: 'maskState',
   default: undefined,
@@ -32,17 +27,25 @@ export interface Rect {
 }
 
 interface AppState {
+  file: File | undefined
   disableShortCuts: boolean
   isInpainting: boolean
   isDisableModelSwitch: boolean
+  isInteractiveSeg: boolean
+  isInteractiveSegRunning: boolean
+  interactiveSegClicks: number[][]
 }
 
 export const appState = atom<AppState>({
   key: 'appState',
   default: {
+    file: undefined,
     disableShortCuts: false,
     isInpainting: false,
     isDisableModelSwitch: false,
+    isInteractiveSeg: false,
+    isInteractiveSegRunning: false,
+    interactiveSegClicks: [],
   },
 })
 
@@ -65,6 +68,60 @@ export const isInpaintingState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, isInpainting: newValue })
+  },
+})
+
+export const fileState = selector({
+  key: 'fileState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.file
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, {
+      ...app,
+      file: newValue,
+      interactiveSegClicks: [],
+      isInteractiveSeg: false,
+      isInteractiveSegRunning: false,
+    })
+  },
+})
+
+export const isInteractiveSegState = selector({
+  key: 'isInteractiveSegState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.isInteractiveSeg
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, isInteractiveSeg: newValue })
+  },
+})
+
+export const isInteractiveSegRunningState = selector({
+  key: 'isInteractiveSegRunningState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.isInteractiveSegRunning
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, isInteractiveSegRunning: newValue })
+  },
+})
+
+export const interactiveSegClicksState = selector({
+  key: 'interactiveSegClicksState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.interactiveSegClicks
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, interactiveSegClicks: newValue })
   },
 })
 

@@ -180,3 +180,29 @@ def boxes_from_mask(mask: np.ndarray) -> List[np.ndarray]:
         boxes.append(box)
 
     return boxes
+
+
+def only_keep_largest_contour(mask: np.ndarray) -> List[np.ndarray]:
+    """
+    Args:
+        mask: (h, w)  0~255
+
+    Returns:
+
+    """
+    _, thresh = cv2.threshold(mask, 127, 255, 0)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    max_area = 0
+    max_index = -1
+    for i, cnt in enumerate(contours):
+        area = cv2.contourArea(cnt)
+        if area > max_area:
+            max_area = area
+            max_index = i
+
+    if max_index != -1:
+        new_mask = np.zeros_like(mask)
+        return cv2.drawContours(new_mask, contours, max_index, 255, -1)
+    else:
+        return mask

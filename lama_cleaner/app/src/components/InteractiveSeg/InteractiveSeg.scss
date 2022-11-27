@@ -1,0 +1,69 @@
+$positiveBackgroundColor: rgba(21, 215, 121, 0.936);
+$positiveOutline: 6px solid rgba(98, 255, 179, 0.31);
+
+$negativeBackgroundColor: rgba(237, 49, 55, 0.942);
+$negativeOutline: 6px solid rgba(255, 89, 95, 0.31);
+
+.interactive-seg-wrapper {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+
+  .click-item {
+    position: absolute;
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+  }
+  .click-item-positive {
+    background-color: $positiveBackgroundColor;
+    outline: $positiveOutline;
+  }
+
+  .click-item-negative {
+    background-color: $negativeBackgroundColor;
+    outline: $negativeOutline;
+  }
+}
+
+.interactive-seg-confirm-actions {
+  position: absolute;
+  top: 68px;
+  z-index: 5;
+  background-color: var(--page-bg);
+  border-radius: 16px;
+  border-style: solid;
+  border-color: var(--border-color);
+  border-width: 1px;
+  padding: 8px;
+
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+@keyframes pulse {
+  to {
+    box-shadow: 0 0 0 14px rgba(21, 215, 121, 0);
+  }
+}
+
+.interactive-seg-cursor {
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  pointer-events: none;
+  color: hsla(137, 100%, 95.8%, 0.98);
+  border-radius: 50%;
+  background-color: $positiveBackgroundColor;
+  // outline: $positiveOutline;
+  transform: 'translate(-50%, -50%)';
+  box-shadow: 0 0 0 0 rgba(21, 215, 121, 0.936);
+  animation: pulse 1.5s infinite cubic-bezier(0.66, 0, 0, 1);
+}

@@ -56,6 +56,7 @@ export default function ShortcutsModal() {
         />
         <ShortCut content="Cancel Mask Drawing" keys={['Esc']} />
         <ShortCut content="Run Inpainting Manually" keys={['Shift', 'R']} />
+        <ShortCut content="Interactive Segmentation" keys={['I']} />
         <ShortCut content="Undo Inpainting" keys={[CmdOrCtrl, 'Z']} />
         <ShortCut content="Redo Inpainting" keys={[CmdOrCtrl, 'Shift', 'Z']} />
         <ShortCut content="View Original Image" keys={['Hold Tab']} />

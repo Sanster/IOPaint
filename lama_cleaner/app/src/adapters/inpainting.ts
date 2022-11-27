@@ -114,3 +114,31 @@ export function modelDownloaded(name: string) {
     method: 'GET',
   })
 }
+
+export async function postInteractiveSeg(
+  imageFile: File,
+  maskFile: File | null,
+  clicks: number[][]
+) {
+  const fd = new FormData()
+  fd.append('image', imageFile)
+  fd.append('clicks', JSON.stringify(clicks))
+  if (maskFile !== null) {
+    fd.append('mask', maskFile)
+  }
+
+  try {
+    const res = await fetch(`${API_ENDPOINT}/interactive_seg`, {
+      method: 'POST',
+      body: fd,
+    })
+    if (res.ok) {
+      const blob = await res.blob()
+      return { blob: URL.createObjectURL(blob) }
+    }
+    const errMsg = await res.text()
+    throw new Error(errMsg)
+  } catch (error) {
+    throw new Error(`Something went wrong: ${error}`)
+  }
+}

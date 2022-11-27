@@ -1,9 +1,10 @@
-import { ArrowLeftIcon, UploadIcon } from '@heroicons/react/outline'
+import { ArrowUpTrayIcon } from '@heroicons/react/24/outline'
 import { PlayIcon } from '@radix-ui/react-icons'
 import React, { useState } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import {
   fileState,
+  interactiveSegClicksState,
   isInpaintingState,
   isSDState,
   maskState,
@@ -37,9 +38,11 @@ const Header = () => {
         >
           <label htmlFor={uploadElemId}>
             <Button
-              icon={<UploadIcon />}
+              icon={<ArrowUpTrayIcon />}
               style={{ border: 0 }}
               disabled={isInpainting}
+              toolTip="Upload image"
+              tooltipPosition="bottom"
             >
               <input
                 style={{ display: 'none' }}
@@ -67,7 +70,12 @@ const Header = () => {
             }}
           >
             <label htmlFor={maskUploadElemId}>
-              <Button style={{ border: 0 }} disabled={isInpainting}>
+              <Button
+                style={{ border: 0 }}
+                disabled={isInpainting}
+                toolTip="Upload custom mask"
+                tooltipPosition="bottom"
+              >
                 <input
                   style={{ display: 'none' }}
                   id={maskUploadElemId}

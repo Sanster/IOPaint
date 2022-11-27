@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { atom, useRecoilState } from 'recoil'
-import { SunIcon, MoonIcon } from '@heroicons/react/outline'
+import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'
 
 export const themeState = atom({
   key: 'themeState',

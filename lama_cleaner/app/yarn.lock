@@ -1298,10 +1298,10 @@
   dependencies:
     "@hapi/hoek" "^8.3.0"
 
-"@heroicons/react@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/@heroicons/react/-/react-1.0.4.tgz"
-  integrity sha512-3kOrTmo8+Z8o6AL0rzN82MOf8J5CuxhRLFhpI8mrn+3OqekA6d5eb1GYO3EYYo1Vn6mYQSMNTzCWbEwUInb0cQ==
+"@heroicons/react@^2.0.0":
+  version "2.0.13"
+  resolved "https://registry.npmmirror.com/@heroicons/react/-/react-2.0.13.tgz#9b1cc54ff77d6625c9565efdce0054a4bcd9074c"
+  integrity sha512-iSN5XwmagrnirWlYEWNPdCDj9aRYVD/lnK3JlsC9/+fqGF80k8C7rl+1HCvBX0dBoagKqOFBs6fMhJJ1hOg1EQ==
 
 "@humanwhocodes/config-array@^0.5.0":
   version "0.5.0"
