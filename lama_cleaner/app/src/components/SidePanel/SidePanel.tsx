@@ -1,13 +1,20 @@
 import React, { FormEvent, useState } from 'react'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { useToggle } from 'react-use'
-import { negativePropmtState, SDSampler, settingState } from '../../store/Atoms'
+import {
+  isInpaintingState,
+  negativePropmtState,
+  propmtState,
+  SDSampler,
+  settingState,
+} from '../../store/Atoms'
 import NumberInputSetting from '../Settings/NumberInputSetting'
 import SettingBlock from '../Settings/SettingBlock'
 import Selector from '../shared/Selector'
 import { Switch, SwitchThumb } from '../shared/Switch'
 import TextAreaInput from '../shared/Textarea'
+import emitter, { EVENT_PROMPT } from '../../event'
 
 const INPUT_WIDTH = 30
 
@@ -17,12 +24,25 @@ const SidePanel = () => {
   const [setting, setSettingState] = useRecoilState(settingState)
   const [negativePrompt, setNegativePrompt] =
     useRecoilState(negativePropmtState)
+  const isInpainting = useRecoilValue(isInpaintingState)
+  const prompt = useRecoilValue(propmtState)
 
   const handleOnInput = (evt: FormEvent<HTMLTextAreaElement>) => {
     evt.preventDefault()
     evt.stopPropagation()
     const target = evt.target as HTMLTextAreaElement
     setNegativePrompt(target.value)
+  }
+
+  const onKeyUp = (e: React.KeyboardEvent) => {
+    if (
+      e.key === 'Enter' &&
+      (e.ctrlKey || e.metaKey) &&
+      prompt.length !== 0 &&
+      !isInpainting
+    ) {
+      emitter.emit(EVENT_PROMPT)
+    }
   }
 
   return (
@@ -203,6 +223,7 @@ const SidePanel = () => {
                   className="negative-prompt"
                   value={negativePrompt}
                   onInput={handleOnInput}
+                  onKeyUp={onKeyUp}
                   placeholder=""
                 />
               }
