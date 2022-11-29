@@ -256,6 +256,7 @@ def main(args):
         sd_disable_nsfw=args.sd_disable_nsfw,
         sd_cpu_textencoder=args.sd_cpu_textencoder,
         sd_run_local=args.sd_run_local,
+        sd_enable_xformers=args.sd_enable_xformers,
         callback=diffuser_callback,
     )
 

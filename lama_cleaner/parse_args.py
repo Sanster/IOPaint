@@ -32,6 +32,11 @@ def parse_args():
         action="store_true",
         help="After first time Stable Diffusion model downloaded, you can add this arg and remove --hf_access_token",
     )
+    parser.add_argument(
+        "--sd-enable-xformers",
+        action="store_true",
+        help="Enable xFormers optimizations. Requires that xformers package has been installed. See: https://github.com/facebookresearch/xformers"
+    )
     parser.add_argument("--device", default="cuda", type=str, choices=["cuda", "cpu"])
     parser.add_argument("--gui", action="store_true", help="Launch as desktop app")
     parser.add_argument(

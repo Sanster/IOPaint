@@ -71,8 +71,11 @@ class SD(InpaintModel):
             use_auth_token=kwargs["hf_access_token"],
             **model_kwargs
         )
-        # https://huggingface.co/docs/diffusers/v0.3.0/en/api/pipelines/stable_diffusion#diffusers.StableDiffusionInpaintPipeline.enable_attention_slicing
+        # https://huggingface.co/docs/diffusers/v0.7.0/en/api/pipelines/stable_diffusion#diffusers.StableDiffusionInpaintPipeline.enable_attention_slicing
         self.model.enable_attention_slicing()
+        # https://huggingface.co/docs/diffusers/v0.7.0/en/optimization/fp16#memory-efficient-attention
+        if kwargs['sd_enable_xformers']:
+            self.model.enable_xformers_memory_efficient_attention()
         self.model = self.model.to(device)
 
         if kwargs['sd_cpu_textencoder']:

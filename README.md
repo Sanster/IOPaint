@@ -105,6 +105,7 @@ Available command line arguments:
 | --sd-run-local       | Once the model as downloaded, you can pass this arg and remove `--hf_access_token`                                  |          |
 | --sd-disable-nsfw    | Disable stable-diffusion NSFW checker.                                                                              |          |
 | --sd-cpu-textencoder | Always run stable-diffusion TextEncoder model on CPU.                                                               |          |
+| --sd-enable-xformers | Enable xFormers optimizations. See: [facebookresearch/xformers](https://github.com/facebookresearch/xformers)       |          |
 | --device             | cuda or cpu                                                                                                         | cuda     |
 | --port               | Port for backend flask web server                                                                                   | 8080     |
 | --gui                | Launch lama-cleaner as a desktop application                                                                        |          |
