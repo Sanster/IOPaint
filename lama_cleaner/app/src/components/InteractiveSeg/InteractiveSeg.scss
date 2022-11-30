@@ -63,7 +63,6 @@ $negativeOutline: 6px solid rgba(255, 89, 95, 0.31);
   border-radius: 50%;
   background-color: $positiveBackgroundColor;
   // outline: $positiveOutline;
-  transform: 'translate(-50%, -50%)';
   box-shadow: 0 0 0 0 rgba(21, 215, 121, 0.936);
   animation: pulse 1.5s infinite cubic-bezier(0.66, 0, 0, 1);
 }

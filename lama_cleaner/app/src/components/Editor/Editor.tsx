@@ -57,6 +57,7 @@ import emitter, {
 import FileSelect from '../FileSelect/FileSelect'
 import InteractiveSeg from '../InteractiveSeg/InteractiveSeg'
 import InteractiveSegConfirmActions from '../InteractiveSeg/ConfirmActions'
+import InteractiveSegReplaceModal from '../InteractiveSeg/ReplaceModal'
 
 const TOOLBAR_SIZE = 200
 const MIN_BRUSH_SIZE = 10
@@ -114,6 +115,7 @@ export default function Editor() {
     isInteractiveSegRunningState
   )
 
+  const [showInteractiveSegModal, setShowInteractiveSegModal] = useState(false)
   const [interactiveSegMask, setInteractiveSegMask] =
     useState<HTMLImageElement | null>(null)
   // only used while interactive segmentation is on
@@ -573,6 +575,7 @@ export default function Editor() {
 
     if (isInteractiveSeg) {
       onInteractiveCancel()
+      return
     }
 
     if (isDraging || isMultiStrokeKeyPressed) {
@@ -1036,9 +1039,13 @@ export default function Editor() {
     () => {
       if (!isInteractiveSeg) {
         setIsInteractiveSeg(true)
+        if (interactiveSegMask !== null) {
+          setShowInteractiveSegModal(true)
+        }
       }
     },
-    isInteractiveSeg
+    {},
+    [isInteractiveSeg, interactiveSegMask]
   )
 
   // Standard Hotkeys for Brush Size
@@ -1173,6 +1180,7 @@ export default function Editor() {
         style={{
           left: `${x}px`,
           top: `${y}px`,
+          // transform: 'translate(-50%, -50%)',
         }}
       >
         <CursorArrowRaysIcon />
@@ -1359,7 +1367,12 @@ export default function Editor() {
             tooltipPosition="top"
             icon={<CursorArrowRaysIcon />}
             disabled={isInteractiveSeg || isInpainting}
-            onClick={() => setIsInteractiveSeg(true)}
+            onClick={() => {
+              setIsInteractiveSeg(true)
+              if (interactiveSegMask !== null) {
+                setShowInteractiveSegModal(true)
+              }
+            }}
           />
           <Button
             toolTip="Reset Zoom & Pan"
@@ -1469,6 +1482,21 @@ export default function Editor() {
           )}
         </div>
       </div>
+      <InteractiveSegReplaceModal
+        show={showInteractiveSegModal}
+        onClose={() => {
+          onInteractiveCancel()
+          setShowInteractiveSegModal(false)
+        }}
+        onCleanClick={() => {
+          onInteractiveCancel()
+          setInteractiveSegMask(null)
+        }}
+        onReplaceClick={() => {
+          setShowInteractiveSegModal(false)
+          setIsInteractiveSeg(true)
+        }}
+      />
     </div>
   )
 }

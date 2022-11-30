@@ -154,7 +154,7 @@ class ISPredictor(object):
 
 INTERACTIVE_SEG_MODEL_URL = os.environ.get(
     "INTERACTIVE_SEG_MODEL_URL",
-    "/Users/qing/code/github/ClickSEG/clickseg_pplnet.pt",
+    "https://github.com/Sanster/models/releases/download/clickseg_pplnet/clickseg_pplnet.pt",
 )
 
 

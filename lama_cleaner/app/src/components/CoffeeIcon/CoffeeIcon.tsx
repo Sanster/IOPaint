@@ -1,7 +1,5 @@
 import React, { useState } from 'react'
-import { useRecoilState } from 'recoil'
 import { Coffee } from 'react-feather'
-import { settingState } from '../../store/Atoms'
 import Button from '../shared/Button'
 import Modal from '../shared/Modal'
 
