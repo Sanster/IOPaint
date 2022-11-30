@@ -1471,8 +1471,9 @@ export default function Editor() {
                 </svg>
               }
               disabled={
-                !interactiveSegMask &&
-                (!hadDrawSomething() || isInpainting || isInteractiveSeg)
+                isInpainting ||
+                isInteractiveSeg ||
+                (!hadDrawSomething() && interactiveSegMask === null)
               }
               onClick={() => {
                 // ensured by disabled
