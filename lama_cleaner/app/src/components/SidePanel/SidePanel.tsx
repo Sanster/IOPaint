@@ -142,6 +142,7 @@ const SidePanel = () => {
 
             <SettingBlock
               title="Match Histograms"
+              desc="Match the inpainting result histogram to the source image histogram, will improves the inpainting quality for some images."
               input={
                 <Switch
                   checked={setting.sdMatchHistograms}

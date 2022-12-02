@@ -121,6 +121,9 @@ export default function Editor() {
   // only used while interactive segmentation is on
   const [tmpInteractiveSegMask, setTmpInteractiveSegMask] =
     useState<HTMLImageElement | null>(null)
+  const [prevInteractiveSegMask, setPrevInteractiveSegMask] = useState<
+    HTMLImageElement | null | undefined
+  >(null)
 
   const [clicks, setClicks] = useRecoilState(interactiveSegClicksState)
 
@@ -264,7 +267,7 @@ export default function Editor() {
       if (file === undefined) {
         return
       }
-      const useCustomMask = customMask !== undefined
+      const useCustomMask = customMask !== undefined && customMask !== null
       const useMaskImage = maskImage !== undefined && maskImage !== null
       // useLastLineGroup 的影响
       // 1. 使用上一次的 mask
@@ -375,6 +378,7 @@ export default function Editor() {
         drawOnCurrentRender([])
       }
       setIsInpainting(false)
+      setPrevInteractiveSegMask(maskImage)
       setTmpInteractiveSegMask(null)
       setInteractiveSegMask(null)
     },
@@ -396,10 +400,14 @@ export default function Editor() {
 
   useEffect(() => {
     emitter.on(EVENT_PROMPT, () => {
-      if (hadDrawSomething()) {
-        runInpainting()
+      if (hadDrawSomething() || interactiveSegMask) {
+        runInpainting(false, undefined, interactiveSegMask)
       } else if (lastLineGroup.length !== 0) {
-        runInpainting(true)
+        // 使用上一次手绘的 mask 生成
+        runInpainting(true, undefined, prevInteractiveSegMask)
+      } else if (prevInteractiveSegMask) {
+        // 使用上一次 IS 的 mask 生成
+        runInpainting(false, undefined, prevInteractiveSegMask)
       } else {
         setToastState({
           open: true,
@@ -413,7 +421,13 @@ export default function Editor() {
     return () => {
       emitter.off(EVENT_PROMPT)
     }
-  }, [hadDrawSomething, runInpainting, promptVal])
+  }, [
+    hadDrawSomething,
+    runInpainting,
+    promptVal,
+    interactiveSegMask,
+    prevInteractiveSegMask,
+  ])
 
   useEffect(() => {
     emitter.on(EVENT_CUSTOM_MASK, (data: any) => {
@@ -1037,7 +1051,7 @@ export default function Editor() {
   useHotKey(
     'i',
     () => {
-      if (!isInteractiveSeg) {
+      if (!isInteractiveSeg && isOriginalLoaded) {
         setIsInteractiveSeg(true)
         if (interactiveSegMask !== null) {
           setShowInteractiveSegModal(true)
@@ -1045,7 +1059,7 @@ export default function Editor() {
       }
     },
     {},
-    [isInteractiveSeg, interactiveSegMask]
+    [isInteractiveSeg, interactiveSegMask, isOriginalLoaded]
   )
 
   // Standard Hotkeys for Brush Size
@@ -1366,7 +1380,7 @@ export default function Editor() {
             toolTip="Interactive Segmentation"
             tooltipPosition="top"
             icon={<CursorArrowRaysIcon />}
-            disabled={isInteractiveSeg || isInpainting}
+            disabled={isInteractiveSeg || isInpainting || !isOriginalLoaded}
             onClick={() => {
               setIsInteractiveSeg(true)
               if (interactiveSegMask !== null) {
