@@ -159,7 +159,7 @@ INTERACTIVE_SEG_MODEL_URL = os.environ.get(
 
 
 class InteractiveSeg:
-    def __init__(self, infer_size=448, open_kernel_size=3, dilate_kernel_size=3):
+    def __init__(self, infer_size=384, open_kernel_size=3, dilate_kernel_size=3):
         device = torch.device('cpu')
         model = load_jit_model(INTERACTIVE_SEG_MODEL_URL, device).eval()
         self.predictor = ISPredictor(model, device,
