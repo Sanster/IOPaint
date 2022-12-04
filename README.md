@@ -42,6 +42,7 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
 - Support CPU & GPU
 - Various inpainting [strategy](#inpainting-strategy)
 - Run as a desktop APP
+- [Interactive Segmentation](https://github.com/Sanster/lama-cleaner/releases/tag/0.28.0) on any object
 
 ## Usage
 
