@@ -25,6 +25,7 @@ class SDSampler(str, Enum):
     k_lms = "k_lms"
     k_euler = 'k_euler'
     k_euler_a = 'k_euler_a'
+    dpm_plus_plus = 'dpm++'
 
 
 class Config(BaseModel):

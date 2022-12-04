@@ -10,6 +10,7 @@ export enum AIModel {
   MAT = 'mat',
   FCF = 'fcf',
   SD15 = 'sd1.5',
+  SD2 = 'sd2',
   CV2 = 'cv2',
   Mange = 'manga',
 }
@@ -294,7 +295,14 @@ const defaultHDSettings: ModelsHDSettings = {
     hdStrategyResizeLimit: 768,
     hdStrategyCropTrigerSize: 512,
     hdStrategyCropMargin: 128,
-    enabled: true,
+    enabled: false,
+  },
+  [AIModel.SD2]: {
+    hdStrategy: HDStrategy.ORIGINAL,
+    hdStrategyResizeLimit: 768,
+    hdStrategyCropTrigerSize: 512,
+    hdStrategyCropMargin: 128,
+    enabled: false,
   },
   [AIModel.Mange]: {
     hdStrategy: HDStrategy.CROP,
@@ -318,6 +326,7 @@ export enum SDSampler {
   klms = 'k_lms',
   kEuler = 'k_euler',
   kEulerA = 'k_euler_a',
+  dpmPlusPlus = 'dpm++',
 }
 
 export enum SDMode {
@@ -422,7 +431,7 @@ export const isSDState = selector({
   key: 'isSD',
   get: ({ get }) => {
     const settings = get(settingState)
-    return settings.model === AIModel.SD15
+    return settings.model === AIModel.SD15 || settings.model === AIModel.SD2
   },
 })
 

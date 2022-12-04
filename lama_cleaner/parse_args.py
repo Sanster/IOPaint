@@ -10,7 +10,7 @@ def parse_args():
     parser.add_argument(
         "--model",
         default="lama",
-        choices=["lama", "ldm", "zits", "mat", "fcf", "sd1.5", "cv2", "manga"],
+        choices=["lama", "ldm", "zits", "mat", "fcf", "sd1.5", "cv2", "manga", "sd2"],
     )
     parser.add_argument(
         "--hf_access_token",
@@ -37,7 +37,7 @@ def parse_args():
         action="store_true",
         help="Enable xFormers optimizations. Requires that xformers package has been installed. See: https://github.com/facebookresearch/xformers"
     )
-    parser.add_argument("--device", default="cuda", type=str, choices=["cuda", "cpu"])
+    parser.add_argument("--device", default="cuda", type=str, choices=["cuda", "cpu", "mps"])
     parser.add_argument("--gui", action="store_true", help="Launch as desktop app")
     parser.add_argument(
         "--gui-size",
@@ -59,7 +59,7 @@ def parse_args():
         if imghdr.what(args.input) is None:
             parser.error(f"invalid --input: {args.input} is not a valid image file")
 
-    if args.model.startswith("sd") and not args.sd_run_local:
+    if args.model == 'sd1.5' and not args.sd_run_local:
         if not args.hf_access_token.startswith("hf_"):
             parser.error(
                 f"sd(stable-diffusion) model requires huggingface access token. Check how to get token from: https://huggingface.co/docs/hub/security-tokens"

@@ -191,6 +191,8 @@ function ModelSettingBlock() {
         return renderFCFModelDesc()
       case AIModel.SD15:
         return undefined
+      case AIModel.SD2:
+        return undefined
       case AIModel.Mange:
         return undefined
       case AIModel.CV2:
@@ -234,9 +236,15 @@ function ModelSettingBlock() {
         )
       case AIModel.SD15:
         return renderModelDesc(
-          'Stable Diffusion',
+          'Stable Diffusion 1.5',
           'https://ommer-lab.com/research/latent-diffusion-models/',
           'https://github.com/CompVis/stable-diffusion'
+        )
+      case AIModel.SD2:
+        return renderModelDesc(
+          'Stable Diffusion 2',
+          'https://ommer-lab.com/research/latent-diffusion-models/',
+          'https://github.com/Stability-AI/stablediffusion'
         )
       case AIModel.Mange:
         return renderModelDesc(
