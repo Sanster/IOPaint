@@ -89,7 +89,7 @@ lama-cleaner --model=lama --device=cpu --port=8080
 # Lama Cleaner is now running at http://localhost:8080
 ```
 
-For stable-diffusion model, you need
+For stable-diffusion 1.5 model, you need
 to [accepting the terms to access](https://huggingface.co/runwayml/stable-diffusion-inpainting), and
 get an access token from here [huggingface access token](https://huggingface.co/docs/hub/security-tokens)
 
@@ -101,13 +101,13 @@ Available command line arguments:
 
 | Name                 | Description                                                                                                         | Default  |
 | -------------------- |---------------------------------------------------------------------------------------------------------------------| -------- |
-| --model              | lama/ldm/zits/mat/fcf/sd1.5/manga See details in [Inpaint Model](#inpainting-model)                                 | lama     |
+| --model              | lama/ldm/zits/mat/fcf/sd1.5/manga/sd2 See details in [Inpaint Model](#inpainting-model)                                 | lama     |
 | --hf_access_token    | stable-diffusion need [huggingface access token](https://huggingface.co/docs/hub/security-tokens) to download model |          |
 | --sd-run-local       | Once the model as downloaded, you can pass this arg and remove `--hf_access_token`                                  |          |
 | --sd-disable-nsfw    | Disable stable-diffusion NSFW checker.                                                                              |          |
 | --sd-cpu-textencoder | Always run stable-diffusion TextEncoder model on CPU.                                                               |          |
 | --sd-enable-xformers | Enable xFormers optimizations. See: [facebookresearch/xformers](https://github.com/facebookresearch/xformers)       |          |
-| --device             | cuda or cpu                                                                                                         | cuda     |
+| --device             | cuda / cpu / mps                                                                                                         | cuda     |
 | --port               | Port for backend flask web server                                                                                   | 8080     |
 | --gui                | Launch lama-cleaner as a desktop application                                                                        |          |
 | --gui_size           | Set the window size for the application                                                                             | 1200 900 |
