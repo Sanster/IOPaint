@@ -30,6 +30,7 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
 
 - Completely free and open-source
 - Fully self-hosted
+- [Windows 1-Click Installer](./scripts/README.md)
 - Classical image inpainting algorithm powered by [cv2](https://docs.opencv.org/3.4/df/d3d/tutorial_py_inpainting.html)
 - Multiple SOTA AI models
     1. [LaMa](https://github.com/saic-mdal/lama)
