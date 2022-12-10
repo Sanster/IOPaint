@@ -39,6 +39,7 @@ import {
   isInpaintingState,
   isInteractiveSegRunningState,
   isInteractiveSegState,
+  isPaintByExampleState,
   isSDState,
   negativePropmtState,
   propmtState,
@@ -53,6 +54,7 @@ import emitter, {
   EVENT_PROMPT,
   EVENT_CUSTOM_MASK,
   CustomMaskEventData,
+  EVENT_PAINT_BY_EXAMPLE,
 } from '../../event'
 import FileSelect from '../FileSelect/FileSelect'
 import InteractiveSeg from '../InteractiveSeg/InteractiveSeg'
@@ -108,6 +110,7 @@ export default function Editor() {
   const [isInpainting, setIsInpainting] = useRecoilState(isInpaintingState)
   const runMannually = useRecoilValue(runManuallyState)
   const isSD = useRecoilValue(isSDState)
+  const isPaintByExample = useRecoilValue(isPaintByExampleState)
   const [isInteractiveSeg, setIsInteractiveSeg] = useRecoilState(
     isInteractiveSegState
   )
@@ -262,8 +265,11 @@ export default function Editor() {
     async (
       useLastLineGroup?: boolean,
       customMask?: File,
-      maskImage?: HTMLImageElement | null
+      maskImage?: HTMLImageElement | null,
+      paintByExampleImage?: File
     ) => {
+      // customMask: mask uploaded by user
+      // maskImage: mask from interactive segmentation
       if (file === undefined) {
         return
       }
@@ -328,9 +334,6 @@ export default function Editor() {
         }
       }
 
-      const sdSeed = settings.sdSeedFixed ? settings.sdSeed : -1
-
-      console.log({ useCustomMask })
       try {
         const res = await inpaint(
           targetFile,
@@ -339,15 +342,16 @@ export default function Editor() {
           promptVal,
           negativePromptVal,
           sizeLimit.toString(),
-          sdSeed,
+          seedVal,
           useCustomMask ? undefined : maskCanvas.toDataURL(),
-          useCustomMask ? customMask : undefined
+          useCustomMask ? customMask : undefined,
+          paintByExampleImage
         )
         if (!res) {
           throw new Error('Something went wrong on server side.')
         }
         const { blob, seed } = res
-        if (seed && !settings.sdSeedFixed) {
+        if (seed) {
           setSeed(parseInt(seed, 10))
         }
         const newRender = new Image()
@@ -395,6 +399,7 @@ export default function Editor() {
       drawOnCurrentRender,
       hadDrawSomething,
       drawLinesOnMask,
+      seedVal,
     ]
   )
 
@@ -436,6 +441,31 @@ export default function Editor() {
 
     return () => {
       emitter.off(EVENT_CUSTOM_MASK)
+    }
+  }, [runInpainting])
+
+  useEffect(() => {
+    emitter.on(EVENT_PAINT_BY_EXAMPLE, (data: any) => {
+      if (hadDrawSomething() || interactiveSegMask) {
+        runInpainting(false, undefined, interactiveSegMask, data.image)
+      } else if (lastLineGroup.length !== 0) {
+        // 使用上一次手绘的 mask 生成
+        runInpainting(true, undefined, prevInteractiveSegMask, data.image)
+      } else if (prevInteractiveSegMask) {
+        // 使用上一次 IS 的 mask 生成
+        runInpainting(false, undefined, prevInteractiveSegMask, data.image)
+      } else {
+        setToastState({
+          open: true,
+          desc: 'Please draw mask on picture',
+          state: 'error',
+          duration: 1500,
+        })
+      }
+    })
+
+    return () => {
+      emitter.off(EVENT_PAINT_BY_EXAMPLE)
     }
   }, [runInpainting])
 
@@ -793,7 +823,11 @@ export default function Editor() {
       return
     }
 
-    if (isSD && settings.showCroper && isOutsideCroper(mouseXY(ev))) {
+    if (
+      (isSD || isPaintByExample) &&
+      settings.showCroper &&
+      isOutsideCroper(mouseXY(ev))
+    ) {
       return
     }
 
@@ -876,7 +910,12 @@ export default function Editor() {
     return false
   }
 
-  useKey(undoPredicate, undo, undefined, [undoStroke, undoRender, isSD])
+  useKey(undoPredicate, undo, undefined, [
+    undoStroke,
+    undoRender,
+    runMannually,
+    curLineGroup,
+  ])
 
   const disableUndo = () => {
     if (isInteractiveSeg) {
@@ -955,7 +994,12 @@ export default function Editor() {
     return false
   }
 
-  useKey(redoPredicate, redo, undefined, [redoStroke, redoRender, isSD])
+  useKey(redoPredicate, redo, undefined, [
+    redoStroke,
+    redoRender,
+    runMannually,
+    redoCurLines,
+  ])
 
   const disableRedo = () => {
     if (isInteractiveSeg) {
@@ -1295,7 +1339,7 @@ export default function Editor() {
             </div>
           </div>
 
-          {isSD && settings.showCroper ? (
+          {(isSD || isPaintByExample) && settings.showCroper ? (
             <Croper
               maxHeight={original.naturalHeight}
               maxWidth={original.naturalWidth}
@@ -1358,7 +1402,7 @@ export default function Editor() {
       )}
 
       <div className="editor-toolkit-panel">
-        {isSD || file === undefined ? (
+        {isSD || isPaintByExample || file === undefined ? (
           <></>
         ) : (
           <SizeSelector
@@ -1466,7 +1510,7 @@ export default function Editor() {
             onClick={download}
           />
 
-          {settings.runInpaintingManually && !isSD && (
+          {settings.runInpaintingManually && !isSD && !isPaintByExample && (
             <Button
               toolTip="Run Inpainting"
               tooltipPosition="top"

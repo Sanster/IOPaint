@@ -1,5 +1,6 @@
 from enum import Enum
 
+from PIL.Image import Image
 from pydantic import BaseModel
 
 
@@ -29,6 +30,9 @@ class SDSampler(str, Enum):
 
 
 class Config(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
     # Configs for ldm model
     ldm_steps: int
     ldm_sampler: str = LDMSampler.plms
@@ -73,3 +77,11 @@ class Config(BaseModel):
     # opencv document https://docs.opencv.org/4.6.0/d7/d8b/group__photo__inpaint.html#gga8002a65f5a3328fbf15df81b842d3c3ca05e763003a805e6c11c673a9f4ba7d07
     cv2_flag: str = 'INPAINT_NS'
     cv2_radius: int = 4
+
+    # Paint by Example
+    paint_by_example_steps: int = 50
+    paint_by_example_guidance_scale: float = 7.5
+    paint_by_example_mask_blur: int = 0
+    paint_by_example_seed: int = 42
+    paint_by_example_match_histograms: bool = False
+    paint_by_example_example_image: Image = None

@@ -7,6 +7,7 @@ import Toast from './shared/Toast'
 import {
   AIModel,
   fileState,
+  isPaintByExampleState,
   isSDState,
   settingState,
   toastState,
@@ -17,12 +18,14 @@ import {
   switchModel,
 } from '../adapters/inpainting'
 import SidePanel from './SidePanel/SidePanel'
+import PESidePanel from './SidePanel/PESidePanel'
 
 const Workspace = () => {
   const [file, setFile] = useRecoilState(fileState)
   const [settings, setSettingState] = useRecoilState(settingState)
   const [toastVal, setToastState] = useRecoilState(toastState)
   const isSD = useRecoilValue(isSDState)
+  const isPaintByExample = useRecoilValue(isPaintByExampleState)
 
   const onSettingClose = async () => {
     const curModel = await currentModel().then(res => res.text())
@@ -88,6 +91,7 @@ const Workspace = () => {
   return (
     <>
       {isSD ? <SidePanel /> : <></>}
+      {isPaintByExample ? <PESidePanel /> : <></>}
       <Editor />
       <SettingModal onClose={onSettingClose} />
       <ShortcutsModal />

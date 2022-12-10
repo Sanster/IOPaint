@@ -193,6 +193,8 @@ function ModelSettingBlock() {
         return undefined
       case AIModel.SD2:
         return undefined
+      case AIModel.PAINT_BY_EXAMPLE:
+        return undefined
       case AIModel.Mange:
         return undefined
       case AIModel.CV2:
@@ -258,6 +260,12 @@ function ModelSettingBlock() {
           'https://docs.opencv.org/4.6.0/df/d3d/tutorial_py_inpainting.html',
           'https://docs.opencv.org/4.6.0/df/d3d/tutorial_py_inpainting.html'
         )
+      case AIModel.PAINT_BY_EXAMPLE:
+        return renderModelDesc(
+          'Paint by Example',
+          'https://arxiv.org/abs/2211.13227',
+          'https://github.com/Fantasy-Studio/Paint-by-Example'
+        )
       default:
         return <></>
     }
@@ -270,7 +278,6 @@ function ModelSettingBlock() {
       titleSuffix={renderPaperCodeBadge()}
       input={
         <Selector
-          width={80}
           value={setting.model as string}
           options={Object.values(AIModel)}
           onChange={val => onModelChange(val as AIModel)}
