@@ -31,11 +31,15 @@ setuptools.setup(
     packages=setuptools.find_packages("./"),
     package_data={"lama_cleaner": web_files},
     install_requires=load_requirements(),
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     entry_points={"console_scripts": ["lama-cleaner=lama_cleaner:entry_point"]},
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
 )
