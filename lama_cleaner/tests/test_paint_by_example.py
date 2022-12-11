@@ -38,7 +38,7 @@ def assert_equal(
 @pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
 def test_paint_by_example(strategy):
     model = ModelManager(name="paint_by_example", device=device)
-    cfg = get_config(strategy, paint_by_example_steps=30)
+    cfg = get_config(strategy, paint_by_example_steps=30 if device == 'cuda' else 1)
     assert_equal(
         model,
         cfg,
