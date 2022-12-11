@@ -32,3 +32,12 @@ header {
   gap: 6px;
   justify-self: end;
 }
+
+.mask-preview {
+  max-height: 400px;
+  max-width: 400px;
+  margin-top: 30px;
+  margin-left: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
