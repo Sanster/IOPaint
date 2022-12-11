@@ -436,6 +436,7 @@ export default function Editor() {
 
   useEffect(() => {
     emitter.on(EVENT_CUSTOM_MASK, (data: any) => {
+      // TODO: not work with paint by example
       runInpainting(false, data.mask)
     })
 
@@ -1339,17 +1340,14 @@ export default function Editor() {
             </div>
           </div>
 
-          {(isSD || isPaintByExample) && settings.showCroper ? (
-            <Croper
-              maxHeight={original.naturalHeight}
-              maxWidth={original.naturalWidth}
-              minHeight={Math.min(256, original.naturalHeight)}
-              minWidth={Math.min(256, original.naturalWidth)}
-              scale={scale}
-            />
-          ) : (
-            <></>
-          )}
+          <Croper
+            maxHeight={original.naturalHeight}
+            maxWidth={original.naturalWidth}
+            minHeight={Math.min(256, original.naturalHeight)}
+            minWidth={Math.min(256, original.naturalWidth)}
+            scale={scale}
+            show={(isSD || isPaintByExample) && settings.showCroper}
+          />
 
           {isInteractiveSeg ? <InteractiveSeg /> : <></>}
         </TransformComponent>
