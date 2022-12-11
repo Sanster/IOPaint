@@ -34,12 +34,13 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
 - Classical image inpainting algorithm powered by [cv2](https://docs.opencv.org/3.4/df/d3d/tutorial_py_inpainting.html)
 - Multiple SOTA AI models
     1. [LaMa](https://github.com/saic-mdal/lama)
-    1. [LDM](https://github.com/CompVis/latent-diffusion)
-    1. [ZITS](https://github.com/DQiaole/ZITS_inpainting)
-    1. [MAT](https://github.com/fenglinglwb/MAT)
-    1. [FcF](https://github.com/SHI-Labs/FcF-Inpainting)
-    1. [SD1.5](https://github.com/runwayml/stable-diffusion)
-    1. [Manga](https://github.com/msxie92/MangaInpainting)
+    2. [LDM](https://github.com/CompVis/latent-diffusion)
+    3. [ZITS](https://github.com/DQiaole/ZITS_inpainting)
+    4. [MAT](https://github.com/fenglinglwb/MAT)
+    5. [FcF](https://github.com/SHI-Labs/FcF-Inpainting)
+    6. [SD1.5/SD2](https://github.com/runwayml/stable-diffusion)
+    7. [Manga](https://github.com/msxie92/MangaInpainting)
+    8. [Paint by Example](https://github.com/Fantasy-Studio/Paint-by-Example)
 - Support CPU & GPU
 - Various inpainting [strategy](#inpainting-strategy)
 - Run as a desktop APP
@@ -72,9 +73,18 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
 <details>
 <summary>3. Replace something on the image </summary>
 
+SD1.5/SD2
+
 | Usage                  | Before                   | After                                                          |
 | ---------------------- | ------------------------ | -------------------------------------------------------------- |
 | Text Driven Inpainting | ![dog](./assets/dog.jpg) | Prompt: a fox sitting on a bench<br/> ![fox](./assets/fox.jpg) |
+
+
+Paint by Example
+
+| Original Image | Example Image | Result Image |
+|----|------|-------|
+|<img src="https://user-images.githubusercontent.com/3998421/206908542-c6465ca3-6414-4593-8318-0c8b569e7682.jpg">|[<img src="https://user-images.githubusercontent.com/3998421/206908517-bd7f62d2-464a-43bc-892e-dbea45f7b104.jpeg">](https://youtu.be/NSAN3TzfhaI)|[<img src="https://user-images.githubusercontent.com/3998421/206903752-0463a0cf-146d-4125-a969-8fe20127a09b.jpeg">](https://youtu.be/NSAN3TzfhaI)|
 
 </details>
 
@@ -102,7 +112,7 @@ Available command line arguments:
 
 | Name                 | Description                                                                                                         | Default  |
 | -------------------- |---------------------------------------------------------------------------------------------------------------------| -------- |
-| --model              | lama/ldm/zits/mat/fcf/sd1.5/manga/sd2 See details in [Inpaint Model](#inpainting-model)                                 | lama     |
+| --model              | lama/ldm/zits/mat/fcf/sd1.5/manga/sd2/paint_by_example See details in [Inpaint Model](#inpainting-model)                                 | lama     |
 | --hf_access_token    | stable-diffusion need [huggingface access token](https://huggingface.co/docs/hub/security-tokens) to download model |          |
 | --sd-run-local       | Once the model as downloaded, you can pass this arg and remove `--hf_access_token`                                  |          |
 | --sd-disable-nsfw    | Disable stable-diffusion NSFW checker.                                                                              |          |
