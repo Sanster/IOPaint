@@ -16,8 +16,8 @@
     <img alt="Hugging Face Spaces" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue" />
   </a>
 
-  <a href="https://www.python.org/downloads/">
-    <img alt="python version" src="https://img.shields.io/badge/python-3.7+-blue.svg" />
+  <a href="">
+    <img alt="python version" src="https://img.shields.io/pypi/pyversions/lama-cleaner" />
   </a>
   <a href="https://hub.docker.com/r/cwq1913/lama-cleaner">
     <img alt="version" src="https://img.shields.io/docker/pulls/cwq1913/lama-cleaner" />
