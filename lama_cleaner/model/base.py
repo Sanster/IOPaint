@@ -211,6 +211,26 @@ class InpaintModel:
 
         return result
 
+    def _apply_cropper(self, image, mask, config: Config):
+        img_h, img_w = image.shape[:2]
+        l, t, w, h = (
+            config.croper_x,
+            config.croper_y,
+            config.croper_width,
+            config.croper_height,
+        )
+        r = l + w
+        b = t + h
+
+        l = max(l, 0)
+        r = min(r, img_w)
+        t = max(t, 0)
+        b = min(b, img_h)
+
+        crop_img = image[t:b, l:r, :]
+        crop_mask = mask[t:b, l:r]
+        return crop_img, crop_mask, (l, t, r, b)
+
     def _run_box(self, image, mask, box, config: Config):
         """
 

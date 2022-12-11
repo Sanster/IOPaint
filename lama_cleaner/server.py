@@ -10,6 +10,7 @@ import time
 import imghdr
 from pathlib import Path
 from typing import Union
+from PIL import Image
 
 import cv2
 import torch
@@ -97,8 +98,8 @@ def process():
     input = request.files
     # RGB
     origin_image_bytes = input["image"].read()
-
     image, alpha_channel = load_img(origin_image_bytes)
+
     mask, _ = load_img(input["mask"].read(), gray=True)
     mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)[1]
 
@@ -114,6 +115,12 @@ def process():
         size_limit = max(image.shape)
     else:
         size_limit = int(size_limit)
+
+    if "paintByExampleImage" in input:
+        paint_by_example_example_image, _ = load_img(input["paintByExampleImage"].read())
+        paint_by_example_example_image = Image.fromarray(paint_by_example_example_image)
+    else:
+        paint_by_example_example_image = None
 
     config = Config(
         ldm_steps=form["ldmSteps"],
@@ -138,11 +145,19 @@ def process():
         sd_seed=form["sdSeed"],
         sd_match_histograms=form["sdMatchHistograms"],
         cv2_flag=form["cv2Flag"],
-        cv2_radius=form['cv2Radius']
+        cv2_radius=form['cv2Radius'],
+        paint_by_example_steps=form["paintByExampleSteps"],
+        paint_by_example_guidance_scale=form["paintByExampleGuidanceScale"],
+        paint_by_example_mask_blur=form["paintByExampleMaskBlur"],
+        paint_by_example_seed=form["paintByExampleSeed"],
+        paint_by_example_match_histograms=form["paintByExampleMatchHistograms"],
+        paint_by_example_example_image=paint_by_example_example_image,
     )
 
     if config.sd_seed == -1:
         config.sd_seed = random.randint(1, 999999999)
+    if config.paint_by_example_seed == -1:
+        config.paint_by_example_seed = random.randint(1, 999999999)
 
     logger.info(f"Origin image shape: {original_shape}")
     image = resize_max_size(image, size_limit=size_limit, interpolation=interpolation)

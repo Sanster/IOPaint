@@ -13,10 +13,16 @@ export enum AIModel {
   SD2 = 'sd2',
   CV2 = 'cv2',
   Mange = 'manga',
+  PAINT_BY_EXAMPLE = 'paint_by_example',
 }
 
 export const maskState = atom<File | undefined>({
   key: 'maskState',
+  default: undefined,
+})
+
+export const paintByExampleImageState = atom<File | undefined>({
+  key: 'paintByExampleImageState',
   default: undefined,
 })
 
@@ -252,6 +258,14 @@ export interface Settings {
   // For OpenCV2
   cv2Radius: number
   cv2Flag: CV2Flag
+
+  // Paint by Example
+  paintByExampleSteps: number
+  paintByExampleGuidanceScale: number
+  paintByExampleSeed: number
+  paintByExampleSeedFixed: boolean
+  paintByExampleMaskBlur: number
+  paintByExampleMatchHistograms: boolean
 }
 
 const defaultHDSettings: ModelsHDSettings = {
@@ -298,6 +312,13 @@ const defaultHDSettings: ModelsHDSettings = {
     enabled: false,
   },
   [AIModel.SD2]: {
+    hdStrategy: HDStrategy.ORIGINAL,
+    hdStrategyResizeLimit: 768,
+    hdStrategyCropTrigerSize: 512,
+    hdStrategyCropMargin: 128,
+    enabled: false,
+  },
+  [AIModel.PAINT_BY_EXAMPLE]: {
     hdStrategy: HDStrategy.ORIGINAL,
     hdStrategyResizeLimit: 768,
     hdStrategyCropTrigerSize: 512,
@@ -364,6 +385,14 @@ export const settingStateDefault: Settings = {
   // CV2
   cv2Radius: 5,
   cv2Flag: CV2Flag.INPAINT_NS,
+
+  // Paint by Example
+  paintByExampleSteps: 50,
+  paintByExampleGuidanceScale: 7.5,
+  paintByExampleSeed: 42,
+  paintByExampleMaskBlur: 5,
+  paintByExampleSeedFixed: false,
+  paintByExampleMatchHistograms: false,
 }
 
 const localStorageEffect =
@@ -401,11 +430,28 @@ export const seedState = selector({
   key: 'seed',
   get: ({ get }) => {
     const settings = get(settingState)
-    return settings.sdSeed
+    switch (settings.model) {
+      case AIModel.PAINT_BY_EXAMPLE:
+        return settings.paintByExampleSeedFixed
+          ? settings.paintByExampleSeed
+          : -1
+      default:
+        return settings.sdSeedFixed ? settings.sdSeed : -1
+    }
   },
   set: ({ get, set }, newValue: any) => {
     const settings = get(settingState)
-    set(settingState, { ...settings, sdSeed: newValue })
+    switch (settings.model) {
+      case AIModel.PAINT_BY_EXAMPLE:
+        if (!settings.paintByExampleSeedFixed) {
+          set(settingState, { ...settings, paintByExampleSeed: newValue })
+        }
+        break
+      default:
+        if (!settings.sdSeedFixed) {
+          set(settingState, { ...settings, sdSeed: newValue })
+        }
+    }
   },
 })
 
@@ -435,11 +481,20 @@ export const isSDState = selector({
   },
 })
 
+export const isPaintByExampleState = selector({
+  key: 'isPaintByExampleState',
+  get: ({ get }) => {
+    const settings = get(settingState)
+    return settings.model === AIModel.PAINT_BY_EXAMPLE
+  },
+})
+
 export const runManuallyState = selector({
   key: 'runManuallyState',
   get: ({ get }) => {
     const settings = get(settingState)
     const isSD = get(isSDState)
-    return settings.runInpaintingManually || isSD
+    const isPaintByExample = get(isPaintByExampleState)
+    return settings.runInpaintingManually || isSD || isPaintByExample
   },
 })

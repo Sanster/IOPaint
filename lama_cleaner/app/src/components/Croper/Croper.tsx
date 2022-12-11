@@ -30,6 +30,7 @@ interface Props {
   scale: number
   minHeight: number
   minWidth: number
+  show: boolean
 }
 
 const clamp = (
@@ -66,7 +67,7 @@ const clamp = (
 }
 
 const Croper = (props: Props) => {
-  const { minHeight, minWidth, maxHeight, maxWidth, scale } = props
+  const { minHeight, minWidth, maxHeight, maxWidth, scale, show } = props
   const [x, setX] = useRecoilState(croperX)
   const [y, setY] = useRecoilState(croperY)
   const [height, setHeight] = useRecoilState(croperHeight)
@@ -79,7 +80,7 @@ const Croper = (props: Props) => {
   useEffect(() => {
     setX(Math.round((maxWidth - 512) / 2))
     setY(Math.round((maxHeight - 512) / 2))
-  }, [maxHeight, maxWidth, minHeight, minWidth])
+  }, [maxHeight, maxWidth])
 
   const [evData, setEVData] = useState<EVData>({
     initX: 0,
@@ -391,7 +392,10 @@ const Croper = (props: Props) => {
   }
 
   return (
-    <div className="croper-wrapper">
+    <div
+      className="croper-wrapper"
+      style={{ visibility: show ? 'visible' : 'hidden' }}
+    >
       <div className="croper" style={{ height, width, left: x, top: y }}>
         {createBorder()}
         {createInfoBar()}

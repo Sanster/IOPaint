@@ -12,7 +12,8 @@ export default async function inpaint(
   sizeLimit?: string,
   seed?: number,
   maskBase64?: string,
-  customMask?: File
+  customMask?: File,
+  paintByExampleImage?: File
 ) {
   // 1080, 2000, Original
   const fd = new FormData()
@@ -48,6 +49,7 @@ export default async function inpaint(
   fd.append('croperHeight', croperRect.height.toString())
   fd.append('croperWidth', croperRect.width.toString())
   fd.append('useCroper', settings.showCroper ? 'true' : 'false')
+
   fd.append('sdMaskBlur', settings.sdMaskBlur.toString())
   fd.append('sdStrength', settings.sdStrength.toString())
   fd.append('sdSteps', settings.sdSteps.toString())
@@ -58,6 +60,26 @@ export default async function inpaint(
 
   fd.append('cv2Radius', settings.cv2Radius.toString())
   fd.append('cv2Flag', settings.cv2Flag.toString())
+
+  fd.append('paintByExampleSteps', settings.paintByExampleSteps.toString())
+  fd.append(
+    'paintByExampleGuidanceScale',
+    settings.paintByExampleGuidanceScale.toString()
+  )
+  fd.append('paintByExampleSeed', seed ? seed.toString() : '-1')
+  fd.append(
+    'paintByExampleMaskBlur',
+    settings.paintByExampleMaskBlur.toString()
+  )
+  fd.append(
+    'paintByExampleMatchHistograms',
+    settings.paintByExampleMatchHistograms ? 'true' : 'false'
+  )
+  // TODO: resize image's shortest_edge to 224 before pass to backend, save network time?
+  // https://huggingface.co/docs/transformers/model_doc/clip#transformers.CLIPImageProcessor
+  if (paintByExampleImage) {
+    fd.append('paintByExampleImage', paintByExampleImage)
+  }
 
   if (sizeLimit === undefined) {
     fd.append('sizeLimit', '1080')
