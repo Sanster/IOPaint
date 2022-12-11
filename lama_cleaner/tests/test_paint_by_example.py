@@ -21,7 +21,7 @@ def assert_equal(
     fx: float = 1, fy: float = 1,
     img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
     mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
-    example_p=current_dir / "rabbit.jpeg",
+    example_p=current_dir / "bunny.jpeg",
 ):
     img, mask = get_data(fx=fx, fy=fy, img_p=img_p, mask_p=mask_p)
 
