@@ -48,6 +48,8 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
 
 ## Usage
 
+A great introductory [youtube video](https://www.youtube.com/watch?v=aYia7Jvbjno&ab_channel=Aitrepreneur) made by **Aitrepreneur**
+
 <details>
 <summary>1. Remove any unwanted things on the image</summary>
 
