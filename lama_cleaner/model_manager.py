@@ -46,8 +46,8 @@ class ModelManager:
             if (torch.cuda.memory_allocated() > 0):
                 # Clear current loaded model from memory
                 torch.cuda.empty_cache()
-                gc.collect()
                 del self.model
+                gc.collect()
 
             self.model = self.init_model(new_name, self.device, **self.kwargs)
             self.name = new_name
