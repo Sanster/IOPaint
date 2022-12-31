@@ -1,0 +1,27 @@
+.file-manager-modal {
+  color: var(--text-color);
+  height: 90%;
+  width: 80%;
+}
+
+.file-manager {
+  overflow: auto;
+  border-radius: 8px;
+}
+
+.react-photo-album.react-photo-album--columns {
+  height: 80vh;
+}
+
+.react-photo-album--photo {
+  border-radius: 8px;
+  border: 1px solid transparent;
+
+  // transform-origin: 0 0;
+  transition: transform 0.25s, visibility 0.25s ease-in;
+
+  &:hover {
+    border: 1px solid var(--border-color);
+    transform: scale(1.01);
+  }
+}

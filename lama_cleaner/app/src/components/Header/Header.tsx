@@ -1,4 +1,4 @@
-import { ArrowUpTrayIcon } from '@heroicons/react/24/outline'
+import { FolderIcon, PhotoIcon } from '@heroicons/react/24/outline'
 import { PlayIcon } from '@radix-ui/react-icons'
 import React, { useState } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
@@ -9,6 +9,7 @@ import {
   isSDState,
   maskState,
   runManuallyState,
+  showFileManagerState,
 } from '../../store/Atoms'
 import Button from '../shared/Button'
 import Shortcuts from '../Shortcuts/Shortcuts'
@@ -18,6 +19,7 @@ import PromptInput from './PromptInput'
 import CoffeeIcon from '../CoffeeIcon/CoffeeIcon'
 import emitter, { EVENT_CUSTOM_MASK } from '../../event'
 import { useImage } from '../../utils'
+import useHotKey from '../../hooks/useHotkey'
 
 const Header = () => {
   const isInpainting = useRecoilValue(isInpaintingState)
@@ -29,6 +31,17 @@ const Header = () => {
   const isSD = useRecoilValue(isSDState)
   const runManually = useRecoilValue(runManuallyState)
   const [openMaskPopover, setOpenMaskPopover] = useState(false)
+  const [showFileManager, setShowFileManager] =
+    useRecoilState(showFileManagerState)
+
+  useHotKey(
+    'f',
+    () => {
+      setShowFileManager(!showFileManager)
+    },
+    {},
+    [showFileManager]
+  )
 
   const renderHeader = () => {
     return (
@@ -41,10 +54,20 @@ const Header = () => {
             gap: 8,
           }}
         >
+          <Button
+            icon={<FolderIcon />}
+            style={{ border: 0 }}
+            toolTip="Open File Manager"
+            tooltipPosition="bottom"
+            onClick={() => {
+              setShowFileManager(true)
+            }}
+          />
+
           <label htmlFor={uploadElemId}>
             <Button
-              icon={<ArrowUpTrayIcon />}
-              style={{ border: 0 }}
+              icon={<PhotoIcon />}
+              style={{ border: 0, gap: 0 }}
               disabled={isInpainting}
               toolTip="Upload image"
               tooltipPosition="bottom"
@@ -62,7 +85,6 @@ const Header = () => {
                 }}
                 accept="image/png, image/jpeg"
               />
-              Image
             </Button>
           </label>
 

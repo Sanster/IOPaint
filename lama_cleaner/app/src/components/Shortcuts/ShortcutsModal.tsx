@@ -67,6 +67,7 @@ export default function ShortcutsModal() {
         <ShortCut content="Toggle Dark Mode" keys={['Shift', 'D']} />
         <ShortCut content="Toggle Hotkeys Dialog" keys={['H']} />
         <ShortCut content="Toggle Settings Dialog" keys={['S']} />
+        <ShortCut content="Toggle File Manager" keys={['F']} />
       </div>
     </Modal>
   )

@@ -164,3 +164,16 @@ export async function postInteractiveSeg(
     throw new Error(`Something went wrong: ${error}`)
   }
 }
+
+export async function getMediaFile(filename: string) {
+  const res = await fetch(`${API_ENDPOINT}/media/${filename}`, {
+    method: 'GET',
+  })
+  if (res.ok) {
+    const blob = await res.blob()
+    const file = new File([blob], filename)
+    return file
+  }
+  const errMsg = await res.text()
+  throw new Error(errMsg)
+}

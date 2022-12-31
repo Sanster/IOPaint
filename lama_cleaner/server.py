@@ -20,6 +20,7 @@ from loguru import logger
 from lama_cleaner.interactive_seg import InteractiveSeg, Click
 from lama_cleaner.model_manager import ModelManager
 from lama_cleaner.schema import Config
+from lama_cleaner.file_manager import FileManager
 
 try:
     torch._C._jit_override_can_fuse_on_cpu(False)
@@ -29,7 +30,8 @@ try:
 except:
     pass
 
-from flask import Flask, request, send_file, cli, make_response
+from flask import Flask, request, send_file, cli, make_response, send_from_directory, jsonify
+from flask_caching import Cache
 
 # Disable ability for Flask to display warning about using a development server in a production environment.
 # https://gist.github.com/jerblack/735b9953ba1ab6234abb43174210d356
@@ -65,15 +67,15 @@ class NoFlaskwebgui(logging.Filter):
 
 logging.getLogger("werkzeug").addFilter(NoFlaskwebgui())
 
+cache = Cache(config={'CACHE_TYPE': 'SimpleCache'}, with_jinja2_ext=False)
+
 app = Flask(__name__, static_folder=os.path.join(BUILD_DIR, "static"))
 app.config["JSON_AS_ASCII"] = False
 CORS(app, expose_headers=["Content-Disposition"])
-# MAX_BUFFER_SIZE = 50 * 1000 * 1000  # 50 MB
-# async_mode 优先级: eventlet/gevent_uwsgi/gevent/threading
-# only threading works on macOS
-# socketio = SocketIO(app, max_http_buffer_size=MAX_BUFFER_SIZE, async_mode='threading')
+cache.init_app(app)
 
 model: ModelManager = None
+thumb = FileManager(app)
 interactive_seg_model: InteractiveSeg = None
 device = None
 input_image_path: str = None
@@ -91,6 +93,38 @@ def get_image_ext(img_bytes):
 def diffuser_callback(i, t, latents):
     pass
     # socketio.emit('diffusion_step', {'diffusion_step': step})
+
+
+@app.route("/medias")
+def medias():
+    # all images in input folder
+    return jsonify(thumb.media_names), 200
+
+
+@app.route('/media/<filename>')
+def media_file(filename):
+    return send_from_directory(app.config['THUMBNAIL_MEDIA_ROOT'], filename)
+
+
+@app.route('/media_thumbnail/<filename>')
+def media_thumbnail_file(filename):
+    args = request.args
+    width = args.get('width')
+    height = args.get('height')
+    if width is None and height is None:
+        width = 256
+    if width:
+        width = int(float(width))
+    if height:
+        height = int(float(height))
+
+    thumb_filename, (width, height) = thumb.get_thumbnail(filename, width, height)
+    thumb_filepath = f"{app.config['THUMBNAIL_MEDIA_THUMBNAIL_ROOT']}{thumb_filename}"
+
+    response = make_response(send_file(thumb_filepath))
+    response.headers["X-Width"] = str(width)
+    response.headers["X-Height"] = str(height)
+    return response
 
 
 @app.route("/inpaint", methods=["POST"])
@@ -294,11 +328,16 @@ def main(args):
     global is_desktop
 
     device = torch.device(args.device)
-    input_image_path = args.input
     is_disable_model_switch = args.disable_model_switch
     is_desktop = args.gui
     if is_disable_model_switch:
         logger.info(f"Start with --disable-model-switch, model switch on frontend is disable")
+
+    if os.path.isdir(args.input):
+        app.config["THUMBNAIL_MEDIA_ROOT"] = args.input
+        app.config["THUMBNAIL_MEDIA_THUMBNAIL_ROOT"] = os.path.join(args.output_dir, 'thumbnails')
+    else:
+        input_image_path = args.input
 
     model = ModelManager(
         name=args.model,

@@ -41,6 +41,7 @@ interface AppState {
   isInteractiveSeg: boolean
   isInteractiveSegRunning: boolean
   interactiveSegClicks: number[][]
+  showFileManager: boolean
 }
 
 export const appState = atom<AppState>({
@@ -53,6 +54,7 @@ export const appState = atom<AppState>({
     isInteractiveSeg: false,
     isInteractiveSegRunning: false,
     interactiveSegClicks: [],
+    showFileManager: false,
   },
 })
 
@@ -75,6 +77,18 @@ export const isInpaintingState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, isInpainting: newValue })
+  },
+})
+
+export const showFileManagerState = selector({
+  key: 'showFileManager',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.showFileManager
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, showFileManager: newValue })
   },
 })
 

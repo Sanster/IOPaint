@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import Editor from './Editor/Editor'
 import ShortcutsModal from './Shortcuts/ShortcutsModal'
@@ -10,15 +10,18 @@ import {
   isPaintByExampleState,
   isSDState,
   settingState,
+  showFileManagerState,
   toastState,
 } from '../store/Atoms'
 import {
   currentModel,
+  getMediaFile,
   modelDownloaded,
   switchModel,
 } from '../adapters/inpainting'
 import SidePanel from './SidePanel/SidePanel'
 import PESidePanel from './SidePanel/PESidePanel'
+import FileManager from './FileManager/FileManager'
 
 const Workspace = () => {
   const [file, setFile] = useRecoilState(fileState)
@@ -26,6 +29,9 @@ const Workspace = () => {
   const [toastVal, setToastState] = useRecoilState(toastState)
   const isSD = useRecoilValue(isSDState)
   const isPaintByExample = useRecoilValue(isPaintByExampleState)
+
+  const [showFileManager, setShowFileManager] =
+    useRecoilState(showFileManagerState)
 
   const onSettingClose = async () => {
     const curModel = await currentModel().then(res => res.text())
@@ -92,6 +98,17 @@ const Workspace = () => {
     <>
       {isSD ? <SidePanel /> : <></>}
       {isPaintByExample ? <PESidePanel /> : <></>}
+      <FileManager
+        show={showFileManager}
+        onClose={() => {
+          setShowFileManager(false)
+        }}
+        onPhotoClick={async (filename: string) => {
+          const newFile = await getMediaFile(filename)
+          setFile(newFile)
+          setShowFileManager(false)
+        }}
+      />
       <Editor />
       <SettingModal onClose={onSettingClose} />
       <ShortcutsModal />
