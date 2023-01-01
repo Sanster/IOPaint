@@ -5,11 +5,20 @@ import useInputImage from './hooks/useInputImage'
 import LandingPage from './components/LandingPage/LandingPage'
 import { themeState } from './components/Header/ThemeChanger'
 import Workspace from './components/Workspace'
-import { fileState, isDisableModelSwitchState, toastState } from './store/Atoms'
+import {
+  enableFileManagerState,
+  fileState,
+  isDisableModelSwitchState,
+  toastState,
+} from './store/Atoms'
 import { keepGUIAlive } from './utils'
 import Header from './components/Header/Header'
 import useHotKey from './hooks/useHotkey'
-import { getIsDisableModelSwitch, isDesktop } from './adapters/inpainting'
+import {
+  getEnableFileManager,
+  getIsDisableModelSwitch,
+  isDesktop,
+} from './adapters/inpainting'
 
 const SUPPORTED_FILE_TYPE = [
   'image/jpeg',
@@ -26,6 +35,9 @@ function App() {
   const userInputImage = useInputImage()
   const [isDisableModelSwitch, setIsDisableModelSwitch] = useRecoilState(
     isDisableModelSwitchState
+  )
+  const [enableFileManager, setEnableFileManager] = useRecoilState(
+    enableFileManagerState
   )
 
   // Set Input Image
@@ -53,6 +65,12 @@ function App() {
     }
 
     fetchData()
+
+    const fetchData2 = async () => {
+      const isEnabled = await getEnableFileManager().then(res => res.text())
+      setEnableFileManager(isEnabled === 'true')
+    }
+    fetchData2()
   }, [])
 
   // Dark Mode Hotkey

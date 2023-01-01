@@ -4,12 +4,13 @@ import React, {
   useMemo,
   useState,
   useCallback,
-  useRef,
 } from 'react'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import PhotoAlbum, { RenderPhoto } from 'react-photo-album'
 import * as ScrollArea from '@radix-ui/react-scroll-area'
 import Modal from '../shared/Modal'
-import Button from '../shared/Button'
+import { toastState } from '../../store/Atoms'
+import { getMedias } from '../../adapters/inpainting'
 
 interface Photo {
   src: string
@@ -54,6 +55,7 @@ export default function FileManager(props: Props) {
   const [filenames, setFileNames] = useState<Filename[]>([])
   const [scrollTop, setScrollTop] = useState(0)
   const [closeScrollTop, setCloseScrollTop] = useState(0)
+  const [toastVal, setToastState] = useRecoilState(toastState)
 
   useEffect(() => {
     if (!show) {
@@ -81,15 +83,22 @@ export default function FileManager(props: Props) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch('/medias')
-      if (res.ok) {
-        const newFilenames = await res.json()
+      try {
+        const newFilenames = await getMedias()
         setFileNames(newFilenames)
+      } catch (e: any) {
+        setToastState({
+          open: true,
+          desc: e.message ? e.message : e.toString(),
+          state: 'error',
+          duration: 2000,
+        })
       }
     }
-
-    fetchData()
-  }, [])
+    if (show) {
+      fetchData()
+    }
+  }, [show])
 
   const onScroll = (event: SyntheticEvent) => {
     setScrollTop(event.currentTarget.scrollTop)

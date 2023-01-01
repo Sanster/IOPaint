@@ -42,6 +42,7 @@ interface AppState {
   isInteractiveSegRunning: boolean
   interactiveSegClicks: number[][]
   showFileManager: boolean
+  enableFileManager: boolean
 }
 
 export const appState = atom<AppState>({
@@ -55,6 +56,7 @@ export const appState = atom<AppState>({
     isInteractiveSegRunning: false,
     interactiveSegClicks: [],
     showFileManager: false,
+    enableFileManager: false,
   },
 })
 
@@ -95,12 +97,12 @@ export const showFileManagerState = selector({
 export const enableFileManagerState = selector({
   key: 'enableFileManagerState',
   get: ({ get }) => {
-    const app = get(settingState)
+    const app = get(appState)
     return app.enableFileManager
   },
   set: ({ get, set }, newValue: any) => {
-    const app = get(settingState)
-    set(settingState, { ...app, enableFileManager: newValue })
+    const app = get(appState)
+    set(appState, { ...app, enableFileManager: newValue })
   },
 })
 
@@ -257,9 +259,6 @@ export interface Settings {
   show: boolean
   showCroper: boolean
   downloadMask: boolean
-  enableFileManager: boolean
-  imageDirectory: string
-  outputDirectory: string
   graduallyInpainting: boolean
   runInpaintingManually: boolean
   model: AIModel
@@ -388,9 +387,6 @@ export enum SDMode {
 export const settingStateDefault: Settings = {
   show: false,
   showCroper: false,
-  enableFileManager: false,
-  imageDirectory: '',
-  outputDirectory: '',
   downloadMask: false,
   graduallyInpainting: true,
   runInpaintingManually: false,

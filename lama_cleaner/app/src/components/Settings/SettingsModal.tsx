@@ -62,92 +62,10 @@ export default function SettingModal(props: SettingModalProps) {
       className="modal-setting"
       show={setting.show}
     >
-      <Tabs.Root
-        className="TabsRoot"
-        defaultValue="tab1"
-        orientation="vertical"
-      >
-        <Tabs.List className="TabsList">
-          <Tabs.Trigger className="TabsTrigger" value="tab1">
-            Model
-          </Tabs.Trigger>
-          <Tabs.Trigger className="TabsTrigger" value="tab2">
-            File
-          </Tabs.Trigger>
-        </Tabs.List>
-        <Tabs.Content className="TabsContent" value="tab1">
-          {isSD || isPaintByExample ? (
-            <></>
-          ) : (
-            <ManualRunInpaintingSettingBlock />
-          )}
-          <ModelSettingBlock />
-          {isSD ? <></> : <HDSettingBlock />}
-        </Tabs.Content>
-        <Tabs.Content className="TabsContent" value="tab2">
-          <DownloadMaskSettingBlock />
-          <SettingBlock
-            title="File Manager"
-            desc="Toggle File Manager"
-            input={
-              <Switch
-                checked={setting.enableFileManager}
-                onCheckedChange={checked => {
-                  setSettingState(old => {
-                    return { ...old, enableFileManager: checked }
-                  })
-                }}
-              >
-                <SwitchThumb />
-              </Switch>
-            }
-            optionDesc={
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 16,
-                }}
-              >
-                <div className="folder-path-block">
-                  <span>Image directory</span>
-                  <TextInput
-                    disabled={!setting.enableFileManager}
-                    value={setting.imageDirectory}
-                    placeholder="Image directory"
-                    className="folder-path"
-                    onInput={(evt: FormEvent<HTMLInputElement>) => {
-                      evt.preventDefault()
-                      evt.stopPropagation()
-                      const target = evt.target as HTMLInputElement
-                      setSettingState(old => {
-                        return { ...old, imageDirectory: target.value }
-                      })
-                    }}
-                  />
-                </div>
-                <div className="folder-path-block">
-                  <span>Output directory</span>
-                  <TextInput
-                    disabled={!setting.enableFileManager}
-                    value={setting.outputDirectory}
-                    placeholder="Output directory"
-                    className="folder-path"
-                    onInput={(evt: FormEvent<HTMLInputElement>) => {
-                      evt.preventDefault()
-                      evt.stopPropagation()
-                      const target = evt.target as HTMLInputElement
-                      setSettingState(old => {
-                        return { ...old, outputDirectory: target.value }
-                      })
-                    }}
-                  />
-                </div>
-              </div>
-            }
-          />
-        </Tabs.Content>
-      </Tabs.Root>
+      <DownloadMaskSettingBlock />
+      {isSD || isPaintByExample ? <></> : <ManualRunInpaintingSettingBlock />}
+      <ModelSettingBlock />
+      {isSD ? <></> : <HDSettingBlock />}
     </Modal>
   )
 }

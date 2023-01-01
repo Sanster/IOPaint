@@ -110,6 +110,12 @@ export function getIsDisableModelSwitch() {
   })
 }
 
+export function getEnableFileManager() {
+  return fetch(`${API_ENDPOINT}/is_enable_file_manager`, {
+    method: 'GET',
+  })
+}
+
 export function switchModel(name: string) {
   const fd = new FormData()
   fd.append('name', name)
@@ -166,13 +172,28 @@ export async function postInteractiveSeg(
 }
 
 export async function getMediaFile(filename: string) {
-  const res = await fetch(`${API_ENDPOINT}/media/${filename}`, {
-    method: 'GET',
-  })
+  const res = await fetch(
+    `${API_ENDPOINT}/media/${encodeURIComponent(filename)}`,
+    {
+      method: 'GET',
+    }
+  )
   if (res.ok) {
     const blob = await res.blob()
     const file = new File([blob], filename)
     return file
+  }
+  const errMsg = await res.text()
+  throw new Error(errMsg)
+}
+
+export async function getMedias() {
+  const res = await fetch(`${API_ENDPOINT}/medias`, {
+    method: 'GET',
+  })
+  if (res.ok) {
+    const filenames = await res.json()
+    return filenames
   }
   const errMsg = await res.text()
   throw new Error(errMsg)

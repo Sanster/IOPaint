@@ -80,6 +80,7 @@ interactive_seg_model: InteractiveSeg = None
 device = None
 input_image_path: str = None
 is_disable_model_switch: bool = False
+is_enable_file_manager: bool = False
 is_desktop: bool = False
 
 
@@ -273,6 +274,12 @@ def get_is_disable_model_switch():
     return res, 200
 
 
+@app.route("/is_enable_file_manager")
+def get_is_enable_file_manager():
+    res = 'true' if is_enable_file_manager else 'false'
+    return res, 200
+
+
 @app.route("/model_downloaded/<name>")
 def model_downloaded(name):
     return str(model.is_downloaded(name)), 200
@@ -325,6 +332,7 @@ def main(args):
     global device
     global input_image_path
     global is_disable_model_switch
+    global is_enable_file_manager
     global is_desktop
 
     device = torch.device(args.device)
@@ -336,6 +344,7 @@ def main(args):
     if os.path.isdir(args.input):
         app.config["THUMBNAIL_MEDIA_ROOT"] = args.input
         app.config["THUMBNAIL_MEDIA_THUMBNAIL_ROOT"] = os.path.join(args.output_dir, 'thumbnails')
+        is_enable_file_manager = True
     else:
         input_image_path = args.input
 
