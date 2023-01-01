@@ -8,7 +8,7 @@
   --yellow-accent: #ffcc00;
   --yellow-accent-light: #ffcc0055;
   --link-color: rgb(0, 0, 0);
-  --border-color: rgb(100, 100, 120);
+  --border-color: rgb(239, 241, 244);
   --border-color-light: rgba(100, 100, 120, 0.5);
   --tooltip-bg: rgb(230, 230, 234);
   --tooltip-text-color: rgb(0, 0, 0);
@@ -60,4 +60,7 @@
     0px 2px 1px -1px hsl(205 10.7% 78%), 0 1px hsl(205 10.7% 78%);
 
   --croper-bg: rgba(0, 0, 0, 0.5);
+
+  // Tabs
+  --tabs-active-color: rgb(240 243 249);
 }

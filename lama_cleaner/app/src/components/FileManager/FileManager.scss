@@ -1,12 +1,11 @@
+@import '@radix-ui/colors/blackA.css';
+@import '@radix-ui/colors/mauve.css';
+@import '@radix-ui/colors/violet.css';
+
 .file-manager-modal {
   color: var(--text-color);
   height: 90%;
   width: 80%;
-}
-
-.file-manager {
-  overflow: auto;
-  border-radius: 8px;
 }
 
 .react-photo-album.react-photo-album--columns {
@@ -22,6 +21,64 @@
 
   &:hover {
     border: 1px solid var(--border-color);
-    transform: scale(1.01);
+    transform: scale(1.03);
   }
+}
+
+.ScrollAreaRoot {
+  border-radius: 4px;
+  overflow: hidden;
+  // box-shadow: 0 2px 10px var(--blackA7);
+  --scrollbar-size: 10px;
+}
+
+.ScrollAreaViewport {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.ScrollAreaScrollbar {
+  display: flex;
+  /* ensures no selection */
+  user-select: none;
+  /* disable browser handling of all panning and zooming gestures on touch devices */
+  touch-action: none;
+  padding: 2px;
+  // background: var(--blackA6);
+  transition: background 160ms ease-out;
+}
+
+.ScrollAreaScrollbar:hover {
+  background: var(--blackA8);
+}
+.ScrollAreaScrollbar[data-orientation='vertical'] {
+  width: var(--scrollbar-size);
+}
+.ScrollAreaScrollbar[data-orientation='horizontal'] {
+  flex-direction: column;
+  height: var(--scrollbar-size);
+}
+
+.ScrollAreaThumb {
+  flex: 1;
+  background: var(--mauve10);
+  border-radius: var(--scrollbar-size);
+  position: relative;
+}
+/* increase target size for touch devices https://www.w3.org/WAI/WCAG21/Understanding/target-size.html */
+.ScrollAreaThumb::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.ScrollAreaCorner {
+  background: var(--blackA8);
 }

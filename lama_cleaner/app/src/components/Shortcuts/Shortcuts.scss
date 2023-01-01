@@ -58,6 +58,7 @@
   .shortcut-description {
     justify-self: start;
     text-align: left;
+    font-size: 0.95rem;
 
     @include mobile {
       text-align: left;

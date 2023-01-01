@@ -120,7 +120,7 @@ function HDSettingBlock() {
   return (
     <SettingBlock
       className="hd-setting-block"
-      title="High Resolution Strategy"
+      title="Strategy"
       input={
         <Selector
           width={80}

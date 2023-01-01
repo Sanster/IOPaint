@@ -4,11 +4,11 @@
 @import './ModelSettingBlock.scss';
 
 .modal-setting {
-  grid-area: main-content;
   background-color: var(--modal-bg);
   color: var(--modal-text-color);
   box-shadow: 0px 0px 20px rgb(0, 0, 40, 0.2);
-  width: 600px;
+  width: 680px;
+  min-height: 420px;
 
   @include mobile {
     display: grid;
@@ -16,5 +16,94 @@
     height: auto;
     margin-top: -11rem;
     animation: slideDown 0.2s ease-out;
+  }
+
+  .modal-header {
+    padding-left: 8px;
+  }
+}
+
+/* reset */
+button,
+fieldset,
+input {
+  all: unset;
+}
+
+.TabsRoot {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  width: 100%;
+  background-color: var(--page-bg);
+  flex-grow: 1;
+}
+
+.TabsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: flex-start;
+  border-right: 1px solid var(--border-color);
+  background-color: var(--page-bg);
+  padding-right: 20px;
+}
+
+.TabsTrigger {
+  font-family: inherit;
+  background-color: white;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-right: 40px;
+  padding-left: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--modal-text-color);
+  user-select: none;
+  background-color: var(--page-bg);
+  border-radius: 8px;
+}
+.TabsTrigger:hover {
+  background-color: var(--tabs-active-color);
+}
+.TabsTrigger[data-state='active'] {
+  background-color: var(--tabs-active-color);
+}
+.TabsTrigger:focus {
+  position: relative;
+}
+
+.TabsContent {
+  background-color: white;
+  outline: none;
+  background-color: var(--page-bg);
+  width: 100%;
+}
+
+.TabsContent[data-state='active'] {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.folder-path-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.folder-path {
+  width: 95%;
+  border-width: 0;
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  outline: 1px solid var(--border-color);
+
+  &:focus-visible {
+    border-width: 0;
+    outline: 1px solid var(--yellow-accent);
   }
 }

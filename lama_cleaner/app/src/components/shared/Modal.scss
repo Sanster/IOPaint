@@ -28,9 +28,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  display: grid;
-  grid-auto-rows: max-content;
-  row-gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   place-self: center;
   padding: 25px;
   border-radius: 0.95rem;

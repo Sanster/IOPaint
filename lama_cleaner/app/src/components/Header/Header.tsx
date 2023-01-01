@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 import {
+  enableFileManagerState,
   fileState,
   isInpaintingState,
   isSDState,
@@ -33,14 +34,17 @@ const Header = () => {
   const [openMaskPopover, setOpenMaskPopover] = useState(false)
   const [showFileManager, setShowFileManager] =
     useRecoilState(showFileManagerState)
+  const enableFileManager = useRecoilValue(enableFileManagerState)
 
   useHotKey(
     'f',
     () => {
-      setShowFileManager(!showFileManager)
+      if (enableFileManager) {
+        setShowFileManager(!showFileManager)
+      }
     },
     {},
-    [showFileManager]
+    [showFileManager, enableFileManager]
   )
 
   const renderHeader = () => {
@@ -54,15 +58,19 @@ const Header = () => {
             gap: 8,
           }}
         >
-          <Button
-            icon={<FolderIcon />}
-            style={{ border: 0 }}
-            toolTip="Open File Manager"
-            tooltipPosition="bottom"
-            onClick={() => {
-              setShowFileManager(true)
-            }}
-          />
+          {enableFileManager ? (
+            <Button
+              icon={<FolderIcon />}
+              style={{ border: 0 }}
+              toolTip="Open File Manager"
+              tooltipPosition="bottom"
+              onClick={() => {
+                setShowFileManager(true)
+              }}
+            />
+          ) : (
+            <></>
+          )}
 
           <label htmlFor={uploadElemId}>
             <Button

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import Editor from './Editor/Editor'
 import ShortcutsModal from './Shortcuts/ShortcutsModal'
@@ -99,6 +99,7 @@ const Workspace = () => {
       {isSD ? <SidePanel /> : <></>}
       {isPaintByExample ? <PESidePanel /> : <></>}
       <FileManager
+        photoWidth={256}
         show={showFileManager}
         onClose={() => {
           setShowFileManager(false)
