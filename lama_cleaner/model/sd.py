@@ -30,6 +30,7 @@ class SD(InpaintModel):
 
     def init_model(self, device: torch.device, **kwargs):
         from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
+        fp16 = not kwargs['no_half']
 
         model_kwargs = {"local_files_only": kwargs['sd_run_local']}
         if kwargs['sd_disable_nsfw']:
@@ -42,7 +43,7 @@ class SD(InpaintModel):
         torch_dtype = torch.float16 if use_gpu else torch.float32
         self.model = StableDiffusionInpaintPipeline.from_pretrained(
             self.model_id_or_path,
-            revision="fp16" if use_gpu else "main",
+            revision="fp16" if use_gpu and fp16 else "main",
             torch_dtype=torch_dtype,
             use_auth_token=kwargs["hf_access_token"],
             **model_kwargs

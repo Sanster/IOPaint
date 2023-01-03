@@ -74,7 +74,6 @@ const Toast = React.forwardRef<
 })
 
 Toast.defaultProps = {
-  desc: '',
   state: 'loading',
 }
 

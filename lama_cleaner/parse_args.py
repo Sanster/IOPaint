@@ -12,6 +12,7 @@ def parse_args():
         default="lama",
         choices=["lama", "ldm", "zits", "mat", "fcf", "sd1.5", "cv2", "manga", "sd2", "paint_by_example"],
     )
+    parser.add_argument("--no-half", action="store_true", help="SD/PaintByExample model no half precision")
     parser.add_argument(
         "--hf_access_token",
         default="",
