@@ -33,14 +33,14 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
 - [Windows 1-Click Installer](./scripts/README.md)
 - Classical image inpainting algorithm powered by [cv2](https://docs.opencv.org/3.4/df/d3d/tutorial_py_inpainting.html)
 - Multiple SOTA AI models
-    1. [LaMa](https://github.com/saic-mdal/lama)
-    2. [LDM](https://github.com/CompVis/latent-diffusion)
-    3. [ZITS](https://github.com/DQiaole/ZITS_inpainting)
-    4. [MAT](https://github.com/fenglinglwb/MAT)
-    5. [FcF](https://github.com/SHI-Labs/FcF-Inpainting)
-    6. [SD1.5/SD2](https://github.com/runwayml/stable-diffusion)
-    7. [Manga](https://github.com/msxie92/MangaInpainting)
-    8. [Paint by Example](https://github.com/Fantasy-Studio/Paint-by-Example)
+  1. [LaMa](https://github.com/saic-mdal/lama)
+  2. [LDM](https://github.com/CompVis/latent-diffusion)
+  3. [ZITS](https://github.com/DQiaole/ZITS_inpainting)
+  4. [MAT](https://github.com/fenglinglwb/MAT)
+  5. [FcF](https://github.com/SHI-Labs/FcF-Inpainting)
+  6. [SD1.5/SD2](https://github.com/runwayml/stable-diffusion)
+  7. [Manga](https://github.com/msxie92/MangaInpainting)
+  8. [Paint by Example](https://github.com/Fantasy-Studio/Paint-by-Example)
 - Support CPU & GPU
 - Various inpainting [strategy](#inpainting-strategy)
 - Run as a desktop APP
@@ -54,7 +54,7 @@ A great introductory [youtube video](https://www.youtube.com/watch?v=aYia7Jvbjno
 <summary>1. Remove any unwanted things on the image</summary>
 
 | Usage                         | Before                                        | After                                               |
-|-------------------------------|-----------------------------------------------|-----------------------------------------------------|
+| ----------------------------- | --------------------------------------------- | --------------------------------------------------- |
 | Remove unwanted things        | ![unwant_object2](./assets/unwant_object.jpg) | ![unwant_object2](./assets/unwant_object_clean.jpg) |
 | Remove unwanted person        | ![unwant_person](./assets/unwant_person.jpg)  | ![unwant_person](./assets/unwant_person_clean.jpg)  |
 | Remove text                   | ![text](./assets/unwant_text.jpg)             | ![text](./assets/unwant_text_clean.jpg)             |
@@ -81,12 +81,11 @@ SD1.5/SD2
 | ---------------------- | ------------------------ | -------------------------------------------------------------- |
 | Text Driven Inpainting | ![dog](./assets/dog.jpg) | Prompt: a fox sitting on a bench<br/> ![fox](./assets/fox.jpg) |
 
-
 Paint by Example
 
-| Original Image | Example Image | Result Image |
-|----|------|-------|
-|<img src="https://user-images.githubusercontent.com/3998421/206908542-c6465ca3-6414-4593-8318-0c8b569e7682.jpg">|[<img src="https://user-images.githubusercontent.com/3998421/206908517-bd7f62d2-464a-43bc-892e-dbea45f7b104.jpeg">](https://youtu.be/NSAN3TzfhaI)|[<img src="https://user-images.githubusercontent.com/3998421/206903752-0463a0cf-146d-4125-a969-8fe20127a09b.jpeg">](https://youtu.be/NSAN3TzfhaI)|
+| Original Image                                                                                                   | Example Image                                                                                                                                     | Result Image                                                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="https://user-images.githubusercontent.com/3998421/206908542-c6465ca3-6414-4593-8318-0c8b569e7682.jpg"> | [<img src="https://user-images.githubusercontent.com/3998421/206908517-bd7f62d2-464a-43bc-892e-dbea45f7b104.jpeg">](https://youtu.be/NSAN3TzfhaI) | [<img src="https://user-images.githubusercontent.com/3998421/206903752-0463a0cf-146d-4125-a969-8fe20127a09b.jpeg">](https://youtu.be/NSAN3TzfhaI) |
 
 </details>
 
@@ -113,14 +112,15 @@ If you hava no idea what is docker or pip, please check [One Click Installer](./
 Available command line arguments:
 
 | Name                 | Description                                                                                                         | Default  |
-| -------------------- |---------------------------------------------------------------------------------------------------------------------| -------- |
-| --model              | lama/ldm/zits/mat/fcf/sd1.5/manga/sd2/paint_by_example See details in [Inpaint Model](#inpainting-model)                                 | lama     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------- | -------- |
+| --model              | lama/ldm/zits/mat/fcf/sd1.5/manga/sd2/paint_by_example See details in [Inpaint Model](#inpainting-model)            | lama     |
 | --hf_access_token    | stable-diffusion need [huggingface access token](https://huggingface.co/docs/hub/security-tokens) to download model |          |
 | --sd-run-local       | Once the model as downloaded, you can pass this arg and remove `--hf_access_token`                                  |          |
 | --sd-disable-nsfw    | Disable stable-diffusion NSFW checker.                                                                              |          |
 | --sd-cpu-textencoder | Always run stable-diffusion TextEncoder model on CPU.                                                               |          |
 | --sd-enable-xformers | Enable xFormers optimizations. See: [facebookresearch/xformers](https://github.com/facebookresearch/xformers)       |          |
-| --device             | cuda / cpu / mps                                                                                                         | cuda     |
+| --no-half            | Using full precision for sd/paint_by_exmaple model                                                                  |          |
+| --device             | cuda / cpu / mps                                                                                                    | cuda     |
 | --port               | Port for backend flask web server                                                                                   | 8080     |
 | --gui                | Launch lama-cleaner as a desktop application                                                                        |          |
 | --gui_size           | Set the window size for the application                                                                             | 1200 900 |
@@ -171,10 +171,10 @@ Manga model works better on high-quality manga image then LaMa model.
 Original Image
 ![manga](./assets/manga.png)
 
-| Model |  1080x740  |  1470x1010 |
-|--------|------------|------------|
-|Manga|![manga_1080x740](https://user-images.githubusercontent.com/3998421/202676629-54f40f20-c55b-4e6d-bcc7-0a4e81fbb27d.png)|![manga_1470x1010](https://user-images.githubusercontent.com/3998421/202675839-4f8012d5-1c10-47ea-9628-20512e86f192.png)|
-|[LaMa](https://github.com/saic-mdal/lama)|![lama_1080x740](https://user-images.githubusercontent.com/3998421/202675704-53fa7a3d-ec74-4044-a19c-c673d74bdd28.png)|![lama_1470x1010](https://user-images.githubusercontent.com/3998421/202675746-1e642367-f5d0-4b48-aa8b-5d82f2e29082.png)|
+| Model                                     | 1080x740                                                                                                                | 1470x1010                                                                                                                |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Manga                                     | ![manga_1080x740](https://user-images.githubusercontent.com/3998421/202676629-54f40f20-c55b-4e6d-bcc7-0a4e81fbb27d.png) | ![manga_1470x1010](https://user-images.githubusercontent.com/3998421/202675839-4f8012d5-1c10-47ea-9628-20512e86f192.png) |
+| [LaMa](https://github.com/saic-mdal/lama) | ![lama_1080x740](https://user-images.githubusercontent.com/3998421/202675704-53fa7a3d-ec74-4044-a19c-c673d74bdd28.png)  | ![lama_1470x1010](https://user-images.githubusercontent.com/3998421/202675746-1e642367-f5d0-4b48-aa8b-5d82f2e29082.png)  |
 
 </details>
 
@@ -195,14 +195,14 @@ you can download it manually. By default lama-cleaner will load model from `TORC
 you can set `TORCH_HOME` to other folder and put the models there.
 
 - GitHub:
-    - [LaMa](https://github.com/Sanster/models/releases/tag/add_big_lama)
-    - [LDM](https://github.com/Sanster/models/releases/tag/add_ldm)
-    - [ZITS](https://github.com/Sanster/models/releases/tag/add_zits)
-    - [MAT](https://github.com/Sanster/models/releases/tag/add_mat)
-    - [FcF](https://github.com/Sanster/models/releases/tag/add_fcf)
+  - [LaMa](https://github.com/Sanster/models/releases/tag/add_big_lama)
+  - [LDM](https://github.com/Sanster/models/releases/tag/add_ldm)
+  - [ZITS](https://github.com/Sanster/models/releases/tag/add_zits)
+  - [MAT](https://github.com/Sanster/models/releases/tag/add_mat)
+  - [FcF](https://github.com/Sanster/models/releases/tag/add_fcf)
 - Baidu:
-    - https://pan.baidu.com/s/1vUd3BVqIpK6e8N_EA_ZJfw
-    - passward: flsu
+  - https://pan.baidu.com/s/1vUd3BVqIpK6e8N_EA_ZJfw
+  - passward: flsu
 
 ## Development
 
