@@ -40,7 +40,7 @@ class SD(InpaintModel):
             ))
 
         use_gpu = device == torch.device('cuda') and torch.cuda.is_available()
-        torch_dtype = torch.float16 if use_gpu else torch.float32
+        torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
         self.model = StableDiffusionInpaintPipeline.from_pretrained(
             self.model_id_or_path,
             revision="fp16" if use_gpu and fp16 else "main",
