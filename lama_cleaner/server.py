@@ -31,7 +31,6 @@ except:
     pass
 
 from flask import Flask, request, send_file, cli, make_response, send_from_directory, jsonify
-from flask_caching import Cache
 
 # Disable ability for Flask to display warning about using a development server in a production environment.
 # https://gist.github.com/jerblack/735b9953ba1ab6234abb43174210d356
@@ -67,12 +66,9 @@ class NoFlaskwebgui(logging.Filter):
 
 logging.getLogger("werkzeug").addFilter(NoFlaskwebgui())
 
-cache = Cache(config={'CACHE_TYPE': 'SimpleCache'}, with_jinja2_ext=False)
-
 app = Flask(__name__, static_folder=os.path.join(BUILD_DIR, "static"))
 app.config["JSON_AS_ASCII"] = False
 CORS(app, expose_headers=["Content-Disposition"])
-cache.init_app(app)
 
 model: ModelManager = None
 thumb = FileManager(app)
@@ -94,6 +90,16 @@ def get_image_ext(img_bytes):
 def diffuser_callback(i, t, latents):
     pass
     # socketio.emit('diffusion_step', {'diffusion_step': step})
+
+
+@app.route("/save_image", methods=["POST"])
+def save_image():
+    # all image in output directory
+    input = request.files
+    origin_image_bytes = input["image"].read()  # RGB
+    image, _ = load_img(origin_image_bytes)
+    thumb.save_to_output_directory(image, request.form["filename"])
+    return 'ok', 200
 
 
 @app.route("/medias")
@@ -172,6 +178,7 @@ def process():
         croper_y=form["croperY"],
         croper_height=form["croperHeight"],
         croper_width=form["croperWidth"],
+        sd_scale=form["sdScale"],
         sd_mask_blur=form["sdMaskBlur"],
         sd_strength=form["sdStrength"],
         sd_steps=form["sdSteps"],
@@ -345,6 +352,7 @@ def main(args):
         app.config["THUMBNAIL_MEDIA_ROOT"] = args.input
         app.config["THUMBNAIL_MEDIA_THUMBNAIL_ROOT"] = os.path.join(args.output_dir, 'thumbnails')
         is_enable_file_manager = True
+        thumb.output_dir = Path(args.output_dir)
     else:
         input_image_path = args.input
 
@@ -356,6 +364,8 @@ def main(args):
         sd_disable_nsfw=args.sd_disable_nsfw,
         sd_cpu_textencoder=args.sd_cpu_textencoder,
         sd_run_local=args.sd_run_local,
+        local_files_only=args.local_files_only,
+        cpu_offload=args.cpu_offload,
         sd_enable_xformers=args.sd_enable_xformers,
         callback=diffuser_callback,
     )

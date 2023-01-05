@@ -8,7 +8,9 @@ from diffusers import PNDMScheduler, DDIMScheduler, LMSDiscreteScheduler, EulerD
     EulerAncestralDiscreteScheduler, DPMSolverMultistepScheduler
 from loguru import logger
 
+from lama_cleaner.helper import resize_max_size
 from lama_cleaner.model.base import InpaintModel
+from lama_cleaner.model.utils import torch_gc
 from lama_cleaner.schema import Config, SDSampler
 
 
@@ -18,6 +20,8 @@ class CPUTextEncoderWrapper:
         self.text_encoder = text_encoder.to(torch.device('cpu'), non_blocking=True)
         self.text_encoder = self.text_encoder.to(torch.float32, non_blocking=True)
         self.torch_dtype = torch_dtype
+        del text_encoder
+        torch_gc()
 
     def __call__(self, x, **kwargs):
         input_device = x.device
@@ -30,9 +34,9 @@ class SD(InpaintModel):
 
     def init_model(self, device: torch.device, **kwargs):
         from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
-        fp16 = not kwargs['no_half']
+        fp16 = not kwargs.get('no_half', False)
 
-        model_kwargs = {"local_files_only": kwargs['sd_run_local']}
+        model_kwargs = {"local_files_only": kwargs.get('local_files_only', kwargs['sd_run_local'])}
         if kwargs['sd_disable_nsfw']:
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(dict(
@@ -48,18 +52,42 @@ class SD(InpaintModel):
             use_auth_token=kwargs["hf_access_token"],
             **model_kwargs
         )
+        self.model = self.model.to(device)
+
         # https://huggingface.co/docs/diffusers/v0.7.0/en/api/pipelines/stable_diffusion#diffusers.StableDiffusionInpaintPipeline.enable_attention_slicing
         self.model.enable_attention_slicing()
         # https://huggingface.co/docs/diffusers/v0.7.0/en/optimization/fp16#memory-efficient-attention
         if kwargs.get('sd_enable_xformers', False):
             self.model.enable_xformers_memory_efficient_attention()
-        self.model = self.model.to(device)
 
-        if kwargs['sd_cpu_textencoder']:
-            logger.info("Run Stable Diffusion TextEncoder on CPU")
-            self.model.text_encoder = CPUTextEncoderWrapper(self.model.text_encoder, torch_dtype)
+        if kwargs.get('cpu_offload', False) and torch.cuda.is_available():
+            # TODO: gpu_id
+            self.model.enable_sequential_cpu_offload(gpu_id=0)
+        else:
+            if kwargs['sd_cpu_textencoder']:
+                logger.info("Run Stable Diffusion TextEncoder on CPU")
+                self.model.text_encoder = CPUTextEncoderWrapper(self.model.text_encoder, torch_dtype)
 
         self.callback = kwargs.pop("callback", None)
+
+    def _scaled_pad_forward(self, image, mask, config: Config):
+        longer_side_length = int(config.sd_scale * max(image.shape[:2]))
+        origin_size = image.shape[:2]
+        downsize_image = resize_max_size(image, size_limit=longer_side_length)
+        downsize_mask = resize_max_size(mask, size_limit=longer_side_length)
+        logger.info(
+            f"Resize image to do sd inpainting: {image.shape} -> {downsize_image.shape}"
+        )
+        inpaint_result = self._pad_forward(downsize_image, downsize_mask, config)
+        # only paste masked area result
+        inpaint_result = cv2.resize(
+            inpaint_result,
+            (origin_size[1], origin_size[0]),
+            interpolation=cv2.INTER_CUBIC,
+        )
+        original_pixel_indices = mask < 127
+        inpaint_result[original_pixel_indices] = image[:, :, ::-1][original_pixel_indices]
+        return inpaint_result
 
     def forward(self, image, mask, config: Config):
         """Input image and output image have same size
@@ -126,11 +154,11 @@ class SD(InpaintModel):
         # boxes = boxes_from_mask(mask)
         if config.use_croper:
             crop_img, crop_mask, (l, t, r, b) = self._apply_cropper(image, mask, config)
-            crop_image = self._pad_forward(crop_img, crop_mask, config)
+            crop_image = self._scaled_pad_forward(crop_img, crop_mask, config)
             inpaint_result = image[:, :, ::-1]
             inpaint_result[t:b, l:r, :] = crop_image
         else:
-            inpaint_result = self._pad_forward(image, mask, config)
+            inpaint_result = self._scaled_pad_forward(image, mask, config)
 
         return inpaint_result
 

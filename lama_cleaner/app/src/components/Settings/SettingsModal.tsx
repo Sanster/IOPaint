@@ -1,8 +1,5 @@
-import React, { FormEvent } from 'react'
-
+import React from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
-import { FolderOpenIcon } from '@heroicons/react/24/outline'
-import * as Tabs from '@radix-ui/react-tabs'
 import {
   isPaintByExampleState,
   isSDState,
@@ -14,10 +11,6 @@ import HDSettingBlock from './HDSettingBlock'
 import ModelSettingBlock from './ModelSettingBlock'
 import DownloadMaskSettingBlock from './DownloadMaskSettingBlock'
 import useHotKey from '../../hooks/useHotkey'
-import SettingBlock from './SettingBlock'
-import { Switch, SwitchThumb } from '../shared/Switch'
-import Button from '../shared/Button'
-import TextInput from '../shared/Input'
 
 declare module 'react' {
   interface InputHTMLAttributes<T> extends HTMLAttributes<T> {

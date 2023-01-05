@@ -38,11 +38,41 @@ def assert_equal(
 @pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
 def test_paint_by_example(strategy):
     model = ModelManager(name="paint_by_example", device=device)
-    cfg = get_config(strategy, paint_by_example_steps=30 if device == 'cuda' else 1)
+    cfg = get_config(strategy, paint_by_example_steps=30)
     assert_equal(
         model,
         cfg,
         f"paint_by_example_{strategy.capitalize()}.png",
+        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
+        fy=0.9,
+        fx=1.3,
+    )
+
+
+@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
+def test_paint_by_example_sd_scale(strategy):
+    model = ModelManager(name="paint_by_example", device=device)
+    cfg = get_config(strategy, paint_by_example_steps=30, sd_scale=0.85)
+    assert_equal(
+        model,
+        cfg,
+        f"paint_by_example_{strategy.capitalize()}_sdscale.png",
+        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
+        fy=0.9,
+        fx=1.3
+    )
+
+
+@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
+def test_paint_by_example_cpu_offload(strategy):
+    model = ModelManager(name="paint_by_example", device=device, cpu_offload=True)
+    cfg = get_config(strategy, paint_by_example_steps=30, sd_scale=0.85)
+    assert_equal(
+        model,
+        cfg,
+        f"paint_by_example_{strategy.capitalize()}_cpu_offload.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
         fy=0.9,

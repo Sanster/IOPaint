@@ -15,7 +15,9 @@ def parse_args():
         default="lama",
         choices=["lama", "ldm", "zits", "mat", "fcf", "sd1.5", "cv2", "manga", "sd2", "paint_by_example"],
     )
-    parser.add_argument("--no-half", action="store_true", help="SD/PaintByExample model no half precision")
+    parser.add_argument("--no-half", action="store_true", help="sd/paint_by_example model no half precision")
+    parser.add_argument("--cpu-offload", action="store_true",
+                        help="sd/paint_by_example model, offloads all models to CPU, significantly reducing vRAM usage.")
     parser.add_argument(
         "--hf_access_token",
         default="",
@@ -34,7 +36,12 @@ def parse_args():
     parser.add_argument(
         "--sd-run-local",
         action="store_true",
-        help="After first time Stable Diffusion model downloaded, you can add this arg and remove --hf_access_token",
+        help="After first time Stable Diffusion model downloaded, you can add this arg and remove --hf_access_token.",
+    )
+    parser.add_argument(
+        "--local-files-only",
+        action="store_true",
+        help="sd/paint_by_example model. Use local files only, not connect to huggingface server",
     )
     parser.add_argument(
         "--sd-enable-xformers",
@@ -80,7 +87,7 @@ def parse_args():
                     if not output_dir.is_dir():
                         parser.error(f"invalid --output-dir: {output_dir} is not a directory")
 
-    if args.model == 'sd1.5' and not args.sd_run_local:
+    if args.model == 'sd1.5' and not (args.sd_run_local or args.local_files_only):
         if not args.hf_access_token.startswith("hf_"):
             parser.error(
                 f"sd(stable-diffusion) model requires huggingface access token. Check how to get token from: https://huggingface.co/docs/hub/security-tokens"

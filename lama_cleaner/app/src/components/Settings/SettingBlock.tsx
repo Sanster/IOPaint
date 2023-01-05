@@ -21,7 +21,7 @@ function SettingBlock(props: SettingBlockProps) {
     <div className={`setting-block ${className}`}>
       <div className={contentClass}>
         <div className="setting-block-content-title">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {desc ? (
               <Tooltip content={<div style={{ maxWidth: 400 }}>{desc}</div>}>
                 <span>{title}</span>

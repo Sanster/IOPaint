@@ -1,5 +1,5 @@
 import { Rect, Settings } from '../store/Atoms'
-import { dataURItoBlob } from '../utils'
+import { dataURItoBlob, srcToFile } from '../utils'
 
 export const API_ENDPOINT = `${process.env.REACT_APP_INPAINTING_URL}`
 
@@ -57,6 +57,7 @@ export default async function inpaint(
   fd.append('sdSampler', settings.sdSampler.toString())
   fd.append('sdSeed', seed ? seed.toString() : '-1')
   fd.append('sdMatchHistograms', settings.sdMatchHistograms ? 'true' : 'false')
+  fd.append('sdScale', (settings.sdScale / 100).toString())
 
   fd.append('cv2Radius', settings.cv2Radius.toString())
   fd.append('cv2Flag', settings.cv2Flag.toString())
@@ -197,4 +198,28 @@ export async function getMedias() {
   }
   const errMsg = await res.text()
   throw new Error(errMsg)
+}
+
+export async function downloadToOutput(
+  image: HTMLImageElement,
+  filename: string,
+  mimeType: string
+) {
+  const file = await srcToFile(image.src, filename, mimeType)
+  const fd = new FormData()
+  fd.append('image', file)
+  fd.append('filename', filename)
+
+  try {
+    const res = await fetch(`${API_ENDPOINT}/save_image`, {
+      method: 'POST',
+      body: fd,
+    })
+    if (!res.ok) {
+      const errMsg = await res.text()
+      throw new Error(errMsg)
+    }
+  } catch (error) {
+    throw new Error(`Something went wrong: ${error}`)
+  }
 }

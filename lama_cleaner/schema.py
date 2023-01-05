@@ -58,6 +58,9 @@ class Config(BaseModel):
     croper_height: int = None
     croper_width: int = None
 
+    # Resize the image before doing sd inpainting, the area outside the mask will not lose quality.
+    # Used by sd models and paint_by_example model
+    sd_scale: float = 1.0
     # Blur the edge of mask area. The higher the number the smoother blend with the original image
     sd_mask_blur: int = 0
     # Ignore this value, it's useless for inpainting

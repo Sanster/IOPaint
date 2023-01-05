@@ -35,6 +35,8 @@ export interface Rect {
 
 interface AppState {
   file: File | undefined
+  imageHeight: number
+  imageWidth: number
   disableShortCuts: boolean
   isInpainting: boolean
   isDisableModelSwitch: boolean
@@ -49,6 +51,8 @@ export const appState = atom<AppState>({
   key: 'appState',
   default: {
     file: undefined,
+    imageHeight: 0,
+    imageWidth: 0,
     disableShortCuts: false,
     isInpainting: false,
     isDisableModelSwitch: false,
@@ -79,6 +83,30 @@ export const isInpaintingState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, isInpainting: newValue })
+  },
+})
+
+export const imageHeightState = selector({
+  key: 'imageHeightState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.imageHeight
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, imageHeight: newValue })
+  },
+})
+
+export const imageWidthState = selector({
+  key: 'imageWidthState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.imageWidth
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, imageWidth: newValue })
   },
 })
 
@@ -120,6 +148,12 @@ export const fileState = selector({
       interactiveSegClicks: [],
       isInteractiveSeg: false,
       isInteractiveSegRunning: false,
+    })
+
+    const setting = get(settingState)
+    set(settingState, {
+      ...setting,
+      sdScale: 100,
     })
   },
 })
@@ -282,6 +316,7 @@ export interface Settings {
   sdSeedFixed: boolean // true: use sdSeed, false: random generate seed on backend
   sdNumSamples: number
   sdMatchHistograms: boolean
+  sdScale: number
 
   // For OpenCV2
   cv2Radius: number
@@ -409,6 +444,7 @@ export const settingStateDefault: Settings = {
   sdSeedFixed: true,
   sdNumSamples: 1,
   sdMatchHistograms: false,
+  sdScale: 100,
 
   // CV2
   cv2Radius: 5,

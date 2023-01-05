@@ -6,13 +6,22 @@ type SliderProps = {
   min?: number
   max?: number
   onChange: (value: number) => void
-  onClick: () => void
+  onClick?: () => void
+  width?: number
 }
 
 export default function Slider(props: SliderProps) {
-  const { value, onChange, onClick, label, min, max } = props
+  const { value, onChange, onClick, label, min, max, width } = props
+  const styles: any = {}
+  if (width !== undefined) {
+    styles.width = width
+  }
 
   const step = ((max || 100) - (min || 0)) / 100
+
+  const onMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.currentTarget?.blur()
+  }
 
   return (
     <div className="editor-brush-slider">
@@ -29,6 +38,8 @@ export default function Slider(props: SliderProps) {
           onChange(parseInt(ev.currentTarget.value, 10))
         }}
         onClick={onClick}
+        style={styles}
+        onMouseUp={onMouseUp}
       />
     </div>
   )

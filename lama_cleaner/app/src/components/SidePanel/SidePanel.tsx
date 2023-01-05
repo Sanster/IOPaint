@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from 'react'
+import React, { FormEvent } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { useToggle } from 'react-use'
@@ -15,6 +15,7 @@ import Selector from '../shared/Selector'
 import { Switch, SwitchThumb } from '../shared/Switch'
 import TextAreaInput from '../shared/Textarea'
 import emitter, { EVENT_PROMPT } from '../../event'
+import ImageResizeScale from './ImageResizeScale'
 
 const INPUT_WIDTH = 30
 
@@ -71,6 +72,9 @@ const SidePanel = () => {
                 </Switch>
               }
             />
+
+            <ImageResizeScale />
+
             {/* 
             <NumberInputSetting
               title="Num Samples"
@@ -97,21 +101,6 @@ const SidePanel = () => {
                 })
               }}
             />
-
-            {/* <NumberInputSetting
-              title="Strength"
-              width={INPUT_WIDTH}
-              allowFloat
-              value={`${setting.sdStrength}`}
-              desc="TODO"
-              onValue={value => {
-                const val = value.length === 0 ? 0 : parseFloat(value)
-                console.log(val)
-                setSettingState(old => {
-                  return { ...old, sdStrength: val }
-                })
-              }}
-            /> */}
 
             <NumberInputSetting
               title="Guidance Scale"

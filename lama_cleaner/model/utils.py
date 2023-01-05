@@ -707,3 +707,9 @@ class Conv2dLayer(torch.nn.Module):
         act_clamp = self.conv_clamp * gain if self.conv_clamp is not None else None
         out = bias_act(x, self.bias, act=self.activation, gain=act_gain, clamp=act_clamp)
         return out
+
+
+def torch_gc():
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        torch.cuda.ipc_collect()

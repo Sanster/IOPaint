@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import { useRecoilState } from 'recoil'
 import { nanoid } from 'nanoid'
 import useInputImage from './hooks/useInputImage'
-import LandingPage from './components/LandingPage/LandingPage'
 import { themeState } from './components/Header/ThemeChanger'
 import Workspace from './components/Workspace'
 import {

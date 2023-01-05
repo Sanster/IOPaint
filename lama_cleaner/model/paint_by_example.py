@@ -6,6 +6,9 @@ import cv2
 import numpy as np
 import torch
 from diffusers import DiffusionPipeline
+from loguru import logger
+
+from lama_cleaner.helper import resize_max_size
 from lama_cleaner.model.base import InpaintModel
 from lama_cleaner.schema import Config
 
@@ -15,15 +18,20 @@ class PaintByExample(InpaintModel):
     min_size = 512
 
     def init_model(self, device: torch.device, **kwargs):
-        fp16 = not kwargs['no_half']
+        fp16 = not kwargs.get('no_half', False)
         use_gpu = device == torch.device('cuda') and torch.cuda.is_available()
         torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
+        model_kwargs = {"local_files_only": kwargs.get('local_files_only', False)}
         self.model = DiffusionPipeline.from_pretrained(
             "Fantasy-Studio/Paint-by-Example",
             torch_dtype=torch_dtype,
+            **model_kwargs
         )
-        self.model.enable_attention_slicing()
         self.model = self.model.to(device)
+        self.model.enable_attention_slicing()
+        # TODO: gpu_id
+        if kwargs.get('cpu_offload', False) and torch.cuda.is_available():
+            self.model.enable_sequential_cpu_offload(gpu_id=0)
 
     def forward(self, image, mask, config: Config):
         """Input image and output image have same size
@@ -49,6 +57,25 @@ class PaintByExample(InpaintModel):
         output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
         return output
 
+    def _scaled_pad_forward(self, image, mask, config: Config):
+        longer_side_length = int(config.sd_scale * max(image.shape[:2]))
+        origin_size = image.shape[:2]
+        downsize_image = resize_max_size(image, size_limit=longer_side_length)
+        downsize_mask = resize_max_size(mask, size_limit=longer_side_length)
+        logger.info(
+            f"Resize image to do paint_by_example: {image.shape} -> {downsize_image.shape}"
+        )
+        inpaint_result = self._pad_forward(downsize_image, downsize_mask, config)
+        # only paste masked area result
+        inpaint_result = cv2.resize(
+            inpaint_result,
+            (origin_size[1], origin_size[0]),
+            interpolation=cv2.INTER_CUBIC,
+        )
+        original_pixel_indices = mask < 127
+        inpaint_result[original_pixel_indices] = image[:, :, ::-1][original_pixel_indices]
+        return inpaint_result
+
     @torch.no_grad()
     def __call__(self, image, mask, config: Config):
         """
@@ -58,11 +85,11 @@ class PaintByExample(InpaintModel):
         """
         if config.use_croper:
             crop_img, crop_mask, (l, t, r, b) = self._apply_cropper(image, mask, config)
-            crop_image = self._pad_forward(crop_img, crop_mask, config)
+            crop_image = self._scaled_pad_forward(crop_img, crop_mask, config)
             inpaint_result = image[:, :, ::-1]
             inpaint_result[t:b, l:r, :] = crop_image
         else:
-            inpaint_result = self._pad_forward(image, mask, config)
+            inpaint_result = self._scaled_pad_forward(image, mask, config)
 
         return inpaint_result
 

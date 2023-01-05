@@ -14,6 +14,7 @@ import { Switch, SwitchThumb } from '../shared/Switch'
 import Button from '../shared/Button'
 import emitter, { EVENT_PAINT_BY_EXAMPLE } from '../../event'
 import { useImage } from '../../utils'
+import ImageResizeScale from './ImageResizeScale'
 
 const INPUT_WIDTH = 30
 
@@ -68,22 +69,6 @@ const PESidePanel = () => {
         </PopoverPrimitive.Trigger>
         <PopoverPrimitive.Portal>
           <PopoverPrimitive.Content className="side-panel-content">
-            <SettingBlock
-              title="Croper"
-              input={
-                <Switch
-                  checked={setting.showCroper}
-                  onCheckedChange={value => {
-                    setSettingState(old => {
-                      return { ...old, showCroper: value }
-                    })
-                  }}
-                >
-                  <SwitchThumb />
-                </Switch>
-              }
-            />
-
             <NumberInputSetting
               title="Steps"
               width={INPUT_WIDTH}
@@ -96,6 +81,8 @@ const PESidePanel = () => {
                 })
               }}
             />
+
+            <ImageResizeScale />
 
             <NumberInputSetting
               title="Guidance Scale"

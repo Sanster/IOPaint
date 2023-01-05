@@ -1,11 +1,16 @@
 # Copy from https://github.com/silentsokolov/flask-thumbnails/blob/master/flask_thumbnails/thumbnail.py
 import os
-from functools import lru_cache
+from cachetools import TTLCache, cached
+import cv2
+import time
 from io import BytesIO
+from pathlib import Path
+import numpy as np
 
 from PIL import Image, ImageOps, PngImagePlugin
+
 LARGE_ENOUGH_NUMBER = 100
-PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
+PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024 ** 2)
 from .storage_backends import FilesystemStorageBackend
 from .utils import aspect_to_string, generate_filename, glob_img
 
@@ -18,6 +23,7 @@ class FileManager:
         self._default_root_url = "/"
         self._default_thumbnail_root_url = "/"
         self._default_format = "JPEG"
+        self.output_dir: Path = None
 
         if app is not None:
             self.init_app(app)
@@ -40,6 +46,16 @@ class FileManager:
         app.config.setdefault("THUMBNAIL_MEDIA_URL", self._default_root_url)
         app.config.setdefault("THUMBNAIL_MEDIA_THUMBNAIL_URL", self._default_thumbnail_root_url)
         app.config.setdefault("THUMBNAIL_DEFAULT_FORMAT", self._default_format)
+
+    def save_to_output_directory(self, image: np.ndarray, filename: str):
+        fp = Path(filename)
+        new_name = fp.stem + f"_{int(time.time())}" + fp.suffix
+        if image.shape[2] == 3:
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        elif image.shape[2] == 4:
+            image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGRA)
+
+        cv2.imwrite(str(self.output_dir / new_name), image)
 
     @property
     def root_directory(self):
@@ -64,7 +80,7 @@ class FileManager:
         return self.app.config["THUMBNAIL_MEDIA_URL"]
 
     @property
-    @lru_cache()
+    @cached(cache=TTLCache(maxsize=1024, ttl=30))
     def media_names(self):
         names = sorted([it.name for it in glob_img(self.root_directory)])
         res = []

@@ -5,7 +5,7 @@ import React, {
   useState,
   useCallback,
 } from 'react'
-import { useRecoilState, useRecoilValue } from 'recoil'
+import { useRecoilState } from 'recoil'
 import PhotoAlbum, { RenderPhoto } from 'react-photo-album'
 import * as ScrollArea from '@radix-ui/react-scroll-area'
 import Modal from '../shared/Modal'
@@ -127,7 +127,7 @@ export default function FileManager(props: Props) {
           ref={onRefChange}
         >
           <PhotoAlbum
-            layout="columns"
+            layout="masonry"
             photos={photos}
             renderPhoto={renderPhoto}
             spacing={8}

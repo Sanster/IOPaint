@@ -18,7 +18,10 @@ import {
 } from 'react-zoom-pan-pinch'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { useWindowSize, useKey, useKeyPressEvent } from 'react-use'
-import inpaint, { postInteractiveSeg } from '../../adapters/inpainting'
+import inpaint, {
+  downloadToOutput,
+  postInteractiveSeg,
+} from '../../adapters/inpainting'
 import Button from '../shared/Button'
 import Slider from './Slider'
 import SizeSelector from './SizeSelector'
@@ -34,7 +37,10 @@ import {
 } from '../../utils'
 import {
   croperState,
+  enableFileManagerState,
   fileState,
+  imageHeightState,
+  imageWidthState,
   interactiveSegClicksState,
   isInpaintingState,
   isInteractiveSegRunningState,
@@ -173,6 +179,10 @@ export default function Editor() {
   const [redoRenders, setRedoRenders] = useState<HTMLImageElement[]>([])
   const [redoCurLines, setRedoCurLines] = useState<Line[]>([])
   const [redoLineGroups, setRedoLineGroups] = useState<LineGroup[]>([])
+  const enableFileManager = useRecoilValue(enableFileManagerState)
+
+  const [imageWidth, setImageWidth] = useRecoilState(imageWidthState)
+  const [imageHeight, setImageHeight] = useRecoilState(imageHeightState)
 
   const draw = useCallback(
     (render: HTMLImageElement, lineGroup: LineGroup) => {
@@ -523,6 +533,9 @@ export default function Editor() {
 
     const rW = windowSize.width / original.naturalWidth
     const rH = (windowSize.height - TOOLBAR_SIZE) / original.naturalHeight
+
+    setImageWidth(original.naturalWidth)
+    setImageHeight(original.naturalHeight)
 
     let s = 1.0
     if (rW < 1 || rH < 1) {
@@ -1054,6 +1067,27 @@ export default function Editor() {
     if (file === undefined) {
       return
     }
+    if (enableFileManager && renders.length > 0) {
+      try {
+        downloadToOutput(renders[renders.length - 1], file.name, file.type)
+        setToastState({
+          open: true,
+          desc: `Save image success`,
+          state: 'success',
+          duration: 2000,
+        })
+      } catch (e: any) {
+        setToastState({
+          open: true,
+          desc: e.message ? e.message : e.toString(),
+          state: 'error',
+          duration: 2000,
+        })
+      }
+      return
+    }
+
+    // TODO: download to output directory
     const name = file.name.replace(/(\.[\w\d_-]+)$/i, '_cleanup$1')
     const curRender = renders[renders.length - 1]
     downloadImage(curRender.currentSrc, name)
