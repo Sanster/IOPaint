@@ -1,17 +1,15 @@
 {
   "files": {
-    "main.css": "/static/css/main.b30da02b.chunk.css",
-    "main.js": "/static/js/main.994b5b32.chunk.js",
-    "runtime-main.js": "/static/js/runtime-main.5e86ac81.js",
-    "static/js/2.ada71d88.chunk.js": "/static/js/2.ada71d88.chunk.js",
-    "index.html": "/index.html",
-    "static/js/2.ada71d88.chunk.js.LICENSE.txt": "/static/js/2.ada71d88.chunk.js.LICENSE.txt",
-    "static/media/_index.scss": "/static/media/WorkSans-SemiBold.1e98db4e.ttf"
+    "main.css": "/static/css/main.c28d98ca.css",
+    "main.js": "/static/js/main.f66a24a3.js",
+    "static/media/WorkSans-SemiBold.ttf": "/static/media/WorkSans-SemiBold.1e98db4eb705b586728e.ttf",
+    "static/media/WorkSans-Bold.ttf": "/static/media/WorkSans-Bold.2bea7a7f7d052c74da25.ttf",
+    "static/media/WorkSans-Regular.ttf": "/static/media/WorkSans-Regular.bb287b894b27372d8ea7.ttf",
+    "static/media/WorkSans-Black.ttf": "/static/media/WorkSans-Black.67c2c5a144333953880b.ttf",
+    "index.html": "/index.html"
   },
   "entrypoints": [
-    "static/js/runtime-main.5e86ac81.js",
-    "static/js/2.ada71d88.chunk.js",
-    "static/css/main.b30da02b.chunk.css",
-    "static/js/main.994b5b32.chunk.js"
+    "static/css/main.c28d98ca.css",
+    "static/js/main.f66a24a3.js"
   ]
 }

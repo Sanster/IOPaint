@@ -4,6 +4,8 @@ object-assign
 @license MIT
 */
 
+/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+
 /**
  * @license
  * Lodash <https://lodash.com/>
@@ -49,11 +51,10 @@ object-assign
  * LICENSE file in the root directory of this source tree.
  */
 
-/**! 
- * hotkeys-js v3.9.4 
- * A simple micro-library for defining and dispatching keyboard shortcuts. It has no dependencies. 
- * 
- * Copyright (c) 2022 kenny wong <wowohoo@qq.com> 
- * http://jaywcjlove.github.io/hotkeys 
- * Licensed under the MIT license 
+/**!
+ * FlexSearch.js v0.7.21 (Bundle)
+ * Copyright 2018-2021 Nextapps GmbH
+ * Author: Thomas Wilkerling
+ * Licence: Apache-2.0
+ * https://github.com/nextapps-de/flexsearch
  */
