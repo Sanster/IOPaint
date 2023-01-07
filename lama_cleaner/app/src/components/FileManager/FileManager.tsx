@@ -158,7 +158,7 @@ export default function FileManager(props: Props) {
   return (
     <Modal
       onClose={onClose}
-      title={`Files(${photos.length})`}
+      title={`Images (${photos.length})`}
       className="file-manager-modal"
       show={show}
     >

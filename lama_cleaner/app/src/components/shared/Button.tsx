@@ -35,8 +35,8 @@ const Button: React.FC<ButtonProps> = props => {
     onClick?.()
   }
 
-  return (
-    <Tooltip content={toolTip}>
+  const renderButton = () => {
+    return (
       <div
         role="button"
         style={style}
@@ -60,8 +60,13 @@ const Button: React.FC<ButtonProps> = props => {
         {icon}
         {children ? <span>{children}</span> : null}
       </div>
-    </Tooltip>
-  )
+    )
+  }
+
+  if (toolTip) {
+    return <Tooltip content={toolTip}>{renderButton()}</Tooltip>
+  }
+  return renderButton()
 }
 
 Button.defaultProps = {

@@ -36,9 +36,7 @@ const ImageResizeScale = () => {
       className="sub-setting-block"
       title="Resize"
       titleSuffix={
-        <div
-          style={{ width: 86 }}
-        >{`(${scaledWidth()}x${scaledHeight()})`}</div>
+        <div className="resize-title-tile">{` ${scaledWidth()}x${scaledHeight()}`}</div>
       }
       desc="Resize the image before inpainting, the area outside the mask will not lose quality."
       input={
