@@ -29,6 +29,7 @@ interface Photo {
   src: string
   height: number
   width: number
+  name: string
 }
 
 interface Filename {
@@ -68,7 +69,6 @@ interface Props {
 
 export default function FileManager(props: Props) {
   const { show, onClose, onPhotoClick, photoWidth } = props
-  const [filenames, setFileNames] = useState<Filename[]>([])
   const [scrollTop, setScrollTop] = useState(0)
   const [closeScrollTop, setCloseScrollTop] = useState(0)
   const setToastState = useSetRecoilState(toastState)
@@ -78,6 +78,7 @@ export default function FileManager(props: Props) {
   const [searchText, setSearchText] = useState('')
   const [debouncedSearchText, setDebouncedSearchText] = useState('')
   const [tab, setTab] = useState(IMAGE_TAB)
+  const [photos, setPhotos] = useState<Photo[]>([])
 
   const [, cancel] = useDebounce(
     () => {
@@ -110,8 +111,26 @@ export default function FileManager(props: Props) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const newFilenames = await getMedias(tab)
-        setFileNames(newFilenames)
+        const filenames = await getMedias(tab)
+        let filteredFilenames = filenames
+        if (debouncedSearchText) {
+          const index = new Index()
+          filenames.forEach((filename: Filename, id: number) =>
+            index.add(id, filename.name)
+          )
+          const results: IndexSearchResult = index.search(debouncedSearchText)
+          filteredFilenames = results.map((id: Id) => filenames[id as number])
+        }
+
+        filteredFilenames = _.orderBy(filteredFilenames, sortBy, sortOrder)
+
+        const newPhotos = filteredFilenames.map((filename: Filename) => {
+          const width = photoWidth
+          const height = filename.height * (width / filename.width)
+          const src = `/media_thumbnail/${tab}/${filename.name}?width=${width}&height=${height}`
+          return { src, height, width, name: filename.name }
+        })
+        setPhotos(newPhotos)
       } catch (e: any) {
         setToastState({
           open: true,
@@ -121,50 +140,15 @@ export default function FileManager(props: Props) {
         })
       }
     }
-    if (show) {
-      fetchData()
-    }
-  }, [show, setToastState, tab])
+    fetchData()
+  }, [setToastState, tab, debouncedSearchText, sortBy, sortOrder, photoWidth])
 
   const onScroll = (event: SyntheticEvent) => {
     setScrollTop(event.currentTarget.scrollTop)
   }
 
-  const filteredFilenames: Filename[] | undefined = useAsyncMemo(async () => {
-    if (!debouncedSearchText) {
-      return filenames
-    }
-
-    const index = new Index()
-    filenames.forEach((filename: Filename, id: number) =>
-      index.add(id, filename.name)
-    )
-    const results: IndexSearchResult = await index.searchAsync(
-      debouncedSearchText
-    )
-    return _.orderBy(
-      results.map((id: Id) => filenames[id as number]),
-      sortBy,
-      sortOrder
-    )
-  }, [filenames, debouncedSearchText, sortBy, sortOrder])
-
-  const photos: Photo[] = useMemo(() => {
-    if (!filteredFilenames) {
-      return []
-    }
-    return filteredFilenames.map((filename: Filename) => {
-      const width = photoWidth
-      const height = filename.height * (width / filename.width)
-      const src = `/media_thumbnail/${tab}/${filename.name}?width=${width}&height=${height}`
-      return { src, height, width }
-    })
-  }, [filteredFilenames, photoWidth, tab])
-
   const onClick = ({ index }: { index: number }) => {
-    if (filteredFilenames) {
-      onPhotoClick(tab, filteredFilenames[index].name)
-    }
+    onPhotoClick(tab, photos[index].name)
   }
 
   return (
