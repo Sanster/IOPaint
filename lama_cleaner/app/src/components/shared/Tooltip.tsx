@@ -13,7 +13,7 @@ const Tooltip = (props: MyTooltipProps) => {
   return (
     <TooltipPrimitive.Root>
       <TooltipPrimitive.Provider>
-        <TooltipPrimitive.Trigger className="tooltip-trigger">
+        <TooltipPrimitive.Trigger className="tooltip-trigger" asChild>
           {children}
         </TooltipPrimitive.Trigger>
 

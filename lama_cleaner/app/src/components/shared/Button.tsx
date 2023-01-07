@@ -58,7 +58,7 @@ const Button: React.FC<ButtonProps> = props => {
         ].join(' ')}
       >
         {icon}
-        {children ? <span>{children}</span> : null}
+        {children}
       </div>
     )
   }
