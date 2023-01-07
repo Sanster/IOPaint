@@ -39,12 +39,12 @@ const Header = () => {
   useHotKey(
     'f',
     () => {
-      if (enableFileManager) {
+      if (enableFileManager && !isInpainting) {
         setShowFileManager(!showFileManager)
       }
     },
     {},
-    [showFileManager, enableFileManager]
+    [showFileManager, enableFileManager, isInpainting]
   )
 
   const renderHeader = () => {
@@ -63,6 +63,7 @@ const Header = () => {
               icon={<FolderIcon />}
               style={{ border: 0 }}
               toolTip="Open File Manager"
+              disabled={isInpainting}
               onClick={() => {
                 setShowFileManager(true)
               }}
