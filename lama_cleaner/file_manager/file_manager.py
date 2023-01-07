@@ -82,10 +82,19 @@ class FileManager:
     @property
     @cached(cache=TTLCache(maxsize=1024, ttl=30))
     def media_names(self):
-        names = sorted([it.name for it in glob_img(self.root_directory)])
+        return self._media_names(self.root_directory)
+
+    @property
+    @cached(cache=TTLCache(maxsize=1024, ttl=30))
+    def output_media_names(self):
+        return self._media_names(self.output_dir)
+
+    @staticmethod
+    def _media_names(directory: Path):
+        names = sorted([it.name for it in glob_img(directory)])
         res = []
         for name in names:
-            path = os.path.join(self.root_directory, name)
+            path = os.path.join(directory, name)
             img = Image.open(path)
             res.append({"name": name, "height": img.height, "width": img.width, "ctime": os.path.getctime(path)})
         return res
@@ -94,14 +103,14 @@ class FileManager:
     def thumbnail_url(self):
         return self.app.config["THUMBNAIL_MEDIA_THUMBNAIL_URL"]
 
-    def get_thumbnail(self, original_filename, width, height, **options):
+    def get_thumbnail(self, directory: Path, original_filename: str, width, height, **options):
         storage = FilesystemStorageBackend(self.app)
         crop = options.get("crop", "fit")
         background = options.get("background")
         quality = options.get("quality", 90)
 
         original_path, original_filename = os.path.split(original_filename)
-        original_filepath = os.path.join(self.root_directory, original_path, original_filename)
+        original_filepath = os.path.join(directory, original_path, original_filename)
         image = Image.open(BytesIO(storage.read(original_filepath)))
 
         # keep ratio resize

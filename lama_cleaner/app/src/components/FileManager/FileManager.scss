@@ -91,11 +91,74 @@
   padding-left: 30px;
   height: 32px;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .sort-btn-inactive {
   svg {
     opacity: 0.5;
   }
+}
+
+/* reset */
+button,
+fieldset,
+input {
+  all: unset;
+}
+
+.TabsRoot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: var(--page-bg);
+  align-self: flex-start;
+}
+
+.TabsList {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  justify-content: flex-start;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background-color: var(--page-bg);
+  padding: 4px;
+}
+
+.TabsTrigger {
+  font-family: inherit;
+  background-color: white;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--modal-text-color);
+  user-select: none;
+  background-color: var(--page-bg);
+  border-radius: 8px;
+}
+.TabsTrigger:hover {
+  background-color: var(--tabs-active-color);
+}
+.TabsTrigger[data-state='active'] {
+  background-color: var(--tabs-active-color);
+}
+.TabsTrigger:focus {
+  position: relative;
+}
+
+.TabsContent {
+  background-color: white;
+  outline: none;
+  background-color: var(--page-bg);
+  width: 100%;
+}
+
+.TabsContent[data-state='active'] {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }

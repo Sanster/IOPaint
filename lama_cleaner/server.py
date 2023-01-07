@@ -102,19 +102,23 @@ def save_image():
     return 'ok', 200
 
 
-@app.route("/medias")
-def medias():
-    # all images in input folder
-    return jsonify(thumb.media_names), 200
+@app.route("/medias/<tab>")
+def medias(tab):
+    if tab == 'image':
+        # all images in input folder
+        return jsonify(thumb.media_names), 200
+    return jsonify(thumb.output_media_names), 200
 
 
-@app.route('/media/<filename>')
-def media_file(filename):
-    return send_from_directory(app.config['THUMBNAIL_MEDIA_ROOT'], filename)
+@app.route('/media/<tab>/<filename>')
+def media_file(tab, filename):
+    if tab == 'image':
+        return send_from_directory(thumb.root_directory, filename)
+    return send_from_directory(thumb.output_dir, filename)
 
 
-@app.route('/media_thumbnail/<filename>')
-def media_thumbnail_file(filename):
+@app.route('/media_thumbnail/<tab>/<filename>')
+def media_thumbnail_file(tab, filename):
     args = request.args
     width = args.get('width')
     height = args.get('height')
@@ -125,7 +129,10 @@ def media_thumbnail_file(filename):
     if height:
         height = int(float(height))
 
-    thumb_filename, (width, height) = thumb.get_thumbnail(filename, width, height)
+    directory = thumb.root_directory
+    if tab == 'output':
+        directory = thumb.output_dir
+    thumb_filename, (width, height) = thumb.get_thumbnail(directory, filename, width, height)
     thumb_filepath = f"{app.config['THUMBNAIL_MEDIA_THUMBNAIL_ROOT']}{thumb_filename}"
 
     response = make_response(send_file(thumb_filepath))
@@ -350,7 +357,7 @@ def main(args):
 
     if os.path.isdir(args.input):
         app.config["THUMBNAIL_MEDIA_ROOT"] = args.input
-        app.config["THUMBNAIL_MEDIA_THUMBNAIL_ROOT"] = os.path.join(args.output_dir, 'thumbnails')
+        app.config["THUMBNAIL_MEDIA_THUMBNAIL_ROOT"] = os.path.join(args.output_dir, 'lama_cleaner_thumbnails')
         is_enable_file_manager = True
         thumb.output_dir = Path(args.output_dir)
     else:

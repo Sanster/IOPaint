@@ -172,9 +172,9 @@ export async function postInteractiveSeg(
   }
 }
 
-export async function getMediaFile(filename: string) {
+export async function getMediaFile(tab: string, filename: string) {
   const res = await fetch(
-    `${API_ENDPOINT}/media/${encodeURIComponent(filename)}`,
+    `${API_ENDPOINT}/media/${tab}/${encodeURIComponent(filename)}`,
     {
       method: 'GET',
     }
@@ -188,8 +188,8 @@ export async function getMediaFile(filename: string) {
   throw new Error(errMsg)
 }
 
-export async function getMedias() {
-  const res = await fetch(`${API_ENDPOINT}/medias`, {
+export async function getMedias(tab: string) {
+  const res = await fetch(`${API_ENDPOINT}/medias/${tab}`, {
     method: 'GET',
   })
   if (res.ok) {

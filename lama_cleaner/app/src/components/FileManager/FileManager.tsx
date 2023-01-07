@@ -8,6 +8,7 @@ import React, {
   FormEvent,
 } from 'react'
 import _ from 'lodash'
+import * as Tabs from '@radix-ui/react-tabs'
 import { useSetRecoilState } from 'recoil'
 import PhotoAlbum from 'react-photo-album'
 import { BarsArrowDownIcon, BarsArrowUpIcon } from '@heroicons/react/24/outline'
@@ -50,6 +51,9 @@ enum SortBy {
 const SORT_BY_NAME = 'Name'
 const SORT_BY_CREATED_TIME = 'Created time'
 
+const IMAGE_TAB = 'image'
+const OUTPUT_TAB = 'output'
+
 const SortByMap = {
   [SortBy.NAME]: SORT_BY_NAME,
   [SortBy.CTIME]: SORT_BY_CREATED_TIME,
@@ -58,7 +62,7 @@ const SortByMap = {
 interface Props {
   show: boolean
   onClose: () => void
-  onPhotoClick(filename: string): void
+  onPhotoClick(tab: string, filename: string): void
   photoWidth: number
 }
 
@@ -73,6 +77,7 @@ export default function FileManager(props: Props) {
   const ref = useRef(null)
   const [searchText, setSearchText] = useState('')
   const [debouncedSearchText, setDebouncedSearchText] = useState('')
+  const [tab, setTab] = useState(IMAGE_TAB)
 
   const [, cancel] = useDebounce(
     () => {
@@ -102,14 +107,10 @@ export default function FileManager(props: Props) {
     [show, closeScrollTop]
   )
 
-  const onClick = ({ index }: { index: number }) => {
-    onPhotoClick(filenames[index].name)
-  }
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const newFilenames = await getMedias()
+        const newFilenames = await getMedias(tab)
         setFileNames(newFilenames)
       } catch (e: any) {
         setToastState({
@@ -123,7 +124,7 @@ export default function FileManager(props: Props) {
     if (show) {
       fetchData()
     }
-  }, [show, setToastState])
+  }, [show, setToastState, tab])
 
   const onScroll = (event: SyntheticEvent) => {
     setScrollTop(event.currentTarget.scrollTop)
@@ -141,19 +142,30 @@ export default function FileManager(props: Props) {
     const results: IndexSearchResult = await index.searchAsync(
       debouncedSearchText
     )
-    return results.map((id: Id) => filenames[id as number])
-  }, [filenames, debouncedSearchText])
+    return _.orderBy(
+      results.map((id: Id) => filenames[id as number]),
+      sortBy,
+      sortOrder
+    )
+  }, [filenames, debouncedSearchText, sortBy, sortOrder])
 
   const photos: Photo[] = useMemo(() => {
-    return _.orderBy(filteredFilenames, sortBy, sortOrder).map(
-      (filename: Filename) => {
-        const width = photoWidth
-        const height = filename.height * (width / filename.width)
-        const src = `/media_thumbnail/${filename.name}?width=${width}&height=${height}`
-        return { src, height, width }
-      }
-    )
-  }, [filteredFilenames, photoWidth, sortBy, sortOrder])
+    if (!filteredFilenames) {
+      return []
+    }
+    return filteredFilenames.map((filename: Filename) => {
+      const width = photoWidth
+      const height = filename.height * (width / filename.width)
+      const src = `/media_thumbnail/${tab}/${filename.name}?width=${width}&height=${height}`
+      return { src, height, width }
+    })
+  }, [filteredFilenames, photoWidth, tab])
+
+  const onClick = ({ index }: { index: number }) => {
+    if (filteredFilenames) {
+      onPhotoClick(tab, filteredFilenames[index].name)
+    }
+  }
 
   return (
     <Modal
@@ -162,62 +174,78 @@ export default function FileManager(props: Props) {
       className="file-manager-modal"
       show={show}
     >
-      <Flex style={{ justifyContent: 'end', gap: 8 }}>
-        <Flex
-          style={{
-            position: 'relative',
-            justifyContent: 'start',
-          }}
+      <Flex style={{ justifyContent: 'space-between', gap: 8 }}>
+        <Tabs.Root
+          className="TabsRoot"
+          defaultValue={tab}
+          onValueChange={val => setTab(val)}
         >
-          <MagnifyingGlassIcon style={{ position: 'absolute', left: 8 }} />
-          <TextInput
-            ref={ref}
-            value={searchText}
-            className="file-search-input"
-            tabIndex={-1}
-            onInput={(evt: FormEvent<HTMLInputElement>) => {
-              evt.preventDefault()
-              evt.stopPropagation()
-              const target = evt.target as HTMLInputElement
-              setSearchText(target.value)
-            }}
-            placeholder="Search by file name"
-          />
-        </Flex>
+          <Tabs.List className="TabsList" aria-label="Manage your account">
+            <Tabs.Trigger className="TabsTrigger" value={IMAGE_TAB}>
+              Image Directory
+            </Tabs.Trigger>
+            <Tabs.Trigger className="TabsTrigger" value={OUTPUT_TAB}>
+              Output Directory
+            </Tabs.Trigger>
+          </Tabs.List>
+        </Tabs.Root>
         <Flex style={{ gap: 8 }}>
-          <Selector
-            width={130}
-            value={SortByMap[sortBy]}
-            options={Object.values(SortByMap)}
-            onChange={val => {
-              if (val === SORT_BY_CREATED_TIME) {
-                setSortBy(SortBy.CTIME)
-              } else {
-                setSortBy(SortBy.NAME)
+          <Flex
+            style={{
+              position: 'relative',
+              justifyContent: 'start',
+            }}
+          >
+            <MagnifyingGlassIcon style={{ position: 'absolute', left: 8 }} />
+            <TextInput
+              ref={ref}
+              value={searchText}
+              className="file-search-input"
+              tabIndex={-1}
+              onInput={(evt: FormEvent<HTMLInputElement>) => {
+                evt.preventDefault()
+                evt.stopPropagation()
+                const target = evt.target as HTMLInputElement
+                setSearchText(target.value)
+              }}
+              placeholder="Search by file name"
+            />
+          </Flex>
+          <Flex style={{ gap: 8 }}>
+            <Selector
+              width={130}
+              value={SortByMap[sortBy]}
+              options={Object.values(SortByMap)}
+              onChange={val => {
+                if (val === SORT_BY_CREATED_TIME) {
+                  setSortBy(SortBy.CTIME)
+                } else {
+                  setSortBy(SortBy.NAME)
+                }
+              }}
+              chevronDirection="down"
+            />
+            <Button
+              icon={<BarsArrowDownIcon />}
+              toolTip="Descending order"
+              onClick={() => {
+                setSortOrder(SortOrder.DESCENDING)
+              }}
+              className={
+                sortOrder !== SortOrder.DESCENDING ? 'sort-btn-inactive' : ''
               }
-            }}
-            chevronDirection="down"
-          />
-          <Button
-            icon={<BarsArrowDownIcon />}
-            toolTip="Descending order"
-            onClick={() => {
-              setSortOrder(SortOrder.DESCENDING)
-            }}
-            className={
-              sortOrder !== SortOrder.DESCENDING ? 'sort-btn-inactive' : ''
-            }
-          />
-          <Button
-            icon={<BarsArrowUpIcon />}
-            toolTip="Ascending order"
-            onClick={() => {
-              setSortOrder(SortOrder.ASCENDING)
-            }}
-            className={
-              sortOrder !== SortOrder.ASCENDING ? 'sort-btn-inactive' : ''
-            }
-          />
+            />
+            <Button
+              icon={<BarsArrowUpIcon />}
+              toolTip="Ascending order"
+              onClick={() => {
+                setSortOrder(SortOrder.ASCENDING)
+              }}
+              className={
+                sortOrder !== SortOrder.ASCENDING ? 'sort-btn-inactive' : ''
+              }
+            />
+          </Flex>
         </Flex>
       </Flex>
       <ScrollArea.Root className="ScrollAreaRoot">

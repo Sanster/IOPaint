@@ -104,8 +104,8 @@ const Workspace = () => {
         onClose={() => {
           setShowFileManager(false)
         }}
-        onPhotoClick={async (filename: string) => {
-          const newFile = await getMediaFile(filename)
+        onPhotoClick={async (tab: string, filename: string) => {
+          const newFile = await getMediaFile(tab, filename)
           setFile(newFile)
           setShowFileManager(false)
         }}

@@ -52,7 +52,7 @@ const SidePanel = () => {
           className="btn-primary side-panel-trigger"
           onClick={() => toggleOpen()}
         >
-          Configurations
+          Config
         </PopoverPrimitive.Trigger>
         <PopoverPrimitive.Portal>
           <PopoverPrimitive.Content className="side-panel-content">
