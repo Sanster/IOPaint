@@ -59,7 +59,6 @@ import Croper from '../Croper/Croper'
 import emitter, {
   EVENT_PROMPT,
   EVENT_CUSTOM_MASK,
-  CustomMaskEventData,
   EVENT_PAINT_BY_EXAMPLE,
 } from '../../event'
 import FileSelect from '../FileSelect/FileSelect'
@@ -1454,7 +1453,6 @@ export default function Editor() {
         <div className="editor-toolkit-btns">
           <Button
             toolTip="Interactive Segmentation"
-            tooltipPosition="top"
             icon={<CursorArrowRaysIcon />}
             disabled={isInteractiveSeg || isInpainting || !isOriginalLoaded}
             onClick={() => {
@@ -1466,14 +1464,12 @@ export default function Editor() {
           />
           <Button
             toolTip="Reset Zoom & Pan"
-            tooltipPosition="top"
             icon={<ArrowsPointingOutIcon />}
             disabled={scale === minScale && panned === false}
             onClick={resetZoom}
           />
           <Button
             toolTip="Undo"
-            tooltipPosition="top"
             icon={
               <svg
                 width="19"
@@ -1493,7 +1489,6 @@ export default function Editor() {
           />
           <Button
             toolTip="Redo"
-            tooltipPosition="top"
             icon={
               <svg
                 width="19"
@@ -1514,7 +1509,6 @@ export default function Editor() {
           />
           <Button
             toolTip="Show Original"
-            tooltipPosition="top"
             icon={<EyeIcon />}
             className={showOriginal ? 'eyeicon-active' : ''}
             onDown={ev => {
@@ -1536,7 +1530,6 @@ export default function Editor() {
           />
           <Button
             toolTip="Save Image"
-            tooltipPosition="top"
             icon={<ArrowDownTrayIcon />}
             disabled={!renders.length}
             onClick={download}
@@ -1545,7 +1538,6 @@ export default function Editor() {
           {settings.runInpaintingManually && !isSD && !isPaintByExample && (
             <Button
               toolTip="Run Inpainting"
-              tooltipPosition="top"
               icon={
                 <svg
                   width="24"

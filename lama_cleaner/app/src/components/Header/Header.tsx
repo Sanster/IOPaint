@@ -63,7 +63,6 @@ const Header = () => {
               icon={<FolderIcon />}
               style={{ border: 0 }}
               toolTip="Open File Manager"
-              tooltipPosition="bottom"
               onClick={() => {
                 setShowFileManager(true)
               }}
@@ -78,7 +77,6 @@ const Header = () => {
               style={{ border: 0, gap: 0 }}
               disabled={isInpainting}
               toolTip="Upload image"
-              tooltipPosition="bottom"
             >
               <input
                 style={{ display: 'none' }}
@@ -109,7 +107,6 @@ const Header = () => {
                 style={{ border: 0 }}
                 disabled={isInpainting}
                 toolTip="Upload custom mask"
-                tooltipPosition="bottom"
               >
                 <input
                   style={{ display: 'none' }}

@@ -201,7 +201,6 @@ export default function FileManager(props: Props) {
           <Button
             icon={<BarsArrowDownIcon />}
             toolTip="Descending order"
-            tooltipPosition="bottom"
             onClick={() => {
               setSortOrder(SortOrder.DESCENDING)
             }}
@@ -212,7 +211,6 @@ export default function FileManager(props: Props) {
           <Button
             icon={<BarsArrowUpIcon />}
             toolTip="Ascending order"
-            tooltipPosition="bottom"
             onClick={() => {
               setSortOrder(SortOrder.ASCENDING)
             }}

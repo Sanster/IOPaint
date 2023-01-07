@@ -36,7 +36,6 @@ const PESidePanel = () => {
         <Button
           border
           toolTip="Upload example image"
-          tooltipPosition="top"
           icon={<UploadIcon />}
           style={{ padding: '0.3rem', gap: 0 }}
         >

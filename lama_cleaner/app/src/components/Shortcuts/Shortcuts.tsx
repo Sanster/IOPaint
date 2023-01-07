@@ -22,7 +22,6 @@ const Shortcuts = () => {
       <Button
         onClick={shortcutStateHandler}
         toolTip="Hotkeys"
-        tooltipPosition="bottom"
         disabled={shortcutVisibility}
         style={{ border: 0 }}
         icon={

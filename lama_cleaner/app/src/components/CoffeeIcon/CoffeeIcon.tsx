@@ -14,7 +14,6 @@ const CoffeeIcon = () => {
       <Button
         onClick={onClick}
         toolTip="Buy me a coffee"
-        tooltipPosition="bottom"
         style={{ border: 0 }}
         icon={<Coffee />}
       />
