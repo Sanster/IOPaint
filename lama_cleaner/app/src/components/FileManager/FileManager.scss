@@ -13,6 +13,9 @@
 }
 
 .react-photo-album--photo {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
   border-radius: 8px;
   border: 1px solid transparent;
 
@@ -81,4 +84,18 @@
 
 .ScrollAreaCorner {
   background: var(--blackA8);
+}
+
+.file-search-input {
+  width: 250px;
+  padding-left: 30px;
+  height: 32px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.sort-btn-inactive {
+  svg {
+    opacity: 0.5;
+  }
 }

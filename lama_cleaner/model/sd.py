@@ -62,6 +62,7 @@ class SD(InpaintModel):
 
         if kwargs.get('cpu_offload', False) and torch.cuda.is_available():
             # TODO: gpu_id
+            logger.info("Enable sequential cpu offload")
             self.model.enable_sequential_cpu_offload(gpu_id=0)
         else:
             if kwargs['sd_cpu_textencoder']:

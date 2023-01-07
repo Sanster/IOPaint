@@ -85,8 +85,9 @@ class FileManager:
         names = sorted([it.name for it in glob_img(self.root_directory)])
         res = []
         for name in names:
-            img = Image.open(os.path.join(self.root_directory, name))
-            res.append({"name": name, "height": img.height, "width": img.width})
+            path = os.path.join(self.root_directory, name)
+            img = Image.open(path)
+            res.append({"name": name, "height": img.height, "width": img.width, "ctime": os.path.getctime(path)})
         return res
 
     @property

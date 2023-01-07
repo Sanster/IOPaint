@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useSetRecoilState } from 'recoil'
 import { nanoid } from 'nanoid'
 import useInputImage from './hooks/useInputImage'
 import { themeState } from './components/Header/ThemeChanger'
@@ -30,14 +30,10 @@ const SUPPORTED_FILE_TYPE = [
 function App() {
   const [file, setFile] = useRecoilState(fileState)
   const [theme, setTheme] = useRecoilState(themeState)
-  const [toastVal, setToastState] = useRecoilState(toastState)
+  const setToastState = useSetRecoilState(toastState)
   const userInputImage = useInputImage()
-  const [isDisableModelSwitch, setIsDisableModelSwitch] = useRecoilState(
-    isDisableModelSwitchState
-  )
-  const [enableFileManager, setEnableFileManager] = useRecoilState(
-    enableFileManagerState
-  )
+  const setIsDisableModelSwitch = useSetRecoilState(isDisableModelSwitchState)
+  const setEnableFileManager = useSetRecoilState(enableFileManagerState)
 
   // Set Input Image
   useEffect(() => {
@@ -70,7 +66,7 @@ function App() {
       setEnableFileManager(isEnabled === 'true')
     }
     fetchData2()
-  }, [])
+  }, [setEnableFileManager, setIsDisableModelSwitch])
 
   // Dark Mode Hotkey
   useHotKey(
@@ -118,35 +114,38 @@ function App() {
     setIsDragging(false)
   }, [])
 
-  const handleDrop = React.useCallback(event => {
-    event.preventDefault()
-    event.stopPropagation()
-    setIsDragging(false)
-    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
-      if (event.dataTransfer.files.length > 1) {
-        setToastState({
-          open: true,
-          desc: 'Please drag and drop only one file',
-          state: 'error',
-          duration: 3000,
-        })
-      } else {
-        const dragFile = event.dataTransfer.files[0]
-        const fileType = dragFile.type
-        if (SUPPORTED_FILE_TYPE.includes(fileType)) {
-          setFile(dragFile)
-        } else {
+  const handleDrop = React.useCallback(
+    event => {
+      event.preventDefault()
+      event.stopPropagation()
+      setIsDragging(false)
+      if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+        if (event.dataTransfer.files.length > 1) {
           setToastState({
             open: true,
-            desc: 'Please drag and drop an image file',
+            desc: 'Please drag and drop only one file',
             state: 'error',
             duration: 3000,
           })
+        } else {
+          const dragFile = event.dataTransfer.files[0]
+          const fileType = dragFile.type
+          if (SUPPORTED_FILE_TYPE.includes(fileType)) {
+            setFile(dragFile)
+          } else {
+            setToastState({
+              open: true,
+              desc: 'Please drag and drop an image file',
+              state: 'error',
+              duration: 3000,
+            })
+          }
         }
+        event.dataTransfer.clearData()
       }
-      event.dataTransfer.clearData()
-    }
-  }, [])
+    },
+    [setToastState, setFile]
+  )
 
   const onPaste = useCallback((event: any) => {
     // TODO: when sd side panel open, ctrl+v not work

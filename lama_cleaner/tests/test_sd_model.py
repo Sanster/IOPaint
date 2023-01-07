@@ -181,3 +181,28 @@ def test_runway_sd_1_5_cpu_offload(sd_device, strategy, sampler):
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
+
+
+@pytest.mark.parametrize("sd_device", ['cpu'])
+@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
+@pytest.mark.parametrize("sampler", [SDSampler.k_euler_a])
+def test_runway_sd_1_5_cpu_offload_cpu_device(sd_device, strategy, sampler):
+    model = ModelManager(name="sd1.5",
+                         device=torch.device(sd_device),
+                         hf_access_token="",
+                         sd_run_local=True,
+                         sd_disable_nsfw=False,
+                         sd_cpu_textencoder=False,
+                         cpu_offload=True)
+    cfg = get_config(strategy, prompt='a fox sitting on a bench', sd_steps=1, sd_scale=0.85)
+    cfg.sd_sampler = sampler
+
+    name = f"device_{sd_device}_{sampler}"
+
+    assert_equal(
+        model,
+        cfg,
+        f"runway_sd_{strategy.capitalize()}_{name}_cpu_offload_cpu_device.png",
+        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
+    )

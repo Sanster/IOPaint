@@ -48,7 +48,7 @@ def aspect_to_string(size):
     return "x".join(map(str, size))
 
 
-IMG_SUFFIX = {'.jpg', '.jpeg', '.png'}
+IMG_SUFFIX = {'.jpg', '.jpeg', '.png', '.JPG', '.JPEG', '.PNG'}
 
 
 def glob_img(p: Union[Path, str], recursive: bool = False):

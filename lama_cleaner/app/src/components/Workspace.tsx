@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react'
-import { useRecoilState, useRecoilValue } from 'recoil'
+import React, { useEffect } from 'react'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
 import Editor from './Editor/Editor'
 import ShortcutsModal from './Shortcuts/ShortcutsModal'
 import SettingModal from './Settings/SettingsModal'
@@ -24,7 +24,7 @@ import PESidePanel from './SidePanel/PESidePanel'
 import FileManager from './FileManager/FileManager'
 
 const Workspace = () => {
-  const [file, setFile] = useRecoilState(fileState)
+  const setFile = useSetRecoilState(fileState)
   const [settings, setSettingState] = useRecoilState(settingState)
   const [toastVal, setToastState] = useRecoilState(toastState)
   const isSD = useRecoilValue(isSDState)
