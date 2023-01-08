@@ -21,7 +21,7 @@ def parse_args():
     parser.add_argument(
         "--hf_access_token",
         default="",
-        help="Huggingface access token. Check how to get token from: https://huggingface.co/docs/hub/security-tokens",
+        help="SD model no more need token: https://github.com/huggingface/diffusers/issues/1447",
     )
     parser.add_argument(
         "--sd-disable-nsfw",
@@ -36,7 +36,7 @@ def parse_args():
     parser.add_argument(
         "--sd-run-local",
         action="store_true",
-        help="After first time Stable Diffusion model downloaded, you can add this arg and remove --hf_access_token.",
+        help="SD model no more need token, use --local-files-only to set not connect to huggingface server",
     )
     parser.add_argument(
         "--local-files-only",
@@ -86,11 +86,5 @@ def parse_args():
                 else:
                     if not output_dir.is_dir():
                         parser.error(f"invalid --output-dir: {output_dir} is not a directory")
-
-    if args.model == 'sd1.5' and not (args.sd_run_local or args.local_files_only):
-        if not args.hf_access_token.startswith("hf_"):
-            parser.error(
-                f"sd(stable-diffusion) model requires huggingface access token. Check how to get token from: https://huggingface.co/docs/hub/security-tokens"
-            )
 
     return args
