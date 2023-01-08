@@ -122,11 +122,13 @@ class FileManager(FileSystemEventHandler):
 
     @property
     def media_names(self):
-        return self.image_dir_filenames
+        # return self.image_dir_filenames
+        return self._media_names(self.root_directory)
 
     @property
     def output_media_names(self):
-        return self.output_dir_filenames
+        return self._media_names(self.output_dir)
+        # return self.output_dir_filenames
 
     @staticmethod
     def _media_names(directory: Path):

@@ -109,10 +109,10 @@ def medias(tab):
         response = make_response(jsonify(thumb.media_names), 200)
     else:
         response = make_response(jsonify(thumb.output_media_names), 200)
-    response.last_modified = thumb.modified_time[tab]
+    # response.last_modified = thumb.modified_time[tab]
     # response.cache_control.no_cache = True
     # response.cache_control.max_age = 0
-    response.make_conditional(request)
+    # response.make_conditional(request)
     return response
 
 
@@ -374,7 +374,7 @@ def main(args):
         app.config["THUMBNAIL_MEDIA_ROOT"] = args.input
         app.config["THUMBNAIL_MEDIA_THUMBNAIL_ROOT"] = os.path.join(args.output_dir, 'lama_cleaner_thumbnails')
         thumb.output_dir = Path(args.output_dir)
-        thumb.start()
+        # thumb.start()
         # try:
         #     while True:
         #         time.sleep(1)
