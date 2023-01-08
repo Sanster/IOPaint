@@ -109,6 +109,9 @@ export default function FileManager(props: Props) {
   )
 
   useEffect(() => {
+    if (!show) {
+      return
+    }
     const fetchData = async () => {
       try {
         const filenames = await getMedias(tab)
@@ -141,7 +144,15 @@ export default function FileManager(props: Props) {
       }
     }
     fetchData()
-  }, [setToastState, tab, debouncedSearchText, sortBy, sortOrder, photoWidth])
+  }, [
+    setToastState,
+    tab,
+    debouncedSearchText,
+    sortBy,
+    sortOrder,
+    photoWidth,
+    show,
+  ])
 
   const onScroll = (event: SyntheticEvent) => {
     setScrollTop(event.currentTarget.scrollTop)

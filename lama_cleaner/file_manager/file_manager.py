@@ -1,13 +1,17 @@
 # Copy from https://github.com/silentsokolov/flask-thumbnails/blob/master/flask_thumbnails/thumbnail.py
 import os
-from cachetools import TTLCache, cached
+from datetime import datetime
+
 import cv2
 import time
 from io import BytesIO
 from pathlib import Path
 import numpy as np
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 from PIL import Image, ImageOps, PngImagePlugin
+from loguru import logger
 
 LARGE_ENOUGH_NUMBER = 100
 PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024 ** 2)
@@ -15,7 +19,7 @@ from .storage_backends import FilesystemStorageBackend
 from .utils import aspect_to_string, generate_filename, glob_img
 
 
-class FileManager:
+class FileManager(FileSystemEventHandler):
     def __init__(self, app=None):
         self.app = app
         self._default_root_directory = "media"
@@ -27,6 +31,43 @@ class FileManager:
 
         if app is not None:
             self.init_app(app)
+
+        self.image_dir_filenames = []
+        self.output_dir_filenames = []
+
+        self.image_dir_observer = None
+        self.output_dir_observer = None
+
+        self.modified_time = {
+            "image": datetime.utcnow(),
+            "output": datetime.utcnow(),
+        }
+
+    def start(self):
+        self.image_dir_filenames = self._media_names(self.root_directory)
+        self.output_dir_filenames = self._media_names(self.output_dir)
+
+        logger.info(f"Start watching image directory: {self.root_directory}")
+        self.image_dir_observer = Observer()
+        self.image_dir_observer.schedule(self, self.root_directory, recursive=False)
+        self.image_dir_observer.start()
+
+        logger.info(f"Start watching output directory: {self.output_dir}")
+        self.output_dir_observer = Observer()
+        self.output_dir_observer.schedule(self, self.output_dir, recursive=False)
+        self.output_dir_observer.start()
+
+    def on_modified(self, event):
+        if not os.path.isdir(event.src_path):
+            return
+        if event.src_path == str(self.root_directory):
+            logger.info(f"Image directory {event.src_path} modified")
+            self.image_dir_filenames = self._media_names(self.root_directory)
+            self.modified_time['image'] = datetime.utcnow()
+        elif event.src_path == str(self.output_dir):
+            logger.info(f"Output directory {event.src_path} modified")
+            self.output_dir_filenames = self._media_names(self.output_dir)
+            self.modified_time['output'] = datetime.utcnow()
 
     def init_app(self, app):
         if self.app is None:
@@ -80,14 +121,12 @@ class FileManager:
         return self.app.config["THUMBNAIL_MEDIA_URL"]
 
     @property
-    @cached(cache=TTLCache(maxsize=1024, ttl=30))
     def media_names(self):
-        return self._media_names(self.root_directory)
+        return self.image_dir_filenames
 
     @property
-    @cached(cache=TTLCache(maxsize=1024, ttl=30))
     def output_media_names(self):
-        return self._media_names(self.output_dir)
+        return self.output_dir_filenames
 
     @staticmethod
     def _media_names(directory: Path):

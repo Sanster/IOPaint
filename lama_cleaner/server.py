@@ -16,6 +16,7 @@ import cv2
 import torch
 import numpy as np
 from loguru import logger
+from watchdog.events import FileSystemEventHandler
 
 from lama_cleaner.interactive_seg import InteractiveSeg, Click
 from lama_cleaner.model_manager import ModelManager
@@ -71,7 +72,7 @@ app.config["JSON_AS_ASCII"] = False
 CORS(app, expose_headers=["Content-Disposition"])
 
 model: ModelManager = None
-thumb = FileManager(app)
+thumb: FileManager = None
 interactive_seg_model: InteractiveSeg = None
 device = None
 input_image_path: str = None
@@ -105,9 +106,14 @@ def save_image():
 @app.route("/medias/<tab>")
 def medias(tab):
     if tab == 'image':
-        # all images in input folder
-        return jsonify(thumb.media_names), 200
-    return jsonify(thumb.output_media_names), 200
+        response = make_response(jsonify(thumb.media_names), 200)
+    else:
+        response = make_response(jsonify(thumb.output_media_names), 200)
+    response.last_modified = thumb.modified_time[tab]
+    # response.cache_control.no_cache = True
+    # response.cache_control.max_age = 0
+    response.make_conditional(request)
+    return response
 
 
 @app.route('/media/<tab>/<filename>')
@@ -340,6 +346,11 @@ def set_input_photo():
         return "No Input Image"
 
 
+class FSHandler(FileSystemEventHandler):
+    def on_modified(self, event):
+        print("File modified: %s" % event.src_path)
+
+
 def main(args):
     global model
     global interactive_seg_model
@@ -348,6 +359,7 @@ def main(args):
     global is_disable_model_switch
     global is_enable_file_manager
     global is_desktop
+    global thumb
 
     device = torch.device(args.device)
     is_disable_model_switch = args.disable_model_switch
@@ -356,10 +368,22 @@ def main(args):
         logger.info(f"Start with --disable-model-switch, model switch on frontend is disable")
 
     if os.path.isdir(args.input):
+        logger.info(f"Initialize file manager")
+        thumb = FileManager(app)
+        is_enable_file_manager = True
         app.config["THUMBNAIL_MEDIA_ROOT"] = args.input
         app.config["THUMBNAIL_MEDIA_THUMBNAIL_ROOT"] = os.path.join(args.output_dir, 'lama_cleaner_thumbnails')
-        is_enable_file_manager = True
         thumb.output_dir = Path(args.output_dir)
+        thumb.start()
+        # try:
+        #     while True:
+        #         time.sleep(1)
+        # finally:
+        #     thumb.image_dir_observer.stop()
+        #     thumb.image_dir_observer.join()
+        #     thumb.output_dir_observer.stop()
+        #     thumb.output_dir_observer.join()
+
     else:
         input_image_path = args.input
 
@@ -388,5 +412,4 @@ def main(args):
         )
         ui.run()
     else:
-        # TODO: socketio
         app.run(host=args.host, port=args.port, debug=args.debug)
