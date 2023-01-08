@@ -367,7 +367,7 @@ def main(args):
     if is_disable_model_switch:
         logger.info(f"Start with --disable-model-switch, model switch on frontend is disable")
 
-    if os.path.isdir(args.input):
+    if args.input and os.path.isdir(args.input):
         logger.info(f"Initialize file manager")
         thumb = FileManager(app)
         is_enable_file_manager = True
