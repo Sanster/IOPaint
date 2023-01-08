@@ -36,6 +36,7 @@ import {
   useImage,
 } from '../../utils'
 import {
+  appState,
   croperState,
   enableFileManagerState,
   fileState,
@@ -182,6 +183,7 @@ export default function Editor() {
 
   const [imageWidth, setImageWidth] = useRecoilState(imageWidthState)
   const [imageHeight, setImageHeight] = useRecoilState(imageHeightState)
+  const app = useRecoilValue(appState)
 
   const draw = useCallback(
     (render: HTMLImageElement, lineGroup: LineGroup) => {
@@ -1195,16 +1197,20 @@ export default function Editor() {
   useKeyPressEvent(
     ' ',
     ev => {
-      ev?.preventDefault()
-      ev?.stopPropagation()
-      setShowBrush(false)
-      setIsPanning(true)
+      if (!app.disableShortCuts) {
+        ev?.preventDefault()
+        ev?.stopPropagation()
+        setShowBrush(false)
+        setIsPanning(true)
+      }
     },
     ev => {
-      ev?.preventDefault()
-      ev?.stopPropagation()
-      setShowBrush(true)
-      setIsPanning(false)
+      if (!app.disableShortCuts) {
+        ev?.preventDefault()
+        ev?.stopPropagation()
+        setShowBrush(true)
+        setIsPanning(false)
+      }
     }
   )
 
