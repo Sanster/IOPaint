@@ -31,6 +31,7 @@ CONFIG_PATH = "config.json"
 class MODEL(str, Enum):
     SD15 = "sd1.5"
     LAMA = "lama"
+    PAINT_BY_EXAMPLE = 'paint_by_example'
 
 
 class DEVICE(str, Enum):
@@ -48,7 +49,7 @@ def info(c):
         c.run("python --version")
         c.run("which pip")
         c.run("pip --version")
-        c.run('pip list | grep "torch\|lama\|diffusers\|opencv\|cuda"')
+        c.run('pip list | grep "torch\|lama\|diffusers\|opencv\|cuda\|xformers\|accelerate"')
     except:
         pass
     print("-" * 60)
@@ -56,22 +57,9 @@ def info(c):
 
 @task(pre=[info])
 def config(c, disable_device_choice=False):
-    # TODO: 提示选择模型，选择设备，端口，host
-    # 如果是 sd 模型，提示接受条款和输入 huggingface token
     model = Prompt.ask(
-        "Choice model", choices=[MODEL.SD15, MODEL.LAMA], default=MODEL.SD15
+        "Choice model", choices=[MODEL.SD15, MODEL.LAMA, MODEL.PAINT_BY_EXAMPLE], default=MODEL.SD15
     )
-
-    hf_access_token = ""
-    if model == MODEL.SD15:
-        while True:
-            hf_access_token = Prompt.ask(
-                "Huggingface access token (https://huggingface.co/docs/hub/security-tokens)"
-            )
-            if hf_access_token == "":
-                log.warning("Access token is required to download model")
-            else:
-                break
 
     if disable_device_choice:
         device = DEVICE.CPU
@@ -93,7 +81,6 @@ def config(c, disable_device_choice=False):
     configs = {
         "model": model,
         "device": device,
-        "hf_access_token": hf_access_token,
         "desktop": desktop,
     }
     log.info(f"Save config to {CONFIG_PATH}")
@@ -114,17 +101,16 @@ def start(c):
 
     model = configs["model"]
     device = configs["device"]
-    hf_access_token = configs["hf_access_token"]
     desktop = configs["desktop"]
     port = find_free_port()
     log.info(f"Using random port: {port}")
 
     if desktop:
         c.run(
-            f"lama-cleaner --model {model} --device {device} --hf_access_token={hf_access_token} --port {port} --gui --gui-size 1400 900"
+            f"lama-cleaner --model {model} --device {device} --port {port} --gui --gui-size 1400 900"
         )
     else:
         c.run(
-            f"lama-cleaner --model {model} --device {device} --hf_access_token={hf_access_token} --port {port}"
+            f"lama-cleaner --model {model} --device {device} --port {port}"
         )
 

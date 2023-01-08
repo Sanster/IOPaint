@@ -40,15 +40,16 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
   5. [FcF](https://github.com/SHI-Labs/FcF-Inpainting)
   6. [SD1.5/SD2](https://github.com/runwayml/stable-diffusion)
   7. [Manga](https://github.com/msxie92/MangaInpainting)
-  8. [Paint by Example](https://github.com/Fantasy-Studio/Paint-by-Example)
+  8. [Paint by Example](https://github.com/Fantasy-Studio/Paint-by-Example) [YouTube Demo](https://www.youtube.com/watch?v=NSAN3TzfhaI&ab_channel=PanicByte)
 - Support CPU & GPU
 - Various inpainting [strategy](#inpainting-strategy)
 - Run as a desktop APP
-- [Interactive Segmentation](https://github.com/Sanster/lama-cleaner/releases/tag/0.28.0) on any object
+- [Interactive Segmentation](https://github.com/Sanster/lama-cleaner/releases/tag/0.28.0) on any object. [YouTube Demo](https://www.youtube.com/watch?v=xHdo8a4Mn2g&ab_channel=PanicByte)
 
 ## Usage
 
-A great introductory [youtube video](https://www.youtube.com/watch?v=aYia7Jvbjno&ab_channel=Aitrepreneur) made by **Aitrepreneur**
+A great introductory [youtube video](https://www.youtube.com/watch?v=aYia7Jvbjno&ab_channel=Aitrepreneur) made by **
+Aitrepreneur**
 
 <details>
 <summary>1. Remove any unwanted things on the image</summary>
@@ -101,31 +102,27 @@ lama-cleaner --model=lama --device=cpu --port=8080
 # Lama Cleaner is now running at http://localhost:8080
 ```
 
-For stable-diffusion 1.5 model, you need
-to [accepting the terms to access](https://huggingface.co/runwayml/stable-diffusion-inpainting), and
-get an access token from here [huggingface access token](https://huggingface.co/docs/hub/security-tokens)
-
 If you prefer to use docker, you can check out [docker](#docker)
 
 If you hava no idea what is docker or pip, please check [One Click Installer](./scripts/README.md)
 
 Available command line arguments:
 
-| Name                 | Description                                                                                                         | Default  |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------- | -------- |
-| --model              | lama/ldm/zits/mat/fcf/sd1.5/manga/sd2/paint_by_example See details in [Inpaint Model](#inpainting-model)            | lama     |
-| --hf_access_token    | stable-diffusion need [huggingface access token](https://huggingface.co/docs/hub/security-tokens) to download model |          |
-| --sd-run-local       | Once the model as downloaded, you can pass this arg and remove `--hf_access_token`                                  |          |
-| --sd-disable-nsfw    | Disable stable-diffusion NSFW checker.                                                                              |          |
-| --sd-cpu-textencoder | Always run stable-diffusion TextEncoder model on CPU.                                                               |          |
-| --sd-enable-xformers | Enable xFormers optimizations. See: [facebookresearch/xformers](https://github.com/facebookresearch/xformers)       |          |
-| --no-half            | Using full precision for sd/paint_by_exmaple model                                                                  |          |
-| --device             | cuda / cpu / mps                                                                                                    | cuda     |
-| --port               | Port for backend flask web server                                                                                   | 8080     |
-| --gui                | Launch lama-cleaner as a desktop application                                                                        |          |
-| --gui_size           | Set the window size for the application                                                                             | 1200 900 |
-| --input              | Path to image you want to load by default                                                                           | None     |
-| --debug              | Enable debug mode for flask web server                                                                              |          |
+| Name                 | Description                                                                                                   | Default  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- | -------- |
+| --model              | lama/ldm/zits/mat/fcf/sd1.5/manga/sd2/paint_by_example See details in [Inpaint Model](#inpainting-model)      | lama     |
+| --sd-disable-nsfw    | Disable stable-diffusion NSFW checker.                                                                        |          |
+| --sd-cpu-textencoder | Always run stable-diffusion TextEncoder model on CPU.                                                         |          |
+| --sd-enable-xformers | Enable xFormers optimizations. See: [facebookresearch/xformers](https://github.com/facebookresearch/xformers) |          |
+| --local-files-only   | Once the model as downloaded, you can pass this arg to avoid diffusers connect to huggingface server          |          |
+| --cpu-offload        | sd/paint_by_example model, offloads all models to CPU, sacrifice speed for reducing vRAM usage.               |
+| --no-half            | Using full precision for sd/paint_by_exmaple model                                                            |          |
+| --device             | cuda / cpu / mps                                                                                              | cuda     |
+| --port               | Port for backend flask web server                                                                             | 8080     |
+| --gui                | Launch lama-cleaner as a desktop application                                                                  |          |
+| --gui_size           | Set the window size for the application                                                                       | 1200 900 |
+| --input              | Path to image you want to load by default                                                                     | None     |
+| --debug              | Enable debug mode for flask web server                                                                        |          |
 
 ## Inpainting Model
 
