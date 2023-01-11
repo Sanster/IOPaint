@@ -68,6 +68,24 @@ const PESidePanel = () => {
         </PopoverPrimitive.Trigger>
         <PopoverPrimitive.Portal>
           <PopoverPrimitive.Content className="side-panel-content">
+            <SettingBlock
+              title="Croper"
+              input={
+                <Switch
+                  checked={setting.showCroper}
+                  onCheckedChange={value => {
+                    setSettingState(old => {
+                      return { ...old, showCroper: value }
+                    })
+                  }}
+                >
+                  <SwitchThumb />
+                </Switch>
+              }
+            />
+
+            <ImageResizeScale />
+
             <NumberInputSetting
               title="Steps"
               width={INPUT_WIDTH}
@@ -80,8 +98,6 @@ const PESidePanel = () => {
                 })
               }}
             />
-
-            <ImageResizeScale />
 
             <NumberInputSetting
               title="Guidance Scale"
