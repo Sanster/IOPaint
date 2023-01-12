@@ -114,7 +114,7 @@ Available command line arguments:
 | --sd-disable-nsfw    | Disable stable-diffusion NSFW checker.                                                                        |          |
 | --sd-cpu-textencoder | Always run stable-diffusion TextEncoder model on CPU.                                                         |          |
 | --sd-enable-xformers | Enable xFormers optimizations. See: [facebookresearch/xformers](https://github.com/facebookresearch/xformers) |          |
-| --local-files-only   | Once the model as downloaded, you can pass this arg to avoid diffusers connect to huggingface server          |          |
+| --local-files-only   | Once the model as downloaded, you can pass this arg to avoid diffusers connect to Hugging Face server          |          |
 | --cpu-offload        | sd/paint_by_example model, offloads all models to CPU, sacrifice speed for reducing vRAM usage.               |
 | --no-half            | Using full precision for sd/paint_by_exmaple model                                                            |          |
 | --device             | cuda / cpu / mps                                                                                              | cuda     |
