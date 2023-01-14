@@ -15,7 +15,7 @@ def get_cache_path_by_url(url):
     hub_dir = get_dir()
     model_dir = os.path.join(hub_dir, "checkpoints")
     if not os.path.isdir(model_dir):
-        os.makedirs(os.path.join(model_dir, "hub", "checkpoints"))
+        os.makedirs(model_dir)
     filename = os.path.basename(parts.path)
     cached_file = os.path.join(model_dir, filename)
     return cached_file
