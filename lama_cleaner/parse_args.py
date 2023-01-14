@@ -65,10 +65,27 @@ def parse_args():
         "--output-dir", type=str,
         help="Only required when --input is directory. Output directory for all processed images"
     )
+    parser.add_argument(
+        "--model-dir", type=str, default=None,
+        help="Model download directory (by setting XDG_CACHE_HOME environment variable), "
+             "by default model downloaded to ~/.cache"
+    )
     parser.add_argument("--disable-model-switch", action="store_true", help="Disable model switch in frontend")
     parser.add_argument("--debug", action="store_true")
 
     args = parser.parse_args()
+
+    if args.model_dir is not None:
+        if os.path.isfile(args.model_dir):
+            parser.error(f"invalid --model-dir: {args.model_dir} is a file")
+
+        if not os.path.exists(args.model_dir):
+            logger.info(f"Create model cache directory: {args.model_dir}")
+            Path(args.model_dir).mkdir(exist_ok=True, parents=True)
+
+        os.environ["XDG_CACHE_HOME"] = args.model_dir
+
+
     if args.input is not None:
         if not os.path.exists(args.input):
             parser.error(f"invalid --input: {args.input} not exists")
