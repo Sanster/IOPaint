@@ -1,4 +1,12 @@
 pipeline {
+  environment {
+    APP="huspy-lama-cleaner-service"
+    ENV=environment(BRANCH_NAME)
+    AWS_PROFILE="huspy-tools"
+    ECR="151712667821.dkr.ecr.eu-central-1.amazonaws.com"
+    APP_VERSION="${ENV}_v${BUILD_NUMBER}_${GIT_COMMIT}"
+  }
+
   agent {
     kubernetes {
       yaml """
@@ -41,61 +49,54 @@ spec:
 """
     }
   }
-    environment {
-        APP="huspy-lama-cleaner-service"
-        ENV=environment(BRANCH_NAME)
-        AWS_PROFILE="huspy-tools"
-        ECR="151712667821.dkr.ecr.eu-central-1.amazonaws.com"
-        APP_VERSION="${ENV}_v${BUILD_NUMBER}_${GIT_COMMIT}"
+
+  stages {
+    stage("Build with Kaniko") {
+      when {
+        anyOf {
+          expression { BRANCH_NAME ==~ /(release.*|development|fix.*|feature.*|bug.*|main)/ }
+        }
+      }
+      steps {
+        container(name: 'kaniko') {
+          sh """
+          /kaniko/executor --dockerfile `pwd`/Dockerfile --context `pwd` --destination=${ECR}/${APP}:${APP_VERSION}
+          """
+        }
+      }
     }
 
-    stages {
-        stage("Build with Kaniko") {
-            when {
-              anyOf {
-               expression { BRANCH_NAME ==~ /(release.*|development|fix.*|feature.*|bug.*|main)/ }
-              }
-            }
-            steps {
-                container(name: 'kaniko') {
-                sh """
-                /kaniko/executor --dockerfile `pwd`/Dockerfile --context `pwd` --destination=${ECR}/${APP}:${APP_VERSION}
-                """
-                }
-            }
+    stage("Update image in argocd") {
+      when {
+        anyOf {
+          expression { BRANCH_NAME ==~ /(release.*|development|fix.*|feature.*|bug.*|main)/ }
         }
-
-        stage("Update image in argocd") {
-            when {
-              anyOf {
-                expression { BRANCH_NAME ==~ /(release.*|development|fix.*|feature.*|bug.*|main)/ }
-              }
+      }
+      steps {
+        container(name: 'alpine') {
+          dir('huspy-services') {
+            git branch: 'main', credentialsId: 'yahiakhidr', url: 'https://github.com/huspy/huspy-services.git'
+          }
+          sh """
+          apk add yq git
+          cd huspy-services
+          yq e -i '.microservice.image.tag = "${APP_VERSION}"' helm/${APP}/${ENV}.yaml
+          git config --global --add safe.directory ${WORKSPACE}/huspy-services
+          git config --global user.email "github_actor@users.noreply.github.com"
+          git config --global user.name "github_actor"
+          git checkout main
+          git add helm/${APP}/${ENV}.yaml
+          git commit -m "Update ${APP} image in ${ENV}"
+          """
+          withCredentials([gitUsernamePassword(credentialsId: 'yahiakhidr')]) {
+            dir('huspy-services') {
+              sh 'git push origin main'
             }
-            steps {
-                container(name: 'alpine') {
-                  dir('huspy-services') {
-                    git branch: 'main', credentialsId: 'yahiakhidr', url: 'https://github.com/huspy/huspy-services.git'
-                  }
-                  sh """
-                  apk add yq git
-                  cd huspy-services
-                  yq e -i '.microservice.image.tag = "${APP_VERSION}"' helm/${APP}/${ENV}.yaml
-                  git config --global --add safe.directory ${WORKSPACE}/huspy-services
-                  git config --global user.email "github_actor@users.noreply.github.com"
-                  git config --global user.name "github_actor"
-                  git checkout main
-                  git add helm/${APP}/${ENV}.yaml
-                  git commit -m "Update ${APP} image in ${ENV}"
-                  """
-                  withCredentials([gitUsernamePassword(credentialsId: 'yahiakhidr')]) {
-                    dir('huspy-services') {
-                      sh 'git push origin main'
-                    }
-                  }
-                }
-            }
+          }
         }
+      }
     }
+  }
 }
 
 def environment(branch) {
