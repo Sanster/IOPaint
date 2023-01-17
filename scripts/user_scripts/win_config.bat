@@ -12,3 +12,5 @@ set PATH=C:\Windows\System32;%PATH%
 
 
 @call invoke config
+
+PAUSE

@@ -105,12 +105,23 @@ def start(c):
     port = find_free_port()
     log.info(f"Using random port: {port}")
 
+    commandline_args = [
+        "--model", model,
+        "--device", device,
+        "--port", port,
+    ]
+
     if desktop:
-        c.run(
-            f"lama-cleaner --model {model} --device {device} --port {port} --gui --gui-size 1400 900"
-        )
-    else:
-        c.run(
-            f"lama-cleaner --model {model} --device {device} --port {port}"
-        )
+        commandline_args.extend(["--gui", "--gui-size", "1400", "900"])
+
+    model_dir = os.environ.get('MODEL_DIR', "")
+    if model_dir:
+        commandline_args.extend(["--model-dir", model_dir])
+    
+    commandline_args = ' '.join(commandline_args)
+    env_commandline_args = os.environ.get('COMMANDLINE_ARGS', "")
+
+    c.run(
+        f"lama-cleaner {env_commandline_args} {commandline_args}"
+    )
 
