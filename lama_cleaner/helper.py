@@ -1,9 +1,11 @@
+import io
 import os
 import sys
 from typing import List, Optional
 
 from urllib.parse import urlparse
 import cv2
+from PIL import Image, ImageOps
 import numpy as np
 import torch
 from loguru import logger
@@ -85,16 +87,23 @@ def numpy_to_bytes(image_numpy: np.ndarray, ext: str) -> bytes:
 
 def load_img(img_bytes, gray: bool = False):
     alpha_channel = None
-    nparr = np.frombuffer(img_bytes, np.uint8)
+    image = Image.open(io.BytesIO(img_bytes))
+    try:
+        image = ImageOps.exif_transpose(image)
+    except:
+        pass
+
     if gray:
-        np_img = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
+        image = image.convert('L')
+        np_img = np.array(image)
     else:
-        np_img = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
-        if len(np_img.shape) == 3 and np_img.shape[2] == 4:
+        if image.mode == 'RGBA':
+            np_img = np.array(image)
             alpha_channel = np_img[:, :, -1]
-            np_img = cv2.cvtColor(np_img, cv2.COLOR_BGRA2RGB)
+            np_img = cv2.cvtColor(np_img, cv2.COLOR_RGBA2RGB)
         else:
-            np_img = cv2.cvtColor(np_img, cv2.COLOR_BGR2RGB)
+            image = image.convert('RGB')
+            np_img = np.array(image)
 
     return np_img, alpha_channel
 
