@@ -48,7 +48,7 @@ lama-cleaner --model=lama --device=cpu --port=8080
 
 That's it, Lama Cleaner is now running at http://localhost:8080
 
-See all command line arguments at [lama-cleaner-docs](https://lama-cleaner-docs.vercel.app/)
+See all command line arguments at [lama-cleaner-docs](https://lama-cleaner-docs.vercel.app/install/pip)
 
 ## Development
 
