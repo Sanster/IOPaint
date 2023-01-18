@@ -37,10 +37,12 @@ class SD(InpaintModel):
         fp16 = not kwargs.get('no_half', False)
 
         model_kwargs = {"local_files_only": kwargs.get('local_files_only', kwargs['sd_run_local'])}
-        if kwargs['sd_disable_nsfw']:
+        if kwargs['disable_nsfw'] or kwargs.get('cpu_offload', False):
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(dict(
                 safety_checker=None,
+                feature_extractor=None,
+                requires_safety_checker=False
             ))
 
         use_gpu = device == torch.device('cuda') and torch.cuda.is_available()
@@ -52,19 +54,19 @@ class SD(InpaintModel):
             use_auth_token=kwargs["hf_access_token"],
             **model_kwargs
         )
-        self.model = self.model.to(device)
 
         # https://huggingface.co/docs/diffusers/v0.7.0/en/api/pipelines/stable_diffusion#diffusers.StableDiffusionInpaintPipeline.enable_attention_slicing
         self.model.enable_attention_slicing()
         # https://huggingface.co/docs/diffusers/v0.7.0/en/optimization/fp16#memory-efficient-attention
-        if kwargs.get('sd_enable_xformers', False):
+        if kwargs.get('enable_xformers', False):
             self.model.enable_xformers_memory_efficient_attention()
 
-        if kwargs.get('cpu_offload', False) and torch.cuda.is_available():
+        if kwargs.get('cpu_offload', False) and use_gpu:
             # TODO: gpu_id
             logger.info("Enable sequential cpu offload")
             self.model.enable_sequential_cpu_offload(gpu_id=0)
         else:
+            self.model = self.model.to(device)
             if kwargs['sd_cpu_textencoder']:
                 logger.info("Run Stable Diffusion TextEncoder on CPU")
                 self.model.text_encoder = CPUTextEncoderWrapper(self.model.text_encoder, torch_dtype)

@@ -392,12 +392,12 @@ def main(args):
         device=device,
         no_half=args.no_half,
         hf_access_token=args.hf_access_token,
-        sd_disable_nsfw=args.sd_disable_nsfw,
+        disable_nsfw=args.sd_disable_nsfw or args.disable_nsfw,
         sd_cpu_textencoder=args.sd_cpu_textencoder,
         sd_run_local=args.sd_run_local,
         local_files_only=args.local_files_only,
         cpu_offload=args.cpu_offload,
-        sd_enable_xformers=args.sd_enable_xformers,
+        enable_xformers=args.sd_enable_xformers or args.enable_xformers,
         callback=diffuser_callback,
     )
 

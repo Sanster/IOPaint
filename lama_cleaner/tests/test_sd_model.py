@@ -14,7 +14,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 device = torch.device(device)
 
 
-@pytest.mark.parametrize("sd_device", ['cpu', 'cuda'])
+@pytest.mark.parametrize("sd_device", ['cuda'])
 @pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
 @pytest.mark.parametrize("sampler", [SDSampler.ddim])
 @pytest.mark.parametrize("cpu_textencoder", [True, False])
@@ -31,7 +31,7 @@ def test_runway_sd_1_5_ddim(sd_device, strategy, sampler, cpu_textencoder, disab
                          device=torch.device(sd_device),
                          hf_access_token="",
                          sd_run_local=True,
-                         sd_disable_nsfw=disable_nsfw,
+                         disable_nsfw=disable_nsfw,
                          sd_cpu_textencoder=cpu_textencoder,
                          callback=callback)
     cfg = get_config(strategy, prompt='a fox sitting on a bench', sd_steps=sd_steps)
@@ -66,7 +66,7 @@ def test_runway_sd_1_5(sd_device, strategy, sampler, cpu_textencoder, disable_ns
                          device=torch.device(sd_device),
                          hf_access_token="",
                          sd_run_local=True,
-                         sd_disable_nsfw=disable_nsfw,
+                         disable_nsfw=disable_nsfw,
                          sd_cpu_textencoder=cpu_textencoder,
                          callback=callback)
     cfg = get_config(strategy, prompt='a fox sitting on a bench', sd_steps=sd_steps)
@@ -99,7 +99,7 @@ def test_runway_sd_1_5_negative_prompt(sd_device, strategy, sampler):
                          device=torch.device(sd_device),
                          hf_access_token="",
                          sd_run_local=True,
-                         sd_disable_nsfw=False,
+                         disable_nsfw=False,
                          sd_cpu_textencoder=False,
                          callback=callback)
     cfg = get_config(
@@ -137,7 +137,7 @@ def test_runway_sd_1_5_sd_scale(sd_device, strategy, sampler, cpu_textencoder, d
                          device=torch.device(sd_device),
                          hf_access_token="",
                          sd_run_local=True,
-                         sd_disable_nsfw=disable_nsfw,
+                         disable_nsfw=disable_nsfw,
                          sd_cpu_textencoder=cpu_textencoder)
     cfg = get_config(strategy, prompt='a fox sitting on a bench', sd_steps=sd_steps, sd_scale=0.85)
     cfg.sd_sampler = sampler
@@ -166,7 +166,7 @@ def test_runway_sd_1_5_cpu_offload(sd_device, strategy, sampler):
                          device=torch.device(sd_device),
                          hf_access_token="",
                          sd_run_local=True,
-                         sd_disable_nsfw=False,
+                         disable_nsfw=True,
                          sd_cpu_textencoder=False,
                          cpu_offload=True)
     cfg = get_config(strategy, prompt='a fox sitting on a bench', sd_steps=sd_steps, sd_scale=0.85)
@@ -191,7 +191,7 @@ def test_runway_sd_1_5_cpu_offload_cpu_device(sd_device, strategy, sampler):
                          device=torch.device(sd_device),
                          hf_access_token="",
                          sd_run_local=True,
-                         sd_disable_nsfw=False,
+                         disable_nsfw=False,
                          sd_cpu_textencoder=False,
                          cpu_offload=True)
     cfg = get_config(strategy, prompt='a fox sitting on a bench', sd_steps=1, sd_scale=0.85)

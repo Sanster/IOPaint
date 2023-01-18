@@ -102,7 +102,7 @@ if __name__ == "__main__":
         name=args.name,
         device=device,
         sd_run_local=True,
-        sd_disable_nsfw=True,
+        disable_nsfw=True,
         sd_cpu_textencoder=True,
         hf_access_token="123"
     )

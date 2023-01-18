@@ -29,6 +29,11 @@ def parse_args():
         help="Disable Stable Diffusion NSFW checker",
     )
     parser.add_argument(
+        "--disable-nsfw",
+        action="store_true",
+        help="Disable Stable Diffusion/Paint By Example NSFW checker",
+    )
+    parser.add_argument(
         "--sd-cpu-textencoder",
         action="store_true",
         help="Always run Stable Diffusion TextEncoder model on CPU",
@@ -47,6 +52,11 @@ def parse_args():
         "--sd-enable-xformers",
         action="store_true",
         help="Enable xFormers optimizations. Requires that xformers package has been installed. See: https://github.com/facebookresearch/xformers"
+    )
+    parser.add_argument(
+        "--enable-xformers",
+        action="store_true",
+        help="sd/paint_by_example model. Enable xFormers optimizations. Requires that xformers package has been installed. See: https://github.com/facebookresearch/xformers"
     )
     parser.add_argument("--device", default="cuda", type=str, choices=["cuda", "cpu", "mps"])
     parser.add_argument("--gui", action="store_true", help="Launch as desktop app")
@@ -78,7 +88,8 @@ def parse_args():
     if args.device == "cuda":
         import torch
         if torch.cuda.is_available() is False:
-            parser.error("torch.cuda.is_available() is False, please use --device cpu or check your pytorch installation")
+            parser.error(
+                "torch.cuda.is_available() is False, please use --device cpu or check your pytorch installation")
 
     if args.model_dir is not None:
         if os.path.isfile(args.model_dir):
@@ -89,7 +100,6 @@ def parse_args():
             Path(args.model_dir).mkdir(exist_ok=True, parents=True)
 
         os.environ["XDG_CACHE_HOME"] = args.model_dir
-
 
     if args.input is not None:
         if not os.path.exists(args.input):
