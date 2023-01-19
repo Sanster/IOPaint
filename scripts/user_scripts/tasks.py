@@ -118,7 +118,7 @@ def start(c):
     if model_dir:
         commandline_args.extend(["--model-dir", model_dir])
     
-    commandline_args = ' '.join(commandline_args)
+    commandline_args = ' '.join([str(it) for it in commandline_args])
     env_commandline_args = os.environ.get('COMMANDLINE_ARGS', "")
 
     c.run(
