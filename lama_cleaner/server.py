@@ -408,7 +408,8 @@ def main(args):
         from flaskwebgui import FlaskUI
 
         ui = FlaskUI(
-            app, width=app_width, height=app_height, host=args.host, port=args.port
+            app, width=app_width, height=app_height, host=args.host, port=args.port,
+            close_server_on_exit=not args.no_gui_auto_close
         )
         ui.run()
     else:

@@ -13,3 +13,4 @@ scikit-image==0.19.3
 diffusers[torch]==0.10.2
 transformers>=4.25.1
 watchdog==2.2.1
+gradio
