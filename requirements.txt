@@ -5,6 +5,7 @@ flask==1.1.4
 flaskwebgui==0.3.5
 tqdm
 pydantic
+rich
 loguru
 pytest
 yacs
@@ -13,3 +14,4 @@ scikit-image==0.19.3
 diffusers[torch]==0.10.2
 transformers>=4.25.1
 watchdog==2.2.1
+gradio

@@ -5,19 +5,47 @@ from pathlib import Path
 
 from loguru import logger
 
+from lama_cleaner.const import AVAILABLE_MODELS, NO_HALF_HELP, CPU_OFFLOAD_HELP, DISABLE_NSFW_HELP, \
+    SD_CPU_TEXTENCODER_HELP, LOCAL_FILES_ONLY_HELP, AVAILABLE_DEVICES, ENABLE_XFORMERS_HELP, MODEL_DIR_HELP, \
+    OUTPUT_DIR_HELP, INPUT_HELP, GUI_HELP, DEFAULT_DEVICE, NO_GUI_AUTO_CLOSE_HELP, DEFAULT_MODEL_DIR
+from lama_cleaner.runtime import dump_environment_info
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", default=8080, type=int)
+
+    parser.add_argument("--config-installer", action="store_true",
+                        help="Open config web page, mainly for windows installer")
+    parser.add_argument("--load-installer-config", action="store_true",
+                        help="Load all cmd args from installer config file")
+    parser.add_argument("--installer-config", default=None, help="Config file for windows installer")
+
+    parser.add_argument("--model", default="lama", choices=AVAILABLE_MODELS)
+    parser.add_argument("--no-half", action="store_true", help=NO_HALF_HELP)
+    parser.add_argument("--cpu-offload", action="store_true", help=CPU_OFFLOAD_HELP)
+    parser.add_argument("--disable-nsfw", action="store_true", help=DISABLE_NSFW_HELP)
+    parser.add_argument("--sd-cpu-textencoder", action="store_true", help=SD_CPU_TEXTENCODER_HELP)
+    parser.add_argument("--local-files-only", action="store_true", help=LOCAL_FILES_ONLY_HELP)
+    parser.add_argument("--enable-xformers", action="store_true", help=ENABLE_XFORMERS_HELP)
+    parser.add_argument("--device", default=DEFAULT_DEVICE, type=str, choices=AVAILABLE_DEVICES)
+    parser.add_argument("--gui", action="store_true", help=GUI_HELP)
+    parser.add_argument("--no-gui-auto-close", action="store_true", help=NO_GUI_AUTO_CLOSE_HELP)
     parser.add_argument(
-        "--model",
-        default="lama",
-        choices=["lama", "ldm", "zits", "mat", "fcf", "sd1.5", "cv2", "manga", "sd2", "paint_by_example"],
+        "--gui-size",
+        default=[1600, 1000],
+        nargs=2,
+        type=int,
+        help="Set window size for GUI",
     )
-    parser.add_argument("--no-half", action="store_true", help="sd/paint_by_example model no half precision")
-    parser.add_argument("--cpu-offload", action="store_true",
-                        help="sd/paint_by_example model, offloads all models to CPU, significantly reducing vRAM usage.")
+    parser.add_argument("--input", type=str, default=None, help=INPUT_HELP)
+    parser.add_argument("--output-dir", type=str, default=None, help=OUTPUT_DIR_HELP)
+    parser.add_argument("--model-dir", type=str, default=DEFAULT_MODEL_DIR, help=MODEL_DIR_HELP)
+    parser.add_argument("--disable-model-switch", action="store_true", help="Disable model switch in frontend")
+    parser.add_argument("--debug", action="store_true")
+
+    # useless args
     parser.add_argument(
         "--hf_access_token",
         default="",
@@ -29,61 +57,39 @@ def parse_args():
         help="Disable Stable Diffusion NSFW checker",
     )
     parser.add_argument(
-        "--disable-nsfw",
-        action="store_true",
-        help="Disable Stable Diffusion/Paint By Example NSFW checker",
-    )
-    parser.add_argument(
-        "--sd-cpu-textencoder",
-        action="store_true",
-        help="Always run Stable Diffusion TextEncoder model on CPU",
-    )
-    parser.add_argument(
         "--sd-run-local",
         action="store_true",
         help="SD model no more need token, use --local-files-only to set not connect to huggingface server",
-    )
-    parser.add_argument(
-        "--local-files-only",
-        action="store_true",
-        help="sd/paint_by_example model. Use local files only, not connect to huggingface server",
     )
     parser.add_argument(
         "--sd-enable-xformers",
         action="store_true",
         help="Enable xFormers optimizations. Requires that xformers package has been installed. See: https://github.com/facebookresearch/xformers"
     )
-    parser.add_argument(
-        "--enable-xformers",
-        action="store_true",
-        help="sd/paint_by_example model. Enable xFormers optimizations. Requires that xformers package has been installed. See: https://github.com/facebookresearch/xformers"
-    )
-    parser.add_argument("--device", default="cuda", type=str, choices=["cuda", "cpu", "mps"])
-    parser.add_argument("--gui", action="store_true", help="Launch as desktop app")
-    parser.add_argument(
-        "--gui-size",
-        default=[1600, 1000],
-        nargs=2,
-        type=int,
-        help="Set window size for GUI",
-    )
-    parser.add_argument(
-        "--input", type=str,
-        help="If input is image, it will be load by default. If input is directory, all images will be loaded to file manager"
-    )
-    parser.add_argument(
-        "--output-dir", type=str,
-        help="Only required when --input is directory. Output directory for all processed images"
-    )
-    parser.add_argument(
-        "--model-dir", type=str, default=None,
-        help="Model download directory (by setting XDG_CACHE_HOME environment variable), "
-             "by default model downloaded to ~/.cache"
-    )
-    parser.add_argument("--disable-model-switch", action="store_true", help="Disable model switch in frontend")
-    parser.add_argument("--debug", action="store_true")
 
     args = parser.parse_args()
+
+    # collect system info to help debug
+    dump_environment_info()
+
+    if args.config_installer:
+        if args.installer_config is None:
+            parser.error(f"args.config_installer==True, must set args.installer_config to store config file")
+        from lama_cleaner.web_config import main
+        logger.info(f"Launching installer web config page")
+        main(args.installer_config)
+        exit()
+
+    if args.load_installer_config:
+        from lama_cleaner.web_config import load_config
+        if args.installer_config and not os.path.exists(args.installer_config):
+            parser.error(f"args.installer_config={args.installer_config} not exists")
+
+        logger.info(f"Loading installer config from {args.installer_config}")
+        _args = load_config(args.installer_config)
+        for k, v in vars(_args).items():
+            if k in vars(args):
+                setattr(args, k, v)
 
     if args.device == "cuda":
         import torch
@@ -91,7 +97,7 @@ def parse_args():
             parser.error(
                 "torch.cuda.is_available() is False, please use --device cpu or check your pytorch installation")
 
-    if args.model_dir is not None:
+    if args.model_dir and args.model_dir is not None:
         if os.path.isfile(args.model_dir):
             parser.error(f"invalid --model-dir: {args.model_dir} is a file")
 
@@ -101,7 +107,7 @@ def parse_args():
 
         os.environ["XDG_CACHE_HOME"] = args.model_dir
 
-    if args.input is not None:
+    if args.input and args.input is not None:
         if not os.path.exists(args.input):
             parser.error(f"invalid --input: {args.input} not exists")
         if os.path.isfile(args.input):
