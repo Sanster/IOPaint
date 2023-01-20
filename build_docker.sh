@@ -15,7 +15,7 @@ docker buildx build \
 --label org.opencontainers.image.source=$GIT_REPO \
 --label org.opencontainers.image.version=$GIT_TAG \
 --build-arg version=$GIT_TAG \
---tag lama-cleaner:cpu-$GIT_TAG .
+--tag cwq1913/lama-cleaner:cpu-$GIT_TAG .
 
 
 echo "Building NVIDIA GPU docker image..."
@@ -28,4 +28,4 @@ docker buildx build \
 --label org.opencontainers.image.source=$GIT_REPO \
 --label org.opencontainers.image.version=$GIT_TAG \
 --build-arg version=$GIT_TAG \
---tag lama-cleaner:gpu-$GIT_TAG .
+--tag cwq1913/lama-cleaner:gpu-$GIT_TAG .

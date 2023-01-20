@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl
 
 RUN pip install --upgrade pip && \
-    pip install torch==1.12.1 --extra-index-url https://download.pytorch.org/whl/cpu
+    pip install torch==1.13.1 --extra-index-url https://download.pytorch.org/whl/cpu
 
 ARG version
 

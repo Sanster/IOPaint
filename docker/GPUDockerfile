@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.6.1-runtime-ubuntu20.04
+FROM nvidia/cuda:11.7.1-runtime-ubuntu20.04
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     software-properties-common \
@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl python3-pip
 
 RUN pip3 install --upgrade pip && \
-    pip3 install torch==1.12.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116
-    
+    pip3 install torch==1.13.1 xformers==0.0.16rc425
+
 ARG version 
 
 RUN pip3 install lama-cleaner==$version
