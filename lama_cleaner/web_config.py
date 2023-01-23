@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from lama_cleaner.const import AVAILABLE_MODELS, AVAILABLE_DEVICES, CPU_OFFLOAD_HELP, NO_HALF_HELP, DISABLE_NSFW_HELP, \
     SD_CPU_TEXTENCODER_HELP, LOCAL_FILES_ONLY_HELP, ENABLE_XFORMERS_HELP, MODEL_DIR_HELP, OUTPUT_DIR_HELP, INPUT_HELP, \
-    GUI_HELP, DEFAULT_MODEL, DEFAULT_DEVICE, NO_GUI_AUTO_CLOSE_HELP
+    GUI_HELP, DEFAULT_MODEL, DEFAULT_DEVICE, NO_GUI_AUTO_CLOSE_HELP, DEFAULT_MODEL_DIR
 
 _config_file = None
 
@@ -26,7 +26,7 @@ class Config(BaseModel):
     sd_cpu_textencoder: bool = False
     enable_xformers: bool = False
     local_files_only: bool = False
-    model_dir: str = None
+    model_dir: str = DEFAULT_MODEL_DIR
     input: str = None
     output_dir: str = None
 

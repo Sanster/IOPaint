@@ -1,3 +1,5 @@
+import os
+
 DEFAULT_MODEL = "lama"
 AVAILABLE_MODELS = [
     "lama",
@@ -40,6 +42,7 @@ ENABLE_XFORMERS_HELP = """
 Enable xFormers optimizations. Requires xformers package has been installed. See: https://github.com/facebookresearch/xformers (sd/paint_by_example)
 """
 
+DEFAULT_MODEL_DIR = os.path.join(os.getenv("XDG_CACHE_HOME", os.path.expanduser("~/.cache")))
 MODEL_DIR_HELP = """
 Model download directory (by setting XDG_CACHE_HOME environment variable), by default model downloaded to ~/.cache
 """

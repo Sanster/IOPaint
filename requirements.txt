@@ -5,6 +5,7 @@ flask==1.1.4
 flaskwebgui==0.3.5
 tqdm
 pydantic
+rich
 loguru
 pytest
 yacs

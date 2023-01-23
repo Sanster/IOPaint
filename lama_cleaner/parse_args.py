@@ -7,7 +7,8 @@ from loguru import logger
 
 from lama_cleaner.const import AVAILABLE_MODELS, NO_HALF_HELP, CPU_OFFLOAD_HELP, DISABLE_NSFW_HELP, \
     SD_CPU_TEXTENCODER_HELP, LOCAL_FILES_ONLY_HELP, AVAILABLE_DEVICES, ENABLE_XFORMERS_HELP, MODEL_DIR_HELP, \
-    OUTPUT_DIR_HELP, INPUT_HELP, GUI_HELP, DEFAULT_DEVICE, NO_GUI_AUTO_CLOSE_HELP
+    OUTPUT_DIR_HELP, INPUT_HELP, GUI_HELP, DEFAULT_DEVICE, NO_GUI_AUTO_CLOSE_HELP, DEFAULT_MODEL_DIR
+from lama_cleaner.runtime import dump_environment_info
 
 
 def parse_args():
@@ -40,7 +41,7 @@ def parse_args():
     )
     parser.add_argument("--input", type=str, default=None, help=INPUT_HELP)
     parser.add_argument("--output-dir", type=str, default=None, help=OUTPUT_DIR_HELP)
-    parser.add_argument("--model-dir", type=str, default=None, help=MODEL_DIR_HELP)
+    parser.add_argument("--model-dir", type=str, default=DEFAULT_MODEL_DIR, help=MODEL_DIR_HELP)
     parser.add_argument("--disable-model-switch", action="store_true", help="Disable model switch in frontend")
     parser.add_argument("--debug", action="store_true")
 
@@ -67,6 +68,10 @@ def parse_args():
     )
 
     args = parser.parse_args()
+
+    # collect system info to help debug
+    dump_environment_info()
+
     if args.config_installer:
         if args.installer_config is None:
             parser.error(f"args.config_installer==True, must set args.installer_config to store config file")
