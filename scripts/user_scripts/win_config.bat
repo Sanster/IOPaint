@@ -11,6 +11,6 @@ set PATH=C:\Windows\System32;%PATH%
 @call pip3 install -U lama-cleaner
 
 
-@call lama-cleaner --web-config --installer-config %0\..\installer_config.json
+@call lama-cleaner --config-installer --installer-config %0\..\installer_config.json
 
 PAUSE
