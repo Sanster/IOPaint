@@ -44,7 +44,7 @@ Enable xFormers optimizations. Requires xformers package has been installed. See
 
 DEFAULT_MODEL_DIR = os.getenv(
     "XDG_CACHE_HOME",
-    os.path.join(os.path.expanduser("~/"), ".cache")
+    os.path.join(os.path.expanduser("~"), ".cache")
 )
 MODEL_DIR_HELP = """
 Model download directory (by setting XDG_CACHE_HOME environment variable), by default model downloaded to ~/.cache
