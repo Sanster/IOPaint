@@ -8,7 +8,6 @@
   color: var(--modal-text-color);
   box-shadow: 0px 0px 20px rgb(0, 0, 40, 0.2);
   width: 680px;
-  min-height: 420px;
 
   @include mobile {
     display: grid;
