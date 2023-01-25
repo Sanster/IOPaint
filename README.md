@@ -59,6 +59,6 @@ Only needed if you plan to modify the frontend and recompile yourself.
 Frontend code are modified from [cleanup.pictures](https://github.com/initml/cleanup.pictures), You can experience their
 great online services [here](https://cleanup.pictures/).
 
-- Install dependencies:`cd lama_cleaner/app/ && yarn`
-- Start development server: `yarn start`
-- Build: `yarn build`
+- Install dependencies:`cd lama_cleaner/app/ && pnpm install`
+- Start development server: `pnpm start`
+- Build: `pnpm build`

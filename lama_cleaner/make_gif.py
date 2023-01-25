@@ -129,22 +129,22 @@ if __name__ == '__main__':
             '/Users/qing/code/github/lama-cleaner/assets/unwant_person.jpg',
             '/Users/qing/code/github/lama-cleaner/assets/unwant_person_clean.jpg'
         ),
-        (
-            '/Users/qing/code/github/lama-cleaner/assets/old_photo.jpg',
-            '/Users/qing/code/github/lama-cleaner/assets/old_photo_clean.jpg'
-        ),
-        (
-            '/Users/qing/code/github/lama-cleaner/assets/unwant_object.jpg',
-            '/Users/qing/code/github/lama-cleaner/assets/unwant_object_clean.jpg'
-        ),
-        (
-            '/Users/qing/code/github/lama-cleaner/assets/unwant_text.jpg',
-            '/Users/qing/code/github/lama-cleaner/assets/unwant_text_clean.jpg'
-        ),
-        (
-            '/Users/qing/code/github/lama-cleaner/assets/watermark.jpg',
-            '/Users/qing/code/github/lama-cleaner/assets/watermark_cleanup.jpg'
-        ),
+        # (
+        #     '/Users/qing/code/github/lama-cleaner/assets/old_photo.jpg',
+        #     '/Users/qing/code/github/lama-cleaner/assets/old_photo_clean.jpg'
+        # ),
+        # (
+        #     '/Users/qing/code/github/lama-cleaner/assets/unwant_object.jpg',
+        #     '/Users/qing/code/github/lama-cleaner/assets/unwant_object_clean.jpg'
+        # ),
+        # (
+        #     '/Users/qing/code/github/lama-cleaner/assets/unwant_text.jpg',
+        #     '/Users/qing/code/github/lama-cleaner/assets/unwant_text_clean.jpg'
+        # ),
+        # (
+        #     '/Users/qing/code/github/lama-cleaner/assets/watermark.jpg',
+        #     '/Users/qing/code/github/lama-cleaner/assets/watermark_cleanup.jpg'
+        # ),
     ]
     for src_p, clean_p in imgs:
         img_bytes = make_compare_gif(Image.open(src_p), Image.open(clean_p), max_side_length=600)
