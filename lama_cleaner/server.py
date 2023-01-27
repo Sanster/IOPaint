@@ -19,6 +19,7 @@ from loguru import logger
 from watchdog.events import FileSystemEventHandler
 
 from lama_cleaner.interactive_seg import InteractiveSeg, Click
+from lama_cleaner.make_gif import make_compare_gif
 from lama_cleaner.model_manager import ModelManager
 from lama_cleaner.schema import Config
 from lama_cleaner.file_manager import FileManager
@@ -91,6 +92,26 @@ def get_image_ext(img_bytes):
 def diffuser_callback(i, t, latents):
     pass
     # socketio.emit('diffusion_step', {'diffusion_step': step})
+
+
+@app.route("/make_gif", methods=["POST"])
+def make_gif():
+    input = request.files
+    filename = request.form["filename"]
+    origin_image_bytes = input["origin_img"].read()
+    clean_image_bytes = input["clean_img"].read()
+    origin_image, _ = load_img(origin_image_bytes)
+    clean_image, _ = load_img(clean_image_bytes)
+    gif_bytes = make_compare_gif(
+        Image.fromarray(origin_image),
+        Image.fromarray(clean_image)
+    )
+    return send_file(
+        io.BytesIO(gif_bytes),
+        mimetype='image/gif',
+        as_attachment=True,
+        attachment_filename=filename
+    )
 
 
 @app.route("/save_image", methods=["POST"])

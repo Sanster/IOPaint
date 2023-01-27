@@ -70,7 +70,6 @@ const CoffeeIcon = () => {
                 }}
               >
                 Sure
-                <Coffee />
               </div>
             </Button>
           </a>

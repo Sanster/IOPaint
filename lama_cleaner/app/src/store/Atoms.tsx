@@ -45,6 +45,7 @@ interface AppState {
   interactiveSegClicks: number[][]
   showFileManager: boolean
   enableFileManager: boolean
+  gifImage: HTMLImageElement | undefined
 }
 
 export const appState = atom<AppState>({
@@ -61,6 +62,7 @@ export const appState = atom<AppState>({
     interactiveSegClicks: [],
     showFileManager: false,
     enableFileManager: false,
+    gifImage: undefined,
   },
 })
 
@@ -131,6 +133,18 @@ export const enableFileManagerState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, enableFileManager: newValue })
+  },
+})
+
+export const gifImageState = selector({
+  key: 'gifImageState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.gifImage
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, gifImage: newValue })
   },
 })
 

@@ -95,10 +95,8 @@
 }
 
 .editor-toolkit-btns {
-  grid-area: toolkit-btns;
-  display: grid;
-  grid-auto-flow: column;
-  column-gap: 1rem;
+  display: flex;
+  gap: 12px;
 }
 
 .brush-shape {

@@ -69,6 +69,8 @@ def make_compare_gif(
     cubic_bezier_points = cubic_bezier((0.33, 0), (0.66, 1), 1, num_frames)
     cubic_bezier_points.reverse()
 
+    max_side_length = min(max_side_length, max(clean_img.size))
+
     src_img = keep_ratio_resize(src_img, max_side_length)
     clean_img = keep_ratio_resize(clean_img, max_side_length)
     width, height = src_img.size

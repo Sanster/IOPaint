@@ -3,7 +3,7 @@ import * as ToastPrimitive from '@radix-ui/react-toast'
 import { ToastProps } from '@radix-ui/react-toast'
 import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline'
 
-const LoadingIcon = () => {
+export const LoadingIcon = () => {
   return (
     <span className="loading-icon">
       <svg

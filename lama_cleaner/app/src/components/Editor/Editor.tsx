@@ -16,10 +16,11 @@ import {
   TransformComponent,
   TransformWrapper,
 } from 'react-zoom-pan-pinch'
-import { useRecoilState, useRecoilValue } from 'recoil'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
 import { useWindowSize, useKey, useKeyPressEvent } from 'react-use'
 import inpaint, {
   downloadToOutput,
+  makeGif,
   postInteractiveSeg,
 } from '../../adapters/inpainting'
 import Button from '../shared/Button'
@@ -40,6 +41,7 @@ import {
   croperState,
   enableFileManagerState,
   fileState,
+  gifImageState,
   imageHeightState,
   imageWidthState,
   interactiveSegClicksState,
@@ -66,6 +68,7 @@ import FileSelect from '../FileSelect/FileSelect'
 import InteractiveSeg from '../InteractiveSeg/InteractiveSeg'
 import InteractiveSegConfirmActions from '../InteractiveSeg/ConfirmActions'
 import InteractiveSegReplaceModal from '../InteractiveSeg/ReplaceModal'
+import MakeGIF from './MakeGIF'
 
 const TOOLBAR_SIZE = 200
 const MIN_BRUSH_SIZE = 10
@@ -112,7 +115,7 @@ export default function Editor() {
   const settings = useRecoilValue(settingState)
   const [seedVal, setSeed] = useRecoilState(seedState)
   const croperRect = useRecoilValue(croperState)
-  const [toastVal, setToastState] = useRecoilState(toastState)
+  const setToastState = useSetRecoilState(toastState)
   const [isInpainting, setIsInpainting] = useRecoilState(isInpaintingState)
   const runMannually = useRecoilValue(runManuallyState)
   const isSD = useRecoilValue(isSDState)
@@ -181,8 +184,8 @@ export default function Editor() {
   const [redoLineGroups, setRedoLineGroups] = useState<LineGroup[]>([])
   const enableFileManager = useRecoilValue(enableFileManagerState)
 
-  const [imageWidth, setImageWidth] = useRecoilState(imageWidthState)
-  const [imageHeight, setImageHeight] = useRecoilState(imageHeightState)
+  const setImageWidth = useSetRecoilState(imageWidthState)
+  const setImageHeight = useSetRecoilState(imageHeightState)
   const app = useRecoilValue(appState)
 
   const draw = useCallback(
@@ -1534,6 +1537,7 @@ export default function Editor() {
             }}
             disabled={renders.length === 0}
           />
+          <MakeGIF renders={renders} />
           <Button
             toolTip="Save Image"
             icon={<ArrowDownTrayIcon />}
