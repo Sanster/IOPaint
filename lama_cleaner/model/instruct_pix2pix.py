@@ -8,7 +8,7 @@ from lama_cleaner.model.utils import set_seed
 from lama_cleaner.schema import Config
 
 
-class Pix2Pix(DiffusionInpaintModel):
+class InstructPix2Pix(DiffusionInpaintModel):
     pad_mod = 8
     min_size = 512
 

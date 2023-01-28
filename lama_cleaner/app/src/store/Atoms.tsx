@@ -14,7 +14,7 @@ export enum AIModel {
   CV2 = 'cv2',
   Mange = 'manga',
   PAINT_BY_EXAMPLE = 'paint_by_example',
-  PIX2PIX = 'pix2pix',
+  PIX2PIX = 'instruct_pix2pix',
 }
 
 export const maskState = atom<File | undefined>({
