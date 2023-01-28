@@ -22,7 +22,7 @@
   .shortcut-option {
     display: grid;
     grid-template-columns: repeat(2, auto);
-    column-gap: 6rem;
+    column-gap: 2rem;
     align-items: center;
 
     @include mobile {
@@ -73,5 +73,5 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 400px;
+  width: 320px;
 }
