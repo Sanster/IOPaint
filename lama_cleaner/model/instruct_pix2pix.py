@@ -16,7 +16,7 @@ class InstructPix2Pix(DiffusionInpaintModel):
         from diffusers import StableDiffusionInstructPix2PixPipeline
         fp16 = not kwargs.get('no_half', False)
 
-        model_kwargs = {"local_files_only": kwargs.get('local_files_only', kwargs['sd_run_local'])}
+        model_kwargs = {"local_files_only": kwargs.get('local_files_only', False)}
         if kwargs['disable_nsfw'] or kwargs.get('cpu_offload', False):
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(dict(
