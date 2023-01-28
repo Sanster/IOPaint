@@ -1,6 +1,7 @@
 import React from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import {
+  isDiffusionModelsState,
   isPaintByExampleState,
   isSDState,
   settingState,
@@ -28,7 +29,7 @@ export default function SettingModal(props: SettingModalProps) {
   const { onClose } = props
   const [setting, setSettingState] = useRecoilState(settingState)
   const isSD = useRecoilValue(isSDState)
-  const isPaintByExample = useRecoilValue(isPaintByExampleState)
+  const isDiffusionModels = useRecoilValue(isDiffusionModelsState)
 
   const handleOnClose = () => {
     setSettingState(old => {
@@ -56,9 +57,9 @@ export default function SettingModal(props: SettingModalProps) {
       show={setting.show}
     >
       <DownloadMaskSettingBlock />
-      {isSD || isPaintByExample ? <></> : <ManualRunInpaintingSettingBlock />}
+      {isDiffusionModels ? <></> : <ManualRunInpaintingSettingBlock />}
       <ModelSettingBlock />
-      {isSD ? <></> : <HDSettingBlock />}
+      {isDiffusionModels ? <></> : <HDSettingBlock />}
     </Modal>
   )
 }

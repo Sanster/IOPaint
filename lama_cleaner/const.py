@@ -11,7 +11,8 @@ AVAILABLE_MODELS = [
     "cv2",
     "manga",
     "sd2",
-    "paint_by_example"
+    "paint_by_example",
+    "pix2pix",
 ]
 
 AVAILABLE_DEVICES = ["cuda", "cpu", "mps"]

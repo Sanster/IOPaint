@@ -82,6 +82,11 @@ export default async function inpaint(
     fd.append('paintByExampleImage', paintByExampleImage)
   }
 
+  // InstructPix2Pix
+  fd.append('p2pSteps', settings.p2pSteps.toString())
+  fd.append('p2pImageGuidanceScale', settings.p2pImageGuidanceScale.toString())
+  fd.append('p2pGuidanceScale', settings.p2pGuidanceScale.toString())
+
   if (sizeLimit === undefined) {
     fd.append('sizeLimit', '1080')
   } else {

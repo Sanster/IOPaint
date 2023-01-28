@@ -41,10 +41,10 @@ import {
   croperState,
   enableFileManagerState,
   fileState,
-  gifImageState,
   imageHeightState,
   imageWidthState,
   interactiveSegClicksState,
+  isDiffusionModelsState,
   isInpaintingState,
   isInteractiveSegRunningState,
   isInteractiveSegState,
@@ -118,8 +118,7 @@ export default function Editor() {
   const setToastState = useSetRecoilState(toastState)
   const [isInpainting, setIsInpainting] = useRecoilState(isInpaintingState)
   const runMannually = useRecoilValue(runManuallyState)
-  const isSD = useRecoilValue(isSDState)
-  const isPaintByExample = useRecoilValue(isPaintByExampleState)
+  const isDiffusionModels = useRecoilValue(isDiffusionModelsState)
   const [isInteractiveSeg, setIsInteractiveSeg] = useRecoilState(
     isInteractiveSegState
   )
@@ -842,7 +841,7 @@ export default function Editor() {
     }
 
     if (
-      (isSD || isPaintByExample) &&
+      isDiffusionModels &&
       settings.showCroper &&
       isOutsideCroper(mouseXY(ev))
     ) {
@@ -1388,7 +1387,7 @@ export default function Editor() {
             minHeight={Math.min(256, original.naturalHeight)}
             minWidth={Math.min(256, original.naturalWidth)}
             scale={scale}
-            show={(isSD || isPaintByExample) && settings.showCroper}
+            show={isDiffusionModels && settings.showCroper}
           />
 
           {isInteractiveSeg ? <InteractiveSeg /> : <></>}
@@ -1442,7 +1441,7 @@ export default function Editor() {
       )}
 
       <div className="editor-toolkit-panel">
-        {isSD || isPaintByExample || file === undefined ? (
+        {isDiffusionModels || file === undefined ? (
           <></>
         ) : (
           <SizeSelector
@@ -1545,7 +1544,7 @@ export default function Editor() {
             onClick={download}
           />
 
-          {settings.runInpaintingManually && !isSD && !isPaintByExample && (
+          {settings.runInpaintingManually && !isDiffusionModels && (
             <Button
               toolTip="Run Inpainting"
               icon={

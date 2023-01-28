@@ -228,6 +228,9 @@ def process():
         paint_by_example_seed=form["paintByExampleSeed"],
         paint_by_example_match_histograms=form["paintByExampleMatchHistograms"],
         paint_by_example_example_image=paint_by_example_example_image,
+        p2p_steps=form["p2pSteps"],
+        p2p_image_guidance_scale=form["p2pImageGuidanceScale"],
+        p2p_guidance_scale=form["p2pGuidanceScale"],
     )
 
     if config.sd_seed == -1:
