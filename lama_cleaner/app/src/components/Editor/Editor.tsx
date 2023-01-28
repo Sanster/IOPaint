@@ -49,6 +49,7 @@ import {
   isInteractiveSegRunningState,
   isInteractiveSegState,
   isPaintByExampleState,
+  isPix2PixState,
   isSDState,
   negativePropmtState,
   propmtState,
@@ -119,6 +120,7 @@ export default function Editor() {
   const [isInpainting, setIsInpainting] = useRecoilState(isInpaintingState)
   const runMannually = useRecoilValue(runManuallyState)
   const isDiffusionModels = useRecoilValue(isDiffusionModelsState)
+  const isPix2Pix = useRecoilValue(isPix2PixState)
   const [isInteractiveSeg, setIsInteractiveSeg] = useRecoilState(
     isInteractiveSegState
   )
@@ -260,8 +262,11 @@ export default function Editor() {
   )
 
   const hadDrawSomething = useCallback(() => {
+    if (isPix2Pix) {
+      return true
+    }
     return curLineGroup.length !== 0
-  }, [curLineGroup])
+  }, [curLineGroup, isPix2Pix])
 
   const drawOnCurrentRender = useCallback(
     (lineGroup: LineGroup) => {
@@ -426,6 +431,8 @@ export default function Editor() {
       } else if (prevInteractiveSegMask) {
         // 使用上一次 IS 的 mask 生成
         runInpainting(false, undefined, prevInteractiveSegMask)
+      } else if (isPix2Pix) {
+        runInpainting(false, undefined, null)
       } else {
         setToastState({
           open: true,
