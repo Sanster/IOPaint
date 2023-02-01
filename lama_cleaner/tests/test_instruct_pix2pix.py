@@ -24,7 +24,7 @@ def test_instruct_pix2pix(disable_nsfw, cpu_offload):
                          disable_nsfw=disable_nsfw,
                          sd_cpu_textencoder=False,
                          cpu_offload=cpu_offload)
-    cfg = get_config(strategy=HDStrategy.ORIGINAL, prompt='make it good', p2p_steps=sd_steps, sd_scale=1.1)
+    cfg = get_config(strategy=HDStrategy.ORIGINAL, prompt='What if it were snowing?', p2p_steps=sd_steps, sd_scale=1.1)
 
     name = f"device_{device}_disnsfw_{disable_nsfw}_cpu_offload_{cpu_offload}"
 
@@ -35,4 +35,28 @@ def test_instruct_pix2pix(disable_nsfw, cpu_offload):
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
         fx=1.3
+    )
+
+
+@pytest.mark.parametrize("disable_nsfw", [False])
+@pytest.mark.parametrize("cpu_offload", [False])
+def test_instruct_pix2pix_snow(disable_nsfw, cpu_offload):
+    sd_steps = 50 if device == 'cuda' else 1
+    model = ModelManager(name="instruct_pix2pix",
+                         device=torch.device(device),
+                         hf_access_token="",
+                         sd_run_local=True,
+                         disable_nsfw=disable_nsfw,
+                         sd_cpu_textencoder=False,
+                         cpu_offload=cpu_offload)
+    cfg = get_config(strategy=HDStrategy.ORIGINAL, prompt='What if it were snowing?', p2p_steps=sd_steps)
+
+    name = f"snow"
+
+    assert_equal(
+        model,
+        cfg,
+        f"instruct_pix2pix_{name}.png",
+        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
