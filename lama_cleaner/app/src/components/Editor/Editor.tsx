@@ -257,6 +257,26 @@ export default function Editor() {
       _lineGroups.forEach(lineGroup => {
         drawLines(ctx, lineGroup, 'white')
       })
+
+      if (
+        (maskImage === undefined || maskImage === null) &&
+        _lineGroups.length === 0
+      ) {
+        // For InstructPix2Pix without mask
+        drawLines(
+          ctx,
+          [
+            {
+              size: 9999999999,
+              pts: [
+                { x: 0, y: 0 },
+                { x: 99999999, y: 99999999 },
+              ],
+            },
+          ],
+          'white'
+        )
+      }
     },
     [context, maskCanvas]
   )
