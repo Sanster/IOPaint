@@ -2,7 +2,7 @@
   "name": "lama-cleaner",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:8080",
+  "proxy": "http://127.0.0.1:8080",
   "dependencies": {
     "@babel/core": "^7.16.0",
     "@heroicons/react": "^2.0.0",

@@ -1,5 +1,12 @@
 import os
 
+MPS_SUPPORT_MODELS = [
+    "instruct_pix2pix",
+    "sd1.5",
+    "sd2",
+    "paint_by_example"
+]
+
 DEFAULT_MODEL = "lama"
 AVAILABLE_MODELS = [
     "lama",

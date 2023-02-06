@@ -260,7 +260,9 @@ export default function Editor() {
 
       if (
         (maskImage === undefined || maskImage === null) &&
-        _lineGroups.length === 0
+        _lineGroups.length === 1 &&
+        _lineGroups[0].length === 0 &&
+        isPix2Pix
       ) {
         // For InstructPix2Pix without mask
         drawLines(
@@ -270,7 +272,9 @@ export default function Editor() {
               size: 9999999999,
               pts: [
                 { x: 0, y: 0 },
-                { x: 99999999, y: 99999999 },
+                { x: original.naturalWidth, y: 0 },
+                { x: original.naturalWidth, y: original.naturalHeight },
+                { x: 0, y: original.naturalHeight },
               ],
             },
           ],
@@ -278,7 +282,7 @@ export default function Editor() {
         )
       }
     },
-    [context, maskCanvas]
+    [context, maskCanvas, isPix2Pix]
   )
 
   const hadDrawSomething = useCallback(() => {

@@ -16,3 +16,4 @@ diffusers[torch]==0.12.1
 transformers>=4.25.1
 watchdog==2.2.1
 gradio
+piexif==1.1.3
