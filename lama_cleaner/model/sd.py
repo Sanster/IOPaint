@@ -4,8 +4,14 @@ import PIL.Image
 import cv2
 import numpy as np
 import torch
-from diffusers import PNDMScheduler, DDIMScheduler, LMSDiscreteScheduler, EulerDiscreteScheduler, \
-    EulerAncestralDiscreteScheduler, DPMSolverMultistepScheduler
+from diffusers import (
+    PNDMScheduler,
+    DDIMScheduler,
+    LMSDiscreteScheduler,
+    EulerDiscreteScheduler,
+    EulerAncestralDiscreteScheduler,
+    DPMSolverMultistepScheduler,
+)
 from loguru import logger
 
 from lama_cleaner.model.base import DiffusionInpaintModel
@@ -16,7 +22,7 @@ from lama_cleaner.schema import Config, SDSampler
 class CPUTextEncoderWrapper:
     def __init__(self, text_encoder, torch_dtype):
         self.config = text_encoder.config
-        self.text_encoder = text_encoder.to(torch.device('cpu'), non_blocking=True)
+        self.text_encoder = text_encoder.to(torch.device("cpu"), non_blocking=True)
         self.text_encoder = self.text_encoder.to(torch.float32, non_blocking=True)
         self.torch_dtype = torch_dtype
         del text_encoder
@@ -24,7 +30,15 @@ class CPUTextEncoderWrapper:
 
     def __call__(self, x, **kwargs):
         input_device = x.device
-        return [self.text_encoder(x.to(self.text_encoder.device), **kwargs)[0].to(input_device).to(self.torch_dtype)]
+        return [
+            self.text_encoder(x.to(self.text_encoder.device), **kwargs)[0]
+            .to(input_device)
+            .to(self.torch_dtype)
+        ]
+
+    @property
+    def dtype(self):
+        return self.torch_dtype
 
 
 class SD(DiffusionInpaintModel):
@@ -33,18 +47,23 @@ class SD(DiffusionInpaintModel):
 
     def init_model(self, device: torch.device, **kwargs):
         from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
-        fp16 = not kwargs.get('no_half', False)
 
-        model_kwargs = {"local_files_only": kwargs.get('local_files_only', kwargs['sd_run_local'])}
-        if kwargs['disable_nsfw'] or kwargs.get('cpu_offload', False):
+        fp16 = not kwargs.get("no_half", False)
+
+        model_kwargs = {
+            "local_files_only": kwargs.get("local_files_only", kwargs["sd_run_local"])
+        }
+        if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
             logger.info("Disable Stable Diffusion Model NSFW checker")
-            model_kwargs.update(dict(
-                safety_checker=None,
-                feature_extractor=None,
-                requires_safety_checker=False
-            ))
+            model_kwargs.update(
+                dict(
+                    safety_checker=None,
+                    feature_extractor=None,
+                    requires_safety_checker=False,
+                )
+            )
 
-        use_gpu = device == torch.device('cuda') and torch.cuda.is_available()
+        use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
         torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
         self.model = StableDiffusionInpaintPipeline.from_pretrained(
             self.model_id_or_path,
@@ -57,18 +76,20 @@ class SD(DiffusionInpaintModel):
         # https://huggingface.co/docs/diffusers/v0.7.0/en/api/pipelines/stable_diffusion#diffusers.StableDiffusionInpaintPipeline.enable_attention_slicing
         self.model.enable_attention_slicing()
         # https://huggingface.co/docs/diffusers/v0.7.0/en/optimization/fp16#memory-efficient-attention
-        if kwargs.get('enable_xformers', False):
+        if kwargs.get("enable_xformers", False):
             self.model.enable_xformers_memory_efficient_attention()
 
-        if kwargs.get('cpu_offload', False) and use_gpu:
+        if kwargs.get("cpu_offload", False) and use_gpu:
             # TODO: gpu_id
             logger.info("Enable sequential cpu offload")
             self.model.enable_sequential_cpu_offload(gpu_id=0)
         else:
             self.model = self.model.to(device)
-            if kwargs['sd_cpu_textencoder']:
+            if kwargs["sd_cpu_textencoder"]:
                 logger.info("Run Stable Diffusion TextEncoder on CPU")
-                self.model.text_encoder = CPUTextEncoderWrapper(self.model.text_encoder, torch_dtype)
+                self.model.text_encoder = CPUTextEncoderWrapper(
+                    self.model.text_encoder, torch_dtype
+                )
 
         self.callback = kwargs.pop("callback", None)
 

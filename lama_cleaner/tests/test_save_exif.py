@@ -1,8 +1,14 @@
 import io
+from pathlib import Path
 
 from PIL import Image
 
 from lama_cleaner.helper import pil_to_bytes
+
+
+current_dir = Path(__file__).parent.absolute().resolve()
+png_img_p = current_dir / "image.png"
+jpg_img_p = current_dir / "bunny.jpeg"
 
 
 def print_exif(exif):
@@ -11,7 +17,7 @@ def print_exif(exif):
 
 
 def test_png():
-    img = Image.open("image.png")
+    img = Image.open(png_img_p)
     exif = img.getexif()
     print_exif(exif)
 
@@ -24,7 +30,7 @@ def test_png():
 
 
 def test_jpeg():
-    img = Image.open("bunny.jpeg")
+    img = Image.open(jpg_img_p)
     exif = img.getexif()
     print_exif(exif)
 
