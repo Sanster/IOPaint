@@ -87,7 +87,7 @@ def numpy_to_bytes(image_numpy: np.ndarray, ext: str) -> bytes:
 
 def pil_to_bytes(pil_img, ext: str, exif=None) -> bytes:
     with io.BytesIO() as output:
-        pil_img.save(output, format=ext, exif=exif)
+        pil_img.save(output, format=ext, exif=exif, quality=95)
         image_bytes = output.getvalue()
     return image_bytes
 
