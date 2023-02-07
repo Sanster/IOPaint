@@ -33,7 +33,6 @@ class Config(BaseModel):
     port: int = 8080
     model: str = DEFAULT_MODEL
     device: str = DEFAULT_DEVICE
-    cuda_visible_device: str = ""
     gui: bool = False
     no_gui_auto_close: bool = False
     no_half: bool = False
@@ -60,7 +59,6 @@ def save_config(
     port,
     model,
     device,
-    cuda_visible_device,
     gui,
     no_gui_auto_close,
     no_half,
@@ -119,9 +117,6 @@ def main(config_file: str):
             device = gr.Radio(
                 AVAILABLE_DEVICES, label=f"Device(mps supports {MPS_SUPPORT_MODELS})", value=init_config.device
             )
-            cuda_visible_device = gr.Textbox(
-                "", label="CUDA visible device. (0/1/2...)"
-            )
         gui = gr.Checkbox(init_config.gui, label=f"{GUI_HELP}")
         no_gui_auto_close = gr.Checkbox(
             init_config.no_gui_auto_close, label=f"{NO_GUI_AUTO_CLOSE_HELP}"
@@ -154,7 +149,6 @@ def main(config_file: str):
                 port,
                 model,
                 device,
-                cuda_visible_device,
                 gui,
                 no_gui_auto_close,
                 no_half,

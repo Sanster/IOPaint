@@ -47,7 +47,6 @@ def parse_args():
     )
 
     parser.add_argument("--model", default=DEFAULT_MODEL, choices=AVAILABLE_MODELS)
-    parser.add_argument("--cuda-visible-device", default="")
     parser.add_argument("--no-half", action="store_true", help=NO_HALF_HELP)
     parser.add_argument("--cpu-offload", action="store_true", help=CPU_OFFLOAD_HELP)
     parser.add_argument("--disable-nsfw", action="store_true", help=DISABLE_NSFW_HELP)
@@ -143,14 +142,6 @@ def parse_args():
             parser.error(
                 "torch.cuda.is_available() is False, please use --device cpu or check your pytorch installation"
             )
-        if args.cuda_visible_device:
-            try:
-                int(args.cuda_visible_device)
-            except:
-                parser.error(
-                    f"invalid --cuda-visible-device: {args.cuda_visible_device}, must be int"
-                )
-            os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda_visible_device
 
     if args.device == "mps":
         if args.model not in MPS_SUPPORT_MODELS:
