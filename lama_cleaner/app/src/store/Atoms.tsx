@@ -14,6 +14,7 @@ export enum AIModel {
   CV2 = 'cv2',
   Mange = 'manga',
   PAINT_BY_EXAMPLE = 'paint_by_example',
+  PIX2PIX = 'instruct_pix2pix',
 }
 
 export const maskState = atom<File | undefined>({
@@ -45,6 +46,7 @@ interface AppState {
   interactiveSegClicks: number[][]
   showFileManager: boolean
   enableFileManager: boolean
+  gifImage: HTMLImageElement | undefined
 }
 
 export const appState = atom<AppState>({
@@ -61,6 +63,7 @@ export const appState = atom<AppState>({
     interactiveSegClicks: [],
     showFileManager: false,
     enableFileManager: false,
+    gifImage: undefined,
   },
 })
 
@@ -131,6 +134,18 @@ export const enableFileManagerState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, enableFileManager: newValue })
+  },
+})
+
+export const gifImageState = selector({
+  key: 'gifImageState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.gifImage
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, gifImage: newValue })
   },
 })
 
@@ -329,6 +344,11 @@ export interface Settings {
   paintByExampleSeedFixed: boolean
   paintByExampleMaskBlur: number
   paintByExampleMatchHistograms: boolean
+
+  // InstructPix2Pix
+  p2pSteps: number
+  p2pImageGuidanceScale: number
+  p2pGuidanceScale: number
 }
 
 const defaultHDSettings: ModelsHDSettings = {
@@ -382,6 +402,13 @@ const defaultHDSettings: ModelsHDSettings = {
     enabled: false,
   },
   [AIModel.PAINT_BY_EXAMPLE]: {
+    hdStrategy: HDStrategy.ORIGINAL,
+    hdStrategyResizeLimit: 768,
+    hdStrategyCropTrigerSize: 512,
+    hdStrategyCropMargin: 128,
+    enabled: false,
+  },
+  [AIModel.PIX2PIX]: {
     hdStrategy: HDStrategy.ORIGINAL,
     hdStrategyResizeLimit: 768,
     hdStrategyCropTrigerSize: 512,
@@ -457,6 +484,11 @@ export const settingStateDefault: Settings = {
   paintByExampleMaskBlur: 5,
   paintByExampleSeedFixed: false,
   paintByExampleMatchHistograms: false,
+
+  // InstructPix2Pix
+  p2pSteps: 50,
+  p2pImageGuidanceScale: 1.5,
+  p2pGuidanceScale: 7.5,
 }
 
 const localStorageEffect =
@@ -553,12 +585,33 @@ export const isPaintByExampleState = selector({
   },
 })
 
+export const isPix2PixState = selector({
+  key: 'isPix2PixState',
+  get: ({ get }) => {
+    const settings = get(settingState)
+    return settings.model === AIModel.PIX2PIX
+  },
+})
+
 export const runManuallyState = selector({
   key: 'runManuallyState',
   get: ({ get }) => {
     const settings = get(settingState)
     const isSD = get(isSDState)
     const isPaintByExample = get(isPaintByExampleState)
-    return settings.runInpaintingManually || isSD || isPaintByExample
+    const isPix2Pix = get(isPix2PixState)
+    return (
+      settings.runInpaintingManually || isSD || isPaintByExample || isPix2Pix
+    )
+  },
+})
+
+export const isDiffusionModelsState = selector({
+  key: 'isDiffusionModelsState',
+  get: ({ get }) => {
+    const isSD = get(isSDState)
+    const isPaintByExample = get(isPaintByExampleState)
+    const isPix2Pix = get(isPix2PixState)
+    return isSD || isPaintByExample || isPix2Pix
   },
 })

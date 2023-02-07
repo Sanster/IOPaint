@@ -16,10 +16,11 @@ import {
   TransformComponent,
   TransformWrapper,
 } from 'react-zoom-pan-pinch'
-import { useRecoilState, useRecoilValue } from 'recoil'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
 import { useWindowSize, useKey, useKeyPressEvent } from 'react-use'
 import inpaint, {
   downloadToOutput,
+  makeGif,
   postInteractiveSeg,
 } from '../../adapters/inpainting'
 import Button from '../shared/Button'
@@ -43,10 +44,12 @@ import {
   imageHeightState,
   imageWidthState,
   interactiveSegClicksState,
+  isDiffusionModelsState,
   isInpaintingState,
   isInteractiveSegRunningState,
   isInteractiveSegState,
   isPaintByExampleState,
+  isPix2PixState,
   isSDState,
   negativePropmtState,
   propmtState,
@@ -66,6 +69,7 @@ import FileSelect from '../FileSelect/FileSelect'
 import InteractiveSeg from '../InteractiveSeg/InteractiveSeg'
 import InteractiveSegConfirmActions from '../InteractiveSeg/ConfirmActions'
 import InteractiveSegReplaceModal from '../InteractiveSeg/ReplaceModal'
+import MakeGIF from './MakeGIF'
 
 const TOOLBAR_SIZE = 200
 const MIN_BRUSH_SIZE = 10
@@ -112,11 +116,11 @@ export default function Editor() {
   const settings = useRecoilValue(settingState)
   const [seedVal, setSeed] = useRecoilState(seedState)
   const croperRect = useRecoilValue(croperState)
-  const [toastVal, setToastState] = useRecoilState(toastState)
+  const setToastState = useSetRecoilState(toastState)
   const [isInpainting, setIsInpainting] = useRecoilState(isInpaintingState)
   const runMannually = useRecoilValue(runManuallyState)
-  const isSD = useRecoilValue(isSDState)
-  const isPaintByExample = useRecoilValue(isPaintByExampleState)
+  const isDiffusionModels = useRecoilValue(isDiffusionModelsState)
+  const isPix2Pix = useRecoilValue(isPix2PixState)
   const [isInteractiveSeg, setIsInteractiveSeg] = useRecoilState(
     isInteractiveSegState
   )
@@ -181,8 +185,8 @@ export default function Editor() {
   const [redoLineGroups, setRedoLineGroups] = useState<LineGroup[]>([])
   const enableFileManager = useRecoilValue(enableFileManagerState)
 
-  const [imageWidth, setImageWidth] = useRecoilState(imageWidthState)
-  const [imageHeight, setImageHeight] = useRecoilState(imageHeightState)
+  const setImageWidth = useSetRecoilState(imageWidthState)
+  const setImageHeight = useSetRecoilState(imageHeightState)
   const app = useRecoilValue(appState)
 
   const draw = useCallback(
@@ -253,13 +257,40 @@ export default function Editor() {
       _lineGroups.forEach(lineGroup => {
         drawLines(ctx, lineGroup, 'white')
       })
+
+      if (
+        (maskImage === undefined || maskImage === null) &&
+        _lineGroups.length === 1 &&
+        _lineGroups[0].length === 0 &&
+        isPix2Pix
+      ) {
+        // For InstructPix2Pix without mask
+        drawLines(
+          ctx,
+          [
+            {
+              size: 9999999999,
+              pts: [
+                { x: 0, y: 0 },
+                { x: original.naturalWidth, y: 0 },
+                { x: original.naturalWidth, y: original.naturalHeight },
+                { x: 0, y: original.naturalHeight },
+              ],
+            },
+          ],
+          'white'
+        )
+      }
     },
-    [context, maskCanvas]
+    [context, maskCanvas, isPix2Pix]
   )
 
   const hadDrawSomething = useCallback(() => {
+    if (isPix2Pix) {
+      return true
+    }
     return curLineGroup.length !== 0
-  }, [curLineGroup])
+  }, [curLineGroup, isPix2Pix])
 
   const drawOnCurrentRender = useCallback(
     (lineGroup: LineGroup) => {
@@ -424,6 +455,8 @@ export default function Editor() {
       } else if (prevInteractiveSegMask) {
         // 使用上一次 IS 的 mask 生成
         runInpainting(false, undefined, prevInteractiveSegMask)
+      } else if (isPix2Pix) {
+        runInpainting(false, undefined, null)
       } else {
         setToastState({
           open: true,
@@ -839,7 +872,7 @@ export default function Editor() {
     }
 
     if (
-      (isSD || isPaintByExample) &&
+      isDiffusionModels &&
       settings.showCroper &&
       isOutsideCroper(mouseXY(ev))
     ) {
@@ -1385,7 +1418,7 @@ export default function Editor() {
             minHeight={Math.min(256, original.naturalHeight)}
             minWidth={Math.min(256, original.naturalWidth)}
             scale={scale}
-            show={(isSD || isPaintByExample) && settings.showCroper}
+            show={isDiffusionModels && settings.showCroper}
           />
 
           {isInteractiveSeg ? <InteractiveSeg /> : <></>}
@@ -1439,7 +1472,7 @@ export default function Editor() {
       )}
 
       <div className="editor-toolkit-panel">
-        {isSD || isPaintByExample || file === undefined ? (
+        {isDiffusionModels || file === undefined ? (
           <></>
         ) : (
           <SizeSelector
@@ -1534,6 +1567,7 @@ export default function Editor() {
             }}
             disabled={renders.length === 0}
           />
+          <MakeGIF renders={renders} />
           <Button
             toolTip="Save Image"
             icon={<ArrowDownTrayIcon />}
@@ -1541,7 +1575,7 @@ export default function Editor() {
             onClick={download}
           />
 
-          {settings.runInpaintingManually && !isSD && !isPaintByExample && (
+          {settings.runInpaintingManually && !isDiffusionModels && (
             <Button
               toolTip="Run Inpainting"
               icon={

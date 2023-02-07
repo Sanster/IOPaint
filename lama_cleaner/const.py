@@ -1,5 +1,12 @@
 import os
 
+MPS_SUPPORT_MODELS = [
+    "instruct_pix2pix",
+    "sd1.5",
+    "sd2",
+    "paint_by_example"
+]
+
 DEFAULT_MODEL = "lama"
 AVAILABLE_MODELS = [
     "lama",
@@ -11,7 +18,8 @@ AVAILABLE_MODELS = [
     "cv2",
     "manga",
     "sd2",
-    "paint_by_example"
+    "paint_by_example",
+    "instruct_pix2pix",
 ]
 
 AVAILABLE_DEVICES = ["cuda", "cpu", "mps"]

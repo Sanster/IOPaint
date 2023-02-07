@@ -50,24 +50,37 @@ export default function ShortcutsModal() {
       show={shortcutsShow}
     >
       <div className="shortcut-options">
-        <ShortCut
-          content="Multi-Stroke Mask Drawing"
-          keys={[`Hold ${CmdOrCtrl}`]}
-        />
-        <ShortCut content="Cancel Mask Drawing" keys={['Esc']} />
-        <ShortCut content="Run Inpainting Manually" keys={['Shift', 'R']} />
-        <ShortCut content="Interactive Segmentation" keys={['I']} />
-        <ShortCut content="Undo Inpainting" keys={[CmdOrCtrl, 'Z']} />
-        <ShortCut content="Redo Inpainting" keys={[CmdOrCtrl, 'Shift', 'Z']} />
-        <ShortCut content="View Original Image" keys={['Hold Tab']} />
-        <ShortCut content="Pan" keys={['Space + Drag']} />
-        <ShortCut content="Reset Zoom/Pan" keys={['Esc']} />
-        <ShortCut content="Decrease Brush Size" keys={['[']} />
-        <ShortCut content="Increase Brush Size" keys={[']']} />
-        <ShortCut content="Toggle Dark Mode" keys={['Shift', 'D']} />
-        <ShortCut content="Toggle Hotkeys Dialog" keys={['H']} />
-        <ShortCut content="Toggle Settings Dialog" keys={['S']} />
-        <ShortCut content="Toggle File Manager" keys={['F']} />
+        <div className="shortcut-options-column">
+          <ShortCut content="Pan" keys={['Space + Drag']} />
+          <ShortCut content="Reset Zoom/Pan" keys={['Esc']} />
+          <ShortCut content="Decrease Brush Size" keys={['[']} />
+          <ShortCut content="Increase Brush Size" keys={[']']} />
+          <ShortCut content="View Original Image" keys={['Hold Tab']} />
+          <ShortCut
+            content="Multi-Stroke Drawing"
+            keys={[`Hold ${CmdOrCtrl}`]}
+          />
+          <ShortCut content="Cancel Drawing" keys={['Esc']} />
+        </div>
+
+        <div className="shortcut-options-column">
+          <ShortCut content="Undo" keys={[CmdOrCtrl, 'Z']} />
+          <ShortCut content="Redo" keys={[CmdOrCtrl, 'Shift', 'Z']} />
+          <ShortCut content="Copy Result" keys={[CmdOrCtrl, 'C']} />
+          <ShortCut content="Paste Image" keys={[CmdOrCtrl, 'V']} />
+          <ShortCut
+            content="Trigger Manually Inpainting"
+            keys={['Shift', 'R']}
+          />
+          <ShortCut content="Trigger Interactive Segmentation" keys={['I']} />
+        </div>
+
+        <div className="shortcut-options-column">
+          <ShortCut content="Switch Theme" keys={['Shift', 'D']} />
+          <ShortCut content="Toggle Hotkeys Dialog" keys={['H']} />
+          <ShortCut content="Toggle Settings Dialog" keys={['S']} />
+          <ShortCut content="Toggle File Manager" keys={['F']} />
+        </div>
       </div>
     </Modal>
   )

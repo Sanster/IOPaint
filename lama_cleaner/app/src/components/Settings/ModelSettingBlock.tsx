@@ -179,28 +179,16 @@ function ModelSettingBlock() {
 
   const renderOptionDesc = (): ReactNode => {
     switch (setting.model) {
-      case AIModel.LAMA:
-        return undefined
       case AIModel.LDM:
         return renderLDMModelDesc()
       case AIModel.ZITS:
         return renderZITSModelDesc()
-      case AIModel.MAT:
-        return undefined
       case AIModel.FCF:
         return renderFCFModelDesc()
-      case AIModel.SD15:
-        return undefined
-      case AIModel.SD2:
-        return undefined
-      case AIModel.PAINT_BY_EXAMPLE:
-        return undefined
-      case AIModel.Mange:
-        return undefined
       case AIModel.CV2:
         return renderOpenCV2Desc()
       default:
-        return <></>
+        return undefined
     }
   }
 
@@ -265,6 +253,12 @@ function ModelSettingBlock() {
           'Paint by Example',
           'https://arxiv.org/abs/2211.13227',
           'https://github.com/Fantasy-Studio/Paint-by-Example'
+        )
+      case AIModel.PIX2PIX:
+        return renderModelDesc(
+          'InstructPix2Pix',
+          'https://arxiv.org/abs/2211.09800',
+          'https://github.com/timothybrooks/instruct-pix2pix'
         )
       default:
         return <></>

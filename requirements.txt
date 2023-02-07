@@ -1,6 +1,7 @@
 torch>=1.9.0
 opencv-python
 flask_cors
+Jinja2==2.11.3
 flask==1.1.4
 flaskwebgui==0.3.5
 tqdm
@@ -11,7 +12,8 @@ pytest
 yacs
 markupsafe==2.0.1
 scikit-image==0.19.3
-diffusers[torch]==0.10.2
+diffusers[torch]==0.12.1
 transformers>=4.25.1
 watchdog==2.2.1
 gradio
+piexif==1.1.3

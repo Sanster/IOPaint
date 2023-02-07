@@ -1,7 +1,8 @@
 {
   "files": {
-    "main.css": "/static/css/main.c28d98ca.css",
-    "main.js": "/static/js/main.1bd455bc.js",
+    "main.css": "/static/css/main.e24c9a9b.css",
+    "main.js": "/static/js/main.23732b19.js",
+    "static/media/coffee-machine-lineal.gif": "/static/media/coffee-machine-lineal.ee32631219cc3986f861.gif",
     "static/media/WorkSans-SemiBold.ttf": "/static/media/WorkSans-SemiBold.1e98db4eb705b586728e.ttf",
     "static/media/WorkSans-Bold.ttf": "/static/media/WorkSans-Bold.2bea7a7f7d052c74da25.ttf",
     "static/media/WorkSans-Regular.ttf": "/static/media/WorkSans-Regular.bb287b894b27372d8ea7.ttf",
@@ -9,7 +10,7 @@
     "index.html": "/index.html"
   },
   "entrypoints": [
-    "static/css/main.c28d98ca.css",
-    "static/js/main.1bd455bc.js"
+    "static/css/main.e24c9a9b.css",
+    "static/js/main.23732b19.js"
   ]
 }

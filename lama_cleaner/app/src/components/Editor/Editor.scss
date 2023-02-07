@@ -55,10 +55,9 @@
   position: fixed;
   bottom: 0.5rem;
   border-radius: 3rem;
-  padding: 0.6rem 3rem;
-  display: grid;
-  grid-template-areas: 'toolkit-size-selector toolkit-brush-slider toolkit-btns';
-  column-gap: 2rem;
+  padding: 0.6rem 32px;
+  display: flex;
+  gap: 16px;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(12px);
@@ -96,10 +95,8 @@
 }
 
 .editor-toolkit-btns {
-  grid-area: toolkit-btns;
-  display: grid;
-  grid-auto-flow: column;
-  column-gap: 1rem;
+  display: flex;
+  gap: 12px;
 }
 
 .brush-shape {

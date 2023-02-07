@@ -1,5 +1,5 @@
 import { Rect, Settings } from '../store/Atoms'
-import { dataURItoBlob, srcToFile } from '../utils'
+import { dataURItoBlob, loadImage, srcToFile } from '../utils'
 
 export const API_ENDPOINT = `${process.env.REACT_APP_INPAINTING_URL}`
 
@@ -81,6 +81,11 @@ export default async function inpaint(
   if (paintByExampleImage) {
     fd.append('paintByExampleImage', paintByExampleImage)
   }
+
+  // InstructPix2Pix
+  fd.append('p2pSteps', settings.p2pSteps.toString())
+  fd.append('p2pImageGuidanceScale', settings.p2pImageGuidanceScale.toString())
+  fd.append('p2pGuidanceScale', settings.p2pGuidanceScale.toString())
 
   if (sizeLimit === undefined) {
     fd.append('sizeLimit', '1080')
@@ -219,6 +224,37 @@ export async function downloadToOutput(
       const errMsg = await res.text()
       throw new Error(errMsg)
     }
+  } catch (error) {
+    throw new Error(`Something went wrong: ${error}`)
+  }
+}
+
+export async function makeGif(
+  originFile: File,
+  cleanImage: HTMLImageElement,
+  filename: string,
+  mimeType: string
+) {
+  const cleanFile = await srcToFile(cleanImage.src, filename, mimeType)
+  const fd = new FormData()
+  fd.append('origin_img', originFile)
+  fd.append('clean_img', cleanFile)
+  fd.append('filename', filename)
+
+  try {
+    const res = await fetch(`${API_ENDPOINT}/make_gif`, {
+      method: 'POST',
+      body: fd,
+    })
+    if (!res.ok) {
+      const errMsg = await res.text()
+      throw new Error(errMsg)
+    }
+
+    const blob = await res.blob()
+    const newImage = new Image()
+    await loadImage(newImage, URL.createObjectURL(blob))
+    return newImage
   } catch (error) {
     throw new Error(`Something went wrong: ${error}`)
   }

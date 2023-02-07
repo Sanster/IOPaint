@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Coffee } from 'react-feather'
 import Button from '../shared/Button'
 import Modal from '../shared/Modal'
+import CoffeeMachineGif from '../../media/coffee-machine-lineal.gif'
 
 const CoffeeIcon = () => {
   const [show, setShow] = useState(false)
@@ -24,10 +25,26 @@ const CoffeeIcon = () => {
         show={show}
         showCloseIcon={false}
       >
-        <h4 style={{ lineHeight: '24px' }}>
-          Hi there, If you found my project is useful, and want to help keep it
-          alive please consider donating! Thank you for your support!
-        </h4>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <h4 style={{ lineHeight: '24px' }}>
+            Hi, if you found my project is useful, please conside buy me a
+            coffee to support my work. Thanks!
+          </h4>
+          <img
+            src={CoffeeMachineGif}
+            alt="coffee machine"
+            style={{
+              height: 150,
+              objectFit: 'contain',
+            }}
+          />
+        </div>
+
         <div
           style={{
             display: 'flex',
@@ -53,7 +70,6 @@ const CoffeeIcon = () => {
                 }}
               >
                 Sure
-                <Coffee />
               </div>
             </Button>
           </a>

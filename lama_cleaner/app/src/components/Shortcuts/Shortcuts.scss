@@ -15,13 +15,14 @@
 }
 
 .shortcut-options {
-  display: grid;
-  row-gap: 1rem;
+  display: flex;
+  gap: 48px;
+  flex-direction: row;
 
   .shortcut-option {
     display: grid;
     grid-template-columns: repeat(2, auto);
-    column-gap: 6rem;
+    column-gap: 2rem;
     align-items: center;
 
     @include mobile {
@@ -66,4 +67,11 @@
       justify-self: start;
     }
   }
+}
+
+.shortcut-options-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 320px;
 }

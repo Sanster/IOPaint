@@ -1,4 +1,5 @@
 import math
+import random
 from typing import Any
 
 import torch
@@ -713,3 +714,10 @@ def torch_gc():
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
         torch.cuda.ipc_collect()
+
+
+def set_seed(seed: int):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)

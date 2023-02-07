@@ -8,6 +8,7 @@ import {
   AIModel,
   fileState,
   isPaintByExampleState,
+  isPix2PixState,
   isSDState,
   settingState,
   showFileManagerState,
@@ -22,6 +23,7 @@ import {
 import SidePanel from './SidePanel/SidePanel'
 import PESidePanel from './SidePanel/PESidePanel'
 import FileManager from './FileManager/FileManager'
+import P2PSidePanel from './SidePanel/P2PSidePanel'
 
 const Workspace = () => {
   const setFile = useSetRecoilState(fileState)
@@ -29,6 +31,7 @@ const Workspace = () => {
   const [toastVal, setToastState] = useRecoilState(toastState)
   const isSD = useRecoilValue(isSDState)
   const isPaintByExample = useRecoilValue(isPaintByExampleState)
+  const isPix2Pix = useRecoilValue(isPix2PixState)
 
   const [showFileManager, setShowFileManager] =
     useRecoilState(showFileManagerState)
@@ -98,6 +101,7 @@ const Workspace = () => {
     <>
       {isSD ? <SidePanel /> : <></>}
       {isPaintByExample ? <PESidePanel /> : <></>}
+      {isPix2Pix ? <P2PSidePanel /> : <></>}
       <FileManager
         photoWidth={256}
         show={showFileManager}

@@ -7,6 +7,7 @@ import {
   enableFileManagerState,
   fileState,
   isInpaintingState,
+  isPix2PixState,
   isSDState,
   maskState,
   runManuallyState,
@@ -30,6 +31,7 @@ const Header = () => {
   const [uploadElemId] = useState(`file-upload-${Math.random().toString()}`)
   const [maskUploadElemId] = useState(`mask-upload-${Math.random().toString()}`)
   const isSD = useRecoilValue(isSDState)
+  const isPix2Pix = useRecoilValue(isPix2PixState)
   const runManually = useRecoilValue(runManuallyState)
   const [openMaskPopover, setOpenMaskPopover] = useState(false)
   const [showFileManager, setShowFileManager] =
@@ -172,7 +174,7 @@ const Header = () => {
           </div>
         </div>
 
-        {isSD && file ? <PromptInput /> : <></>}
+        {(isSD || isPix2Pix) && file ? <PromptInput /> : <></>}
 
         <div className="header-icons-wrapper">
           <CoffeeIcon />
