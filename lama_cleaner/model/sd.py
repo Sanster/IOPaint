@@ -160,8 +160,10 @@ class SD(DiffusionInpaintModel):
 
 
 class SD15(SD):
+    name = "sd1.5"
     model_id_or_path = "runwayml/stable-diffusion-inpainting"
 
 
 class SD2(SD):
+    name = "sd2"
     model_id_or_path = "stabilityai/stable-diffusion-2-inpainting"

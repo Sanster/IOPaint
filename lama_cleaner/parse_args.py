@@ -143,12 +143,6 @@ def parse_args():
                 "torch.cuda.is_available() is False, please use --device cpu or check your pytorch installation"
             )
 
-    if args.device == "mps":
-        if args.model not in MPS_SUPPORT_MODELS:
-            parser.error(
-                f"mps only support: {MPS_SUPPORT_MODELS}, but got {args.model}"
-            )
-
     if args.model_dir and args.model_dir is not None:
         if os.path.isfile(args.model_dir):
             parser.error(f"invalid --model-dir: {args.model_dir} is a file")

@@ -11,6 +11,7 @@ from lama_cleaner.schema import Config
 
 
 class PaintByExample(DiffusionInpaintModel):
+    name = "paint_by_example"
     pad_mod = 8
     min_size = 512
 
