@@ -8,3 +8,5 @@ build
 dist/
 lama_cleaner.egg-info/
 venv/
+main.spec
+lama-cleaner-mac-arm64*
