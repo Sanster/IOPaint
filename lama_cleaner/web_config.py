@@ -22,7 +22,8 @@ from lama_cleaner.const import (
     DEFAULT_MODEL,
     DEFAULT_DEVICE,
     NO_GUI_AUTO_CLOSE_HELP,
-    DEFAULT_MODEL_DIR, MPS_SUPPORT_MODELS,
+    DEFAULT_MODEL_DIR,
+    MPS_SUPPORT_MODELS,
 )
 
 _config_file = None
@@ -115,7 +116,7 @@ def main(config_file: str):
         with gr.Row():
             model = gr.Radio(AVAILABLE_MODELS, label="Model", value=init_config.model)
             device = gr.Radio(
-                AVAILABLE_DEVICES, label=f"Device(mps supports {MPS_SUPPORT_MODELS})", value=init_config.device
+                AVAILABLE_DEVICES, label="Device", value=init_config.device
             )
         gui = gr.Checkbox(init_config.gui, label=f"{GUI_HELP}")
         no_gui_auto_close = gr.Checkbox(

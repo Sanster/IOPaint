@@ -9,6 +9,7 @@ from lama_cleaner.schema import Config
 
 
 class InstructPix2Pix(DiffusionInpaintModel):
+    name = "instruct_pix2pix"
     pad_mod = 8
     min_size = 512
 

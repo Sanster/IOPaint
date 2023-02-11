@@ -203,6 +203,7 @@ def to_device(data, device):
 
 
 class ZITS(InpaintModel):
+    name = "zits"
     min_size = 256
     pad_mod = 32
     pad_to_square = True

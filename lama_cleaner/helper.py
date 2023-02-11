@@ -8,8 +8,16 @@ import cv2
 from PIL import Image, ImageOps
 import numpy as np
 import torch
+from lama_cleaner.const import MPS_SUPPORT_MODELS
 from loguru import logger
 from torch.hub import download_url_to_file, get_dir
+
+
+def switch_mps_device(model_name, device):
+    if model_name not in MPS_SUPPORT_MODELS and (device == "mps" or device == torch.device('mps')):
+        logger.info(f"{model_name} not support mps, switch to cpu")
+        return torch.device('cpu')
+    return device
 
 
 def get_cache_path_by_url(url):

@@ -76,6 +76,7 @@ MANGA_LINE_MODEL_URL = os.environ.get(
 
 
 class Manga(InpaintModel):
+    name = "manga"
     pad_mod = 16
 
     def init_model(self, device, **kwargs):

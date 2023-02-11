@@ -6,11 +6,12 @@ import torch
 import numpy as np
 from loguru import logger
 
-from lama_cleaner.helper import boxes_from_mask, resize_max_size, pad_img_to_modulo
+from lama_cleaner.helper import boxes_from_mask, resize_max_size, pad_img_to_modulo, switch_mps_device
 from lama_cleaner.schema import Config, HDStrategy
 
 
 class InpaintModel:
+    name = "base"
     min_size: Optional[int] = None
     pad_mod = 8
     pad_to_square = False
@@ -21,6 +22,7 @@ class InpaintModel:
         Args:
             device:
         """
+        device = switch_mps_device(self.name, device)
         self.device = device
         self.init_model(device, **kwargs)
 

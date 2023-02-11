@@ -1401,6 +1401,7 @@ MAT_MODEL_URL = os.environ.get(
 
 
 class MAT(InpaintModel):
+    name = "mat"
     min_size = 512
     pad_mod = 512
     pad_to_square = True

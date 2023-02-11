@@ -1131,6 +1131,7 @@ FCF_MODEL_URL = os.environ.get(
 
 
 class FcF(InpaintModel):
+    name = "fcf"
     min_size = 512
     pad_mod = 512
     pad_to_square = True
