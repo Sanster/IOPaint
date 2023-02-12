@@ -26,6 +26,10 @@
 
 https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-965f-5c6683141375.mp4
 
+## Sponsor
+
+<img src="./assets/GitHub_Copilot_logo.svg" style="background: white;padding: 8px;"></img>
+
 ## Features
 
 - Completely free and open-source, fully self-hosted, support CPU & GPU
