@@ -64,6 +64,7 @@ export default function ShortcutsModal() {
         </div>
 
         <div className="shortcut-options-column">
+          <ShortCut content="Rerun last mask" keys={['R']} />
           <ShortCut content="Undo" keys={[CmdOrCtrl, 'Z']} />
           <ShortCut content="Redo" keys={[CmdOrCtrl, 'Shift', 'Z']} />
           <ShortCut content="Copy Result" keys={[CmdOrCtrl, 'C']} />

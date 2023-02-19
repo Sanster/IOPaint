@@ -1,6 +1,6 @@
 import { FolderIcon, PhotoIcon } from '@heroicons/react/24/outline'
-import { PlayIcon } from '@radix-ui/react-icons'
-import React, { useState } from 'react'
+import { PlayIcon, ReloadIcon } from '@radix-ui/react-icons'
+import React, { useCallback, useState } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 import {
@@ -19,7 +19,7 @@ import { ThemeChanger } from './ThemeChanger'
 import SettingIcon from '../Settings/SettingIcon'
 import PromptInput from './PromptInput'
 import CoffeeIcon from '../CoffeeIcon/CoffeeIcon'
-import emitter, { EVENT_CUSTOM_MASK } from '../../event'
+import emitter, { EVENT_CUSTOM_MASK, RERUN_LAST_MASK } from '../../event'
 import { useImage } from '../../utils'
 import useHotKey from '../../hooks/useHotkey'
 
@@ -49,6 +49,21 @@ const Header = () => {
     [showFileManager, enableFileManager, isInpainting]
   )
 
+  const handleRerunLastMask = useCallback(() => {
+    emitter.emit(RERUN_LAST_MASK)
+  }, [])
+
+  useHotKey(
+    'r',
+    () => {
+      if (!isInpainting) {
+        handleRerunLastMask()
+      }
+    },
+    {},
+    [isInpainting, handleRerunLastMask]
+  )
+
   const renderHeader = () => {
     return (
       <header>
@@ -57,7 +72,7 @@ const Header = () => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: 8,
+            gap: 4,
           }}
         >
           {enableFileManager ? (
@@ -136,41 +151,53 @@ const Header = () => {
               </Button>
             </label>
 
-            <PopoverPrimitive.Root open={openMaskPopover}>
-              <PopoverPrimitive.Trigger
-                className="btn-primary side-panel-trigger"
-                onMouseEnter={() => setOpenMaskPopover(true)}
-                onMouseLeave={() => setOpenMaskPopover(false)}
-                style={{
-                  visibility: mask ? 'visible' : 'hidden',
-                  outline: 'none',
-                }}
-                onClick={() => {
-                  if (mask) {
-                    emitter.emit(EVENT_CUSTOM_MASK, { mask })
-                  }
-                }}
-              >
-                <PlayIcon />
-              </PopoverPrimitive.Trigger>
-              <PopoverPrimitive.Portal>
-                <PopoverPrimitive.Content
+            {mask ? (
+              <PopoverPrimitive.Root open={openMaskPopover}>
+                <PopoverPrimitive.Trigger
+                  className="btn-primary side-panel-trigger"
+                  onMouseEnter={() => setOpenMaskPopover(true)}
+                  onMouseLeave={() => setOpenMaskPopover(false)}
                   style={{
+                    visibility: mask ? 'visible' : 'hidden',
                     outline: 'none',
                   }}
+                  onClick={() => {
+                    if (mask) {
+                      emitter.emit(EVENT_CUSTOM_MASK, { mask })
+                    }
+                  }}
                 >
-                  {maskImageLoaded ? (
-                    <img
-                      src={maskImage.src}
-                      alt="mask"
-                      className="mask-preview"
-                    />
-                  ) : (
-                    <></>
-                  )}
-                </PopoverPrimitive.Content>
-              </PopoverPrimitive.Portal>
-            </PopoverPrimitive.Root>
+                  <PlayIcon />
+                </PopoverPrimitive.Trigger>
+                <PopoverPrimitive.Portal>
+                  <PopoverPrimitive.Content
+                    style={{
+                      outline: 'none',
+                    }}
+                  >
+                    {maskImageLoaded ? (
+                      <img
+                        src={maskImage.src}
+                        alt="mask"
+                        className="mask-preview"
+                      />
+                    ) : (
+                      <></>
+                    )}
+                  </PopoverPrimitive.Content>
+                </PopoverPrimitive.Portal>
+              </PopoverPrimitive.Root>
+            ) : (
+              <></>
+            )}
+
+            <Button
+              icon={<ReloadIcon style={{ height: 16, width: 16 }} />}
+              style={{ border: 0, gap: 0 }}
+              disabled={isInpainting}
+              toolTip="Rerun last mask [r]"
+              onClick={handleRerunLastMask}
+            />
           </div>
         </div>
 

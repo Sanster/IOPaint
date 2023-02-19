@@ -12,6 +12,8 @@ export interface PaintByExampleEventData {
   image: File
 }
 
+export const RERUN_LAST_MASK = 'rerun_last_mask'
+
 const emitter = mitt()
 
 export default emitter

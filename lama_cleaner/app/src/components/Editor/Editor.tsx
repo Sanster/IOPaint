@@ -63,6 +63,7 @@ import emitter, {
   EVENT_PROMPT,
   EVENT_CUSTOM_MASK,
   EVENT_PAINT_BY_EXAMPLE,
+  RERUN_LAST_MASK,
 } from '../../event'
 import FileSelect from '../FileSelect/FileSelect'
 import InteractiveSeg from '../InteractiveSeg/InteractiveSeg'
@@ -512,6 +513,28 @@ export default function Editor() {
 
     return () => {
       emitter.off(EVENT_PAINT_BY_EXAMPLE)
+    }
+  }, [runInpainting])
+
+  useEffect(() => {
+    emitter.on(RERUN_LAST_MASK, () => {
+      if (lastLineGroup.length !== 0) {
+        // 使用上一次手绘的 mask 生成
+        runInpainting(true, undefined, prevInteractiveSegMask)
+      } else if (prevInteractiveSegMask) {
+        // 使用上一次 IS 的 mask 生成
+        runInpainting(false, undefined, prevInteractiveSegMask)
+      } else {
+        setToastState({
+          open: true,
+          desc: 'No mask to reuse',
+          state: 'error',
+          duration: 1500,
+        })
+      }
+    })
+    return () => {
+      emitter.off(RERUN_LAST_MASK)
     }
   }, [runInpainting])
 
