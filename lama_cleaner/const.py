@@ -59,7 +59,7 @@ Model download directory (by setting XDG_CACHE_HOME environment variable), by de
 """
 
 OUTPUT_DIR_HELP = """
-Only required when --input is directory. Result images will be saved to output directory automatically.
+Result images will be saved to output directory automatically without confirmation.
 """
 
 INPUT_HELP = """

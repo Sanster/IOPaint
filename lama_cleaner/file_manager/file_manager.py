@@ -14,7 +14,7 @@ from PIL import Image, ImageOps, PngImagePlugin
 from loguru import logger
 
 LARGE_ENOUGH_NUMBER = 100
-PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024 ** 2)
+PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
 from .storage_backends import FilesystemStorageBackend
 from .utils import aspect_to_string, generate_filename, glob_img
 
@@ -63,11 +63,11 @@ class FileManager(FileSystemEventHandler):
         if event.src_path == str(self.root_directory):
             logger.info(f"Image directory {event.src_path} modified")
             self.image_dir_filenames = self._media_names(self.root_directory)
-            self.modified_time['image'] = datetime.utcnow()
+            self.modified_time["image"] = datetime.utcnow()
         elif event.src_path == str(self.output_dir):
             logger.info(f"Output directory {event.src_path} modified")
             self.output_dir_filenames = self._media_names(self.output_dir)
-            self.modified_time['output'] = datetime.utcnow()
+            self.modified_time["output"] = datetime.utcnow()
 
     def init_app(self, app):
         if self.app is None:
@@ -83,20 +83,14 @@ class FileManager(FileSystemEventHandler):
         app.extensions["thumbnail"] = self
 
         app.config.setdefault("THUMBNAIL_MEDIA_ROOT", self._default_root_directory)
-        app.config.setdefault("THUMBNAIL_MEDIA_THUMBNAIL_ROOT", self._default_thumbnail_directory)
+        app.config.setdefault(
+            "THUMBNAIL_MEDIA_THUMBNAIL_ROOT", self._default_thumbnail_directory
+        )
         app.config.setdefault("THUMBNAIL_MEDIA_URL", self._default_root_url)
-        app.config.setdefault("THUMBNAIL_MEDIA_THUMBNAIL_URL", self._default_thumbnail_root_url)
+        app.config.setdefault(
+            "THUMBNAIL_MEDIA_THUMBNAIL_URL", self._default_thumbnail_root_url
+        )
         app.config.setdefault("THUMBNAIL_DEFAULT_FORMAT", self._default_format)
-
-    def save_to_output_directory(self, image: np.ndarray, filename: str):
-        fp = Path(filename)
-        new_name = fp.stem + f"_{int(time.time())}" + fp.suffix
-        if image.shape[2] == 3:
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        elif image.shape[2] == 4:
-            image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGRA)
-
-        cv2.imwrite(str(self.output_dir / new_name), image)
 
     @property
     def root_directory(self):
@@ -137,14 +131,23 @@ class FileManager(FileSystemEventHandler):
         for name in names:
             path = os.path.join(directory, name)
             img = Image.open(path)
-            res.append({"name": name, "height": img.height, "width": img.width, "ctime": os.path.getctime(path)})
+            res.append(
+                {
+                    "name": name,
+                    "height": img.height,
+                    "width": img.width,
+                    "ctime": os.path.getctime(path),
+                }
+            )
         return res
 
     @property
     def thumbnail_url(self):
         return self.app.config["THUMBNAIL_MEDIA_THUMBNAIL_URL"]
 
-    def get_thumbnail(self, directory: Path, original_filename: str, width, height, **options):
+    def get_thumbnail(
+        self, directory: Path, original_filename: str, width, height, **options
+    ):
         storage = FilesystemStorageBackend(self.app)
         crop = options.get("crop", "fit")
         background = options.get("background")
@@ -163,13 +166,19 @@ class FileManager(FileSystemEventHandler):
         thumbnail_size = (width, height)
 
         thumbnail_filename = generate_filename(
-            original_filename, aspect_to_string(thumbnail_size), crop, background, quality
+            original_filename,
+            aspect_to_string(thumbnail_size),
+            crop,
+            background,
+            quality,
         )
 
         thumbnail_filepath = os.path.join(
             self.thumbnail_directory, original_path, thumbnail_filename
         )
-        thumbnail_url = os.path.join(self.thumbnail_url, original_path, thumbnail_filename)
+        thumbnail_url = os.path.join(
+            self.thumbnail_url, original_path, thumbnail_filename
+        )
 
         if storage.exists(thumbnail_filepath):
             return thumbnail_url, (width, height)
@@ -183,7 +192,9 @@ class FileManager(FileSystemEventHandler):
         # get original image format
         options["format"] = options.get("format", image.format)
 
-        image = self._create_thumbnail(image, thumbnail_size, crop, background=background)
+        image = self._create_thumbnail(
+            image, thumbnail_size, crop, background=background
+        )
 
         raw_data = self.get_raw_data(image, **options)
         storage.save(thumbnail_filepath, raw_data)

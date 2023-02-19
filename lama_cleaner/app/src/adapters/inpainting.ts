@@ -122,6 +122,12 @@ export function getEnableFileManager() {
   })
 }
 
+export function getEnableAutoSaving() {
+  return fetch(`${API_ENDPOINT}/is_enable_auto_saving`, {
+    method: 'GET',
+  })
+}
+
 export function switchModel(name: string) {
   const fd = new FormData()
   fd.append('name', name)

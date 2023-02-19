@@ -41,6 +41,7 @@ interface AppState {
   disableShortCuts: boolean
   isInpainting: boolean
   isDisableModelSwitch: boolean
+  isEnableAutoSaving: boolean
   isInteractiveSeg: boolean
   isInteractiveSegRunning: boolean
   interactiveSegClicks: number[][]
@@ -58,6 +59,7 @@ export const appState = atom<AppState>({
     disableShortCuts: false,
     isInpainting: false,
     isDisableModelSwitch: false,
+    isEnableAutoSaving: false,
     isInteractiveSeg: false,
     isInteractiveSegRunning: false,
     interactiveSegClicks: [],
@@ -218,6 +220,18 @@ export const isDisableModelSwitchState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, isDisableModelSwitch: newValue })
+  },
+})
+
+export const isEnableAutoSavingState = selector({
+  key: 'isEnableAutoSavingState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.isEnableAutoSaving
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, isEnableAutoSaving: newValue })
   },
 })
 

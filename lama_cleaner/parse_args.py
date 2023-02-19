@@ -170,15 +170,14 @@ def parse_args():
                 parser.error(
                     f"invalid --input: {args.input} is a directory, --output-dir is required"
                 )
-            else:
-                output_dir = Path(args.output_dir)
-                if not output_dir.exists():
-                    logger.info(f"Creating output directory: {output_dir}")
-                    output_dir.mkdir(parents=True)
-                else:
-                    if not output_dir.is_dir():
-                        parser.error(
-                            f"invalid --output-dir: {output_dir} is not a directory"
-                        )
+
+    if args.output_dir is not None:
+        output_dir = Path(args.output_dir)
+        if not output_dir.exists():
+            logger.info(f"Creating output directory: {output_dir}")
+            output_dir.mkdir(parents=True)
+        else:
+            if not output_dir.is_dir():
+                parser.error(f"invalid --output-dir: {output_dir} is not a directory")
 
     return args

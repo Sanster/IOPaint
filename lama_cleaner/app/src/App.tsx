@@ -8,12 +8,14 @@ import {
   enableFileManagerState,
   fileState,
   isDisableModelSwitchState,
+  isEnableAutoSavingState,
   toastState,
 } from './store/Atoms'
 import { keepGUIAlive } from './utils'
 import Header from './components/Header/Header'
 import useHotKey from './hooks/useHotkey'
 import {
+  getEnableAutoSaving,
   getEnableFileManager,
   getIsDisableModelSwitch,
   isDesktop,
@@ -34,6 +36,7 @@ function App() {
   const userInputImage = useInputImage()
   const setIsDisableModelSwitch = useSetRecoilState(isDisableModelSwitchState)
   const setEnableFileManager = useSetRecoilState(enableFileManagerState)
+  const setIsEnableAutoSavingState = useSetRecoilState(isEnableAutoSavingState)
 
   // Set Input Image
   useEffect(() => {
@@ -66,7 +69,17 @@ function App() {
       setEnableFileManager(isEnabled === 'true')
     }
     fetchData2()
-  }, [setEnableFileManager, setIsDisableModelSwitch])
+
+    const fetchData3 = async () => {
+      const isEnabled = await getEnableAutoSaving().then(res => res.text())
+      setIsEnableAutoSavingState(isEnabled === 'true')
+    }
+    fetchData3()
+  }, [
+    setEnableFileManager,
+    setIsDisableModelSwitch,
+    setIsEnableAutoSavingState,
+  ])
 
   // Dark Mode Hotkey
   useHotKey(

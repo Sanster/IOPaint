@@ -83,11 +83,13 @@ CORS(app, expose_headers=["Content-Disposition"])
 
 model: ModelManager = None
 thumb: FileManager = None
+output_dir: str = None
 interactive_seg_model: InteractiveSeg = None
 device = None
 input_image_path: str = None
 is_disable_model_switch: bool = False
 is_enable_file_manager: bool = False
+is_enable_auto_saving: bool = False
 is_desktop: bool = False
 
 
@@ -124,11 +126,20 @@ def make_gif():
 
 @app.route("/save_image", methods=["POST"])
 def save_image():
-    # all image in output directory
+    if output_dir is None:
+        return "--output-dir is None", 500
+
     input = request.files
+    filename = request.form["filename"]
     origin_image_bytes = input["image"].read()  # RGB
     image, _ = load_img(origin_image_bytes)
-    thumb.save_to_output_directory(image, request.form["filename"])
+    if image.shape[2] == 3:
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    elif image.shape[2] == 4:
+        image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGRA)
+
+    cv2.imwrite(os.path.join(output_dir, filename), image)
+
     return "ok", 200
 
 
@@ -348,6 +359,12 @@ def get_is_enable_file_manager():
     return res, 200
 
 
+@app.route("/is_enable_auto_saving")
+def get_is_enable_auto_saving():
+    res = "true" if is_enable_auto_saving else "false"
+    return res, 200
+
+
 @app.route("/model_downloaded/<name>")
 def model_downloaded(name):
     return str(model.is_downloaded(name)), 200
@@ -408,6 +425,12 @@ def main(args):
     global is_enable_file_manager
     global is_desktop
     global thumb
+    global output_dir
+    global is_enable_auto_saving
+
+    output_dir = args.output_dir
+    if output_dir is not None:
+        is_enable_auto_saving = True
 
     device = torch.device(args.device)
     is_disable_model_switch = args.disable_model_switch
