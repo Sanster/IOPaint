@@ -383,7 +383,7 @@ const defaultHDSettings: ModelsHDSettings = {
   [AIModel.LAMA]: {
     hdStrategy: HDStrategy.CROP,
     hdStrategyResizeLimit: 2048,
-    hdStrategyCropTrigerSize: 1280,
+    hdStrategyCropTrigerSize: 800,
     hdStrategyCropMargin: 196,
     enabled: true,
   },
@@ -496,7 +496,7 @@ export const settingStateDefault: Settings = {
   sdGuidanceScale: 7.5,
   sdSampler: SDSampler.pndm,
   sdSeed: 42,
-  sdSeedFixed: true,
+  sdSeedFixed: false,
   sdNumSamples: 1,
   sdMatchHistograms: false,
   sdScale: 100,
