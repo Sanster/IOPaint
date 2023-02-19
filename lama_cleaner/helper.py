@@ -48,7 +48,8 @@ def ceil_modulo(x, mod):
     return (x // mod + 1) * mod
 
 
-def load_jit_model(url_or_path, device):
+def \
+        load_jit_model(url_or_path, device):
     if os.path.exists(url_or_path):
         model_path = url_or_path
     else:

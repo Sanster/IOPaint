@@ -28,7 +28,9 @@ from lama_cleaner.runtime import dump_environment_info
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", default=8080, type=int)
 
@@ -83,28 +85,16 @@ def parse_args():
         action="store_true",
         help="Disable model switch in frontend",
     )
-    parser.add_argument("--debug", action="store_true")
 
     # useless args
+    parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--hf_access_token", default="", help=argparse.SUPPRESS)
     parser.add_argument(
-        "--hf_access_token",
-        default="",
-        help="SD model no more need token: https://github.com/huggingface/diffusers/issues/1447",
+        "--sd-disable-nsfw", action="store_true", help=argparse.SUPPRESS
     )
+    parser.add_argument("--sd-run-local", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument(
-        "--sd-disable-nsfw",
-        action="store_true",
-        help="Disable Stable Diffusion NSFW checker",
-    )
-    parser.add_argument(
-        "--sd-run-local",
-        action="store_true",
-        help="SD model no more need token, use --local-files-only to set not connect to huggingface server",
-    )
-    parser.add_argument(
-        "--sd-enable-xformers",
-        action="store_true",
-        help="Enable xFormers optimizations. Requires that xformers package has been installed. See: https://github.com/facebookresearch/xformers",
+        "--sd-enable-xformers", action="store_true", help=argparse.SUPPRESS
     )
 
     args = parser.parse_args()
