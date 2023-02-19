@@ -37,6 +37,7 @@ import {
 } from '../../utils'
 import {
   appState,
+  brushSizeState,
   croperState,
   enableFileManagerState,
   fileState,
@@ -138,7 +139,8 @@ export default function Editor() {
 
   const [clicks, setClicks] = useRecoilState(interactiveSegClicksState)
 
-  const [brushSize, setBrushSize] = useState(40)
+  const [brushSize, setBrushSize] = useRecoilState(brushSizeState)
+
   const [original, isOriginalLoaded] = useImage(file)
   const [renders, setRenders] = useState<HTMLImageElement[]>([])
   const [context, setContext] = useState<CanvasRenderingContext2D>()
@@ -1176,7 +1178,7 @@ export default function Editor() {
 
   // Standard Hotkeys for Brush Size
   useHotKey('[', () => {
-    setBrushSize(currentBrushSize => {
+    setBrushSize((currentBrushSize: number) => {
       if (currentBrushSize > 10) {
         return currentBrushSize - 10
       }
@@ -1188,7 +1190,7 @@ export default function Editor() {
   })
 
   useHotKey(']', () => {
-    setBrushSize(currentBrushSize => {
+    setBrushSize((currentBrushSize: number) => {
       return currentBrushSize + 10
     })
   })

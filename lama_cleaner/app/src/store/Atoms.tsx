@@ -48,6 +48,7 @@ interface AppState {
   showFileManager: boolean
   enableFileManager: boolean
   gifImage: HTMLImageElement | undefined
+  brushSize: number
 }
 
 export const appState = atom<AppState>({
@@ -66,6 +67,7 @@ export const appState = atom<AppState>({
     showFileManager: false,
     enableFileManager: false,
     gifImage: undefined,
+    brushSize: 40,
   },
 })
 
@@ -88,6 +90,18 @@ export const isInpaintingState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, isInpainting: newValue })
+  },
+})
+
+export const brushSizeState = selector({
+  key: 'brushSizeState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.brushSize
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, brushSize: newValue })
   },
 })
 
