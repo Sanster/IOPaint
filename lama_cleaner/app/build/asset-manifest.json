@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.e24c9a9b.css",
-    "main.js": "/static/js/main.23732b19.js",
+    "main.js": "/static/js/main.a2cdd7a2.js",
     "static/media/coffee-machine-lineal.gif": "/static/media/coffee-machine-lineal.ee32631219cc3986f861.gif",
     "static/media/WorkSans-SemiBold.ttf": "/static/media/WorkSans-SemiBold.1e98db4eb705b586728e.ttf",
     "static/media/WorkSans-Bold.ttf": "/static/media/WorkSans-Bold.2bea7a7f7d052c74da25.ttf",
@@ -11,6 +11,6 @@
   },
   "entrypoints": [
     "static/css/main.e24c9a9b.css",
-    "static/js/main.23732b19.js"
+    "static/js/main.a2cdd7a2.js"
   ]
 }
