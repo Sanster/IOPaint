@@ -16,6 +16,7 @@ LAMA_MODEL_URL = os.environ.get(
     "LAMA_MODEL_URL",
     "https://github.com/Sanster/models/releases/download/add_big_lama/big-lama.pt",
 )
+LAMA_MODEL_MD5 = os.environ.get("LAMA_MODEL_MD5", "e3aa4aaa15225a33ec84f9f4bc47e500")
 
 
 class LaMa(InpaintModel):
@@ -23,7 +24,7 @@ class LaMa(InpaintModel):
     pad_mod = 8
 
     def init_model(self, device, **kwargs):
-        self.model = load_jit_model(LAMA_MODEL_URL, device).eval()
+        self.model = load_jit_model(LAMA_MODEL_URL, device, LAMA_MODEL_MD5).eval()
 
     @staticmethod
     def is_downloaded() -> bool:

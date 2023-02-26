@@ -156,12 +156,13 @@ INTERACTIVE_SEG_MODEL_URL = os.environ.get(
     "INTERACTIVE_SEG_MODEL_URL",
     "https://github.com/Sanster/models/releases/download/clickseg_pplnet/clickseg_pplnet.pt",
 )
+INTERACTIVE_SEG_MODEL_MD5 = os.environ.get("INTERACTIVE_SEG_MODEL_MD5", "8ca44b6e02bca78f62ec26a3c32376cf")
 
 
 class InteractiveSeg:
     def __init__(self, infer_size=384, open_kernel_size=3, dilate_kernel_size=3):
         device = torch.device('cpu')
-        model = load_jit_model(INTERACTIVE_SEG_MODEL_URL, device).eval()
+        model = load_jit_model(INTERACTIVE_SEG_MODEL_URL, device, INTERACTIVE_SEG_MODEL_MD5).eval()
         self.predictor = ISPredictor(model, device,
                                      infer_size=infer_size,
                                      open_kernel_size=open_kernel_size,
