@@ -70,10 +70,16 @@ def ceil_modulo(x, mod):
 def handle_error(model_path, model_md5, e):
     _md5 = md5sum(model_path)
     if _md5 != model_md5:
-        logger.error(
-            f"Model md5: {_md5}, expected: {model_md5}, please delete {model_path} and restart lama-cleaner."
-            f"If you still have errors, please try download model manually first https://lama-cleaner-docs.vercel.app/install/download_model_manually.\n"
-        )
+        try:
+            os.remove(model_path)
+            logger.error(
+                f"Model md5: {_md5}, expected md5: {model_md5}, wrong model deleted. Please restart lama-cleaner."
+                f"If you still have errors, please try download model manually first https://lama-cleaner-docs.vercel.app/install/download_model_manually.\n"
+            )
+        except:
+            logger.error(
+                f"Model md5: {_md5}, expected md5: {model_md5}, please delete {model_path} and restart lama-cleaner."
+            )
     else:
         logger.error(
             f"Failed to load model {model_path},"
