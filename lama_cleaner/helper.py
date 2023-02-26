@@ -53,9 +53,16 @@ def download_model(url, model_md5: str = None):
             if model_md5 == _md5:
                 logger.info(f"Download model success, md5: {_md5}")
             else:
-                logger.error(
-                    f"Download model failed, md5: {_md5}, expected: {model_md5}. Please delete model at {cached_file} and restart lama-cleaner"
-                )
+                try:
+                    os.remove(cached_file)
+                    logger.error(
+                        f"Model md5: {_md5}, expected md5: {model_md5}, wrong model deleted. Please restart lama-cleaner."
+                        f"If you still have errors, please try download model manually first https://lama-cleaner-docs.vercel.app/install/download_model_manually.\n"
+                    )
+                except:
+                    logger.error(
+                        f"Model md5: {_md5}, expected md5: {model_md5}, please delete {cached_file} and restart lama-cleaner."
+                    )
                 exit(-1)
 
     return cached_file
