@@ -3,6 +3,8 @@ import os
 MPS_SUPPORT_MODELS = [
     "instruct_pix2pix",
     "sd1.5",
+    "anything4",
+    "realisticVision1.4",
     "sd2",
     "paint_by_example"
 ]
@@ -15,6 +17,8 @@ AVAILABLE_MODELS = [
     "mat",
     "fcf",
     "sd1.5",
+    "anything4",
+    "realisticVision1.4",
     "cv2",
     "manga",
     "sd2",

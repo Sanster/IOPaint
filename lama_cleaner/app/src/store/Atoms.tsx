@@ -10,6 +10,8 @@ export enum AIModel {
   MAT = 'mat',
   FCF = 'fcf',
   SD15 = 'sd1.5',
+  ANYTHING4 = 'anything4',
+  REALISTIC_VISION_1_4 = 'realisticVision1.4',
   SD2 = 'sd2',
   CV2 = 'cv2',
   Mange = 'manga',
@@ -422,6 +424,20 @@ const defaultHDSettings: ModelsHDSettings = {
     hdStrategyCropMargin: 128,
     enabled: false,
   },
+  [AIModel.ANYTHING4]: {
+    hdStrategy: HDStrategy.ORIGINAL,
+    hdStrategyResizeLimit: 768,
+    hdStrategyCropTrigerSize: 512,
+    hdStrategyCropMargin: 128,
+    enabled: false,
+  },
+  [AIModel.REALISTIC_VISION_1_4]: {
+    hdStrategy: HDStrategy.ORIGINAL,
+    hdStrategyResizeLimit: 768,
+    hdStrategyCropTrigerSize: 512,
+    hdStrategyCropMargin: 128,
+    enabled: false,
+  },
   [AIModel.SD2]: {
     hdStrategy: HDStrategy.ORIGINAL,
     hdStrategyResizeLimit: 768,
@@ -601,7 +617,12 @@ export const isSDState = selector({
   key: 'isSD',
   get: ({ get }) => {
     const settings = get(settingState)
-    return settings.model === AIModel.SD15 || settings.model === AIModel.SD2
+    return (
+      settings.model === AIModel.SD15 ||
+      settings.model === AIModel.SD2 ||
+      settings.model === AIModel.ANYTHING4 ||
+      settings.model === AIModel.REALISTIC_VISION_1_4
+    )
   },
 })
 
