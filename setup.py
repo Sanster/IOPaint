@@ -21,7 +21,7 @@ def load_requirements():
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#including-data-files
 setuptools.setup(
     name="lama-cleaner",
-    version="0.36.4",
+    version="0.37.0",
     author="PanicByte",
     author_email="cwq1913@gmail.com",
     description="Image inpainting tool powered by SOTA AI Model",
