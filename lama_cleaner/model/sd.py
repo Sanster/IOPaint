@@ -119,8 +119,6 @@ class SD(DiffusionInpaintModel):
 
         self.model.scheduler = scheduler
 
-        set_seed(config.sd_seed)
-
         if config.sd_mask_blur != 0:
             k = 2 * config.sd_mask_blur + 1
             mask = cv2.GaussianBlur(mask, (k, k), 0)[:, :, np.newaxis]
@@ -138,6 +136,7 @@ class SD(DiffusionInpaintModel):
             callback=self.callback,
             height=img_h,
             width=img_w,
+            generator=torch.manual_seed(config.sd_seed)
         ).images[0]
 
         output = (output * 255).round().astype("uint8")

@@ -51,14 +51,13 @@ class PaintByExample(DiffusionInpaintModel):
         mask: [H, W, 1] 255 means area to repaint
         return: BGR IMAGE
         """
-        set_seed(config.paint_by_example_seed)
-
         output = self.model(
             image=PIL.Image.fromarray(image),
             mask_image=PIL.Image.fromarray(mask[:, :, -1], mode="L"),
             example_image=config.paint_by_example_example_image,
             num_inference_steps=config.paint_by_example_steps,
             output_type='np.array',
+            generator=torch.manual_seed(config.paint_by_example_seed)
         ).images[0]
 
         output = (output * 255).round().astype("uint8")
