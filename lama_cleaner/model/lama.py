@@ -14,7 +14,7 @@ from lama_cleaner.schema import Config
 
 LAMA_MODEL_URL = os.environ.get(
     "LAMA_MODEL_URL",
-    "https://github.com/Sanster/models/releases/download/add_big_lama/big-lama.pt",
+    "https://huggingface.co/spaces/aryadytm/remove-photo-object/resolve/f00f2d12ada635f5f30f18ed74200ea89dd26631/assets/big-lama.pt",
 )
 LAMA_MODEL_MD5 = os.environ.get("LAMA_MODEL_MD5", "e3aa4aaa15225a33ec84f9f4bc47e500")
 
