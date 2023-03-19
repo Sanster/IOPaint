@@ -1,7 +1,9 @@
 import torch
 import gc
 
+from lama_cleaner.const import SD15_MODELS
 from lama_cleaner.helper import switch_mps_device
+from lama_cleaner.model.controlnet import ControlNet
 from lama_cleaner.model.fcf import FcF
 from lama_cleaner.model.lama import LaMa
 from lama_cleaner.model.ldm import LDM
@@ -20,7 +22,7 @@ models = {
     "zits": ZITS,
     "mat": MAT,
     "fcf": FcF,
-    "sd1.5": SD15,
+    SD15.name: SD15,
     Anything4.name: Anything4,
     RealisticVision14.name: RealisticVision14,
     "cv2": OpenCV2,
@@ -39,6 +41,9 @@ class ModelManager:
         self.model = self.init_model(name, device, **kwargs)
 
     def init_model(self, name: str, device, **kwargs):
+        if name in SD15_MODELS and kwargs.get("sd_controlnet", False):
+            return ControlNet(device, **{**kwargs, "name": name})
+
         if name in models:
             model = models[name](device, **kwargs)
         else:

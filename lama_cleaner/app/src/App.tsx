@@ -7,6 +7,7 @@ import Workspace from './components/Workspace'
 import {
   enableFileManagerState,
   fileState,
+  isControlNetState,
   isDisableModelSwitchState,
   isEnableAutoSavingState,
   toastState,
@@ -17,6 +18,7 @@ import useHotKey from './hooks/useHotkey'
 import {
   getEnableAutoSaving,
   getEnableFileManager,
+  getIsControlNet,
   getIsDisableModelSwitch,
   isDesktop,
 } from './adapters/inpainting'
@@ -37,6 +39,7 @@ function App() {
   const setIsDisableModelSwitch = useSetRecoilState(isDisableModelSwitchState)
   const setEnableFileManager = useSetRecoilState(enableFileManagerState)
   const setIsEnableAutoSavingState = useSetRecoilState(isEnableAutoSavingState)
+  const setIsControlNet = useSetRecoilState(isControlNetState)
 
   // Set Input Image
   useEffect(() => {
@@ -75,10 +78,17 @@ function App() {
       setIsEnableAutoSavingState(isEnabled === 'true')
     }
     fetchData3()
+
+    const fetchData4 = async () => {
+      const isEnabled = await getIsControlNet().then(res => res.text())
+      setIsControlNet(isEnabled === 'true')
+    }
+    fetchData4()
   }, [
     setEnableFileManager,
     setIsDisableModelSwitch,
     setIsEnableAutoSavingState,
+    setIsControlNet,
   ])
 
   // Dark Mode Hotkey

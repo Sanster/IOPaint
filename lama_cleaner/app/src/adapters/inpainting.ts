@@ -87,6 +87,12 @@ export default async function inpaint(
   fd.append('p2pImageGuidanceScale', settings.p2pImageGuidanceScale.toString())
   fd.append('p2pGuidanceScale', settings.p2pGuidanceScale.toString())
 
+  // ControlNet
+  fd.append(
+    'controlnet_conditioning_scale',
+    settings.controlnetConditioningScale.toString()
+  )
+
   if (sizeLimit === undefined) {
     fd.append('sizeLimit', '1080')
   } else {
@@ -112,6 +118,12 @@ export default async function inpaint(
 
 export function getIsDisableModelSwitch() {
   return fetch(`${API_ENDPOINT}/is_disable_model_switch`, {
+    method: 'GET',
+  })
+}
+
+export function getIsControlNet() {
+  return fetch(`${API_ENDPOINT}/is_controlnet`, {
     method: 'GET',
   })
 }

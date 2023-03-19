@@ -3,6 +3,7 @@ import { useRecoilState, useRecoilValue } from 'recoil'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { useToggle } from 'react-use'
 import {
+  isControlNetState,
   isInpaintingState,
   negativePropmtState,
   propmtState,
@@ -26,6 +27,7 @@ const SidePanel = () => {
     useRecoilState(negativePropmtState)
   const isInpainting = useRecoilValue(isInpaintingState)
   const prompt = useRecoilValue(propmtState)
+  const isControlNet = useRecoilValue(isControlNetState)
 
   const handleOnInput = (evt: FormEvent<HTMLTextAreaElement>) => {
     evt.preventDefault()
@@ -114,6 +116,22 @@ const SidePanel = () => {
                 })
               }}
             />
+
+            {isControlNet && (
+              <NumberInputSetting
+                title="ControlNet Weight"
+                width={INPUT_WIDTH}
+                allowFloat
+                value={`${setting.controlnetConditioningScale}`}
+                desc="Lowered this value if there is a big misalignment between the text prompt and the control image"
+                onValue={value => {
+                  const val = value.length === 0 ? 0 : parseFloat(value)
+                  setSettingState(old => {
+                    return { ...old, controlnetConditioningScale: val }
+                  })
+                }}
+              />
+            )}
 
             <NumberInputSetting
               title="Mask Blur"

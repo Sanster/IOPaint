@@ -51,6 +51,7 @@ interface AppState {
   enableFileManager: boolean
   gifImage: HTMLImageElement | undefined
   brushSize: number
+  isControlNet: boolean
 }
 
 export const appState = atom<AppState>({
@@ -70,6 +71,7 @@ export const appState = atom<AppState>({
     enableFileManager: false,
     gifImage: undefined,
     brushSize: 40,
+    isControlNet: false,
   },
 })
 
@@ -239,6 +241,18 @@ export const isDisableModelSwitchState = selector({
   },
 })
 
+export const isControlNetState = selector({
+  key: 'isControlNetState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.isControlNet
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, isControlNet: newValue })
+  },
+})
+
 export const isEnableAutoSavingState = selector({
   key: 'isEnableAutoSavingState',
   get: ({ get }) => {
@@ -379,6 +393,9 @@ export interface Settings {
   p2pSteps: number
   p2pImageGuidanceScale: number
   p2pGuidanceScale: number
+
+  // ControlNet
+  controlnetConditioningScale: number
 }
 
 const defaultHDSettings: ModelsHDSettings = {
@@ -482,6 +499,7 @@ export enum SDSampler {
   kEuler = 'k_euler',
   kEulerA = 'k_euler_a',
   dpmPlusPlus = 'dpm++',
+  uni_pc = 'uni_pc',
 }
 
 export enum SDMode {
@@ -510,7 +528,7 @@ export const settingStateDefault: Settings = {
   sdStrength: 0.75,
   sdSteps: 50,
   sdGuidanceScale: 7.5,
-  sdSampler: SDSampler.pndm,
+  sdSampler: SDSampler.uni_pc,
   sdSeed: 42,
   sdSeedFixed: false,
   sdNumSamples: 1,
@@ -533,6 +551,9 @@ export const settingStateDefault: Settings = {
   p2pSteps: 50,
   p2pImageGuidanceScale: 1.5,
   p2pGuidanceScale: 7.5,
+
+  // ControlNet
+  controlnetConditioningScale: 0.4,
 }
 
 const localStorageEffect =

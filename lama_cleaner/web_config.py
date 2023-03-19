@@ -6,25 +6,7 @@ import gradio as gr
 from loguru import logger
 from pydantic import BaseModel
 
-from lama_cleaner.const import (
-    AVAILABLE_MODELS,
-    AVAILABLE_DEVICES,
-    CPU_OFFLOAD_HELP,
-    NO_HALF_HELP,
-    DISABLE_NSFW_HELP,
-    SD_CPU_TEXTENCODER_HELP,
-    LOCAL_FILES_ONLY_HELP,
-    ENABLE_XFORMERS_HELP,
-    MODEL_DIR_HELP,
-    OUTPUT_DIR_HELP,
-    INPUT_HELP,
-    GUI_HELP,
-    DEFAULT_MODEL,
-    DEFAULT_DEVICE,
-    NO_GUI_AUTO_CLOSE_HELP,
-    DEFAULT_MODEL_DIR,
-    MPS_SUPPORT_MODELS,
-)
+from lama_cleaner.const import *
 
 _config_file = None
 
@@ -33,6 +15,7 @@ class Config(BaseModel):
     host: str = "127.0.0.1"
     port: int = 8080
     model: str = DEFAULT_MODEL
+    sd_controlnet: bool = False
     device: str = DEFAULT_DEVICE
     gui: bool = False
     no_gui_auto_close: bool = False
@@ -59,6 +42,7 @@ def save_config(
     host,
     port,
     model,
+    sd_controlnet,
     device,
     gui,
     no_gui_auto_close,
@@ -127,6 +111,9 @@ def main(config_file: str):
         disable_nsfw = gr.Checkbox(
             init_config.disable_nsfw, label=f"{DISABLE_NSFW_HELP}"
         )
+        sd_controlnet = gr.Checkbox(
+            init_config.sd_controlnet, label=f"{SD_CONTROLNET_HELP}"
+        )
         sd_cpu_textencoder = gr.Checkbox(
             init_config.sd_cpu_textencoder, label=f"{SD_CPU_TEXTENCODER_HELP}"
         )
@@ -149,6 +136,7 @@ def main(config_file: str):
                 host,
                 port,
                 model,
+                sd_controlnet,
                 device,
                 gui,
                 no_gui_auto_close,

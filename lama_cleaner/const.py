@@ -6,7 +6,8 @@ MPS_SUPPORT_MODELS = [
     "anything4",
     "realisticVision1.4",
     "sd2",
-    "paint_by_example"
+    "paint_by_example",
+    "controlnet",
 ]
 
 DEFAULT_MODEL = "lama"
@@ -24,10 +25,12 @@ AVAILABLE_MODELS = [
     "sd2",
     "paint_by_example",
     "instruct_pix2pix",
+    "controlnet",
 ]
+SD15_MODELS = ["sd1.5", "anything4", "realisticVision1.4"]
 
 AVAILABLE_DEVICES = ["cuda", "cpu", "mps"]
-DEFAULT_DEVICE = 'cuda'
+DEFAULT_DEVICE = "cuda"
 
 NO_HALF_HELP = """
 Using full precision model.
@@ -46,6 +49,10 @@ SD_CPU_TEXTENCODER_HELP = """
 Run Stable Diffusion text encoder model on CPU to save GPU memory.
 """
 
+SD_CONTROLNET_HELP = """
+Run Stable Diffusion 1.5 inpainting model with controlNet-canny model.
+"""
+
 LOCAL_FILES_ONLY_HELP = """
 Use local files only, not connect to Hugging Face server. (sd/paint_by_example)
 """
@@ -55,8 +62,7 @@ Enable xFormers optimizations. Requires xformers package has been installed. See
 """
 
 DEFAULT_MODEL_DIR = os.getenv(
-    "XDG_CACHE_HOME",
-    os.path.join(os.path.expanduser("~"), ".cache")
+    "XDG_CACHE_HOME", os.path.join(os.path.expanduser("~"), ".cache")
 )
 MODEL_DIR_HELP = """
 Model download directory (by setting XDG_CACHE_HOME environment variable), by default model downloaded to ~/.cache

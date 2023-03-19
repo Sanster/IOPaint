@@ -5,25 +5,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from lama_cleaner.const import (
-    AVAILABLE_MODELS,
-    NO_HALF_HELP,
-    CPU_OFFLOAD_HELP,
-    DISABLE_NSFW_HELP,
-    SD_CPU_TEXTENCODER_HELP,
-    LOCAL_FILES_ONLY_HELP,
-    AVAILABLE_DEVICES,
-    ENABLE_XFORMERS_HELP,
-    MODEL_DIR_HELP,
-    OUTPUT_DIR_HELP,
-    INPUT_HELP,
-    GUI_HELP,
-    DEFAULT_DEVICE,
-    NO_GUI_AUTO_CLOSE_HELP,
-    DEFAULT_MODEL_DIR,
-    DEFAULT_MODEL,
-    MPS_SUPPORT_MODELS,
-)
+from lama_cleaner.const import *
 from lama_cleaner.runtime import dump_environment_info
 
 
@@ -54,6 +36,9 @@ def parse_args():
     parser.add_argument("--disable-nsfw", action="store_true", help=DISABLE_NSFW_HELP)
     parser.add_argument(
         "--sd-cpu-textencoder", action="store_true", help=SD_CPU_TEXTENCODER_HELP
+    )
+    parser.add_argument(
+        "--sd-controlnet", action="store_true", help=SD_CONTROLNET_HELP
     )
     parser.add_argument(
         "--local-files-only", action="store_true", help=LOCAL_FILES_ONLY_HELP
@@ -132,6 +117,10 @@ def parse_args():
             parser.error(
                 "torch.cuda.is_available() is False, please use --device cpu or check your pytorch installation"
             )
+
+    if args.sd_controlnet:
+        if args.model not in SD15_MODELS:
+            logger.warning(f"--sd_controlnet only support {SD15_MODELS}")
 
     if args.model_dir and args.model_dir is not None:
         if os.path.isfile(args.model_dir):

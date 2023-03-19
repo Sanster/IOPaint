@@ -2,6 +2,9 @@ import PIL.Image
 import cv2
 import numpy as np
 import torch
+from diffusers import (
+    ControlNetModel,
+)
 from loguru import logger
 
 from lama_cleaner.model.base import DiffusionInpaintModel
@@ -31,13 +34,22 @@ class CPUTextEncoderWrapper:
         return self.torch_dtype
 
 
-class SD(DiffusionInpaintModel):
+NAMES_MAP = {
+    "sd1.5": "runwayml/stable-diffusion-inpainting",
+    "anything4": "Sanster/anything-4.0-inpainting",
+    "realisticVision1.4": "Sanster/Realistic_Vision_V1.4-inpainting",
+}
+
+
+class ControlNet(DiffusionInpaintModel):
+    name = "controlnet"
     pad_mod = 8
     min_size = 512
 
     def init_model(self, device: torch.device, **kwargs):
-        from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
+        from .pipeline import StableDiffusionControlNetInpaintPipeline
 
+        model_id = NAMES_MAP[kwargs["name"]]
         fp16 = not kwargs.get("no_half", False)
 
         model_kwargs = {
@@ -55,12 +67,16 @@ class SD(DiffusionInpaintModel):
 
         use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
         torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
-        self.model = StableDiffusionInpaintPipeline.from_pretrained(
-            self.model_id_or_path,
+
+        controlnet = ControlNetModel.from_pretrained(
+            f"lllyasviel/sd-controlnet-canny", torch_dtype=torch_dtype
+        )
+        self.model = StableDiffusionControlNetInpaintPipeline.from_pretrained(
+            model_id,
+            controlnet=controlnet,
             revision="fp16" if use_gpu and fp16 else "main",
             torch_dtype=torch_dtype,
-            use_auth_token=kwargs["hf_access_token"],
-            **model_kwargs
+            **model_kwargs,
         )
 
         # https://huggingface.co/docs/diffusers/v0.7.0/en/api/pipelines/stable_diffusion#diffusers.StableDiffusionInpaintPipeline.enable_attention_slicing
@@ -70,7 +86,6 @@ class SD(DiffusionInpaintModel):
             self.model.enable_xformers_memory_efficient_attention()
 
         if kwargs.get("cpu_offload", False) and use_gpu:
-            # TODO: gpu_id
             logger.info("Enable sequential cpu offload")
             self.model.enable_sequential_cpu_offload(gpu_id=0)
         else:
@@ -100,11 +115,19 @@ class SD(DiffusionInpaintModel):
 
         img_h, img_w = image.shape[:2]
 
+        canny_image = cv2.Canny(image, 100, 200)
+        canny_image = canny_image[:, :, None]
+        canny_image = np.concatenate([canny_image, canny_image, canny_image], axis=2)
+        canny_image = PIL.Image.fromarray(canny_image)
+        mask_image = PIL.Image.fromarray(mask[:, :, -1], mode="L")
+        image = PIL.Image.fromarray(image)
+
         output = self.model(
-            image=PIL.Image.fromarray(image),
+            image=image,
+            control_image=canny_image,
             prompt=config.prompt,
             negative_prompt=config.negative_prompt,
-            mask_image=PIL.Image.fromarray(mask[:, :, -1], mode="L"),
+            mask_image=mask_image,
             num_inference_steps=config.sd_steps,
             guidance_scale=config.sd_guidance_scale,
             output_type="np.array",
@@ -112,6 +135,7 @@ class SD(DiffusionInpaintModel):
             height=img_h,
             width=img_w,
             generator=torch.manual_seed(config.sd_seed),
+            controlnet_conditioning_scale=config.controlnet_conditioning_scale,
         ).images[0]
 
         output = (output * 255).round().astype("uint8")
@@ -131,23 +155,3 @@ class SD(DiffusionInpaintModel):
     def is_downloaded() -> bool:
         # model will be downloaded when app start, and can't switch in frontend settings
         return True
-
-
-class SD15(SD):
-    name = "sd1.5"
-    model_id_or_path = "runwayml/stable-diffusion-inpainting"
-
-
-class Anything4(SD):
-    name = "anything4"
-    model_id_or_path = "Sanster/anything-4.0-inpainting"
-
-
-class RealisticVision14(SD):
-    name = "realisticVision1.4"
-    model_id_or_path = "Sanster/Realistic_Vision_V1.4-inpainting"
-
-
-class SD2(SD):
-    name = "sd2"
-    model_id_or_path = "stabilityai/stable-diffusion-2-inpainting"

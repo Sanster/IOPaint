@@ -18,6 +18,7 @@ import numpy as np
 from loguru import logger
 from watchdog.events import FileSystemEventHandler
 
+from lama_cleaner.const import SD15_MODELS
 from lama_cleaner.interactive_seg import InteractiveSeg, Click
 from lama_cleaner.make_gif import make_compare_gif
 from lama_cleaner.model_manager import ModelManager
@@ -88,6 +89,7 @@ interactive_seg_model: InteractiveSeg = None
 device = None
 input_image_path: str = None
 is_disable_model_switch: bool = False
+is_controlnet: bool = False
 is_enable_file_manager: bool = False
 is_enable_auto_saving: bool = False
 is_desktop: bool = False
@@ -257,6 +259,7 @@ def process():
         p2p_steps=form["p2pSteps"],
         p2p_image_guidance_scale=form["p2pImageGuidanceScale"],
         p2p_guidance_scale=form["p2pGuidanceScale"],
+        controlnet_conditioning_scale=form["controlnet_conditioning_scale"],
     )
 
     if config.sd_seed == -1:
@@ -347,6 +350,12 @@ def current_model():
     return model.name, 200
 
 
+@app.route("/is_controlnet")
+def get_is_controlnet():
+    res = "true" if is_controlnet else "false"
+    return res, 200
+
+
 @app.route("/is_disable_model_switch")
 def get_is_disable_model_switch():
     res = "true" if is_disable_model_switch else "false"
@@ -427,6 +436,9 @@ def main(args):
     global thumb
     global output_dir
     global is_enable_auto_saving
+    global is_controlnet
+    if args.sd_controlnet and args.model in SD15_MODELS:
+        is_controlnet = True
 
     output_dir = args.output_dir
     if output_dir is not None:
@@ -464,6 +476,7 @@ def main(args):
 
     model = ModelManager(
         name=args.model,
+        sd_controlnet=args.sd_controlnet,
         device=device,
         no_half=args.no_half,
         hf_access_token=args.hf_access_token,

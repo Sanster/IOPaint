@@ -24,9 +24,10 @@ class SDSampler(str, Enum):
     ddim = "ddim"
     pndm = "pndm"
     k_lms = "k_lms"
-    k_euler = 'k_euler'
-    k_euler_a = 'k_euler_a'
-    dpm_plus_plus = 'dpm++'
+    k_euler = "k_euler"
+    k_euler_a = "k_euler_a"
+    dpm_plus_plus = "dpm++"
+    uni_pc = "uni_pc"
 
 
 class Config(BaseModel):
@@ -71,14 +72,14 @@ class Config(BaseModel):
     # Higher guidance scale encourages to generate images that are closely linked
     # to the text prompt, usually at the expense of lower image quality.
     sd_guidance_scale: float = 7.5
-    sd_sampler: str = SDSampler.ddim
+    sd_sampler: str = SDSampler.uni_pc
     # -1 mean random seed
     sd_seed: int = 42
     sd_match_histograms: bool = False
 
     # Configs for opencv inpainting
     # opencv document https://docs.opencv.org/4.6.0/d7/d8b/group__photo__inpaint.html#gga8002a65f5a3328fbf15df81b842d3c3ca05e763003a805e6c11c673a9f4ba7d07
-    cv2_flag: str = 'INPAINT_NS'
+    cv2_flag: str = "INPAINT_NS"
     cv2_radius: int = 4
 
     # Paint by Example
@@ -93,3 +94,6 @@ class Config(BaseModel):
     p2p_steps: int = 50
     p2p_image_guidance_scale: float = 1.5
     p2p_guidance_scale: float = 7.5
+
+    # ControlNet
+    controlnet_conditioning_scale: float = 0.4
