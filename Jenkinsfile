@@ -77,6 +77,7 @@ spec:
           dir('huspy-services') {
             git branch: 'main', credentialsId: 'yahiakhidr', url: 'https://github.com/huspy/huspy-services.git'
           }
+          ENV = selectEnvironment(BRANCH_NAME)
           sh """
           apk add yq git
           cd huspy-services
@@ -133,4 +134,21 @@ def branchToConfig(branch) {
     }
     return result
   }
+}
+
+def selectEnvironment(branch) {
+  script {
+    def dev_environments = 'feature/(dev|grey|purple|orange|blue)/.*'
+    def matcher = branch =~ dev_environments
+    if (matcher.find()) {  
+      return matcher.group(1)
+    }
+    if (branch ==~ /release.*/) {
+      return "qa"
+    }
+    if (branch ==~ "master|main") {
+      return "prod"
+    }
+  }
+  return "dev"
 }
