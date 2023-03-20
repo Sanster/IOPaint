@@ -37,9 +37,7 @@ def parse_args():
     parser.add_argument(
         "--sd-cpu-textencoder", action="store_true", help=SD_CPU_TEXTENCODER_HELP
     )
-    parser.add_argument(
-        "--sd-controlnet", action="store_true", help=SD_CONTROLNET_HELP
-    )
+    parser.add_argument("--sd-controlnet", action="store_true", help=SD_CONTROLNET_HELP)
     parser.add_argument(
         "--local-files-only", action="store_true", help=LOCAL_FILES_ONLY_HELP
     )
@@ -69,6 +67,9 @@ def parse_args():
         "--disable-model-switch",
         action="store_true",
         help="Disable model switch in frontend",
+    )
+    parser.add_argument(
+        "--quality", default=95, type=int, help=QUALITY_HELP,
     )
 
     # useless args

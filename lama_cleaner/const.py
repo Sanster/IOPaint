@@ -7,7 +7,6 @@ MPS_SUPPORT_MODELS = [
     "realisticVision1.4",
     "sd2",
     "paint_by_example",
-    "controlnet",
 ]
 
 DEFAULT_MODEL = "lama"
@@ -25,7 +24,6 @@ AVAILABLE_MODELS = [
     "sd2",
     "paint_by_example",
     "instruct_pix2pix",
-    "controlnet",
 ]
 SD15_MODELS = ["sd1.5", "anything4", "realisticVision1.4"]
 
@@ -50,7 +48,7 @@ Run Stable Diffusion text encoder model on CPU to save GPU memory.
 """
 
 SD_CONTROLNET_HELP = """
-Run Stable Diffusion 1.5 inpainting model with controlNet-canny model.
+Run Stable Diffusion 1.5 inpainting model with Canny ControlNet control.
 """
 
 LOCAL_FILES_ONLY_HELP = """
@@ -83,4 +81,8 @@ Launch Lama Cleaner as desktop app
 
 NO_GUI_AUTO_CLOSE_HELP = """
 Prevent backend auto close after the GUI window closed.
+"""
+
+QUALITY_HELP = """
+Quality of image encoding, 0-100. Default is 95, higher quality will generate larger file size.
 """

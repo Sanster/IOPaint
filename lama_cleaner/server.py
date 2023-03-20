@@ -93,6 +93,7 @@ is_controlnet: bool = False
 is_enable_file_manager: bool = False
 is_enable_auto_saving: bool = False
 is_desktop: bool = False
+image_quality: int = 95
 
 
 def get_image_ext(img_bytes):
@@ -300,10 +301,12 @@ def process():
 
     ext = get_image_ext(origin_image_bytes)
 
+    # fmt: off
     if exif is not None:
-        bytes_io = io.BytesIO(pil_to_bytes(Image.fromarray(res_np_img), ext, exif=exif))
+        bytes_io = io.BytesIO(pil_to_bytes(Image.fromarray(res_np_img), ext, quality=image_quality, exif=exif))
     else:
-        bytes_io = io.BytesIO(pil_to_bytes(Image.fromarray(res_np_img), ext))
+        bytes_io = io.BytesIO(pil_to_bytes(Image.fromarray(res_np_img), ext, quality=image_quality))
+    # fmt: on
 
     response = make_response(
         send_file(
@@ -437,6 +440,10 @@ def main(args):
     global output_dir
     global is_enable_auto_saving
     global is_controlnet
+    global image_quality
+
+    image_quality = args.quality
+
     if args.sd_controlnet and args.model in SD15_MODELS:
         is_controlnet = True
 
