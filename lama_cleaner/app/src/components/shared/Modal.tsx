@@ -9,7 +9,7 @@ export interface ModalProps {
   show: boolean
   children?: ReactNode
   onClose?: () => void
-  title: string
+  title: string | ReactNode
   showCloseIcon?: boolean
   className?: string
 }

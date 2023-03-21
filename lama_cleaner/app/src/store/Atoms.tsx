@@ -701,6 +701,7 @@ interface FileManagerState {
   sortBy: SortBy
   sortOrder: SortOrder
   layout: 'rows' | 'masonry'
+  searchText: string
 }
 
 const FILE_MANAGER_STATE_KEY = 'fileManagerState'
@@ -711,6 +712,7 @@ export const fileManagerState = atom<FileManagerState>({
     sortBy: SortBy.CTIME,
     sortOrder: SortOrder.DESCENDING,
     layout: 'masonry',
+    searchText: '',
   },
   effects: [localStorageEffect(FILE_MANAGER_STATE_KEY)],
 })
@@ -739,5 +741,14 @@ export const fileManagerLayout = selector({
   set: ({ get, set }, newValue: any) => {
     const val = get(fileManagerState)
     set(fileManagerState, { ...val, layout: newValue })
+  },
+})
+
+export const fileManagerSearchText = selector({
+  key: 'fileManagerSearchText',
+  get: ({ get }) => get(fileManagerState).searchText,
+  set: ({ get, set }, newValue: any) => {
+    const val = get(fileManagerState)
+    set(fileManagerState, { ...val, searchText: newValue })
   },
 })

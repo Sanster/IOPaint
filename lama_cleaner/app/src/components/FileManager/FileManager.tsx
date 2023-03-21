@@ -11,7 +11,11 @@ import * as Tabs from '@radix-ui/react-tabs'
 import { useRecoilState, useSetRecoilState } from 'recoil'
 import PhotoAlbum from 'react-photo-album'
 import { BarsArrowDownIcon, BarsArrowUpIcon } from '@heroicons/react/24/outline'
-import { MagnifyingGlassIcon } from '@radix-ui/react-icons'
+import {
+  MagnifyingGlassIcon,
+  ViewHorizontalIcon,
+  ViewGridIcon,
+} from '@radix-ui/react-icons'
 import { useDebounce } from 'react-use'
 import { Id, Index, IndexSearchResult } from 'flexsearch'
 import * as ScrollArea from '@radix-ui/react-scroll-area'
@@ -19,6 +23,7 @@ import Modal from '../shared/Modal'
 import Flex from '../shared/Layout'
 import {
   fileManagerLayout,
+  fileManagerSearchText,
   fileManagerSortBy,
   fileManagerSortOrder,
   SortBy,
@@ -74,10 +79,11 @@ export default function FileManager(props: Props) {
   const [sortBy, setSortBy] = useRecoilState<SortBy>(fileManagerSortBy)
   const [sortOrder, setSortOrder] = useRecoilState(fileManagerSortOrder)
   const [layout, setLayout] = useRecoilState(fileManagerLayout)
-
+  const [debouncedSearchText, setDebouncedSearchText] = useRecoilState(
+    fileManagerSearchText
+  )
   const ref = useRef(null)
-  const [searchText, setSearchText] = useState('')
-  const [debouncedSearchText, setDebouncedSearchText] = useState('')
+  const [searchText, setSearchText] = useState(debouncedSearchText)
   const [tab, setTab] = useState(IMAGE_TAB)
   const [photos, setPhotos] = useState<Photo[]>([])
 
@@ -163,11 +169,39 @@ export default function FileManager(props: Props) {
     onPhotoClick(tab, photos[index].name)
   }
 
+  const renderTitle = () => {
+    return (
+      <Flex
+        style={{ justifyContent: 'flex-start', alignItems: 'center', gap: 12 }}
+      >
+        <div>{`Images (${photos.length})`}</div>
+        <Flex>
+          <Button
+            icon={<ViewHorizontalIcon />}
+            toolTip="Rows layout"
+            onClick={() => {
+              setLayout('rows')
+            }}
+            className={layout !== 'rows' ? 'sort-btn-inactive' : ''}
+          />
+          <Button
+            icon={<ViewGridIcon />}
+            toolTip="Grid layout"
+            onClick={() => {
+              setLayout('masonry')
+            }}
+            className={layout !== 'masonry' ? 'sort-btn-inactive' : ''}
+          />
+        </Flex>
+      </Flex>
+    )
+  }
+
   return (
     <Modal
       onClose={onClose}
       // TODO：layout switch 放到标题中
-      title={`Images (${photos.length})`}
+      title={renderTitle()}
       className="file-manager-modal"
       show={show}
     >
