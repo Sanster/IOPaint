@@ -1,7 +1,6 @@
 import React, {
   SyntheticEvent,
   useEffect,
-  useMemo,
   useState,
   useCallback,
   useRef,
@@ -9,7 +8,7 @@ import React, {
 } from 'react'
 import _ from 'lodash'
 import * as Tabs from '@radix-ui/react-tabs'
-import { useSetRecoilState } from 'recoil'
+import { useRecoilState, useSetRecoilState } from 'recoil'
 import PhotoAlbum from 'react-photo-album'
 import { BarsArrowDownIcon, BarsArrowUpIcon } from '@heroicons/react/24/outline'
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons'
@@ -18,12 +17,18 @@ import { Id, Index, IndexSearchResult } from 'flexsearch'
 import * as ScrollArea from '@radix-ui/react-scroll-area'
 import Modal from '../shared/Modal'
 import Flex from '../shared/Layout'
-import { toastState } from '../../store/Atoms'
+import {
+  fileManagerLayout,
+  fileManagerSortBy,
+  fileManagerSortOrder,
+  SortBy,
+  SortOrder,
+  toastState,
+} from '../../store/Atoms'
 import { getMedias } from '../../adapters/inpainting'
 import Selector from '../shared/Selector'
 import Button from '../shared/Button'
 import TextInput from '../shared/Input'
-import { useAsyncMemo } from '../../hooks/useAsyncMemo'
 
 interface Photo {
   src: string
@@ -37,20 +42,12 @@ interface Filename {
   height: number
   width: number
   ctime: number
-}
-
-enum SortOrder {
-  DESCENDING = 'desc',
-  ASCENDING = 'asc',
-}
-
-enum SortBy {
-  NAME = 'name',
-  CTIME = 'ctime',
+  mtime: number
 }
 
 const SORT_BY_NAME = 'Name'
 const SORT_BY_CREATED_TIME = 'Created time'
+const SORT_BY_MODIFIED_TIME = 'Modified time'
 
 const IMAGE_TAB = 'image'
 const OUTPUT_TAB = 'output'
@@ -58,6 +55,7 @@ const OUTPUT_TAB = 'output'
 const SortByMap = {
   [SortBy.NAME]: SORT_BY_NAME,
   [SortBy.CTIME]: SORT_BY_CREATED_TIME,
+  [SortBy.MTIME]: SORT_BY_MODIFIED_TIME,
 }
 
 interface Props {
@@ -72,8 +70,11 @@ export default function FileManager(props: Props) {
   const [scrollTop, setScrollTop] = useState(0)
   const [closeScrollTop, setCloseScrollTop] = useState(0)
   const setToastState = useSetRecoilState(toastState)
-  const [sortBy, setSortBy] = useState<SortBy>(SortBy.CTIME)
-  const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.DESCENDING)
+
+  const [sortBy, setSortBy] = useRecoilState<SortBy>(fileManagerSortBy)
+  const [sortOrder, setSortOrder] = useRecoilState(fileManagerSortOrder)
+  const [layout, setLayout] = useRecoilState(fileManagerLayout)
+
   const ref = useRef(null)
   const [searchText, setSearchText] = useState('')
   const [debouncedSearchText, setDebouncedSearchText] = useState('')
@@ -165,6 +166,7 @@ export default function FileManager(props: Props) {
   return (
     <Modal
       onClose={onClose}
+      // TODO：layout switch 放到标题中
       title={`Images (${photos.length})`}
       className="file-manager-modal"
       show={show}
@@ -208,14 +210,22 @@ export default function FileManager(props: Props) {
           </Flex>
           <Flex style={{ gap: 8 }}>
             <Selector
-              width={130}
+              width={140}
               value={SortByMap[sortBy]}
               options={Object.values(SortByMap)}
               onChange={val => {
-                if (val === SORT_BY_CREATED_TIME) {
-                  setSortBy(SortBy.CTIME)
-                } else {
-                  setSortBy(SortBy.NAME)
+                switch (val) {
+                  case SORT_BY_NAME:
+                    setSortBy(SortBy.NAME)
+                    break
+                  case SORT_BY_CREATED_TIME:
+                    setSortBy(SortBy.CTIME)
+                    break
+                  case SORT_BY_MODIFIED_TIME:
+                    setSortBy(SortBy.MTIME)
+                    break
+                  default:
+                    break
                 }
               }}
               chevronDirection="down"
@@ -250,7 +260,7 @@ export default function FileManager(props: Props) {
           ref={onRefChange}
         >
           <PhotoAlbum
-            layout="masonry"
+            layout={layout}
             photos={photos}
             spacing={8}
             padding={0}

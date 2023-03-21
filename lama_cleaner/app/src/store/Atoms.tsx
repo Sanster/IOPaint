@@ -685,3 +685,59 @@ export const isDiffusionModelsState = selector({
     return isSD || isPaintByExample || isPix2Pix
   },
 })
+
+export enum SortBy {
+  NAME = 'name',
+  CTIME = 'ctime',
+  MTIME = 'mtime',
+}
+
+export enum SortOrder {
+  DESCENDING = 'desc',
+  ASCENDING = 'asc',
+}
+
+interface FileManagerState {
+  sortBy: SortBy
+  sortOrder: SortOrder
+  layout: 'rows' | 'masonry'
+}
+
+const FILE_MANAGER_STATE_KEY = 'fileManagerState'
+
+export const fileManagerState = atom<FileManagerState>({
+  key: FILE_MANAGER_STATE_KEY,
+  default: {
+    sortBy: SortBy.CTIME,
+    sortOrder: SortOrder.DESCENDING,
+    layout: 'masonry',
+  },
+  effects: [localStorageEffect(FILE_MANAGER_STATE_KEY)],
+})
+
+export const fileManagerSortBy = selector({
+  key: 'fileManagerSortBy',
+  get: ({ get }) => get(fileManagerState).sortBy,
+  set: ({ get, set }, newValue: any) => {
+    const val = get(fileManagerState)
+    set(fileManagerState, { ...val, sortBy: newValue })
+  },
+})
+
+export const fileManagerSortOrder = selector({
+  key: 'fileManagerSortOrder',
+  get: ({ get }) => get(fileManagerState).sortOrder,
+  set: ({ get, set }, newValue: any) => {
+    const val = get(fileManagerState)
+    set(fileManagerState, { ...val, sortOrder: newValue })
+  },
+})
+
+export const fileManagerLayout = selector({
+  key: 'fileManagerLayout',
+  get: ({ get }) => get(fileManagerState).layout,
+  set: ({ get, set }, newValue: any) => {
+    const val = get(fileManagerState)
+    set(fileManagerState, { ...val, layout: newValue })
+  },
+})

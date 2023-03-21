@@ -137,6 +137,7 @@ class FileManager(FileSystemEventHandler):
                     "height": img.height,
                     "width": img.width,
                     "ctime": os.path.getctime(path),
+                    "mtime": os.path.getmtime(path),
                 }
             )
         return res
