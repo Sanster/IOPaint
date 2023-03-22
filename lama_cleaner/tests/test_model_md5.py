@@ -1,10 +1,5 @@
-import os
-import tempfile
-from pathlib import Path
-
-
 def test_load_model():
-    from lama_cleaner.interactive_seg import InteractiveSeg
+    from lama_cleaner.plugins import InteractiveSeg
     from lama_cleaner.model_manager import ModelManager
 
     interactive_seg_model = InteractiveSeg()

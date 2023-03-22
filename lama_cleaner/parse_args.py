@@ -69,8 +69,32 @@ def parse_args():
         help="Disable model switch in frontend",
     )
     parser.add_argument(
-        "--quality", default=95, type=int, help=QUALITY_HELP,
+        "--quality",
+        default=95,
+        type=int,
+        help=QUALITY_HELP,
     )
+
+    # Plugins
+    parser.add_argument(
+        "--enable-interactive-seg",
+        action="store_true",
+        help="Enable interactive segmentation. Always run on CPU",
+    )
+    parser.add_argument(
+        "--enable-remove-bg",
+        action="store_true",
+        help="Enable remove background. Always run on CPU",
+    )
+    parser.add_argument(
+        "--enable-realesrgan",
+        action="store_true",
+        help="Enable realesrgan super resolution",
+    )
+    parser.add_argument(
+        "--realesrgan-device", default="cpu", type=str, choices=["cpu", "cuda"]
+    )
+    #########
 
     # useless args
     parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
@@ -123,6 +147,7 @@ def parse_args():
         if args.model not in SD15_MODELS:
             logger.warning(f"--sd_controlnet only support {SD15_MODELS}")
 
+    os.environ["U2NET_HOME"] = DEFAULT_MODEL_DIR
     if args.model_dir and args.model_dir is not None:
         if os.path.isfile(args.model_dir):
             parser.error(f"invalid --model-dir: {args.model_dir} is a file")
@@ -132,6 +157,7 @@ def parse_args():
             Path(args.model_dir).mkdir(exist_ok=True, parents=True)
 
         os.environ["XDG_CACHE_HOME"] = args.model_dir
+        os.environ["U2NET_HOME"] = args.model_dir
 
     if args.input and args.input is not None:
         if not os.path.exists(args.input):
