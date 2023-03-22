@@ -25,7 +25,7 @@ MANGA_LINE_MODEL_URL = os.environ.get(
     "https://github.com/Sanster/models/releases/download/manga/erika.jit",
 )
 MANGA_LINE_MODEL_MD5 = os.environ.get(
-    "MANGA_LINE_MODEL_MD5", "8f157c142718f11e233d3750a65e0794"
+    "MANGA_LINE_MODEL_MD5", "0c926d5a4af8450b0d00bc5b9a095644"
 )
 
 
