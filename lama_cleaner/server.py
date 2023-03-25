@@ -423,8 +423,12 @@ def build_plugins(args):
         logger.info(f"Initialize {RemoveBG.name} plugin")
         plugins[RemoveBG.name] = RemoveBG()
     if args.enable_realesrgan:
-        logger.info(f"Initialize {RealESRGANUpscaler.name} plugin")
-        plugins[RealESRGANUpscaler.name] = RealESRGANUpscaler(args.realesrgan_device)
+        logger.info(
+            f"Initialize {RealESRGANUpscaler.name} plugin: {args.realesrgan_model}, {args.realesrgan_device}"
+        )
+        plugins[RealESRGANUpscaler.name] = RealESRGANUpscaler(
+            args.realesrgan_model, args.realesrgan_device
+        )
     if args.enable_gif:
         logger.info(f"Initialize GIF plugin")
         plugins[MakeGIF.name] = MakeGIF()

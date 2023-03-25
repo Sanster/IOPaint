@@ -6,6 +6,7 @@ from pathlib import Path
 from loguru import logger
 
 from lama_cleaner.const import *
+from lama_cleaner.plugins.realesrgan import RealESRGANModelName, RealESRGANModelNameList
 from lama_cleaner.runtime import dump_environment_info
 
 
@@ -92,7 +93,13 @@ def parse_args():
         help="Enable realesrgan super resolution",
     )
     parser.add_argument(
-        "--realesrgan-device", default="cpu", type=str, choices=["cpu", "cuda"]
+        "--realesrgan-device", default="cpu", type=str, choices=["cpu", "cuda", "mps"]
+    )
+    parser.add_argument(
+        "--realesrgan-model",
+        default=RealESRGANModelName.realesr_general_x4v3.value,
+        type=str,
+        choices=RealESRGANModelNameList,
     )
     parser.add_argument(
         "--enable-gif",
