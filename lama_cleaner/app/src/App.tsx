@@ -4,24 +4,11 @@ import { nanoid } from 'nanoid'
 import useInputImage from './hooks/useInputImage'
 import { themeState } from './components/Header/ThemeChanger'
 import Workspace from './components/Workspace'
-import {
-  enableFileManagerState,
-  fileState,
-  isControlNetState,
-  isDisableModelSwitchState,
-  isEnableAutoSavingState,
-  toastState,
-} from './store/Atoms'
+import { fileState, serverConfigState, toastState } from './store/Atoms'
 import { keepGUIAlive } from './utils'
 import Header from './components/Header/Header'
 import useHotKey from './hooks/useHotkey'
-import {
-  getEnableAutoSaving,
-  getEnableFileManager,
-  getIsControlNet,
-  getIsDisableModelSwitch,
-  isDesktop,
-} from './adapters/inpainting'
+import { getServerConfig, isDesktop } from './adapters/inpainting'
 
 const SUPPORTED_FILE_TYPE = [
   'image/jpeg',
@@ -36,10 +23,7 @@ function App() {
   const [theme, setTheme] = useRecoilState(themeState)
   const setToastState = useSetRecoilState(toastState)
   const userInputImage = useInputImage()
-  const setIsDisableModelSwitch = useSetRecoilState(isDisableModelSwitchState)
-  const setEnableFileManager = useSetRecoilState(enableFileManagerState)
-  const setIsEnableAutoSavingState = useSetRecoilState(isEnableAutoSavingState)
-  const setIsControlNet = useSetRecoilState(isControlNetState)
+  const setServerConfigState = useSetRecoilState(serverConfigState)
 
   // Set Input Image
   useEffect(() => {
@@ -58,38 +42,13 @@ function App() {
   }, [])
 
   useEffect(() => {
-    const fetchData = async () => {
-      const isDisable: string = await getIsDisableModelSwitch().then(res =>
-        res.text()
-      )
-      setIsDisableModelSwitch(isDisable === 'true')
+    const fetchServerConfig = async () => {
+      const serverConfig = await getServerConfig().then(res => res.json())
+      console.log(serverConfig)
+      setServerConfigState(serverConfig)
     }
-
-    fetchData()
-
-    const fetchData2 = async () => {
-      const isEnabled = await getEnableFileManager().then(res => res.text())
-      setEnableFileManager(isEnabled === 'true')
-    }
-    fetchData2()
-
-    const fetchData3 = async () => {
-      const isEnabled = await getEnableAutoSaving().then(res => res.text())
-      setIsEnableAutoSavingState(isEnabled === 'true')
-    }
-    fetchData3()
-
-    const fetchData4 = async () => {
-      const isEnabled = await getIsControlNet().then(res => res.text())
-      setIsControlNet(isEnabled === 'true')
-    }
-    fetchData4()
-  }, [
-    setEnableFileManager,
-    setIsDisableModelSwitch,
-    setIsEnableAutoSavingState,
-    setIsControlNet,
-  ])
+    fetchServerConfig()
+  }, [])
 
   // Dark Mode Hotkey
   useHotKey(

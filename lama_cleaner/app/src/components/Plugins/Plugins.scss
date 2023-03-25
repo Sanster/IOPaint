@@ -1,9 +1,9 @@
 @use '../../styles/Mixins/' as *;
 
-.side-panel {
+.plugins {
   position: absolute;
   top: 68px;
-  right: 1.5rem;
+  left: 1rem;
   padding: 0.1rem 0.3rem;
   z-index: 4;
 
@@ -13,20 +13,20 @@
   border-width: 1px;
 }
 
-.side-panel-trigger {
+.plugins-trigger {
   font-family: 'WorkSans', sans-serif;
   font-size: 16px;
   border: 0px;
 }
 
-.side-panel-content {
+.plugins-content {
   outline: none;
   position: relative;
   font-family: 'WorkSans', sans-serif;
   font-size: 14px;
   top: 8px;
-  right: 1.5rem;
-  padding: 1rem 1rem;
+  left: 1rem;
+  padding: 0.8rem 0.5rem;
   z-index: 9;
 
   // backdrop-filter: blur(12px);

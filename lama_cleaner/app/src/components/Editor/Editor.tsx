@@ -18,10 +18,7 @@ import {
 } from 'react-zoom-pan-pinch'
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
 import { useWindowSize, useKey, useKeyPressEvent } from 'react-use'
-import inpaint, {
-  downloadToOutput,
-  postInteractiveSeg,
-} from '../../adapters/inpainting'
+import inpaint, { downloadToOutput, runPlugin } from '../../adapters/inpainting'
 import Button from '../shared/Button'
 import Slider from './Slider'
 import SizeSelector from './SizeSelector'
@@ -50,6 +47,8 @@ import {
   isInteractiveSegRunningState,
   isInteractiveSegState,
   isPix2PixState,
+  isPluginRunningState,
+  isProcessingState,
   negativePropmtState,
   propmtState,
   runManuallyState,
@@ -69,6 +68,7 @@ import FileSelect from '../FileSelect/FileSelect'
 import InteractiveSeg from '../InteractiveSeg/InteractiveSeg'
 import InteractiveSegConfirmActions from '../InteractiveSeg/ConfirmActions'
 import InteractiveSegReplaceModal from '../InteractiveSeg/ReplaceModal'
+import { PluginName } from '../Plugins/Plugins'
 import MakeGIF from './MakeGIF'
 
 const TOOLBAR_SIZE = 200
@@ -118,13 +118,15 @@ export default function Editor() {
   const croperRect = useRecoilValue(croperState)
   const setToastState = useSetRecoilState(toastState)
   const [isInpainting, setIsInpainting] = useRecoilState(isInpaintingState)
+  const setIsPluginRunning = useSetRecoilState(isPluginRunningState)
+  const isProcessing = useRecoilValue(isProcessingState)
   const runMannually = useRecoilValue(runManuallyState)
   const isDiffusionModels = useRecoilValue(isDiffusionModelsState)
   const isPix2Pix = useRecoilValue(isPix2PixState)
   const [isInteractiveSeg, setIsInteractiveSeg] = useRecoilState(
     isInteractiveSegState
   )
-  const [isInteractiveSegRunning, setIsInteractiveSegRunning] = useRecoilState(
+  const setIsInteractiveSegRunning = useSetRecoilState(
     isInteractiveSegRunningState
   )
 
@@ -538,6 +540,77 @@ export default function Editor() {
     }
   }, [runInpainting])
 
+  const getCurrentRender = useCallback(async () => {
+    let targetFile = file
+    if (renders.length > 0) {
+      const lastRender = renders[renders.length - 1]
+      targetFile = await srcToFile(lastRender.currentSrc, file.name, file.type)
+    }
+    return targetFile
+  }, [file, renders])
+
+  useEffect(() => {
+    emitter.on(PluginName.InteractiveSeg, () => {
+      setIsInteractiveSeg(true)
+      if (interactiveSegMask !== null) {
+        setShowInteractiveSegModal(true)
+      }
+    })
+    return () => {
+      emitter.off(PluginName.InteractiveSeg)
+    }
+  })
+
+  const runRenderablePlugin = useCallback(
+    async (name: string) => {
+      if (isProcessing) {
+        return
+      }
+      try {
+        // TODO 要不要加 undoCurrentLine？？
+        setIsPluginRunning(true)
+        const targetFile = await getCurrentRender()
+        const res = await runPlugin(name, targetFile)
+        if (!res) {
+          throw new Error('Something went wrong on server side.')
+        }
+        const { blob } = res
+        const newRender = new Image()
+        await loadImage(newRender, blob)
+        const newRenders = [...renders, newRender]
+        setRenders(newRenders)
+      } catch (e: any) {
+        setToastState({
+          open: true,
+          desc: e.message ? e.message : e.toString(),
+          state: 'error',
+          duration: 3000,
+        })
+      } finally {
+        setIsPluginRunning(false)
+      }
+    },
+    [renders, setRenders, getCurrentRender, setIsPluginRunning, isProcessing]
+  )
+
+  useEffect(() => {
+    emitter.on(PluginName.RemoveBG, () => {
+      runRenderablePlugin(PluginName.RemoveBG)
+    })
+    return () => {
+      emitter.off(PluginName.RemoveBG)
+    }
+  }, [runRenderablePlugin])
+
+  useEffect(() => {
+    emitter.on(PluginName.RealESRGAN, () => {
+      runRenderablePlugin(PluginName.RealESRGAN)
+    })
+    return () => {
+      emitter.off(PluginName.RealESRGAN)
+    }
+  }, [runRenderablePlugin])
+
   const hadRunInpainting = () => {
     return renders.length !== 0
   }
@@ -759,13 +832,7 @@ export default function Editor() {
     }
 
     setIsInteractiveSegRunning(true)
-
-    let targetFile = file
-    if (renders.length > 0) {
-      const lastRender = renders[renders.length - 1]
-      targetFile = await srcToFile(lastRender.currentSrc, file.name, file.type)
-    }
-
+    const targetFile = await getCurrentRender()
     const prevMask = null
     // prev_mask seems to be not working better
     // if (tmpInteractiveSegMask !== null) {
@@ -777,7 +844,12 @@ export default function Editor() {
     // }
 
     try {
-      const res = await postInteractiveSeg(targetFile, prevMask, newClicks)
+      const res = await runPlugin(
+        PluginName.InteractiveSeg.toString(),
+        targetFile,
+        prevMask,
+        newClicks
+      )
       if (!res) {
         throw new Error('Something went wrong on server side.')
       }
@@ -990,10 +1062,7 @@ export default function Editor() {
   ])
 
   const disableUndo = () => {
-    if (isInteractiveSeg) {
-      return true
-    }
-    if (isInpainting) {
+    if (isProcessing) {
       return true
     }
     if (renders.length > 0) {
@@ -1074,10 +1143,7 @@ export default function Editor() {
   ])
 
   const disableRedo = () => {
-    if (isInteractiveSeg) {
-      return true
-    }
-    if (isInpainting) {
+    if (isProcessing) {
       return true
     }
     if (redoRenders.length > 0) {
@@ -1184,20 +1250,6 @@ export default function Editor() {
     }
     return undefined
   }, [showBrush, isPanning])
-
-  useHotKey(
-    'i',
-    () => {
-      if (!isInteractiveSeg && isOriginalLoaded) {
-        setIsInteractiveSeg(true)
-        if (interactiveSegMask !== null) {
-          setShowInteractiveSegModal(true)
-        }
-      }
-    },
-    {},
-    [isInteractiveSeg, interactiveSegMask, isOriginalLoaded]
-  )
 
   // Standard Hotkeys for Brush Size
   useHotKey('[', () => {
@@ -1370,11 +1422,7 @@ export default function Editor() {
         }}
       >
         <TransformComponent
-          contentClass={
-            isInpainting || isInteractiveSegRunning
-              ? 'editor-canvas-loading'
-              : ''
-          }
+          contentClass={isProcessing ? 'editor-canvas-loading' : ''}
           contentStyle={{
             visibility: initialCentered ? 'visible' : 'hidden',
           }}
@@ -1416,23 +1464,24 @@ export default function Editor() {
               }}
             >
               {showOriginal && (
-                <div
-                  className="editor-slider"
-                  style={{
-                    marginRight: `${sliderPos}%`,
-                  }}
-                />
+                <>
+                  <div
+                    className="editor-slider"
+                    style={{
+                      marginRight: `${sliderPos}%`,
+                    }}
+                  />
+                  <img
+                    className="original-image"
+                    src={original.src}
+                    alt="original"
+                    style={{
+                      width: `${original.naturalWidth}px`,
+                      height: `${original.naturalHeight}px`,
+                    }}
+                  />
+                </>
               )}
-
-              <img
-                className="original-image"
-                src={original.src}
-                alt="original"
-                style={{
-                  width: `${original.naturalWidth}px`,
-                  height: `${original.naturalHeight}px`,
-                }}
-              />
             </div>
           </div>
 
@@ -1467,6 +1516,7 @@ export default function Editor() {
       onMouseMove={onMouseMove}
       onMouseUp={onPointerUp}
     >
+      <MakeGIF renders={renders} />
       <InteractiveSegConfirmActions
         onAcceptClick={onInteractiveAccept}
         onCancelClick={onInteractiveCancel}
@@ -1514,17 +1564,6 @@ export default function Editor() {
           onClick={() => setShowRefBrush(false)}
         />
         <div className="editor-toolkit-btns">
-          <Button
-            toolTip="Interactive Segmentation"
-            icon={<CursorArrowRaysIcon />}
-            disabled={isInteractiveSeg || isInpainting || !isOriginalLoaded}
-            onClick={() => {
-              setIsInteractiveSeg(true)
-              if (interactiveSegMask !== null) {
-                setShowInteractiveSegModal(true)
-              }
-            }}
-          />
           <Button
             toolTip="Reset Zoom & Pan"
             icon={<ArrowsPointingOutIcon />}
@@ -1591,7 +1630,6 @@ export default function Editor() {
             }}
             disabled={renders.length === 0}
           />
-          <MakeGIF renders={renders} />
           <Button
             toolTip="Save Image"
             icon={<ArrowDownTrayIcon />}
@@ -1617,8 +1655,7 @@ export default function Editor() {
                 </svg>
               }
               disabled={
-                isInpainting ||
-                isInteractiveSeg ||
+                isProcessing ||
                 (!hadDrawSomething() && interactiveSegMask === null)
               }
               onClick={() => {

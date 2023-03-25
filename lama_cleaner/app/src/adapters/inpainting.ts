@@ -1,3 +1,4 @@
+import { PluginName } from '../components/Plugins/Plugins'
 import { Rect, Settings } from '../store/Atoms'
 import { dataURItoBlob, loadImage, srcToFile } from '../utils'
 
@@ -116,26 +117,8 @@ export default async function inpaint(
   }
 }
 
-export function getIsDisableModelSwitch() {
-  return fetch(`${API_ENDPOINT}/is_disable_model_switch`, {
-    method: 'GET',
-  })
-}
-
-export function getIsControlNet() {
-  return fetch(`${API_ENDPOINT}/is_controlnet`, {
-    method: 'GET',
-  })
-}
-
-export function getEnableFileManager() {
-  return fetch(`${API_ENDPOINT}/is_enable_file_manager`, {
-    method: 'GET',
-  })
-}
-
-export function getEnableAutoSaving() {
-  return fetch(`${API_ENDPOINT}/is_enable_auto_saving`, {
+export function getServerConfig() {
+  return fetch(`${API_ENDPOINT}/server_config`, {
     method: 'GET',
   })
 }
@@ -167,20 +150,24 @@ export function modelDownloaded(name: string) {
   })
 }
 
-export async function postInteractiveSeg(
+export async function runPlugin(
+  name: string,
   imageFile: File,
-  maskFile: File | null,
-  clicks: number[][]
+  maskFile?: File | null,
+  clicks?: number[][]
 ) {
   const fd = new FormData()
+  fd.append('name', name)
   fd.append('image', imageFile)
-  fd.append('clicks', JSON.stringify(clicks))
-  if (maskFile !== null) {
+  if (clicks) {
+    fd.append('clicks', JSON.stringify(clicks))
+  }
+  if (maskFile) {
     fd.append('mask', maskFile)
   }
 
   try {
-    const res = await fetch(`${API_ENDPOINT}/interactive_seg`, {
+    const res = await fetch(`${API_ENDPOINT}/run_plugin`, {
       method: 'POST',
       body: fd,
     })
@@ -255,12 +242,13 @@ export async function makeGif(
 ) {
   const cleanFile = await srcToFile(cleanImage.src, filename, mimeType)
   const fd = new FormData()
-  fd.append('origin_img', originFile)
+  fd.append('name', PluginName.MakeGIF)
+  fd.append('image', originFile)
   fd.append('clean_img', cleanFile)
   fd.append('filename', filename)
 
   try {
-    const res = await fetch(`${API_ENDPOINT}/make_gif`, {
+    const res = await fetch(`${API_ENDPOINT}/run_plugin`, {
       method: 'POST',
       body: fd,
     })

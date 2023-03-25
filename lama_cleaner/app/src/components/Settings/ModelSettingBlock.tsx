@@ -1,11 +1,9 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
-import { getIsDisableModelSwitch } from '../../adapters/inpainting'
 import {
   AIModel,
   CV2Flag,
   isDisableModelSwitchState,
-  SDSampler,
   settingState,
 } from '../../store/Atoms'
 import Selector from '../shared/Selector'

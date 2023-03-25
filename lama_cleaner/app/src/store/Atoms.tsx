@@ -52,6 +52,8 @@ interface AppState {
   gifImage: HTMLImageElement | undefined
   brushSize: number
   isControlNet: boolean
+  plugins: string[]
+  isPluginRunning: boolean
 }
 
 export const appState = atom<AppState>({
@@ -72,6 +74,8 @@ export const appState = atom<AppState>({
     gifImage: undefined,
     brushSize: 40,
     isControlNet: false,
+    plugins: [],
+    isPluginRunning: false,
   },
 })
 
@@ -94,6 +98,36 @@ export const isInpaintingState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, isInpainting: newValue })
+  },
+})
+
+export const isPluginRunningState = selector({
+  key: 'isPluginRunningState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.isPluginRunning
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, isPluginRunning: newValue })
+  },
+})
+
+export const serverConfigState = selector({
+  key: 'serverConfigState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return {
+      isControlNet: app.isControlNet,
+      isDisableModelSwitchState: app.isDisableModelSwitch,
+      isEnableAutoSaving: app.isEnableAutoSaving,
+      enableFileManager: app.enableFileManager,
+      plugins: app.plugins,
+    }
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, ...newValue })
   },
 })
 
@@ -214,6 +248,16 @@ export const isInteractiveSegRunningState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, isInteractiveSegRunning: newValue })
+  },
+})
+
+export const isProcessingState = selector({
+  key: 'isProcessingState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return (
+      app.isInteractiveSegRunning || app.isPluginRunning || app.isInpainting
+    )
   },
 })
 

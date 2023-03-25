@@ -37,7 +37,7 @@ class RealESRGANUpscaler:
 
     def __call__(self, rgb_np_img, files, form):
         bgr_np_img = cv2.cvtColor(rgb_np_img, cv2.COLOR_RGB2BGR)
-        scale = float(form["scale"])
+        scale = 4
         return self.forward(bgr_np_img, scale)
 
     def forward(self, bgr_np_img, scale: float):

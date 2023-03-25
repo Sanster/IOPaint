@@ -1,3 +1,3 @@
 from .interactive_seg import InteractiveSeg, Click
 from .remove_bg import RemoveBG
-from .upscale import RealESRGANUpscaler
+from .realesrgan import RealESRGANUpscaler

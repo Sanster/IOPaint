@@ -94,6 +94,11 @@ def parse_args():
     parser.add_argument(
         "--realesrgan-device", default="cpu", type=str, choices=["cpu", "cuda"]
     )
+    parser.add_argument(
+        "--enable-gif",
+        action="store_true",
+        help="Enable GIF plugin",
+    )
     #########
 
     # useless args
