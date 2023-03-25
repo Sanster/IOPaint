@@ -130,6 +130,7 @@ const Plugins = () => {
           side="bottom"
           align="start"
           sideOffset={5}
+          onCloseAutoFocus={event => event.preventDefault()}
         >
           {renderPlugins()}
         </DropdownMenu.Content>
