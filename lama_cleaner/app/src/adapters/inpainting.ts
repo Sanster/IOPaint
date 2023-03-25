@@ -10,7 +10,6 @@ export default async function inpaint(
   croperRect: Rect,
   prompt?: string,
   negativePrompt?: string,
-  sizeLimit?: string,
   seed?: number,
   maskBase64?: string,
   customMask?: File,
@@ -93,12 +92,6 @@ export default async function inpaint(
     'controlnet_conditioning_scale',
     settings.controlnetConditioningScale.toString()
   )
-
-  if (sizeLimit === undefined) {
-    fd.append('sizeLimit', '1080')
-  } else {
-    fd.append('sizeLimit', sizeLimit)
-  }
 
   try {
     const res = await fetch(`${API_ENDPOINT}/inpaint`, {

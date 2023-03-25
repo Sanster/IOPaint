@@ -211,11 +211,7 @@ def process():
     interpolation = cv2.INTER_CUBIC
 
     form = request.form
-    size_limit: Union[int, str] = form.get("sizeLimit", "1080")
-    if size_limit == "Original":
-        size_limit = max(image.shape)
-    else:
-        size_limit = int(size_limit)
+    size_limit = max(image.shape)
 
     if "paintByExampleImage" in input:
         paint_by_example_example_image, _ = load_img(

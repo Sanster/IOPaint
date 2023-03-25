@@ -21,7 +21,6 @@ import { useWindowSize, useKey, useKeyPressEvent } from 'react-use'
 import inpaint, { downloadToOutput, runPlugin } from '../../adapters/inpainting'
 import Button from '../shared/Button'
 import Slider from './Slider'
-import SizeSelector from './SizeSelector'
 import {
   askWritePermission,
   copyCanvasImage,
@@ -169,7 +168,6 @@ export default function Editor() {
   const [scale, setScale] = useState<number>(1)
   const [panned, setPanned] = useState<boolean>(false)
   const [minScale, setMinScale] = useState<number>(1.0)
-  const [sizeLimit, setSizeLimit] = useState<number>(1080)
   const windowSize = useWindowSize()
   const windowCenterX = windowSize.width / 2
   const windowCenterY = windowSize.height / 2
@@ -387,7 +385,6 @@ export default function Editor() {
           croperRect,
           promptVal,
           negativePromptVal,
-          sizeLimit.toString(),
           seedVal,
           useCustomMask ? undefined : maskCanvas.toDataURL(),
           useCustomMask ? customMask : undefined,
@@ -439,7 +436,6 @@ export default function Editor() {
       settings.graduallyInpainting,
       settings,
       croperRect,
-      sizeLimit,
       promptVal,
       negativePromptVal,
       drawOnCurrentRender,
@@ -684,8 +680,6 @@ export default function Editor() {
     if (!initialCentered) {
       viewportRef.current?.centerView(s, 1)
       setInitialCentered(true)
-      const imageSizeLimit = Math.max(original.width, original.height)
-      setSizeLimit(imageSizeLimit)
     }
   }, [
     context?.canvas,
@@ -1229,10 +1223,6 @@ export default function Editor() {
     }
   }
 
-  const onSizeLimitChange = (_sizeLimit: number) => {
-    setSizeLimit(_sizeLimit)
-  }
-
   const toggleShowBrush = (newState: boolean) => {
     if (newState !== showBrush && !isPanning) {
       setShowBrush(newState)
@@ -1544,15 +1534,6 @@ export default function Editor() {
       )}
 
       <div className="editor-toolkit-panel">
-        {isDiffusionModels || file === undefined ? (
-          <></>
-        ) : (
-          <SizeSelector
-            onChange={onSizeLimitChange}
-            originalWidth={original.naturalWidth}
-            originalHeight={original.naturalHeight}
-          />
-        )}
         <Slider
           label="Brush"
           min={MIN_BRUSH_SIZE}
