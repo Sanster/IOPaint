@@ -153,12 +153,16 @@ export function modelDownloaded(name: string) {
 export async function runPlugin(
   name: string,
   imageFile: File,
+  upscale?: number,
   maskFile?: File | null,
   clicks?: number[][]
 ) {
   const fd = new FormData()
   fd.append('name', name)
   fd.append('image', imageFile)
+  if (upscale) {
+    fd.append('upscale', upscale.toString())
+  }
   if (clicks) {
     fd.append('clicks', JSON.stringify(clicks))
   }

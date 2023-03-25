@@ -1,6 +1,7 @@
 from enum import Enum
 
 import cv2
+from loguru import logger
 
 from lama_cleaner.helper import download_model
 
@@ -83,8 +84,11 @@ class RealESRGANUpscaler:
 
     def __call__(self, rgb_np_img, files, form):
         bgr_np_img = cv2.cvtColor(rgb_np_img, cv2.COLOR_RGB2BGR)
-        scale = 4
-        return self.forward(bgr_np_img, scale)
+        scale = float(form['upscale'])
+        logger.info(f"RealESRGAN input shape: {bgr_np_img.shape}, scale: {scale}")
+        result = self.forward(bgr_np_img, scale)
+        logger.info(f"RealESRGAN output shape: {result.shape}")
+        return result
 
     def forward(self, bgr_np_img, scale: float):
         # 输出是 BGR

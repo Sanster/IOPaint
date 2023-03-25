@@ -1,13 +1,16 @@
 import React, { FormEvent } from 'react'
 import { useRecoilValue } from 'recoil'
 import { CursorArrowRaysIcon, GifIcon } from '@heroicons/react/24/outline'
-import { BoxModelIcon, MarginIcon, HobbyKnifeIcon } from '@radix-ui/react-icons'
+import {
+  BoxModelIcon,
+  ChevronRightIcon,
+  HobbyKnifeIcon,
+  MixIcon,
+} from '@radix-ui/react-icons'
 import { useToggle } from 'react-use'
-import * as PopoverPrimitive from '@radix-ui/react-popover'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import {
   fileState,
-  isInpaintingState,
-  isPluginRunningState,
   isProcessingState,
   serverConfigState,
 } from '../../store/Atoms'
@@ -41,50 +44,97 @@ const pluginMap = {
 }
 
 const Plugins = () => {
-  const [open, toggleOpen] = useToggle(true)
+  // const [open, toggleOpen] = useToggle(true)
   const serverConfig = useRecoilValue(serverConfigState)
   const file = useRecoilValue(fileState)
   const isProcessing = useRecoilValue(isProcessingState)
+  const disabled = !file || isProcessing
 
   const onPluginClick = (pluginName: string) => {
-    if (isProcessing) {
-      return
+    if (!disabled) {
+      emitter.emit(pluginName)
     }
-    emitter.emit(pluginName)
+  }
+
+  const onRealESRGANClick = (upscale: number) => {
+    if (!disabled) {
+      emitter.emit(PluginName.RealESRGAN, { upscale })
+    }
+  }
+
+  const renderRealESRGANPlugin = () => {
+    return (
+      <DropdownMenu.Sub>
+        <DropdownMenu.SubTrigger
+          className="DropdownMenuSubTrigger"
+          disabled={disabled}
+        >
+          <BoxModelIcon />
+          RealESRGAN
+          <div className="RightSlot">
+            <ChevronRightIcon />
+          </div>
+        </DropdownMenu.SubTrigger>
+        <DropdownMenu.Portal>
+          <DropdownMenu.SubContent className="DropdownMenuSubContent">
+            <DropdownMenu.Item
+              className="DropdownMenuItem"
+              onClick={() => onRealESRGANClick(2)}
+            >
+              upscale 2x
+            </DropdownMenu.Item>
+            <DropdownMenu.Item
+              className="DropdownMenuItem"
+              onClick={() => onRealESRGANClick(4)}
+              disabled={disabled}
+            >
+              upscale 4x
+            </DropdownMenu.Item>
+          </DropdownMenu.SubContent>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Sub>
+    )
   }
 
   const renderPlugins = () => {
     return serverConfig.plugins.map((plugin: string) => {
       const { IconClass } = pluginMap[plugin as PluginName]
+      if (plugin === PluginName.RealESRGAN) {
+        return renderRealESRGANPlugin()
+      }
       return (
-        <Button
-          style={{ gap: 6 }}
-          icon={<IconClass style={{ width: 15 }} />}
+        <DropdownMenu.Item
+          className="DropdownMenuItem"
           onClick={() => onPluginClick(plugin)}
-          disabled={!file || isProcessing}
+          disabled={disabled}
         >
-          {pluginMap[plugin as PluginName].showName}
-        </Button>
+          <IconClass style={{ width: 15 }} />
+          {plugin}
+        </DropdownMenu.Item>
       )
     })
   }
+  if (serverConfig.plugins.length === 0) {
+    return null
+  }
 
   return (
-    <div className="plugins">
-      <PopoverPrimitive.Root open={open}>
-        <PopoverPrimitive.Trigger
-          className="btn-primary plugins-trigger"
-          onClick={() => toggleOpen()}
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger className="plugins">
+        <Button icon={<MixIcon />} />
+      </DropdownMenu.Trigger>
+
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          className="DropdownMenuContent"
+          side="bottom"
+          align="start"
+          sideOffset={5}
         >
-          Plugins
-        </PopoverPrimitive.Trigger>
-        <PopoverPrimitive.Portal>
-          <PopoverPrimitive.Content className="plugins-content">
-            {renderPlugins()}
-          </PopoverPrimitive.Content>
-        </PopoverPrimitive.Portal>
-      </PopoverPrimitive.Root>
-    </div>
+          {renderPlugins()}
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   )
 }
 

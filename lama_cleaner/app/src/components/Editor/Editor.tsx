@@ -562,7 +562,7 @@ export default function Editor() {
   })
 
   const runRenderablePlugin = useCallback(
-    async (name: string) => {
+    async (name: string, data?: any) => {
       if (isProcessing) {
         return
       }
@@ -570,7 +570,7 @@ export default function Editor() {
         // TODO 要不要加 undoCurrentLine？？
         setIsPluginRunning(true)
         const targetFile = await getCurrentRender()
-        const res = await runPlugin(name, targetFile)
+        const res = await runPlugin(name, targetFile, data?.upscale)
         if (!res) {
           throw new Error('Something went wrong on server side.')
         }
@@ -603,8 +603,8 @@ export default function Editor() {
   }, [runRenderablePlugin])
 
   useEffect(() => {
-    emitter.on(PluginName.RealESRGAN, () => {
-      runRenderablePlugin(PluginName.RealESRGAN)
+    emitter.on(PluginName.RealESRGAN, (data: any) => {
+      runRenderablePlugin(PluginName.RealESRGAN, data)
     })
     return () => {
       emitter.off(PluginName.RealESRGAN)
@@ -845,8 +845,9 @@ export default function Editor() {
 
     try {
       const res = await runPlugin(
-        PluginName.InteractiveSeg.toString(),
+        PluginName.InteractiveSeg,
         targetFile,
+        undefined,
         prevMask,
         newClicks
       )
@@ -938,7 +939,7 @@ export default function Editor() {
   }
 
   const onMouseDown = (ev: SyntheticEvent) => {
-    if (isInteractiveSeg) {
+    if (isProcessing) {
       return
     }
     if (isChangingBrushSizeByMouse) {
@@ -952,9 +953,6 @@ export default function Editor() {
     }
     const canvas = context?.canvas
     if (!canvas) {
-      return
-    }
-    if (isInpainting) {
       return
     }
 
