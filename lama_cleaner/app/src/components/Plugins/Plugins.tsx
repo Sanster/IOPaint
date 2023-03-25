@@ -119,7 +119,7 @@ const Plugins = () => {
   }
 
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root modal={false}>
       <DropdownMenu.Trigger className="plugins">
         <Button icon={<MixIcon />} />
       </DropdownMenu.Trigger>
