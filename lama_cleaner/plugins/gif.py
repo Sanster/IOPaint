@@ -98,7 +98,7 @@ def make_compare_gif(
             )
         images.append(new_frame)
 
-    for i in range(10):
+    for i in range(30):
         images.append(src_img)
 
     cubic_bezier_points.reverse()
@@ -117,8 +117,9 @@ def make_compare_gif(
                 [(right, 0), (right, height)], width=splitter_width, fill=splitter_color
             )
         images.append(new_frame)
-
-    images.append(clean_img)
+        
+    for _ in range(30):
+        images.append(clean_img)
 
     img_byte_arr = io.BytesIO()
     clean_img.save(
