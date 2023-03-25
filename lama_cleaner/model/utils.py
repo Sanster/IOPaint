@@ -27,7 +27,7 @@ def make_beta_schedule(
     if schedule == "linear":
         betas = (
             torch.linspace(
-                linear_start**0.5, linear_end**0.5, n_timestep, dtype=torch.float64
+                linear_start ** 0.5, linear_end ** 0.5, n_timestep, dtype=torch.float64
             )
             ** 2
         )
@@ -134,8 +134,10 @@ def timestep_embedding(device, timesteps, dim, max_period=10000, repeat_only=Fal
 ###### MAT and FcF #######
 
 
-def normalize_2nd_moment(x, dim=1, eps=1e-8):
-    return x * (x.square().mean(dim=dim, keepdim=True) + eps).rsqrt()
+def normalize_2nd_moment(x, dim=1):
+    return (
+        x * (x.square().mean(dim=dim, keepdim=True) + torch.finfo(x.dtype).eps).rsqrt()
+    )
 
 
 class EasyDict(dict):
@@ -460,7 +462,7 @@ def _upfirdn2d_ref(x, f, up=1, down=1, padding=0, flip_filter=False, gain=1):
     if f is None:
         f = torch.ones([1, 1], dtype=torch.float32, device=x.device)
     assert isinstance(f, torch.Tensor) and f.ndim in [1, 2]
-    assert f.dtype == torch.float32 and not f.requires_grad
+    assert not f.requires_grad
     batch_size, num_channels, in_height, in_width = x.shape
     # upx, upy = _parse_scaling(up)
     # downx, downy = _parse_scaling(down)
@@ -733,9 +735,7 @@ def conv2d_resample(
     # Validate arguments.
     assert isinstance(x, torch.Tensor) and (x.ndim == 4)
     assert isinstance(w, torch.Tensor) and (w.ndim == 4) and (w.dtype == x.dtype)
-    assert f is None or (
-        isinstance(f, torch.Tensor) and f.ndim in [1, 2] and f.dtype == torch.float32
-    )
+    assert f is None or (isinstance(f, torch.Tensor) and f.ndim in [1, 2])
     assert isinstance(up, int) and (up >= 1)
     assert isinstance(down, int) and (down >= 1)
     # assert isinstance(groups, int) and (groups >= 1), f"!!!!!! groups: {groups} isinstance(groups, int)  {isinstance(groups, int)} {type(groups)}"
@@ -772,7 +772,7 @@ def conv2d_resample(
             f=f,
             up=up,
             padding=[px0, px1, py0, py1],
-            gain=up**2,
+            gain=up ** 2,
             flip_filter=flip_filter,
         )
         return x
@@ -814,7 +814,7 @@ def conv2d_resample(
             x=x,
             f=f,
             padding=[px0 + pxt, px1 + pxt, py0 + pyt, py1 + pyt],
-            gain=up**2,
+            gain=up ** 2,
             flip_filter=flip_filter,
         )
         if down > 1:
@@ -834,7 +834,7 @@ def conv2d_resample(
         f=(f if up > 1 else None),
         up=up,
         padding=[px0, px1, py0, py1],
-        gain=up**2,
+        gain=up ** 2,
         flip_filter=flip_filter,
     )
     x = _conv2d_wrapper(x=x, w=w, groups=groups, flip_weight=flip_weight)
@@ -870,7 +870,7 @@ class Conv2dLayer(torch.nn.Module):
         self.register_buffer("resample_filter", setup_filter(resample_filter))
         self.conv_clamp = conv_clamp
         self.padding = kernel_size // 2
-        self.weight_gain = 1 / np.sqrt(in_channels * (kernel_size**2))
+        self.weight_gain = 1 / np.sqrt(in_channels * (kernel_size ** 2))
         self.act_gain = activation_funcs[activation].def_gain
 
         memory_format = (
