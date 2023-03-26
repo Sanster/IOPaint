@@ -102,6 +102,14 @@ def parse_args():
         choices=RealESRGANModelNameList,
     )
     parser.add_argument(
+        "--enable-gfpgan",
+        action="store_true",
+        help="Enable GFPGAN face restore",
+    )
+    parser.add_argument(
+        "--gfpgan-device", default="cpu", type=str, choices=["cpu", "cuda"]
+    )
+    parser.add_argument(
         "--enable-gif",
         action="store_true",
         help="Enable GIF plugin",

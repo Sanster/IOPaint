@@ -71,6 +71,7 @@ class RealESRGANUpscaler(BasePlugin):
         model_info = REAL_ESRGAN_MODELS[name]
 
         model_path = download_model(model_info["url"], model_info["model_md5"])
+        logger.info(f"RealESRGAN model path: {model_path}")
 
         self.model = RealESRGANer(
             scale=model_info["scale"],

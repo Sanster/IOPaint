@@ -1,5 +1,7 @@
+import os
 import cv2
 import numpy as np
+from torch.hub import get_dir
 
 from lama_cleaner.plugins.base_plugin import BasePlugin
 
@@ -10,6 +12,10 @@ class RemoveBG(BasePlugin):
     def __init__(self):
         super().__init__()
         from rembg import new_session
+
+        hub_dir = get_dir()
+        model_dir = os.path.join(hub_dir, "checkpoints")
+        os.environ["U2NET_HOME"] = model_dir
 
         self.session = new_session(model_name="u2net")
 

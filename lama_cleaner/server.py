@@ -19,7 +19,13 @@ from lama_cleaner.const import SD15_MODELS
 from lama_cleaner.file_manager import FileManager
 from lama_cleaner.model.utils import torch_gc
 from lama_cleaner.model_manager import ModelManager
-from lama_cleaner.plugins import InteractiveSeg, RemoveBG, RealESRGANUpscaler, MakeGIF
+from lama_cleaner.plugins import (
+    InteractiveSeg,
+    RemoveBG,
+    RealESRGANUpscaler,
+    MakeGIF,
+    GFPGANPlugin,
+)
 from lama_cleaner.schema import Config
 
 try:
@@ -423,6 +429,9 @@ def build_plugins(args):
         plugins[RealESRGANUpscaler.name] = RealESRGANUpscaler(
             args.realesrgan_model, args.realesrgan_device
         )
+    if args.enable_gfpgan:
+        logger.info(f"Initialize {GFPGANPlugin.name} plugin")
+        plugins[GFPGANPlugin.name] = GFPGANPlugin(args.gfpgan_device)
     if args.enable_gif:
         logger.info(f"Initialize GIF plugin")
         plugins[MakeGIF.name] = MakeGIF()
