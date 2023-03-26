@@ -1,28 +1,26 @@
 #!/usr/bin/env python3
 
+import imghdr
 import io
 import logging
 import multiprocessing
 import os
 import random
 import time
-import imghdr
 from pathlib import Path
-from typing import Union
-from PIL import Image
 
 import cv2
-import torch
 import numpy as np
+import torch
+from PIL import Image
 from loguru import logger
 
 from lama_cleaner.const import SD15_MODELS
+from lama_cleaner.file_manager import FileManager
 from lama_cleaner.model.utils import torch_gc
 from lama_cleaner.model_manager import ModelManager
-from lama_cleaner.plugins import InteractiveSeg, RemoveBG, RealESRGANUpscaler
-from lama_cleaner.plugins.gif import MakeGIF
+from lama_cleaner.plugins import InteractiveSeg, RemoveBG, RealESRGANUpscaler, MakeGIF
 from lama_cleaner.schema import Config
-from lama_cleaner.file_manager import FileManager
 
 try:
     torch._C._jit_override_can_fuse_on_cpu(False)

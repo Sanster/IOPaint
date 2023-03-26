@@ -1,11 +1,14 @@
 import cv2
 import numpy as np
 
+from lama_cleaner.plugins.base_plugin import BasePlugin
 
-class RemoveBG:
+
+class RemoveBG(BasePlugin):
     name = "RemoveBG"
 
     def __init__(self):
+        super().__init__()
         from rembg import new_session
 
         self.session = new_session(model_name="u2net")
@@ -20,3 +23,11 @@ class RemoveBG:
         # return BGRA image
         output = remove(bgr_np_img, session=self.session)
         return output
+
+    def check_dep(self):
+        try:
+            import rembg
+        except ImportError:
+            return (
+                "RemoveBG is not installed, please install it first. pip install rembg"
+            )

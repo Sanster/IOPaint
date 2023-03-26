@@ -4,6 +4,7 @@ import math
 from PIL import Image, ImageDraw
 
 from lama_cleaner.helper import load_img
+from lama_cleaner.plugins.base_plugin import BasePlugin
 
 
 def keep_ratio_resize(img, size, resample=Image.BILINEAR):
@@ -117,7 +118,7 @@ def make_compare_gif(
                 [(right, 0), (right, height)], width=splitter_width, fill=splitter_color
             )
         images.append(new_frame)
-        
+
     for _ in range(30):
         images.append(clean_img)
 
@@ -135,7 +136,7 @@ def make_compare_gif(
     return img_byte_arr.getvalue()
 
 
-class MakeGIF:
+class MakeGIF(BasePlugin):
     name = "MakeGIF"
 
     def __call__(self, rgb_np_img, files, form):

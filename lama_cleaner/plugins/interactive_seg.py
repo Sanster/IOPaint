@@ -1,5 +1,4 @@
 import json
-import json
 import os
 from typing import Tuple, List
 
@@ -14,6 +13,7 @@ from lama_cleaner.helper import (
     load_jit_model,
     load_img,
 )
+from lama_cleaner.plugins.base_plugin import BasePlugin
 
 
 class Click(BaseModel):
@@ -195,10 +195,11 @@ INTERACTIVE_SEG_MODEL_MD5 = os.environ.get(
 )
 
 
-class InteractiveSeg:
+class InteractiveSeg(BasePlugin):
     name = "InteractiveSeg"
 
     def __init__(self, infer_size=384, open_kernel_size=3, dilate_kernel_size=3):
+        super().__init__()
         device = torch.device("cpu")
         model = load_jit_model(
             INTERACTIVE_SEG_MODEL_URL, device, INTERACTIVE_SEG_MODEL_MD5
