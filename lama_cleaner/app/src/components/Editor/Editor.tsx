@@ -564,6 +564,7 @@ export default function Editor() {
       }
       try {
         // TODO 要不要加 undoCurrentLine？？
+        const start = new Date()
         setIsPluginRunning(true)
         const targetFile = await getCurrentRender()
         const res = await runPlugin(name, targetFile, data?.upscale)
@@ -575,6 +576,16 @@ export default function Editor() {
         await loadImage(newRender, blob)
         const newRenders = [...renders, newRender]
         setRenders(newRenders)
+
+        const end = new Date()
+        const time = end.getTime() - start.getTime()
+
+        setToastState({
+          open: true,
+          desc: `Run ${name} successfully in ${time / 1000}s`,
+          state: 'success',
+          duration: 3000,
+        })
       } catch (e: any) {
         setToastState({
           open: true,
