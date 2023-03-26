@@ -4,6 +4,7 @@ import { CursorArrowRaysIcon, GifIcon } from '@heroicons/react/24/outline'
 import {
   BoxModelIcon,
   ChevronRightIcon,
+  FaceIcon,
   HobbyKnifeIcon,
   MixIcon,
 } from '@radix-ui/react-icons'
@@ -20,6 +21,7 @@ import Button from '../shared/Button'
 export enum PluginName {
   RemoveBG = 'RemoveBG',
   RealESRGAN = 'RealESRGAN',
+  GFPGAN = 'GFPGAN',
   InteractiveSeg = 'InteractiveSeg',
   MakeGIF = 'MakeGIF',
 }
@@ -32,6 +34,10 @@ const pluginMap = {
   [PluginName.RealESRGAN]: {
     IconClass: BoxModelIcon,
     showName: 'RealESRGAN 4x',
+  },
+  [PluginName.GFPGAN]: {
+    IconClass: FaceIcon,
+    showName: 'GFPGAN',
   },
   [PluginName.InteractiveSeg]: {
     IconClass: CursorArrowRaysIcon,

@@ -1,27 +1,46 @@
 from pathlib import Path
 
 import cv2
+import pytest
+import torch.cuda
 
-from lama_cleaner.plugins import RemoveBG, RealESRGANUpscaler
+from lama_cleaner.plugins import RemoveBG, RealESRGANUpscaler, GFPGANPlugin
 
 current_dir = Path(__file__).parent.absolute().resolve()
 save_dir = current_dir / "result"
 save_dir.mkdir(exist_ok=True, parents=True)
 img_p = current_dir / "bunny.jpeg"
+bgr_img = cv2.imread(str(img_p))
+rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
+
+
+def _save(img, name):
+    cv2.imwrite(str(save_dir / name), img)
 
 
 def test_remove_bg():
     model = RemoveBG()
-    img = cv2.imread(str(img_p))
-    res = model.forward(img)
-    cv2.imwrite(str(save_dir / "test_remove_bg.png"), res)
+    res = model.forward(bgr_img)
+    _save(res, "test_remove_bg.png")
 
 
-def test_upscale():
-    model = RealESRGANUpscaler("cpu")
-    img = cv2.imread(str(img_p))
-    res = model.forward(img, 2)
-    cv2.imwrite(str(save_dir / "test_upscale_x2.png"), res)
+@pytest.mark.parametrize("device", ["cuda", "cpu"])
+def test_upscale(device):
+    if device == "cuda" and not torch.cuda.is_available():
+        return
 
-    res = model.forward(img, 4)
-    cv2.imwrite(str(save_dir / "test_upscale_x4.png"), res)
+    model = RealESRGANUpscaler("realesr-general-x4v3", device)
+    res = model.forward(bgr_img, 2)
+    _save(res, "test_upscale_x2.png")
+
+    res = model.forward(bgr_img, 4)
+    _save(res, "test_upscale_x4.png")
+
+
+@pytest.mark.parametrize("device", ["cuda", "cpu"])
+def test_gfpgan(device):
+    if device == "cuda" and not torch.cuda.is_available():
+        return
+    model = GFPGANPlugin(device)
+    res = model(rgb_img, None, None)
+    _save(res, "test_gfpgan.png")

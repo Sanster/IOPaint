@@ -599,6 +599,15 @@ export default function Editor() {
   }, [runRenderablePlugin])
 
   useEffect(() => {
+    emitter.on(PluginName.GFPGAN, () => {
+      runRenderablePlugin(PluginName.GFPGAN)
+    })
+    return () => {
+      emitter.off(PluginName.GFPGAN)
+    }
+  }, [runRenderablePlugin])
+
+  useEffect(() => {
     emitter.on(PluginName.RealESRGAN, (data: any) => {
       runRenderablePlugin(PluginName.RealESRGAN, data)
     })

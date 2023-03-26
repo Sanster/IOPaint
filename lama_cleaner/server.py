@@ -327,28 +327,46 @@ def run_plugin():
         return "Plugin not found", 500
 
     origin_image_bytes = files["image"].read()  # RGB
-    rgb_np_img, _ = load_img(origin_image_bytes)
+    rgb_np_img, alpha_channel, exif = load_img(origin_image_bytes, return_exif=True)
 
     start = time.time()
-    res = plugins[name](rgb_np_img, files, form)
+    bgr_res = plugins[name](rgb_np_img, files, form)
     logger.info(f"{name} process time: {(time.time() - start) * 1000}ms")
     torch_gc()
 
     if name == MakeGIF.name:
-        filename = form["filename"]
         return send_file(
-            io.BytesIO(res),
+            io.BytesIO(bgr_res),
             mimetype="image/gif",
             as_attachment=True,
-            attachment_filename=filename,
+            attachment_filename=form["filename"],
         )
+
+    if name == RemoveBG.name:
+        rgb_res = cv2.cvtColor(bgr_res, cv2.COLOR_BGRA2RGBA)
+        ext = "png"
     else:
-        response = make_response(
-            send_file(
-                io.BytesIO(numpy_to_bytes(res, "png")),
-                mimetype=f"image/png",
+        rgb_res = cv2.cvtColor(bgr_res, cv2.COLOR_BGR2RGB)
+        ext = get_image_ext(origin_image_bytes)
+        if alpha_channel is not None:
+            if alpha_channel.shape[:2] != rgb_res.shape[:2]:
+                alpha_channel = cv2.resize(
+                    alpha_channel, dsize=(rgb_res.shape[1], rgb_res.shape[0])
+                )
+            rgb_res = np.concatenate(
+                (rgb_res, alpha_channel[:, :, np.newaxis]), axis=-1
             )
+
+    response = make_response(
+        send_file(
+            io.BytesIO(
+                pil_to_bytes(
+                    Image.fromarray(rgb_res), ext, quality=image_quality, exif=exif
+                )
+            ),
+            mimetype=f"image/{ext}",
         )
+    )
     return response
 
 
