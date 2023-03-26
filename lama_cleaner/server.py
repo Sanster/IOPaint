@@ -341,6 +341,13 @@ def run_plugin():
             as_attachment=True,
             attachment_filename=form["filename"],
         )
+    if name == InteractiveSeg.name:
+        return make_response(
+            send_file(
+                io.BytesIO(numpy_to_bytes(bgr_res, "png")),
+                mimetype="image/png",
+            )
+        )
 
     if name == RemoveBG.name:
         rgb_res = cv2.cvtColor(bgr_res, cv2.COLOR_BGRA2RGBA)
