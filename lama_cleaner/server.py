@@ -449,7 +449,9 @@ def build_plugins(args):
         )
     if args.enable_gfpgan:
         logger.info(f"Initialize {GFPGANPlugin.name} plugin")
-        plugins[GFPGANPlugin.name] = GFPGANPlugin(args.gfpgan_device)
+        plugins[GFPGANPlugin.name] = GFPGANPlugin(
+            args.gfpgan_device, upscaler=plugins.get(RealESRGANUpscaler.name, None)
+        )
     if args.enable_gif:
         logger.info(f"Initialize GIF plugin")
         plugins[MakeGIF.name] = MakeGIF()

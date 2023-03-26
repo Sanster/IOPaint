@@ -8,7 +8,7 @@ from lama_cleaner.plugins.base_plugin import BasePlugin
 class GFPGANPlugin(BasePlugin):
     name = "GFPGAN"
 
-    def __init__(self, device):
+    def __init__(self, device, upscaler=None):
         super().__init__()
         from .gfpganer import MyGFPGANer
 
@@ -24,6 +24,7 @@ class GFPGANPlugin(BasePlugin):
             arch="clean",
             channel_multiplier=2,
             device=device,
+            bg_upsampler=upscaler.model if upscaler is not None else None,
         )
 
     def __call__(self, rgb_np_img, files, form):
