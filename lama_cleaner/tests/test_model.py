@@ -132,15 +132,19 @@ def test_zits(strategy, zits_wireframe):
     )
 
 
-@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL], "no_half", [True, False])
+@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
+@pytest.mark.parametrize("no_half", [True, False])
 def test_mat(strategy, no_half):
     model = ModelManager(name="mat", device=device, no_half=no_half)
     cfg = get_config(strategy)
 
     for _ in range(10):
         assert_equal(
-            model, cfg, f"mat_{strategy.capitalize()}_result.png",
+            model,
+            cfg,
+            f"mat_{strategy.capitalize()}_result.png",
         )
+
 
 @pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
 def test_fcf(strategy):
@@ -188,4 +192,3 @@ def test_manga(strategy):
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
->>>>>>> 944494a (mat support float16)
