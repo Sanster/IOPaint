@@ -728,15 +728,15 @@ export default function Editor() {
 
   // Zoom reset
   const resetZoom = useCallback(() => {
-    if (!minScale || !original || !windowSize) {
+    if (!minScale || !windowSize) {
       return
     }
     const viewport = viewportRef.current
     if (!viewport) {
       return
     }
-    const offsetX = (windowSize.width - original.width * minScale) / 2
-    const offsetY = (windowSize.height - original.height * minScale) / 2
+    const offsetX = (windowSize.width - imageWidth * minScale) / 2
+    const offsetY = (windowSize.height - imageHeight * minScale) / 2
     viewport.setTransform(offsetX, offsetY, minScale, 200, 'easeOutQuad')
     viewport.state.scale = minScale
 
@@ -745,8 +745,8 @@ export default function Editor() {
   }, [
     viewportRef,
     windowSize,
-    original,
-    original.width,
+    imageHeight,
+    imageWidth,
     windowSize.height,
     minScale,
   ])
@@ -787,7 +787,7 @@ export default function Editor() {
   }, [])
 
   const handleEscPressed = () => {
-    if (isInpainting) {
+    if (isProcessing) {
       return
     }
 
