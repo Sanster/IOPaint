@@ -562,6 +562,8 @@ export default function Editor() {
         setImageWidth(newRender.width)
         const newRenders = [...renders, newRender]
         setRenders(newRenders)
+        const newLineGroups = [...lineGroups, []]
+        setLineGroups(newLineGroups)
 
         const end = new Date()
         const time = end.getTime() - start.getTime()
@@ -591,6 +593,8 @@ export default function Editor() {
       isProcessing,
       setImageHeight,
       setImageWidth,
+      lineGroups,
+      setLineGroups,
     ]
   )
 
