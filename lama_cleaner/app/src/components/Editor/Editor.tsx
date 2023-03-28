@@ -187,8 +187,8 @@ export default function Editor() {
   const enableFileManager = useRecoilValue(enableFileManagerState)
   const isEnableAutoSaving = useRecoilValue(isEnableAutoSavingState)
 
-  const setImageWidth = useSetRecoilState(imageWidthState)
-  const setImageHeight = useSetRecoilState(imageHeightState)
+  const [imageWidth, setImageWidth] = useRecoilState(imageWidthState)
+  const [imageHeight, setImageHeight] = useRecoilState(imageHeightState)
   const app = useRecoilValue(appState)
 
   const draw = useCallback(
@@ -196,40 +196,30 @@ export default function Editor() {
       if (!context) {
         return
       }
-      context.clearRect(0, 0, context.canvas.width, context.canvas.height)
-      context.drawImage(
-        render,
-        0,
-        0,
-        original.naturalWidth,
-        original.naturalHeight
+      console.log('-------------------------------')
+      console.log(`render size: ${render.width}x${render.height}`)
+      console.log(`image size: ${imageWidth}x${imageHeight} `)
+      console.log(
+        `canvas size: ${context.canvas.width}x${context.canvas.height} `
       )
+
+      context.clearRect(0, 0, context.canvas.width, context.canvas.height)
+      context.drawImage(render, 0, 0, imageWidth, imageHeight)
       if (isInteractiveSeg && tmpInteractiveSegMask !== null) {
-        context.drawImage(
-          tmpInteractiveSegMask,
-          0,
-          0,
-          original.naturalWidth,
-          original.naturalHeight
-        )
+        context.drawImage(tmpInteractiveSegMask, 0, 0, imageWidth, imageHeight)
       }
       if (!isInteractiveSeg && interactiveSegMask !== null) {
-        context.drawImage(
-          interactiveSegMask,
-          0,
-          0,
-          original.naturalWidth,
-          original.naturalHeight
-        )
+        context.drawImage(interactiveSegMask, 0, 0, imageWidth, imageHeight)
       }
       drawLines(context, lineGroup)
     },
     [
       context,
-      original,
       isInteractiveSeg,
       tmpInteractiveSegMask,
       interactiveSegMask,
+      imageHeight,
+      imageWidth,
     ]
   )
 
@@ -247,13 +237,7 @@ export default function Editor() {
 
       if (maskImage !== undefined && maskImage !== null) {
         // TODO: check whether draw yellow mask works on backend
-        ctx.drawImage(
-          maskImage,
-          0,
-          0,
-          original.naturalWidth,
-          original.naturalHeight
-        )
+        ctx.drawImage(maskImage, 0, 0, imageWidth, imageHeight)
       }
 
       _lineGroups.forEach(lineGroup => {
@@ -274,9 +258,9 @@ export default function Editor() {
               size: 9999999999,
               pts: [
                 { x: 0, y: 0 },
-                { x: original.naturalWidth, y: 0 },
-                { x: original.naturalWidth, y: original.naturalHeight },
-                { x: 0, y: original.naturalHeight },
+                { x: imageWidth, y: 0 },
+                { x: imageWidth, y: imageHeight },
+                { x: 0, y: imageHeight },
               ],
             },
           ],
@@ -284,7 +268,7 @@ export default function Editor() {
         )
       }
     },
-    [context, maskCanvas, isPix2Pix]
+    [context, maskCanvas, isPix2Pix, imageWidth, imageHeight]
   )
 
   const hadDrawSomething = useCallback(() => {
@@ -574,6 +558,8 @@ export default function Editor() {
         const { blob } = res
         const newRender = new Image()
         await loadImage(newRender, blob)
+        setImageHeight(newRender.height)
+        setImageWidth(newRender.width)
         const newRenders = [...renders, newRender]
         setRenders(newRenders)
 
@@ -597,7 +583,15 @@ export default function Editor() {
         setIsPluginRunning(false)
       }
     },
-    [renders, setRenders, getCurrentRender, setIsPluginRunning, isProcessing]
+    [
+      renders,
+      setRenders,
+      getCurrentRender,
+      setIsPluginRunning,
+      isProcessing,
+      setImageHeight,
+      setImageWidth,
+    ]
   )
 
   useEffect(() => {
@@ -672,17 +666,32 @@ export default function Editor() {
     [isInpainting]
   )
 
+  const getCurrentWidthHeight = useCallback(() => {
+    let width = 512
+    let height = 512
+    if (!isOriginalLoaded) {
+      return [width, height]
+    }
+    if (renders.length === 0) {
+      width = original.naturalWidth
+      height = original.naturalHeight
+    } else if (renders.length !== 0) {
+      width = renders[renders.length - 1].width
+      height = renders[renders.length - 1].height
+    }
+
+    return [width, height]
+  }, [original, isOriginalLoaded, renders])
+
   // Draw once the original image is loaded
   useEffect(() => {
     if (!isOriginalLoaded) {
       return
     }
+    const [width, height] = getCurrentWidthHeight()
 
-    const rW = windowSize.width / original.naturalWidth
-    const rH = (windowSize.height - TOOLBAR_SIZE) / original.naturalHeight
-
-    setImageWidth(original.naturalWidth)
-    setImageHeight(original.naturalHeight)
+    const rW = windowSize.width / width
+    const rH = (windowSize.height - TOOLBAR_SIZE) / height
 
     let s = 1.0
     if (rW < 1 || rH < 1) {
@@ -692,15 +701,16 @@ export default function Editor() {
     setScale(s)
 
     if (context?.canvas) {
-      context.canvas.width = original.naturalWidth
-      context.canvas.height = original.naturalHeight
+      context.canvas.width = width
+      context.canvas.height = height
       drawOnCurrentRender([])
     }
+    console.log(`on load image size: ${width}x${height}`)
+    setImageWidth(width)
+    setImageHeight(height)
 
-    if (!initialCentered) {
-      viewportRef.current?.centerView(s, 1)
-      setInitialCentered(true)
-    }
+    viewportRef.current?.centerView(s, 1)
+    setInitialCentered(true)
   }, [
     context?.canvas,
     viewportRef,
@@ -709,6 +719,7 @@ export default function Editor() {
     windowSize,
     initialCentered,
     drawOnCurrentRender,
+    getCurrentWidthHeight,
   ])
 
   // Zoom reset
@@ -1034,12 +1045,20 @@ export default function Editor() {
 
     const newRenders = [...renders]
     setRenders(newRenders)
-    if (newRenders.length === 0) {
-      draw(original, [])
-    } else {
-      draw(newRenders[newRenders.length - 1], [])
-    }
-  }, [draw, renders, redoRenders, redoLineGroups, lineGroups, original])
+    // if (newRenders.length === 0) {
+    //   draw(original, [])
+    // } else {
+    //   draw(newRenders[newRenders.length - 1], [])
+    // }
+  }, [
+    draw,
+    renders,
+    redoRenders,
+    redoLineGroups,
+    lineGroups,
+    original,
+    context,
+  ])
 
   const undo = () => {
     if (runMannually && curLineGroup.length !== 0) {
@@ -1060,7 +1079,6 @@ export default function Editor() {
     }
     if (isCmdZ) {
       event.preventDefault()
-      console.log('undo')
       return true
     }
     return false
@@ -1071,6 +1089,8 @@ export default function Editor() {
     undoRender,
     runMannually,
     curLineGroup,
+    context?.canvas,
+    renders,
   ])
 
   const disableUndo = () => {
@@ -1118,7 +1138,7 @@ export default function Editor() {
     const render = redoRenders.pop()!
     const newRenders = [...renders, render]
     setRenders(newRenders)
-    draw(newRenders[newRenders.length - 1], [])
+    // draw(newRenders[newRenders.length - 1], [])
   }, [draw, renders, redoRenders, redoLineGroups, lineGroups, original])
 
   const redo = () => {
@@ -1141,7 +1161,6 @@ export default function Editor() {
     }
     if (isCmdZ) {
       event.preventDefault()
-      console.log('redo')
       return true
     }
     return false
@@ -1467,8 +1486,8 @@ export default function Editor() {
             <div
               className="original-image-container"
               style={{
-                width: `${original.naturalWidth}px`,
-                height: `${original.naturalHeight}px`,
+                width: `${imageWidth}px`,
+                height: `${imageHeight}px`,
               }}
             >
               {showOriginal && (
@@ -1484,8 +1503,8 @@ export default function Editor() {
                     src={original.src}
                     alt="original"
                     style={{
-                      width: `${original.naturalWidth}px`,
-                      height: `${original.naturalHeight}px`,
+                      width: `${imageWidth}px`,
+                      height: `${imageHeight}px`,
                     }}
                   />
                 </>
@@ -1494,10 +1513,10 @@ export default function Editor() {
           </div>
 
           <Croper
-            maxHeight={original.naturalHeight}
-            maxWidth={original.naturalWidth}
-            minHeight={Math.min(256, original.naturalHeight)}
-            minWidth={Math.min(256, original.naturalWidth)}
+            maxHeight={imageHeight}
+            maxWidth={imageWidth}
+            minHeight={Math.min(256, imageHeight)}
+            minWidth={Math.min(256, imageWidth)}
             scale={scale}
             show={isDiffusionModels && settings.showCroper}
           />

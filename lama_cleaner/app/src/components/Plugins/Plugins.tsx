@@ -70,7 +70,7 @@ const Plugins = () => {
 
   const renderRealESRGANPlugin = () => {
     return (
-      <DropdownMenu.Sub>
+      <DropdownMenu.Sub key="RealESRGAN">
         <DropdownMenu.SubTrigger
           className="DropdownMenuSubTrigger"
           disabled={disabled}
@@ -110,6 +110,7 @@ const Plugins = () => {
       }
       return (
         <DropdownMenu.Item
+          key={plugin}
           className="DropdownMenuItem"
           onClick={() => onPluginClick(plugin)}
           disabled={disabled}
