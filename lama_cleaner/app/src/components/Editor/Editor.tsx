@@ -967,6 +967,9 @@ export default function Editor() {
     if (isProcessing) {
       return
     }
+    if (isInteractiveSeg) {
+      return
+    }
     if (isChangingBrushSizeByMouse) {
       return
     }
