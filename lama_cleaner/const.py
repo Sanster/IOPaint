@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 
 MPS_SUPPORT_MODELS = [
     "instruct_pix2pix",
@@ -86,3 +87,22 @@ Prevent backend auto close after the GUI window closed.
 QUALITY_HELP = """
 Quality of image encoding, 0-100. Default is 95, higher quality will generate larger file size.
 """
+
+
+class RealESRGANModelName(str, Enum):
+    realesr_general_x4v3 = "realesr-general-x4v3"
+    RealESRGAN_x4plus = "RealESRGAN_x4plus"
+    RealESRGAN_x4plus_anime_6B = "RealESRGAN_x4plus_anime_6B"
+
+
+RealESRGANModelNameList = [e.value for e in RealESRGANModelName]
+
+INTERACTIVE_SEG_HELP = "Enable interactive segmentation. Always run on CPU"
+REMOVE_BG_HELP = "Enable remove background. Always run on CPU"
+REALESRGAN_HELP = "Enable realesrgan super resolution"
+REALESRGAN_AVAILABLE_DEVICES = ["cpu", "cuda", "mps"]
+GFPGAN_HELP = (
+    "Enable GFPGAN face restore. To enhance background, use with --enable-realesrgan"
+)
+GFPGAN_AVAILABLE_DEVICES = ["cpu", "cuda", "mps"]
+GIF_HELP = "Enable GIF plugin. Make GIF to compare original and cleaned image"

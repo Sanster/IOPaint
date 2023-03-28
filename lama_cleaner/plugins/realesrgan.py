@@ -3,17 +3,9 @@ from enum import Enum
 import cv2
 from loguru import logger
 
+from lama_cleaner.const import RealESRGANModelName
 from lama_cleaner.helper import download_model
 from lama_cleaner.plugins.base_plugin import BasePlugin
-
-
-class RealESRGANModelName(str, Enum):
-    realesr_general_x4v3 = "realesr-general-x4v3"
-    RealESRGAN_x4plus = "RealESRGAN_x4plus"
-    RealESRGAN_x4plus_anime_6B = "RealESRGAN_x4plus_anime_6B"
-
-
-RealESRGANModelNameList = [e.value for e in RealESRGANModelName]
 
 
 class RealESRGANUpscaler(BasePlugin):

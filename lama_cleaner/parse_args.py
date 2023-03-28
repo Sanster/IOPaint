@@ -6,7 +6,6 @@ from pathlib import Path
 from loguru import logger
 
 from lama_cleaner.const import *
-from lama_cleaner.plugins.realesrgan import RealESRGANModelName, RealESRGANModelNameList
 from lama_cleaner.runtime import dump_environment_info
 
 
@@ -80,20 +79,23 @@ def parse_args():
     parser.add_argument(
         "--enable-interactive-seg",
         action="store_true",
-        help="Enable interactive segmentation. Always run on CPU",
+        help=INTERACTIVE_SEG_HELP,
     )
     parser.add_argument(
         "--enable-remove-bg",
         action="store_true",
-        help="Enable remove background. Always run on CPU",
+        help=REMOVE_BG_HELP,
     )
     parser.add_argument(
         "--enable-realesrgan",
         action="store_true",
-        help="Enable realesrgan super resolution",
+        help=REALESRGAN_HELP,
     )
     parser.add_argument(
-        "--realesrgan-device", default="cpu", type=str, choices=["cpu", "cuda", "mps"]
+        "--realesrgan-device",
+        default="cpu",
+        type=str,
+        choices=REALESRGAN_AVAILABLE_DEVICES,
     )
     parser.add_argument(
         "--realesrgan-model",
@@ -101,18 +103,14 @@ def parse_args():
         type=str,
         choices=RealESRGANModelNameList,
     )
-    parser.add_argument(
-        "--enable-gfpgan",
-        action="store_true",
-        help="Enable GFPGAN face restore",
-    )
+    parser.add_argument("--enable-gfpgan", action="store_true", help=GFPGAN_HELP)
     parser.add_argument(
         "--gfpgan-device", default="cpu", type=str, choices=["cpu", "cuda", "mps"]
     )
     parser.add_argument(
         "--enable-gif",
         action="store_true",
-        help="Enable GIF plugin",
+        help=GIF_HELP,
     )
     #########
 
@@ -199,5 +197,13 @@ def parse_args():
         else:
             if not output_dir.is_dir():
                 parser.error(f"invalid --output-dir: {output_dir} is not a directory")
+
+    if args.enable_gfpgan:
+        if args.enable_realesrgan:
+            logger.info("Use realesrgan as GFPGAN background upscaler")
+        else:
+            logger.info(
+                f"GFPGAN no background upscaler, use --enable-realesrgan to enable it"
+            )
 
     return args
