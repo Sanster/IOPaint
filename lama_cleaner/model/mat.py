@@ -1872,7 +1872,7 @@ MAT_MODEL_MD5 = os.environ.get("MAT_MODEL_MD5", "8ca927835fa3f5e21d65ffcb165377e
 
 class MAT(InpaintModel):
     name = "mat"
-    min_size = 1024
+    min_size = 512
     pad_mod = 512
     pad_to_square = True
 
