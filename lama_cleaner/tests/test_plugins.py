@@ -24,23 +24,27 @@ def test_remove_bg():
     _save(res, "test_remove_bg.png")
 
 
-@pytest.mark.parametrize("device", ["cuda", "cpu"])
+@pytest.mark.parametrize("device", ["cuda", "cpu", "mps"])
 def test_upscale(device):
     if device == "cuda" and not torch.cuda.is_available():
+        return
+    if device == "mps" and not torch.backends.mps.is_available():
         return
 
     model = RealESRGANUpscaler("realesr-general-x4v3", device)
     res = model.forward(bgr_img, 2)
-    _save(res, "test_upscale_x2.png")
+    _save(res, f"test_upscale_x2_{device}.png")
 
     res = model.forward(bgr_img, 4)
-    _save(res, "test_upscale_x4.png")
+    _save(res, f"test_upscale_x4_{device}.png")
 
 
-@pytest.mark.parametrize("device", ["cuda", "cpu"])
+@pytest.mark.parametrize("device", ["cuda", "cpu", "mps"])
 def test_gfpgan(device):
     if device == "cuda" and not torch.cuda.is_available():
         return
+    if device == "mps" and not torch.backends.mps.is_available():
+        return
     model = GFPGANPlugin(device)
     res = model(rgb_img, None, None)
-    _save(res, "test_gfpgan.png")
+    _save(res, f"test_gfpgan_{device}.png")

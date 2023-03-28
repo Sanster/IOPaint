@@ -17,6 +17,10 @@ class GFPGANPlugin(BasePlugin):
         model_path = download_model(url, model_md5)
         logger.info(f"GFPGAN model path: {model_path}")
 
+        import facexlib
+        if hasattr(facexlib.detection.retinaface, "device"):
+            facexlib.detection.retinaface.device = device
+
         # Use GFPGAN for face enhancement
         self.face_enhancer = MyGFPGANer(
             model_path=model_path,

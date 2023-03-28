@@ -107,7 +107,7 @@ def parse_args():
         help="Enable GFPGAN face restore",
     )
     parser.add_argument(
-        "--gfpgan-device", default="cpu", type=str, choices=["cpu", "cuda"]
+        "--gfpgan-device", default="cpu", type=str, choices=["cpu", "cuda", "mps"]
     )
     parser.add_argument(
         "--enable-gif",
