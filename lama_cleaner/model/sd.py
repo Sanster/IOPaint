@@ -1,3 +1,5 @@
+import gc
+
 import PIL.Image
 import cv2
 import numpy as np
@@ -31,6 +33,37 @@ class CPUTextEncoderWrapper:
         return self.torch_dtype
 
 
+def load_from_local_model(local_model_path, torch_dtype, disable_nsfw):
+    from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
+        load_pipeline_from_original_stable_diffusion_ckpt,
+    )
+    from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
+
+    logger.info(f"Converting {local_model_path} to diffusers pipeline")
+
+    pipe = load_pipeline_from_original_stable_diffusion_ckpt(
+        local_model_path,
+        num_in_channels=9,
+        from_safetensors=local_model_path.endswith("safetensors"),
+        device="cpu",
+    )
+
+    inpaint_pipe = StableDiffusionInpaintPipeline(
+        vae=pipe.vae,
+        text_encoder=pipe.text_encoder,
+        tokenizer=pipe.tokenizer,
+        unet=pipe.unet,
+        scheduler=pipe.scheduler,
+        safety_checker=None if disable_nsfw else pipe.safety_checker,
+        feature_extractor=None if disable_nsfw else pipe.safety_checker,
+        requires_safety_checker=not disable_nsfw,
+    )
+
+    del pipe
+    gc.collect()
+    return inpaint_pipe.to(torch_dtype)
+
+
 class SD(DiffusionInpaintModel):
     pad_mod = 8
     min_size = 512
@@ -43,6 +76,7 @@ class SD(DiffusionInpaintModel):
         model_kwargs = {
             "local_files_only": kwargs.get("local_files_only", kwargs["sd_run_local"])
         }
+        disable_nsfw = False
         if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(
@@ -52,16 +86,25 @@ class SD(DiffusionInpaintModel):
                     requires_safety_checker=False,
                 )
             )
+            disable_nsfw = True
 
         use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
         torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
-        self.model = StableDiffusionInpaintPipeline.from_pretrained(
-            self.model_id_or_path,
-            revision="fp16" if use_gpu and fp16 else "main",
-            torch_dtype=torch_dtype,
-            use_auth_token=kwargs["hf_access_token"],
-            **model_kwargs
-        )
+
+        if kwargs.get("sd_local_model_path", None):
+            self.model = load_from_local_model(
+                kwargs["sd_local_model_path"],
+                torch_dtype=torch_dtype,
+                disable_nsfw=disable_nsfw,
+            )
+        else:
+            self.model = StableDiffusionInpaintPipeline.from_pretrained(
+                self.model_id_or_path,
+                revision="fp16" if use_gpu and fp16 else "main",
+                torch_dtype=torch_dtype,
+                use_auth_token=kwargs["hf_access_token"],
+                **model_kwargs,
+            )
 
         # https://huggingface.co/docs/diffusers/v0.7.0/en/api/pipelines/stable_diffusion#diffusers.StableDiffusionInpaintPipeline.enable_attention_slicing
         self.model.enable_attention_slicing()

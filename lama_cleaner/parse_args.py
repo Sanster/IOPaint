@@ -38,6 +38,7 @@ def parse_args():
         "--sd-cpu-textencoder", action="store_true", help=SD_CPU_TEXTENCODER_HELP
     )
     parser.add_argument("--sd-controlnet", action="store_true", help=SD_CONTROLNET_HELP)
+    parser.add_argument("--sd-local-model-path", default=None, help=SD_LOCAL_MODEL_HELP)
     parser.add_argument(
         "--local-files-only", action="store_true", help=LOCAL_FILES_ONLY_HELP
     )
@@ -112,6 +113,10 @@ def parse_args():
         action="store_true",
         help=GIF_HELP,
     )
+    parser.add_argument(
+        "--install-plugins-package",
+        action="store_true",
+    )
     #########
 
     # useless args
@@ -129,6 +134,11 @@ def parse_args():
 
     # collect system info to help debug
     dump_environment_info()
+    if args.install_plugins_package:
+        from lama_cleaner.installer import install_plugins_package
+
+        install_plugins_package()
+        exit()
 
     if args.config_installer:
         if args.installer_config is None:
@@ -164,6 +174,16 @@ def parse_args():
     if args.sd_controlnet:
         if args.model not in SD15_MODELS:
             logger.warning(f"--sd_controlnet only support {SD15_MODELS}")
+
+    if args.sd_local_model_path and args.model == "sd1.5":
+        if not os.path.exists(args.sd_local_model_path):
+            parser.error(
+                f"invalid --sd-local-model-path: {args.sd_local_model_path} not exists"
+            )
+        if not os.path.isfile(args.sd_local_model_path):
+            parser.error(
+                f"invalid --sd-local-model-path: {args.sd_local_model_path} is a directory"
+            )
 
     os.environ["U2NET_HOME"] = DEFAULT_MODEL_DIR
     if args.model_dir and args.model_dir is not None:

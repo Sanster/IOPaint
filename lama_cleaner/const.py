@@ -52,6 +52,10 @@ SD_CONTROLNET_HELP = """
 Run Stable Diffusion 1.5 inpainting model with Canny ControlNet control.
 """
 
+SD_LOCAL_MODEL_HELP = """
+Load Stable Diffusion 1.5 model(ckpt/safetensors) from local path.
+"""
+
 LOCAL_FILES_ONLY_HELP = """
 Use local files only, not connect to Hugging Face server. (sd/paint_by_example)
 """

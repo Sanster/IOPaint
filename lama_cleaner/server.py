@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+import os
+
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 import imghdr
 import io
 import logging
 import multiprocessing
-import os
 import random
 import time
 from pathlib import Path
@@ -527,6 +529,7 @@ def main(args):
         disable_nsfw=args.sd_disable_nsfw or args.disable_nsfw,
         sd_cpu_textencoder=args.sd_cpu_textencoder,
         sd_run_local=args.sd_run_local,
+        sd_local_model_path=args.sd_local_model_path,
         local_files_only=args.local_files_only,
         cpu_offload=args.cpu_offload,
         enable_xformers=args.sd_enable_xformers or args.enable_xformers,
