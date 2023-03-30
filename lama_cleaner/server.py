@@ -27,7 +27,7 @@ from lama_cleaner.plugins import (
     RealESRGANUpscaler,
     MakeGIF,
     GFPGANPlugin,
-    RestoreFormerPlugin
+    RestoreFormerPlugin,
 )
 from lama_cleaner.schema import Config
 
@@ -314,7 +314,17 @@ def run_plugin():
     rgb_np_img, alpha_channel, exif = load_img(origin_image_bytes, return_exif=True)
 
     start = time.time()
-    bgr_res = plugins[name](rgb_np_img, files, form)
+    try:
+        bgr_res = plugins[name](rgb_np_img, files, form)
+    except RuntimeError as e:
+        torch.cuda.empty_cache()
+        if "CUDA out of memory. " in str(e):
+            # NOTE: the string may change?
+            return "CUDA out of memory", 500
+        else:
+            logger.exception(e)
+            return "Internal Server Error", 500
+
     logger.info(f"{name} process time: {(time.time() - start) * 1000}ms")
     torch_gc()
 
@@ -446,7 +456,8 @@ def build_plugins(args):
     if args.enable_restoreformer:
         logger.info(f"Initialize {RestoreFormerPlugin.name} plugin")
         plugins[RestoreFormerPlugin.name] = RestoreFormerPlugin(
-            args.restoreformer_device, upscaler=plugins.get(RealESRGANUpscaler.name, None)
+            args.restoreformer_device,
+            upscaler=plugins.get(RealESRGANUpscaler.name, None),
         )
     if args.enable_gif:
         logger.info(f"Initialize GIF plugin")
