@@ -4,7 +4,12 @@ import cv2
 import pytest
 import torch.cuda
 
-from lama_cleaner.plugins import RemoveBG, RealESRGANUpscaler, GFPGANPlugin
+from lama_cleaner.plugins import (
+    RemoveBG,
+    RealESRGANUpscaler,
+    GFPGANPlugin,
+    RestoreFormerPlugin,
+)
 
 current_dir = Path(__file__).parent.absolute().resolve()
 save_dir = current_dir / "result"
@@ -48,3 +53,14 @@ def test_gfpgan(device):
     model = GFPGANPlugin(device)
     res = model(rgb_img, None, None)
     _save(res, f"test_gfpgan_{device}.png")
+
+
+@pytest.mark.parametrize("device", ["cuda", "cpu", "mps"])
+def test_restoreformer(device):
+    if device == "cuda" and not torch.cuda.is_available():
+        return
+    if device == "mps" and not torch.backends.mps.is_available():
+        return
+    model = RestoreFormerPlugin(device)
+    res = model(rgb_img, None, None)
+    _save(res, f"test_restoreformer_{device}.png")
