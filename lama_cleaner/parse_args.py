@@ -106,7 +106,16 @@ def parse_args():
     )
     parser.add_argument("--enable-gfpgan", action="store_true", help=GFPGAN_HELP)
     parser.add_argument(
-        "--gfpgan-device", default="cpu", type=str, choices=["cpu", "cuda", "mps"]
+        "--gfpgan-device", default="cpu", type=str, choices=GFPGAN_AVAILABLE_DEVICES
+    )
+    parser.add_argument(
+        "--enable-restoreformer", action="store_true", help=RESTOREFORMER_HELP
+    )
+    parser.add_argument(
+        "--restoreformer-device",
+        default="cpu",
+        type=str,
+        choices=RESTOREFORMER_AVAILABLE_DEVICES,
     )
     parser.add_argument(
         "--enable-gif",

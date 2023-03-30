@@ -27,6 +27,7 @@ from lama_cleaner.plugins import (
     RealESRGANUpscaler,
     MakeGIF,
     GFPGANPlugin,
+    RestoreFormerPlugin
 )
 from lama_cleaner.schema import Config
 
@@ -111,25 +112,6 @@ def get_image_ext(img_bytes):
 def diffuser_callback(i, t, latents):
     pass
     # socketio.emit('diffusion_step', {'diffusion_step': step})
-
-
-@app.route("/make_gif", methods=["POST"])
-def make_gif():
-    input = request.files
-    filename = request.form["filename"]
-    origin_image_bytes = input["origin_img"].read()
-    clean_image_bytes = input["clean_img"].read()
-    origin_image, _ = load_img(origin_image_bytes)
-    clean_image, _ = load_img(clean_image_bytes)
-    gif_bytes = make_compare_gif(
-        Image.fromarray(origin_image), Image.fromarray(clean_image)
-    )
-    return send_file(
-        io.BytesIO(gif_bytes),
-        mimetype="image/gif",
-        as_attachment=True,
-        attachment_filename=filename,
-    )
 
 
 @app.route("/save_image", methods=["POST"])
@@ -460,6 +442,11 @@ def build_plugins(args):
         logger.info(f"Initialize {GFPGANPlugin.name} plugin")
         plugins[GFPGANPlugin.name] = GFPGANPlugin(
             args.gfpgan_device, upscaler=plugins.get(RealESRGANUpscaler.name, None)
+        )
+    if args.enable_restoreformer:
+        logger.info(f"Initialize {RestoreFormerPlugin.name} plugin")
+        plugins[RestoreFormerPlugin.name] = RestoreFormerPlugin(
+            args.restoreformer_device, upscaler=plugins.get(RealESRGANUpscaler.name, None)
         )
     if args.enable_gif:
         logger.info(f"Initialize GIF plugin")

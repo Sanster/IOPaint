@@ -109,4 +109,6 @@ GFPGAN_HELP = (
     "Enable GFPGAN face restore. To enhance background, use with --enable-realesrgan"
 )
 GFPGAN_AVAILABLE_DEVICES = ["cpu", "cuda", "mps"]
+RESTOREFORMER_HELP = "Enable RestoreFormer face restore. To enhance background, use with --enable-realesrgan"
+RESTOREFORMER_AVAILABLE_DEVICES = ["cpu", "cuda", "mps"]
 GIF_HELP = "Enable GIF plugin. Make GIF to compare original and cleaned image"

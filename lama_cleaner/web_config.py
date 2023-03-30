@@ -36,6 +36,8 @@ class Config(BaseModel):
     realesrgan_model: str = RealESRGANModelName.realesr_general_x4v3.value
     enable_gfpgan: bool = False
     gfpgan_device: str = "cpu"
+    enable_restoreformer: bool = False
+    restoreformer_device: str = "cpu"
     enable_gif: bool = False
 
 
@@ -72,6 +74,8 @@ def save_config(
     realesrgan_model,
     enable_gfpgan,
     gfpgan_device,
+    enable_restoreformer,
+    restoreformer_device,
     enable_gif,
 ):
     config = Config(**locals())
@@ -179,6 +183,15 @@ def main(config_file: str):
                         label="GFPGAN Device",
                         value=init_config.gfpgan_device,
                     )
+                with gr.Row():
+                    enable_restoreformer = gr.Checkbox(
+                        init_config.enable_restoreformer, label=RESTOREFORMER_HELP
+                    )
+                    restoreformer_device = gr.Radio(
+                        RESTOREFORMER_AVAILABLE_DEVICES,
+                        label="RestoreFormer Device",
+                        value=init_config.restoreformer_device,
+                    )
                 enable_gif = gr.Checkbox(init_config.enable_gif, label=GIF_HELP)
 
             with gr.Tab("Diffusion Model"):
@@ -229,6 +242,8 @@ def main(config_file: str):
                 realesrgan_model,
                 enable_gfpgan,
                 gfpgan_device,
+                enable_restoreformer,
+                restoreformer_device,
                 enable_gif,
             ],
             message,

@@ -22,6 +22,7 @@ export enum PluginName {
   RemoveBG = 'RemoveBG',
   RealESRGAN = 'RealESRGAN',
   GFPGAN = 'GFPGAN',
+  RestoreFormer = 'RestoreFormer',
   InteractiveSeg = 'InteractiveSeg',
   MakeGIF = 'MakeGIF',
 }
@@ -38,6 +39,10 @@ const pluginMap = {
   [PluginName.GFPGAN]: {
     IconClass: FaceIcon,
     showName: 'GFPGAN',
+  },
+  [PluginName.RestoreFormer]: {
+    IconClass: FaceIcon,
+    showName: 'RestoreFormer',
   },
   [PluginName.InteractiveSeg]: {
     IconClass: CursorArrowRaysIcon,

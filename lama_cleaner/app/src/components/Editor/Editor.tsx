@@ -617,6 +617,15 @@ export default function Editor() {
   }, [runRenderablePlugin])
 
   useEffect(() => {
+    emitter.on(PluginName.RestoreFormer, () => {
+      runRenderablePlugin(PluginName.RestoreFormer)
+    })
+    return () => {
+      emitter.off(PluginName.RestoreFormer)
+    }
+  }, [runRenderablePlugin])
+
+  useEffect(() => {
     emitter.on(PluginName.RealESRGAN, (data: any) => {
       runRenderablePlugin(PluginName.RealESRGAN, data)
     })
