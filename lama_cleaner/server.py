@@ -376,8 +376,8 @@ def get_server_config():
     return {
         "isControlNet": is_controlnet,
         "isDisableModelSwitchState": is_disable_model_switch,
-        "isEnableAutoSaving": is_enable_file_manager,
-        "enableFileManager": is_enable_auto_saving,
+        "isEnableAutoSaving": is_enable_auto_saving,
+        "enableFileManager": is_enable_file_manager,
         "plugins": list(plugins.keys()),
     }, 200
 
@@ -485,7 +485,7 @@ def main(args):
         is_controlnet = True
 
     output_dir = args.output_dir
-    if output_dir is not None:
+    if output_dir:
         is_enable_auto_saving = True
 
     device = torch.device(args.device)

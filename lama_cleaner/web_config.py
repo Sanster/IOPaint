@@ -197,7 +197,7 @@ def main(config_file: str):
                 enable_gif = gr.Checkbox(init_config.enable_gif, label=GIF_HELP)
 
             with gr.Tab("Diffusion Model"):
-                sd_local_model_path = gr.Checkbox(
+                sd_local_model_path = gr.Textbox(
                     init_config.sd_local_model_path, label=f"{SD_LOCAL_MODEL_HELP}"
                 )
                 sd_controlnet = gr.Checkbox(
