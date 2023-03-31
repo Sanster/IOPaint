@@ -15,6 +15,7 @@ class Config(BaseModel):
     host: str = "127.0.0.1"
     port: int = 8080
     model: str = DEFAULT_MODEL
+    sd_local_model_path: str = None
     sd_controlnet: bool = False
     device: str = DEFAULT_DEVICE
     gui: bool = False
@@ -53,6 +54,7 @@ def save_config(
     host,
     port,
     model,
+    sd_local_model_path,
     sd_controlnet,
     device,
     gui,
@@ -195,6 +197,9 @@ def main(config_file: str):
                 enable_gif = gr.Checkbox(init_config.enable_gif, label=GIF_HELP)
 
             with gr.Tab("Diffusion Model"):
+                sd_local_model_path = gr.Checkbox(
+                    init_config.sd_local_model_path, label=f"{SD_LOCAL_MODEL_HELP}"
+                )
                 sd_controlnet = gr.Checkbox(
                     init_config.sd_controlnet, label=f"{SD_CONTROLNET_HELP}"
                 )
@@ -202,11 +207,11 @@ def main(config_file: str):
                 cpu_offload = gr.Checkbox(
                     init_config.cpu_offload, label=f"{CPU_OFFLOAD_HELP}"
                 )
-                disable_nsfw = gr.Checkbox(
-                    init_config.disable_nsfw, label=f"{DISABLE_NSFW_HELP}"
-                )
                 sd_cpu_textencoder = gr.Checkbox(
                     init_config.sd_cpu_textencoder, label=f"{SD_CPU_TEXTENCODER_HELP}"
+                )
+                disable_nsfw = gr.Checkbox(
+                    init_config.disable_nsfw, label=f"{DISABLE_NSFW_HELP}"
                 )
                 enable_xformers = gr.Checkbox(
                     init_config.enable_xformers, label=f"{ENABLE_XFORMERS_HELP}"
@@ -221,6 +226,7 @@ def main(config_file: str):
                 host,
                 port,
                 model,
+                sd_local_model_path,
                 sd_controlnet,
                 device,
                 gui,
