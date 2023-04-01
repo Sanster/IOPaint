@@ -8,6 +8,7 @@ MPS_SUPPORT_MODELS = [
     "realisticVision1.4",
     "sd2",
     "paint_by_example",
+    "controlnet"
 ]
 
 DEFAULT_MODEL = "lama"
