@@ -196,11 +196,8 @@ export default function Editor() {
       if (!context) {
         return
       }
-      console.log('-------------------------------')
-      console.log(`render size: ${render.width}x${render.height}`)
-      console.log(`image size: ${imageWidth}x${imageHeight} `)
       console.log(
-        `canvas size: ${context.canvas.width}x${context.canvas.height} `
+        `[draw] render size: ${render.width}x${render.height} image size: ${imageWidth}x${imageHeight} canvas size: ${context.canvas.width}x${context.canvas.height}`
       )
 
       context.clearRect(0, 0, context.canvas.width, context.canvas.height)
@@ -574,6 +571,16 @@ export default function Editor() {
           state: 'success',
           duration: 3000,
         })
+
+        const rW = windowSize.width / newRender.width
+        const rH = (windowSize.height - TOOLBAR_SIZE) / newRender.height
+        let s = 1.0
+        if (rW < 1 || rH < 1) {
+          s = Math.min(rW, rH)
+        }
+        setMinScale(s)
+        setScale(s)
+        viewportRef.current?.centerView(s, 1)
       } catch (e: any) {
         setToastState({
           open: true,
@@ -594,6 +601,8 @@ export default function Editor() {
       setImageHeight,
       setImageWidth,
       lineGroups,
+      viewportRef,
+      windowSize,
       setLineGroups,
     ]
   )
@@ -701,7 +710,10 @@ export default function Editor() {
     if (!isOriginalLoaded) {
       return
     }
+
     const [width, height] = getCurrentWidthHeight()
+    setImageWidth(width)
+    setImageHeight(height)
 
     const rW = windowSize.width / width
     const rH = (windowSize.height - TOOLBAR_SIZE) / height
@@ -713,17 +725,23 @@ export default function Editor() {
     setMinScale(s)
     setScale(s)
 
+    console.log(
+      `[on file load] image size: ${width}x${height}, canvas size: ${context?.canvas.width}x${context?.canvas.height} scale: ${s}, initialCentered: ${initialCentered}`
+    )
+
     if (context?.canvas) {
       context.canvas.width = width
       context.canvas.height = height
+      console.log('[on file load] set canvas size && drawOnCurrentRender')
       drawOnCurrentRender([])
     }
-    console.log(`on load image size: ${width}x${height}`)
-    setImageWidth(width)
-    setImageHeight(height)
 
-    viewportRef.current?.centerView(s, 1)
-    setInitialCentered(true)
+    if (!initialCentered) {
+      // 防止每次擦除以后图片 zoom 还原
+      viewportRef.current?.centerView(s, 1)
+      console.log('[on file load] centerView')
+      setInitialCentered(true)
+    }
   }, [
     context?.canvas,
     viewportRef,
