@@ -196,11 +196,8 @@ export default function Editor() {
       if (!context) {
         return
       }
-      console.log('-------------------------------')
-      console.log(`render size: ${render.width}x${render.height}`)
-      console.log(`image size: ${imageWidth}x${imageHeight} `)
       console.log(
-        `canvas size: ${context.canvas.width}x${context.canvas.height} `
+        `[draw] render size: ${render.width}x${render.height} image size: ${imageWidth}x${imageHeight} canvas size: ${context.canvas.width}x${context.canvas.height}`
       )
 
       context.clearRect(0, 0, context.canvas.width, context.canvas.height)
@@ -701,7 +698,10 @@ export default function Editor() {
     if (!isOriginalLoaded) {
       return
     }
+
     const [width, height] = getCurrentWidthHeight()
+    setImageWidth(width)
+    setImageHeight(height)
 
     const rW = windowSize.width / width
     const rH = (windowSize.height - TOOLBAR_SIZE) / height
@@ -713,17 +713,23 @@ export default function Editor() {
     setMinScale(s)
     setScale(s)
 
+    console.log(
+      `[on file load] image size: ${width}x${height}, canvas size: ${context?.canvas.width}x${context?.canvas.height} scale: ${s}, initialCentered: ${initialCentered}`
+    )
+
     if (context?.canvas) {
       context.canvas.width = width
       context.canvas.height = height
+      console.log('[on file load] set canvas size && drawOnCurrentRender')
       drawOnCurrentRender([])
     }
-    console.log(`on load image size: ${width}x${height}`)
-    setImageWidth(width)
-    setImageHeight(height)
 
-    viewportRef.current?.centerView(s, 1)
-    setInitialCentered(true)
+    if (!initialCentered) {
+      // 防止每次擦除以后图片 zoom 还原
+      viewportRef.current?.centerView(s, 1)
+      console.log('[on file load] centerView')
+      setInitialCentered(true)
+    }
   }, [
     context?.canvas,
     viewportRef,
@@ -734,6 +740,12 @@ export default function Editor() {
     drawOnCurrentRender,
     getCurrentWidthHeight,
   ])
+
+  useEffect(() => {
+    console.log('[useEffect] centerView')
+    // render 改变尺寸以后，undo/redo 重新 center
+    viewportRef?.current?.centerView(minScale, 1)
+  }, [context?.canvas.height, context?.canvas.width, viewportRef, minScale])
 
   // Zoom reset
   const resetZoom = useCallback(() => {
