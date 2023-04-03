@@ -25,7 +25,7 @@ class GFPGANPlugin(BasePlugin):
         # Use GFPGAN for face enhancement
         self.face_enhancer = MyGFPGANer(
             model_path=model_path,
-            upscale=2,
+            upscale=1,
             arch="clean",
             channel_multiplier=2,
             device=device,
