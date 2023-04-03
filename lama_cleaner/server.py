@@ -446,7 +446,9 @@ def build_plugins(args):
             f"Initialize {RealESRGANUpscaler.name} plugin: {args.realesrgan_model}, {args.realesrgan_device}"
         )
         plugins[RealESRGANUpscaler.name] = RealESRGANUpscaler(
-            args.realesrgan_model, args.realesrgan_device
+            args.realesrgan_model,
+            args.realesrgan_device,
+            no_half=args.realesrgan_no_half,
         )
     if args.enable_gfpgan:
         logger.info(f"Initialize {GFPGANPlugin.name} plugin")

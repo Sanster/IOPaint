@@ -104,6 +104,11 @@ def parse_args():
         type=str,
         choices=RealESRGANModelNameList,
     )
+    parser.add_argument(
+        "--realesrgan-no-half",
+        action="store_true",
+        help="Disable half precision for RealESRGAN",
+    )
     parser.add_argument("--enable-gfpgan", action="store_true", help=GFPGAN_HELP)
     parser.add_argument(
         "--gfpgan-device", default="cpu", type=str, choices=GFPGAN_AVAILABLE_DEVICES

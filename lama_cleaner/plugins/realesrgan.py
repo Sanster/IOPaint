@@ -11,7 +11,7 @@ from lama_cleaner.plugins.base_plugin import BasePlugin
 class RealESRGANUpscaler(BasePlugin):
     name = "RealESRGAN"
 
-    def __init__(self, name, device):
+    def __init__(self, name, device, no_half=False):
         super().__init__()
         from basicsr.archs.rrdbnet_arch import RRDBNet
         from realesrgan import RealESRGANer
@@ -69,7 +69,7 @@ class RealESRGANUpscaler(BasePlugin):
             scale=model_info["scale"],
             model_path=model_path,
             model=model_info["model"](),
-            half=True if "cuda" in str(device) else False,
+            half=True if "cuda" in str(device) and not no_half else False,
             tile=512,
             tile_pad=10,
             pre_pad=10,
