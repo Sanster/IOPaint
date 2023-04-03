@@ -166,8 +166,6 @@ def parse_args():
         exit()
 
     if args.load_installer_config:
-        from lama_cleaner.web_config import load_config
-
         if args.installer_config and not os.path.exists(args.installer_config):
             parser.error(f"args.installer_config={args.installer_config} not exists")
 
