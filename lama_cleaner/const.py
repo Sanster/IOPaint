@@ -11,7 +11,7 @@ MPS_SUPPORT_MODELS = [
     "realisticVision1.4",
     "sd2",
     "paint_by_example",
-    "controlnet"
+    "controlnet",
 ]
 
 DEFAULT_MODEL = "lama"
@@ -105,7 +105,9 @@ class RealESRGANModelName(str, Enum):
 
 RealESRGANModelNameList = [e.value for e in RealESRGANModelName]
 
-INTERACTIVE_SEG_HELP = "Enable interactive segmentation. Always run on CPU"
+INTERACTIVE_SEG_HELP = "Enable interactive segmentation using Segment Anything."
+AVAILABLE_INTERACTIVE_SEG_MODELS = ["vit_b", "vit_l", "vit_h"]
+AVAILABLE_INTERACTIVE_SEG_DEVICES = ["cuda", "cpu", "mps"]
 REMOVE_BG_HELP = "Enable remove background. Always run on CPU"
 REALESRGAN_HELP = "Enable realesrgan super resolution"
 REALESRGAN_AVAILABLE_DEVICES = ["cpu", "cuda", "mps"]

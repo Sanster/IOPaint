@@ -1,3 +1,8 @@
+import hashlib
+import os
+import time
+
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 from pathlib import Path
 
 import cv2
@@ -9,12 +14,14 @@ from lama_cleaner.plugins import (
     RealESRGANUpscaler,
     GFPGANPlugin,
     RestoreFormerPlugin,
+    InteractiveSeg,
 )
 
 current_dir = Path(__file__).parent.absolute().resolve()
 save_dir = current_dir / "result"
 save_dir.mkdir(exist_ok=True, parents=True)
 img_p = current_dir / "bunny.jpeg"
+img_bytes = open(img_p, "rb").read()
 bgr_img = cv2.imread(str(img_p))
 rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
 
@@ -64,3 +71,21 @@ def test_restoreformer(device):
     model = RestoreFormerPlugin(device)
     res = model(rgb_img, None, None)
     _save(res, f"test_restoreformer_{device}.png")
+
+
+@pytest.mark.parametrize("device", ["cuda", "cpu", "mps"])
+def test_segment_anything(device):
+    if device == "cuda" and not torch.cuda.is_available():
+        return
+    if device == "mps" and not torch.backends.mps.is_available():
+        return
+    img_md5 = hashlib.md5(img_bytes).hexdigest()
+    model = InteractiveSeg("vit_l", device)
+    new_mask = model.forward(rgb_img, [[448 // 2, 394 // 2, 1]], img_md5)
+
+    save_name = f"test_segment_anything_{device}.png"
+    _save(new_mask, save_name)
+
+    start = time.time()
+    model.forward(rgb_img, [[448 // 2, 394 // 2, 1]], img_md5)
+    print(f"Time for {save_name}: {time.time() - start:.2f}s")

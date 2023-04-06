@@ -83,6 +83,16 @@ def parse_args():
         help=INTERACTIVE_SEG_HELP,
     )
     parser.add_argument(
+        "--interactive-seg-model",
+        default="vit_l",
+        help=AVAILABLE_INTERACTIVE_SEG_MODELS,
+    )
+    parser.add_argument(
+        "--interactive-seg-device",
+        default="cpu",
+        help=AVAILABLE_INTERACTIVE_SEG_DEVICES,
+    )
+    parser.add_argument(
         "--enable-remove-bg",
         action="store_true",
         help=REMOVE_BG_HELP,
@@ -229,13 +239,5 @@ def parse_args():
         else:
             if not output_dir.is_dir():
                 parser.error(f"invalid --output-dir: {output_dir} is not a directory")
-
-    if args.enable_gfpgan:
-        if args.enable_realesrgan:
-            logger.info("Use realesrgan as GFPGAN background upscaler")
-        else:
-            logger.info(
-                f"GFPGAN no background upscaler, use --enable-realesrgan to enable it"
-            )
 
     return args
