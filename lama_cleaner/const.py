@@ -140,10 +140,13 @@ class Config(BaseModel):
     output_dir: str = None
     # plugins
     enable_interactive_seg: bool = False
+    interactive_seg_model: str = "vit_l"
+    interactive_seg_device: str = "cuda"
     enable_remove_bg: bool = False
     enable_realesrgan: bool = False
     realesrgan_device: str = "cpu"
     realesrgan_model: str = RealESRGANModelName.realesr_general_x4v3.value
+    realesrgan_no_half: bool = False
     enable_gfpgan: bool = False
     gfpgan_device: str = "cpu"
     enable_restoreformer: bool = False
