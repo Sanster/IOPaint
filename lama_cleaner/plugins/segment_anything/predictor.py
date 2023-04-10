@@ -11,8 +11,6 @@ from .modeling import Sam
 
 from typing import Optional, Tuple
 
-from .utils.transforms import ResizeLongestSide
-
 
 class SamPredictor:
     def __init__(
@@ -28,6 +26,8 @@ class SamPredictor:
         """
         super().__init__()
         self.model = sam_model
+        from .utils.transforms import ResizeLongestSide
+
         self.transform = ResizeLongestSide(sam_model.image_encoder.img_size)
         self.reset_image()
 
