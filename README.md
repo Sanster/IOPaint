@@ -53,6 +53,7 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
   - [RealESRGAN](https://github.com/xinntao/Real-ESRGAN): Super Resolution
   - [GFPGAN](https://github.com/TencentARC/GFPGAN): Face Restoration
   - [RestoreFormer](https://github.com/wzhouxiff/RestoreFormer): Face Restoration
+  - [Segment Anything](https://lama-cleaner-docs.vercel.app/plugins#interactive-segmentation): Accurate and fast interactive object segmentation
 - More features at [lama-cleaner-docs](https://lama-cleaner-docs.vercel.app/)
 
 ## Quick Start
