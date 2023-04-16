@@ -1,16 +1,12 @@
 torch>=1.9.0
 opencv-python
+flask==2.2.3
 flask_cors
-Jinja2==2.11.3
-flask==1.1.4
 flaskwebgui==0.3.5
-tqdm
 pydantic
 rich
 loguru
-pytest
 yacs
-markupsafe==2.0.1
 diffusers[torch]==0.14.0
 transformers==4.27.4
 gradio

@@ -339,7 +339,7 @@ def run_plugin():
             io.BytesIO(bgr_res),
             mimetype="image/gif",
             as_attachment=True,
-            attachment_filename=form["filename"],
+            download_name=form["filename"],
         )
     if name == InteractiveSeg.name:
         return make_response(
@@ -421,7 +421,7 @@ def switch_model():
 
 @app.route("/")
 def index():
-    return send_file(os.path.join(BUILD_DIR, "index.html"), cache_timeout=0)
+    return send_file(os.path.join(BUILD_DIR, "index.html"))
 
 
 @app.route("/inputimage")
