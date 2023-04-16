@@ -129,7 +129,8 @@ def save_image():
     elif image.shape[2] == 4:
         image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGRA)
 
-    cv2.imwrite(os.path.join(output_dir, filename), image)
+    save_path = os.path.join(output_dir, filename)
+    cv2.imencode(Path(save_path).suffix, image)[1].tofile(save_path)
 
     return "ok", 200
 
