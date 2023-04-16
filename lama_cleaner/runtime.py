@@ -16,13 +16,17 @@ _package_versions = {}
 
 _CANDIDATES = [
     "torch",
+    "torchvision",
     "Pillow",
     "diffusers",
     "transformers",
     "opencv-python",
     "xformers",
     "accelerate",
-    "lama-cleaner"
+    "lama-cleaner",
+    "rembg",
+    "realesrgan",
+    "gfpgan",
 ]
 # Check once at runtime
 for name in _CANDIDATES:
