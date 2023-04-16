@@ -11,7 +11,6 @@ loguru
 pytest
 yacs
 markupsafe==2.0.1
-scikit-image==0.19.3
 diffusers[torch]==0.14.0
 transformers==4.27.4
 gradio
