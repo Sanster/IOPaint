@@ -123,7 +123,7 @@ def main(config_file: str):
                 )
                 interactive_seg_model = gr.Radio(
                     AVAILABLE_INTERACTIVE_SEG_MODELS,
-                    label="Segment Anything models. Model size: vit_b < vit_l < vit_h. Bigger model size means better segmentation but slower speed.",
+                    label=f"Segment Anything models. {INTERACTIVE_SEG_MODEL_HELP}",
                     value=init_config.interactive_seg_model,
                 )
                 interactive_seg_device = gr.Radio(

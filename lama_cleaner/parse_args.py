@@ -85,12 +85,13 @@ def parse_args():
     parser.add_argument(
         "--interactive-seg-model",
         default="vit_l",
-        help=AVAILABLE_INTERACTIVE_SEG_MODELS,
+        choices=AVAILABLE_INTERACTIVE_SEG_MODELS,
+        help=INTERACTIVE_SEG_MODEL_HELP
     )
     parser.add_argument(
         "--interactive-seg-device",
         default="cpu",
-        help=AVAILABLE_INTERACTIVE_SEG_DEVICES,
+        choices=AVAILABLE_INTERACTIVE_SEG_DEVICES,
     )
     parser.add_argument(
         "--enable-remove-bg",
