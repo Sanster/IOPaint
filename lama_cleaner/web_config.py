@@ -30,6 +30,8 @@ def save_config(
     output_dir,
     quality,
     enable_interactive_seg,
+    interactive_seg_model,
+    interactive_seg_device,
     enable_remove_bg,
     enable_realesrgan,
     realesrgan_device,
@@ -119,9 +121,21 @@ def main(config_file: str):
                 enable_interactive_seg = gr.Checkbox(
                     init_config.enable_interactive_seg, label=INTERACTIVE_SEG_HELP
                 )
-                enable_remove_bg = gr.Checkbox(
-                    init_config.enable_remove_bg, label=REMOVE_BG_HELP
+                interactive_seg_model = gr.Radio(
+                    AVAILABLE_INTERACTIVE_SEG_MODELS,
+                    label="Segment Anything models. Model size: vit_b < vit_l < vit_h. Bigger model size means better segmentation but slower speed.",
+                    value=init_config.interactive_seg_model,
                 )
+                interactive_seg_device = gr.Radio(
+                    AVAILABLE_INTERACTIVE_SEG_DEVICES,
+                    label="Segment Anything Device",
+                    value=init_config.interactive_seg_device,
+                )
+                with gr.Row():
+                    enable_remove_bg = gr.Checkbox(
+                        init_config.enable_remove_bg, label=REMOVE_BG_HELP
+                    )
+
                 with gr.Row():
                     enable_realesrgan = gr.Checkbox(
                         init_config.enable_realesrgan, label=REALESRGAN_HELP
@@ -202,6 +216,8 @@ def main(config_file: str):
                 output_dir,
                 quality,
                 enable_interactive_seg,
+                interactive_seg_model,
+                interactive_seg_device,
                 enable_remove_bg,
                 enable_realesrgan,
                 realesrgan_device,

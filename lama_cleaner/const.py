@@ -141,7 +141,7 @@ class Config(BaseModel):
     # plugins
     enable_interactive_seg: bool = False
     interactive_seg_model: str = "vit_l"
-    interactive_seg_device: str = "cuda"
+    interactive_seg_device: str = "cpu"
     enable_remove_bg: bool = False
     enable_realesrgan: bool = False
     realesrgan_device: str = "cpu"
