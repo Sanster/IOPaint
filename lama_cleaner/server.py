@@ -537,6 +537,7 @@ def main(args):
     model = ModelManager(
         name=args.model,
         sd_controlnet=args.sd_controlnet,
+        sd_controlnet_method=args.sd_controlnet_method,
         device=device,
         no_half=args.no_half,
         hf_access_token=args.hf_access_token,

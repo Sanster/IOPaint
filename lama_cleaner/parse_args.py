@@ -38,6 +38,14 @@ def parse_args():
         "--sd-cpu-textencoder", action="store_true", help=SD_CPU_TEXTENCODER_HELP
     )
     parser.add_argument("--sd-controlnet", action="store_true", help=SD_CONTROLNET_HELP)
+    parser.add_argument(
+        "--sd-controlnet-method",
+        default="control_v11p_sd15_inpaint",
+        choices=[
+            "control_v11p_sd15_canny",
+            "control_v11p_sd15_inpaint",
+        ],
+    )
     parser.add_argument("--sd-local-model-path", default=None, help=SD_LOCAL_MODEL_HELP)
     parser.add_argument(
         "--local-files-only", action="store_true", help=LOCAL_FILES_ONLY_HELP
@@ -86,7 +94,7 @@ def parse_args():
         "--interactive-seg-model",
         default="vit_l",
         choices=AVAILABLE_INTERACTIVE_SEG_MODELS,
-        help=INTERACTIVE_SEG_MODEL_HELP
+        help=INTERACTIVE_SEG_MODEL_HELP,
     )
     parser.add_argument(
         "--interactive-seg-device",
@@ -168,11 +176,11 @@ def parse_args():
     if args.config_installer:
         if args.installer_config is None:
             parser.error(
-                f"args.config_installer==True, must set args.installer_config to store config file"
+                "args.config_installer==True, must set args.installer_config to store config file"
             )
         from lama_cleaner.web_config import main
 
-        logger.info(f"Launching installer web config page")
+        logger.info("Launching installer web config page")
         main(args.installer_config)
         exit()
 
@@ -193,10 +201,6 @@ def parse_args():
             parser.error(
                 "torch.cuda.is_available() is False, please use --device cpu or check your pytorch installation"
             )
-
-    if args.sd_controlnet:
-        if args.model not in SD15_MODELS:
-            logger.warning(f"--sd_controlnet only support {SD15_MODELS}")
 
     if args.sd_local_model_path and args.model == "sd1.5":
         if not os.path.exists(args.sd_local_model_path):
