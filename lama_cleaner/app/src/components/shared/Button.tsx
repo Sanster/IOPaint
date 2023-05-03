@@ -12,6 +12,8 @@ interface ButtonProps {
   onClick?: () => void
   onDown?: (ev: PointerEvent) => void
   onUp?: (ev: PointerEvent) => void
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
   style?: React.CSSProperties
 }
 
@@ -27,6 +29,8 @@ const Button: React.FC<ButtonProps> = props => {
     onClick,
     onDown,
     onUp,
+    onMouseEnter,
+    onMouseLeave,
     style,
   } = props
 
@@ -42,6 +46,8 @@ const Button: React.FC<ButtonProps> = props => {
         style={style}
         onKeyDown={onKeyDown}
         onClick={blurOnClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         onPointerDown={(ev: React.PointerEvent<HTMLDivElement>) => {
           onDown?.(ev.nativeEvent)
         }}

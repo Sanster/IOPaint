@@ -62,6 +62,8 @@ import emitter, {
   EVENT_CUSTOM_MASK,
   EVENT_PAINT_BY_EXAMPLE,
   RERUN_LAST_MASK,
+  DREAM_BUTTON_MOUSE_ENTER,
+  DREAM_BUTTON_MOUSE_LEAVE,
 } from '../../event'
 import FileSelect from '../FileSelect/FileSelect'
 import InteractiveSeg from '../InteractiveSeg/InteractiveSeg'
@@ -130,14 +132,23 @@ export default function Editor() {
   )
 
   const [showInteractiveSegModal, setShowInteractiveSegModal] = useState(false)
-  const [interactiveSegMask, setInteractiveSegMask] =
-    useState<HTMLImageElement | null>(null)
+  const [interactiveSegMask, setInteractiveSegMask] = useState<
+    HTMLImageElement | null | undefined
+  >(null)
   // only used while interactive segmentation is on
-  const [tmpInteractiveSegMask, setTmpInteractiveSegMask] =
-    useState<HTMLImageElement | null>(null)
+  const [tmpInteractiveSegMask, setTmpInteractiveSegMask] = useState<
+    HTMLImageElement | null | undefined
+  >(null)
   const [prevInteractiveSegMask, setPrevInteractiveSegMask] = useState<
     HTMLImageElement | null | undefined
   >(null)
+
+  // 仅用于在 dream button hover 时显示提示
+  const [dreamButtonHoverSegMask, setDreamButtonHoverSegMask] = useState<
+    HTMLImageElement | null | undefined
+  >(null)
+  const [dreamButtonHoverLineGroup, setDreamButtonHoverLineGroup] =
+    useState<LineGroup>([])
 
   const [clicks, setClicks] = useRecoilState(interactiveSegClicksState)
 
@@ -202,21 +213,33 @@ export default function Editor() {
 
       context.clearRect(0, 0, context.canvas.width, context.canvas.height)
       context.drawImage(render, 0, 0, imageWidth, imageHeight)
-      if (isInteractiveSeg && tmpInteractiveSegMask !== null) {
+      if (isInteractiveSeg && tmpInteractiveSegMask) {
         context.drawImage(tmpInteractiveSegMask, 0, 0, imageWidth, imageHeight)
       }
-      if (!isInteractiveSeg && interactiveSegMask !== null) {
+      if (!isInteractiveSeg && interactiveSegMask) {
         context.drawImage(interactiveSegMask, 0, 0, imageWidth, imageHeight)
       }
+      if (dreamButtonHoverSegMask) {
+        context.drawImage(
+          dreamButtonHoverSegMask,
+          0,
+          0,
+          imageWidth,
+          imageHeight
+        )
+      }
       drawLines(context, lineGroup)
+      drawLines(context, dreamButtonHoverLineGroup)
     },
     [
       context,
       isInteractiveSeg,
       tmpInteractiveSegMask,
+      dreamButtonHoverSegMask,
       interactiveSegMask,
       imageHeight,
       imageWidth,
+      dreamButtonHoverLineGroup,
     ]
   )
 
@@ -277,6 +300,7 @@ export default function Editor() {
 
   const drawOnCurrentRender = useCallback(
     (lineGroup: LineGroup) => {
+      console.log('[drawOnCurrentRender] draw on current render')
       if (renders.length === 0) {
         draw(original, lineGroup)
       } else {
@@ -458,6 +482,53 @@ export default function Editor() {
     interactiveSegMask,
     prevInteractiveSegMask,
   ])
+
+  useEffect(() => {
+    emitter.on(DREAM_BUTTON_MOUSE_ENTER, () => {
+      // 当前 canvas 上没有手绘 mask 或者 interactiveSegMask 时，显示上一次的 mask
+      if (!hadDrawSomething() && !interactiveSegMask) {
+        if (prevInteractiveSegMask) {
+          setDreamButtonHoverSegMask(prevInteractiveSegMask)
+        }
+        let lineGroup2Show: LineGroup = []
+        if (redoLineGroups.length !== 0) {
+          lineGroup2Show = redoLineGroups[redoLineGroups.length - 1]
+        } else if (lineGroups.length !== 0) {
+          lineGroup2Show = lineGroups[lineGroups.length - 1]
+        }
+        console.log(
+          `[DREAM_BUTTON_MOUSE_ENTER], prevInteractiveSegMask: ${prevInteractiveSegMask} lineGroup2Show: ${lineGroup2Show.length}`
+        )
+        if (lineGroup2Show) {
+          setDreamButtonHoverLineGroup(lineGroup2Show)
+        }
+      }
+    })
+    return () => {
+      emitter.off(DREAM_BUTTON_MOUSE_ENTER)
+    }
+  }, [
+    hadDrawSomething,
+    interactiveSegMask,
+    prevInteractiveSegMask,
+    drawOnCurrentRender,
+    lineGroups,
+    redoLineGroups,
+  ])
+
+  useEffect(() => {
+    emitter.on(DREAM_BUTTON_MOUSE_LEAVE, () => {
+      // 当前 canvas 上没有手绘 mask 或者 interactiveSegMask 时，显示上一次的 mask
+      if (!hadDrawSomething() && !interactiveSegMask) {
+        setDreamButtonHoverSegMask(null)
+        setDreamButtonHoverLineGroup([])
+        drawOnCurrentRender([])
+      }
+    })
+    return () => {
+      emitter.off(DREAM_BUTTON_MOUSE_LEAVE)
+    }
+  }, [hadDrawSomething, interactiveSegMask, drawOnCurrentRender])
 
   useEffect(() => {
     emitter.on(EVENT_CUSTOM_MASK, (data: any) => {
@@ -743,7 +814,7 @@ export default function Editor() {
       setInitialCentered(true)
     }
   }, [
-    context?.canvas,
+    // context?.canvas,
     viewportRef,
     original,
     isOriginalLoaded,

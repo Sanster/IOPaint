@@ -1,14 +1,18 @@
 import React, { FormEvent, useRef, useState } from 'react'
 import { useClickAway } from 'react-use'
 import { useRecoilState, useRecoilValue } from 'recoil'
-import emitter, { EVENT_PROMPT } from '../../event'
+import emitter, {
+  DREAM_BUTTON_MOUSE_ENTER,
+  DREAM_BUTTON_MOUSE_LEAVE,
+  EVENT_PROMPT,
+} from '../../event'
 import { appState, isInpaintingState, propmtState } from '../../store/Atoms'
 import Button from '../shared/Button'
 import TextInput from '../shared/Input'
 
 // TODO: show progress in input
 const PromptInput = () => {
-  const [app, setAppState] = useRecoilState(appState)
+  const app = useRecoilValue(appState)
   const [prompt, setPrompt] = useRecoilState(propmtState)
   const isInpainting = useRecoilValue(isInpaintingState)
   const ref = useRef(null)
@@ -39,6 +43,14 @@ const PromptInput = () => {
     }
   }
 
+  const onMouseEnter = () => {
+    emitter.emit(DREAM_BUTTON_MOUSE_ENTER)
+  }
+
+  const onMouseLeave = () => {
+    emitter.emit(DREAM_BUTTON_MOUSE_LEAVE)
+  }
+
   return (
     <div className="prompt-wrapper">
       <TextInput
@@ -52,6 +64,8 @@ const PromptInput = () => {
         border
         onClick={handleRepaintClick}
         disabled={prompt.length === 0 || app.isInpainting}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
         Dream
       </Button>
