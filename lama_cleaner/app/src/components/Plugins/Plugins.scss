@@ -7,6 +7,7 @@
   z-index: 4;
   border: 1px solid var(--border-color);
   border-radius: 8px;
+  background-color: var(--page-bg);
 }
 
 .DropdownMenuContent,
@@ -16,7 +17,8 @@
   background-color: var(--page-bg);
   border-radius: 6px;
   padding: 5px;
-  box-shadow: 0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2);
+  box-shadow: 0px 10px 38px -10px rgba(22, 23, 24, 0.35),
+    0px 10px 20px -15px rgba(22, 23, 24, 0.2);
   animation-duration: 400ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;

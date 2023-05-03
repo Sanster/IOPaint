@@ -11,10 +11,10 @@
   border-style: solid;
   border-color: var(--border-color);
   border-width: 1px;
+  background-color: var(--page-bg);
 }
 
 .side-panel-trigger {
-  font-family: 'WorkSans', sans-serif;
   font-size: 16px;
   border: 0px;
 }
@@ -22,7 +22,6 @@
 .side-panel-content {
   outline: none;
   position: relative;
-  font-family: 'WorkSans', sans-serif;
   font-size: 14px;
   top: 8px;
   right: 1.5rem;
