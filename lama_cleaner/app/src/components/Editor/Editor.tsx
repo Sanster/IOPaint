@@ -1060,11 +1060,13 @@ export default function Editor() {
   const onCanvasMouseUp = (ev: SyntheticEvent) => {
     if (isInteractiveSeg) {
       const xy = mouseXY(ev)
+      const isX = xy.x
+      const isY = xy.y
       const newClicks: number[][] = [...clicks]
       if (isRightClick(ev)) {
-        newClicks.push([xy.x, xy.y, 0, newClicks.length])
+        newClicks.push([isX, isY, 0, newClicks.length])
       } else {
-        newClicks.push([xy.x, xy.y, 1, newClicks.length])
+        newClicks.push([isX, isY, 1, newClicks.length])
       }
       runInteractiveSeg(newClicks)
       setClicks(newClicks)
@@ -1525,7 +1527,7 @@ export default function Editor() {
         style={{
           left: `${x}px`,
           top: `${y}px`,
-          // transform: 'translate(-50%, -50%)',
+          transform: 'translate(-50%, -50%)',
         }}
       >
         <CursorArrowRaysIcon />
