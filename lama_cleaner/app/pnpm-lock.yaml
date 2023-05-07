@@ -9,6 +9,7 @@ specifiers:
   '@radix-ui/react-dropdown-menu': ^2.0.4
   '@radix-ui/react-icons': ^1.1.1
   '@radix-ui/react-popover': ^1.0.0
+  '@radix-ui/react-progress': ^1.0.2
   '@radix-ui/react-scroll-area': ^1.0.2
   '@radix-ui/react-select': 0.1.2-rc.27
   '@radix-ui/react-switch': ^0.1.5
@@ -86,7 +87,7 @@ specifiers:
   sass: ^1.49.9
   sass-loader: ^12.3.0
   semver: ^7.3.5
-  socket.io-client: ^4.5.2
+  socket.io-client: ^4.5.4
   source-map-loader: ^3.0.0
   style-loader: ^3.3.1
   tailwindcss: ^3.0.2
@@ -106,6 +107,7 @@ dependencies:
   '@radix-ui/react-dropdown-menu': 2.0.4_zsjcj4gvi24ks76nprapl4hsmq
   '@radix-ui/react-icons': registry.npmmirror.com/@radix-ui/react-icons/1.1.1_react@17.0.2
   '@radix-ui/react-popover': registry.npmmirror.com/@radix-ui/react-popover/1.0.3_zsjcj4gvi24ks76nprapl4hsmq
+  '@radix-ui/react-progress': 1.0.2_sfoxds7t5ydpegc3knd667wn6m
   '@radix-ui/react-scroll-area': registry.npmmirror.com/@radix-ui/react-scroll-area/1.0.2_sfoxds7t5ydpegc3knd667wn6m
   '@radix-ui/react-select': registry.npmmirror.com/@radix-ui/react-select/0.1.2-rc.27_zsjcj4gvi24ks76nprapl4hsmq
   '@radix-ui/react-switch': registry.npmmirror.com/@radix-ui/react-switch/0.1.5_react@17.0.2
@@ -260,6 +262,15 @@ packages:
       '@radix-ui/react-slot': 1.0.1_react@17.0.2
       react: registry.npmmirror.com/react/17.0.2
       react-dom: registry.npmmirror.com/react-dom/17.0.2_react@17.0.2
+    dev: false
+
+  /@radix-ui/react-compose-refs/0.1.0_react@17.0.2:
+    resolution: {integrity: sha512-eyclbh+b77k+69Dk72q3694OHrn9B3QsoIRx7ywX341U9RK1ThgQjMFZoPtmZNQTksXHLNEiefR8hGVeFyInGg==}
+    peerDependencies:
+      react: ^16.8 || ^17.0
+    dependencies:
+      '@babel/runtime': 7.20.13
+      react: registry.npmmirror.com/react/17.0.2
     dev: false
 
   /@radix-ui/react-compose-refs/1.0.0_react@17.0.2:
@@ -437,6 +448,28 @@ packages:
       react-dom: registry.npmmirror.com/react-dom/17.0.2_react@17.0.2
     dev: false
 
+  /@radix-ui/react-primitive/0.1.4_react@17.0.2:
+    resolution: {integrity: sha512-6gSl2IidySupIMJFjYnDIkIWRyQdbu/AHK7rbICPani+LW4b0XdxBXc46og/iZvuwW8pjCS8I2SadIerv84xYA==}
+    peerDependencies:
+      react: ^16.8 || ^17.0
+    dependencies:
+      '@babel/runtime': 7.20.13
+      '@radix-ui/react-slot': 0.1.2_react@17.0.2
+      react: registry.npmmirror.com/react/17.0.2
+    dev: false
+
+  /@radix-ui/react-primitive/1.0.1_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-fHbmislWVkZaIdeF6GZxF0A/NH/3BjrGIYj+Ae6eTmTCr7EB0RQAAVEiqsXK6p3/JcRqVSBQoceZroj30Jj3XA==}
+    peerDependencies:
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    dependencies:
+      '@babel/runtime': 7.20.13
+      '@radix-ui/react-slot': 1.0.1_react@17.0.2
+      react: registry.npmmirror.com/react/17.0.2
+      react-dom: registry.npmmirror.com/react-dom/17.0.2_react@17.0.2
+    dev: false
+
   /@radix-ui/react-primitive/1.0.2_sfoxds7t5ydpegc3knd667wn6m:
     resolution: {integrity: sha512-zY6G5Qq4R8diFPNwtyoLRZBxzu1Z+SXMlfYpChN7Dv8gvmx9X3qhDqiLWvKseKVJMuedFeU/Sa0Sy/Ia+t06Dw==}
     peerDependencies:
@@ -445,6 +478,19 @@ packages:
     dependencies:
       '@babel/runtime': 7.20.13
       '@radix-ui/react-slot': 1.0.1_react@17.0.2
+      react: registry.npmmirror.com/react/17.0.2
+      react-dom: registry.npmmirror.com/react-dom/17.0.2_react@17.0.2
+    dev: false
+
+  /@radix-ui/react-progress/1.0.2_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-c16RVM43ct2koRcMmPw4b47JWFNs89qe5p4Um9dwoPs0yi+d7It1MJ35EpsX+93o31Mqdwe4vQyu0SrHrygdCg==}
+    peerDependencies:
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    dependencies:
+      '@babel/runtime': 7.20.13
+      '@radix-ui/react-context': 1.0.0_react@17.0.2
+      '@radix-ui/react-primitive': 1.0.2_sfoxds7t5ydpegc3knd667wn6m
       react: registry.npmmirror.com/react/17.0.2
       react-dom: registry.npmmirror.com/react-dom/17.0.2_react@17.0.2
     dev: false
@@ -467,6 +513,16 @@ packages:
       '@radix-ui/react-use-controllable-state': 1.0.0_react@17.0.2
       react: registry.npmmirror.com/react/17.0.2
       react-dom: registry.npmmirror.com/react-dom/17.0.2_react@17.0.2
+    dev: false
+
+  /@radix-ui/react-slot/0.1.2_react@17.0.2:
+    resolution: {integrity: sha512-ADkqfL+agEzEguU3yS26jfB50hRrwf7U4VTwAOZEmi/g+ITcBWe12yM46ueS/UCIMI9Py+gFUaAdxgxafFvY2Q==}
+    peerDependencies:
+      react: ^16.8 || ^17.0
+    dependencies:
+      '@babel/runtime': 7.20.13
+      '@radix-ui/react-compose-refs': 0.1.0_react@17.0.2
+      react: registry.npmmirror.com/react/17.0.2
     dev: false
 
   /@radix-ui/react-slot/1.0.1_react@17.0.2:
@@ -3197,7 +3253,7 @@ packages:
     name: '@radix-ui/popper'
     version: 0.1.0
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
+      '@babel/runtime': 7.20.13
       csstype: registry.npmmirror.com/csstype/3.1.1
     dev: false
 
@@ -3225,8 +3281,8 @@ packages:
     peerDependencies:
       react: ^16.8 || ^17.0
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
-      '@radix-ui/react-primitive': registry.npmmirror.com/@radix-ui/react-primitive/0.1.4_react@17.0.2
+      '@babel/runtime': 7.20.13
+      '@radix-ui/react-primitive': 0.1.4_react@17.0.2
       react: registry.npmmirror.com/react/17.0.2
     dev: false
 
@@ -3239,8 +3295,8 @@ packages:
       react: ^16.8 || ^17.0 || ^18.0
       react-dom: ^16.8 || ^17.0 || ^18.0
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
-      '@radix-ui/react-primitive': registry.npmmirror.com/@radix-ui/react-primitive/1.0.1_sfoxds7t5ydpegc3knd667wn6m
+      '@babel/runtime': 7.20.13
+      '@radix-ui/react-primitive': 1.0.1_sfoxds7t5ydpegc3knd667wn6m
       react: registry.npmmirror.com/react/17.0.2
       react-dom: registry.npmmirror.com/react-dom/17.0.2_react@17.0.2
     dev: false
@@ -3272,11 +3328,11 @@ packages:
       react: ^16.8 || ^17.0 || ^18.0
       react-dom: ^16.8 || ^17.0 || ^18.0
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
-      '@radix-ui/react-compose-refs': registry.npmmirror.com/@radix-ui/react-compose-refs/1.0.0_react@17.0.2
-      '@radix-ui/react-context': registry.npmmirror.com/@radix-ui/react-context/1.0.0_react@17.0.2
-      '@radix-ui/react-primitive': registry.npmmirror.com/@radix-ui/react-primitive/1.0.1_sfoxds7t5ydpegc3knd667wn6m
-      '@radix-ui/react-slot': registry.npmmirror.com/@radix-ui/react-slot/1.0.1_react@17.0.2
+      '@babel/runtime': 7.20.13
+      '@radix-ui/react-compose-refs': 1.0.0_react@17.0.2
+      '@radix-ui/react-context': 1.0.0_react@17.0.2
+      '@radix-ui/react-primitive': 1.0.1_sfoxds7t5ydpegc3knd667wn6m
+      '@radix-ui/react-slot': 1.0.1_react@17.0.2
       react: registry.npmmirror.com/react/17.0.2
       react-dom: registry.npmmirror.com/react-dom/17.0.2_react@17.0.2
     dev: false
@@ -4042,7 +4098,7 @@ packages:
     peerDependencies:
       react: ^16.8 || ^17.0
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
+      '@babel/runtime': 7.20.13
       '@radix-ui/react-use-layout-effect': registry.npmmirror.com/@radix-ui/react-use-layout-effect/0.1.0_react@17.0.2
       react: registry.npmmirror.com/react/17.0.2
     dev: false
@@ -4055,7 +4111,7 @@ packages:
     peerDependencies:
       react: ^16.8 || ^17.0 || ^18.0
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
+      '@babel/runtime': 7.20.13
       '@radix-ui/react-use-layout-effect': registry.npmmirror.com/@radix-ui/react-use-layout-effect/0.1.1-rc.18_react@17.0.2
       react: registry.npmmirror.com/react/17.0.2
     dev: false
@@ -4156,7 +4212,7 @@ packages:
     peerDependencies:
       react: ^16.8 || ^17.0 || ^18.0
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
+      '@babel/runtime': 7.20.13
       '@radix-ui/react-use-callback-ref': registry.npmmirror.com/@radix-ui/react-use-callback-ref/0.1.1-rc.18_react@17.0.2
       react: registry.npmmirror.com/react/17.0.2
     dev: false
@@ -4169,7 +4225,7 @@ packages:
     peerDependencies:
       react: ^16.8 || ^17.0 || ^18.0
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
+      '@babel/runtime': 7.20.13
       '@radix-ui/react-use-callback-ref': registry.npmmirror.com/@radix-ui/react-use-callback-ref/1.0.0_react@17.0.2
       react: registry.npmmirror.com/react/17.0.2
     dev: false
@@ -4255,7 +4311,7 @@ packages:
     peerDependencies:
       react: ^16.8 || ^17.0 || ^18.0
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
+      '@babel/runtime': 7.20.13
       '@radix-ui/rect': registry.npmmirror.com/@radix-ui/rect/1.0.0
       react: registry.npmmirror.com/react/17.0.2
     dev: false
@@ -4280,7 +4336,7 @@ packages:
     peerDependencies:
       react: ^16.8 || ^17.0 || ^18.0
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
+      '@babel/runtime': 7.20.13
       '@radix-ui/react-use-layout-effect': registry.npmmirror.com/@radix-ui/react-use-layout-effect/1.0.0_react@17.0.2
       react: registry.npmmirror.com/react/17.0.2
     dev: false
@@ -4318,7 +4374,7 @@ packages:
     name: '@radix-ui/rect'
     version: 0.1.1
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
+      '@babel/runtime': 7.20.13
     dev: false
 
   registry.npmmirror.com/@radix-ui/rect/1.0.0:
@@ -4326,7 +4382,7 @@ packages:
     name: '@radix-ui/rect'
     version: 1.0.0
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
+      '@babel/runtime': 7.20.13
     dev: false
 
   registry.npmmirror.com/@rollup/plugin-babel/5.3.1_3dsfpkpoyvuuxyfgdbpn4j4uzm:
@@ -12867,7 +12923,7 @@ packages:
     name: regenerator-transform
     version: 0.15.1
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
+      '@babel/runtime': 7.20.13
     dev: false
 
   registry.npmmirror.com/regex-parser/2.2.11:
@@ -13088,7 +13144,7 @@ packages:
     name: rtl-css-js
     version: 1.16.1
     dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime/7.20.13
+      '@babel/runtime': 7.20.13
     dev: false
 
   registry.npmmirror.com/run-parallel/1.2.0:

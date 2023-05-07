@@ -9,6 +9,7 @@ import { keepGUIAlive } from './utils'
 import Header from './components/Header/Header'
 import useHotKey from './hooks/useHotkey'
 import { getServerConfig, isDesktop } from './adapters/inpainting'
+import SDProgress from './components/SDProgress/SDProgress'
 
 const SUPPORTED_FILE_TYPE = [
   'image/jpeg',
@@ -178,6 +179,7 @@ function App() {
   return (
     <div className="lama-cleaner">
       <Header />
+      <SDProgress />
       <Workspace key={workspaceId} />
     </div>
   )

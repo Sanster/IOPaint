@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import asyncio
 import hashlib
 import os
 
@@ -49,6 +50,7 @@ from flask import (
     send_from_directory,
     jsonify,
 )
+from flask_socketio import SocketIO
 
 # Disable ability for Flask to display warning about using a development server in a production environment.
 # https://gist.github.com/jerblack/735b9953ba1ab6234abb43174210d356
@@ -88,6 +90,7 @@ logging.getLogger("werkzeug").addFilter(NoFlaskwebgui())
 app = Flask(__name__, static_folder=os.path.join(BUILD_DIR, "static"))
 app.config["JSON_AS_ASCII"] = False
 CORS(app, expose_headers=["Content-Disposition"])
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 model: ModelManager = None
 thumb: FileManager = None
@@ -111,8 +114,7 @@ def get_image_ext(img_bytes):
 
 
 def diffuser_callback(i, t, latents):
-    pass
-    # socketio.emit('diffusion_step', {'diffusion_step': step})
+    socketio.emit('diffusion_progress', {'step': i})
 
 
 @app.route("/save_image", methods=["POST"])
@@ -301,6 +303,8 @@ def process():
         )
     )
     response.headers["X-Seed"] = str(config.sd_seed)
+
+    socketio.emit('diffusion_finish')
     return response
 
 
@@ -557,6 +561,7 @@ def main(args):
 
         ui = FlaskUI(
             app,
+            socketio=socketio,
             width=app_width,
             height=app_height,
             host=args.host,
@@ -565,4 +570,4 @@ def main(args):
         )
         ui.run()
     else:
-        app.run(host=args.host, port=args.port, debug=args.debug)
+        socketio.run(app, host=args.host, port=args.port, debug=args.debug)
