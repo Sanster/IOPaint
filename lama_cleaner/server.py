@@ -125,14 +125,18 @@ def save_image():
     input = request.files
     filename = request.form["filename"]
     origin_image_bytes = input["image"].read()  # RGB
-    image, _ = load_img(origin_image_bytes)
-    if image.shape[2] == 3:
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    elif image.shape[2] == 4:
-        image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGRA)
-
+    ext = get_image_ext(origin_image_bytes)
+    image, _, exif_infos = load_img(origin_image_bytes, return_exif=True)
     save_path = os.path.join(output_dir, filename)
-    cv2.imencode(Path(save_path).suffix, image)[1].tofile(save_path)
+
+    img_bytes = pil_to_bytes(
+        Image.fromarray(image),
+        ext,
+        quality=image_quality,
+        exif_infos=exif_infos,
+    )
+    with open(save_path, "wb") as fw:
+        fw.write(img_bytes)
 
     return "ok", 200
 
