@@ -443,7 +443,7 @@ def set_input_photo():
         return send_file(
             input_image_path,
             as_attachment=True,
-            attachment_filename=Path(input_image_path).name,
+            download_name=Path(input_image_path).name,
             mimetype=f"image/{get_image_ext(image_in_bytes)}",
         )
     else:
