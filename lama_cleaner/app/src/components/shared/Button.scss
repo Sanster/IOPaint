@@ -12,6 +12,7 @@
   place-items: center;
   border-radius: 0.5rem;
   z-index: 1;
+  user-select: none;
   cursor: pointer;
 
   &:hover {
@@ -26,6 +27,7 @@
 }
 
 .btn-primary-disabled {
+  user-select: none;
   background-color: var(--page-bg);
   pointer-events: none;
   opacity: 0.5;
