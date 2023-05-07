@@ -90,7 +90,7 @@ logging.getLogger("werkzeug").addFilter(NoFlaskwebgui())
 app = Flask(__name__, static_folder=os.path.join(BUILD_DIR, "static"))
 app.config["JSON_AS_ASCII"] = False
 CORS(app, expose_headers=["Content-Disposition"])
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 model: ModelManager = None
 thumb: FileManager = None
@@ -114,7 +114,7 @@ def get_image_ext(img_bytes):
 
 
 def diffuser_callback(i, t, latents):
-    socketio.emit('diffusion_progress', {'step': i})
+    socketio.emit("diffusion_progress", {"step": i})
 
 
 @app.route("/save_image", methods=["POST"])
@@ -188,7 +188,7 @@ def process():
     input = request.files
     # RGB
     origin_image_bytes = input["image"].read()
-    image, alpha_channel, exif = load_img(origin_image_bytes, return_exif=True)
+    image, alpha_channel, exif_infos = load_img(origin_image_bytes, return_exif=True)
 
     mask, _ = load_img(input["mask"].read(), gray=True)
     mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)[1]
@@ -288,12 +288,14 @@ def process():
 
     ext = get_image_ext(origin_image_bytes)
 
-    # fmt: off
-    if exif is not None:
-        bytes_io = io.BytesIO(pil_to_bytes(Image.fromarray(res_np_img), ext, quality=image_quality, exif=exif))
-    else:
-        bytes_io = io.BytesIO(pil_to_bytes(Image.fromarray(res_np_img), ext, quality=image_quality))
-    # fmt: on
+    bytes_io = io.BytesIO(
+        pil_to_bytes(
+            Image.fromarray(res_np_img),
+            ext,
+            quality=image_quality,
+            exif_infos=exif_infos,
+        )
+    )
 
     response = make_response(
         send_file(
@@ -304,7 +306,7 @@ def process():
     )
     response.headers["X-Seed"] = str(config.sd_seed)
 
-    socketio.emit('diffusion_finish')
+    socketio.emit("diffusion_finish")
     return response
 
 
@@ -317,7 +319,9 @@ def run_plugin():
         return "Plugin not found", 500
 
     origin_image_bytes = files["image"].read()  # RGB
-    rgb_np_img, alpha_channel, exif = load_img(origin_image_bytes, return_exif=True)
+    rgb_np_img, alpha_channel, exif_infos = load_img(
+        origin_image_bytes, return_exif=True
+    )
 
     start = time.time()
     try:
@@ -372,7 +376,10 @@ def run_plugin():
         send_file(
             io.BytesIO(
                 pil_to_bytes(
-                    Image.fromarray(rgb_res), ext, quality=image_quality, exif=exif
+                    Image.fromarray(rgb_res),
+                    ext,
+                    quality=image_quality,
+                    exif_infos=exif_infos,
                 )
             ),
             mimetype=f"image/{ext}",

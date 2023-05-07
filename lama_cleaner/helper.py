@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from urllib.parse import urlparse
 import cv2
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, PngImagePlugin
 import numpy as np
 import torch
 from lama_cleaner.const import MPS_SUPPORT_MODELS
@@ -135,9 +135,20 @@ def numpy_to_bytes(image_numpy: np.ndarray, ext: str) -> bytes:
     return image_bytes
 
 
-def pil_to_bytes(pil_img, ext: str, quality: int = 95, exif=None) -> bytes:
+def pil_to_bytes(pil_img, ext: str, quality: int = 95, exif_infos={}) -> bytes:
     with io.BytesIO() as output:
-        pil_img.save(output, format=ext, exif=exif, quality=quality)
+        kwargs = {k: v for k, v in exif_infos.items() if v is not None}
+        if ext == "png" and "parameters" in kwargs:
+            pnginfo_data = PngImagePlugin.PngInfo()
+            pnginfo_data.add_text("parameters", kwargs["parameters"])
+            kwargs["pnginfo"] = pnginfo_data
+
+        pil_img.save(
+            output,
+            format=ext,
+            quality=quality,
+            **kwargs,
+        )
         image_bytes = output.getvalue()
     return image_bytes
 
@@ -146,12 +157,9 @@ def load_img(img_bytes, gray: bool = False, return_exif: bool = False):
     alpha_channel = None
     image = Image.open(io.BytesIO(img_bytes))
 
-    try:
-        if return_exif:
-            exif = image.getexif()
-    except:
-        exif = None
-        logger.error("Failed to extract exif from image")
+    if return_exif:
+        info = image.info or {}
+        exif_infos = {"exif": image.getexif(), "parameters": info.get("parameters")}
 
     try:
         image = ImageOps.exif_transpose(image)
@@ -171,7 +179,7 @@ def load_img(img_bytes, gray: bool = False, return_exif: bool = False):
             np_img = np.array(image)
 
     if return_exif:
-        return np_img, alpha_channel, exif
+        return np_img, alpha_channel, exif_infos
     return np_img, alpha_channel
 
 
