@@ -107,6 +107,11 @@ def parse_args():
         help=REMOVE_BG_HELP,
     )
     parser.add_argument(
+        "--enable-anime-seg",
+        action="store_true",
+        help=ANIMESEG_HELP,
+    )
+    parser.add_argument(
         "--enable-realesrgan",
         action="store_true",
         help=REALESRGAN_HELP,

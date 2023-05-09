@@ -688,6 +688,15 @@ export default function Editor() {
   }, [runRenderablePlugin])
 
   useEffect(() => {
+    emitter.on(PluginName.AnimeSeg, () => {
+      runRenderablePlugin(PluginName.AnimeSeg)
+    })
+    return () => {
+      emitter.off(PluginName.AnimeSeg)
+    }
+  }, [runRenderablePlugin])
+
+  useEffect(() => {
     emitter.on(PluginName.GFPGAN, () => {
       runRenderablePlugin(PluginName.GFPGAN)
     })

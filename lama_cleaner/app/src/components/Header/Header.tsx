@@ -147,7 +147,7 @@ const Header = () => {
                   }}
                   accept="image/png, image/jpeg"
                 />
-                Mask
+                M
               </Button>
             </label>
 

@@ -110,6 +110,7 @@ INTERACTIVE_SEG_MODEL_HELP = "Model size: vit_b < vit_l < vit_h. Bigger model si
 AVAILABLE_INTERACTIVE_SEG_MODELS = ["vit_b", "vit_l", "vit_h"]
 AVAILABLE_INTERACTIVE_SEG_DEVICES = ["cuda", "cpu", "mps"]
 REMOVE_BG_HELP = "Enable remove background. Always run on CPU"
+ANIMESEG_HELP = "Enable anime segmentation. Always run on CPU"
 REALESRGAN_HELP = "Enable realesrgan super resolution"
 REALESRGAN_AVAILABLE_DEVICES = ["cpu", "cuda", "mps"]
 GFPGAN_HELP = (
@@ -144,6 +145,7 @@ class Config(BaseModel):
     interactive_seg_model: str = "vit_l"
     interactive_seg_device: str = "cpu"
     enable_remove_bg: bool = False
+    enable_anime_seg: bool = False
     enable_realesrgan: bool = False
     realesrgan_device: str = "cpu"
     realesrgan_model: str = RealESRGANModelName.realesr_general_x4v3.value

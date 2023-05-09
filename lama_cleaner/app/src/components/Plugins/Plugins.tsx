@@ -6,6 +6,7 @@ import {
   ChevronRightIcon,
   FaceIcon,
   HobbyKnifeIcon,
+  PersonIcon,
   MixIcon,
 } from '@radix-ui/react-icons'
 import { useToggle } from 'react-use'
@@ -20,6 +21,7 @@ import Button from '../shared/Button'
 
 export enum PluginName {
   RemoveBG = 'RemoveBG',
+  AnimeSeg = 'AnimeSeg',
   RealESRGAN = 'RealESRGAN',
   GFPGAN = 'GFPGAN',
   RestoreFormer = 'RestoreFormer',
@@ -31,6 +33,10 @@ const pluginMap = {
   [PluginName.RemoveBG]: {
     IconClass: HobbyKnifeIcon,
     showName: 'RemoveBG',
+  },
+  [PluginName.AnimeSeg]: {
+    IconClass: PersonIcon,
+    showName: 'Anime Segmentation',
   },
   [PluginName.RealESRGAN]: {
     IconClass: BoxModelIcon,
@@ -46,7 +52,7 @@ const pluginMap = {
   },
   [PluginName.InteractiveSeg]: {
     IconClass: CursorArrowRaysIcon,
-    showName: 'Interactive Seg',
+    showName: 'Interactive Segmentation',
   },
   [PluginName.MakeGIF]: {
     IconClass: GifIcon,

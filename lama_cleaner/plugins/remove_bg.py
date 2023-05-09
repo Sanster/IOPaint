@@ -28,7 +28,7 @@ class RemoveBG(BasePlugin):
 
         # return BGRA image
         output = remove(bgr_np_img, session=self.session)
-        return output
+        return cv2.cvtColor(output, cv2.COLOR_BGRA2RGBA)
 
     def check_dep(self):
         try:

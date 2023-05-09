@@ -3,6 +3,8 @@ import asyncio
 import hashlib
 import os
 
+from lama_cleaner.plugins.anime_seg import AnimeSeg
+
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 import imghdr
@@ -361,8 +363,8 @@ def run_plugin():
             )
         )
 
-    if name == RemoveBG.name:
-        rgb_res = cv2.cvtColor(bgr_res, cv2.COLOR_BGRA2RGBA)
+    if name in [RemoveBG.name, AnimeSeg.name]:
+        rgb_res = bgr_res
         ext = "png"
     else:
         rgb_res = cv2.cvtColor(bgr_res, cv2.COLOR_BGR2RGB)
@@ -461,9 +463,15 @@ def build_plugins(args):
         plugins[InteractiveSeg.name] = InteractiveSeg(
             args.interactive_seg_model, args.interactive_seg_device
         )
+
     if args.enable_remove_bg:
         logger.info(f"Initialize {RemoveBG.name} plugin")
         plugins[RemoveBG.name] = RemoveBG()
+
+    if args.enable_anime_seg:
+        logger.info(f"Initialize {AnimeSeg.name} plugin")
+        plugins[AnimeSeg.name] = AnimeSeg()
+
     if args.enable_realesrgan:
         logger.info(
             f"Initialize {RealESRGANUpscaler.name} plugin: {args.realesrgan_model}, {args.realesrgan_device}"
@@ -473,6 +481,7 @@ def build_plugins(args):
             args.realesrgan_device,
             no_half=args.realesrgan_no_half,
         )
+
     if args.enable_gfpgan:
         logger.info(f"Initialize {GFPGANPlugin.name} plugin")
         if args.enable_realesrgan:
@@ -484,12 +493,14 @@ def build_plugins(args):
         plugins[GFPGANPlugin.name] = GFPGANPlugin(
             args.gfpgan_device, upscaler=plugins.get(RealESRGANUpscaler.name, None)
         )
+
     if args.enable_restoreformer:
         logger.info(f"Initialize {RestoreFormerPlugin.name} plugin")
         plugins[RestoreFormerPlugin.name] = RestoreFormerPlugin(
             args.restoreformer_device,
             upscaler=plugins.get(RealESRGANUpscaler.name, None),
         )
+
     if args.enable_gif:
         logger.info(f"Initialize GIF plugin")
         plugins[MakeGIF.name] = MakeGIF()
