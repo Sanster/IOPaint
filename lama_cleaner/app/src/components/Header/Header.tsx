@@ -92,7 +92,7 @@ const Header = () => {
           <label htmlFor={uploadElemId}>
             <Button
               icon={<PhotoIcon />}
-              style={{ border: 0, gap: 0 }}
+              style={{ border: 0, gap: 0, padding: 6 }}
               disabled={isInpainting}
               toolTip="Upload image"
             >
@@ -147,7 +147,17 @@ const Header = () => {
                   }}
                   accept="image/png, image/jpeg"
                 />
-                M
+                <div
+                  style={{
+                    height: 16,
+                    width: 16,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  M
+                </div>
               </Button>
             </label>
 
