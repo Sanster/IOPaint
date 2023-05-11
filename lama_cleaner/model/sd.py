@@ -35,13 +35,13 @@ class CPUTextEncoderWrapper:
 
 def load_from_local_model(local_model_path, torch_dtype, disable_nsfw=True):
     from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
-        load_pipeline_from_original_stable_diffusion_ckpt,
+        download_from_original_stable_diffusion_ckpt,
     )
     from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
 
     logger.info(f"Converting {local_model_path} to diffusers pipeline")
 
-    pipe = load_pipeline_from_original_stable_diffusion_ckpt(
+    pipe = download_from_original_stable_diffusion_ckpt(
         local_model_path,
         num_in_channels=9,
         from_safetensors=local_model_path.endswith("safetensors"),

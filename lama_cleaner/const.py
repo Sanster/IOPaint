@@ -53,8 +53,13 @@ Run Stable Diffusion text encoder model on CPU to save GPU memory.
 """
 
 SD_CONTROLNET_HELP = """
-Run Stable Diffusion 1.5 inpainting model with Canny ControlNet control.
+Run Stable Diffusion inpainting model with ControlNet. You can switch control method in webui.
 """
+SD_CONTROLNET_CHOICES = [
+    "control_v11p_sd15_canny",
+    "control_v11p_sd15_openpose",
+    "control_v11p_sd15_inpaint",
+]
 
 SD_LOCAL_MODEL_HELP = """
 Load Stable Diffusion 1.5 model(ckpt/safetensors) from local path.

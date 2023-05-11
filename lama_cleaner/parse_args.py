@@ -41,10 +41,7 @@ def parse_args():
     parser.add_argument(
         "--sd-controlnet-method",
         default="control_v11p_sd15_inpaint",
-        choices=[
-            "control_v11p_sd15_canny",
-            "control_v11p_sd15_inpaint",
-        ],
+        choices=SD_CONTROLNET_CHOICES,
     )
     parser.add_argument("--sd-local-model-path", default=None, help=SD_LOCAL_MODEL_HELP)
     parser.add_argument(

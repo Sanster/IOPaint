@@ -436,6 +436,17 @@ def switch_model():
     return f"ok, switch to {new_name}", 200
 
 
+@app.route("/controlnet_method", methods=["POST"])
+def switch_controlnet_method():
+    new_method = request.form.get("method")
+
+    try:
+        model.switch_controlnet_method(new_method)
+    except NotImplementedError:
+        return f"Failed switch to {new_method} not implemented", 500
+    return f"Switch to {new_method}", 200
+
+
 @app.route("/")
 def index():
     return send_file(os.path.join(BUILD_DIR, "index.html"))
