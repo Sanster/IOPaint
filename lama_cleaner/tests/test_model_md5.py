@@ -2,7 +2,7 @@ def test_load_model():
     from lama_cleaner.plugins import InteractiveSeg
     from lama_cleaner.model_manager import ModelManager
 
-    interactive_seg_model = InteractiveSeg()
+    interactive_seg_model = InteractiveSeg('vit_l', 'cpu')
 
     models = [
         "lama",

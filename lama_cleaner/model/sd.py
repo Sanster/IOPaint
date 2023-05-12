@@ -61,7 +61,7 @@ def load_from_local_model(local_model_path, torch_dtype, disable_nsfw=True):
 
     del pipe
     gc.collect()
-    return inpaint_pipe.to(torch_dtype)
+    return inpaint_pipe.to(torch_dtype=torch_dtype)
 
 
 class SD(DiffusionInpaintModel):
