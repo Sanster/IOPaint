@@ -31,10 +31,8 @@ const CoffeeIcon = () => {
             flexDirection: 'column',
           }}
         >
-          <h4 style={{ lineHeight: '24px' }}>
-            Hi, if you found my project is useful, please conside buy me a
-            coffee to support my work. Thanks!
-          </h4>
+          Hi, if you found my project is useful, please conside buy me a coffee
+          to support my work. Thanks!
           <img
             src={CoffeeMachineGif}
             alt="coffee machine"

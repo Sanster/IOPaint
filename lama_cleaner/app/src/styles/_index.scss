@@ -1,5 +1,13 @@
+@use '~inter-ui/default' with (
+  $inter-font-display: swap,
+  $inter-font-path: '~inter-ui/Inter (web)'
+);
+@use '~inter-ui/variable' with (
+  $inter-font-display: swap,
+  $inter-font-path: '~inter-ui/Inter (web)'
+);
+
 // General
-@use './Fonts';
 @use './Colors';
 @use './ColorsDark';
 @use './Animations';
@@ -40,7 +48,15 @@
   padding: 0;
 }
 
-html,
-body {
-  font-family: 'WorkSans', sans-serif;
+@include default.all;
+@include variable.all;
+
+html {
+  font-family: 'Inter', 'system-ui';
+}
+
+@supports (font-variation-settings: normal) {
+  html {
+    font-family: 'Inter var', 'system-ui';
+  }
 }
