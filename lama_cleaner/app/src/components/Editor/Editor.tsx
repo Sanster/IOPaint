@@ -470,6 +470,7 @@ export default function Editor() {
           duration: 1500,
         })
       }
+      emitter.emit(DREAM_BUTTON_MOUSE_LEAVE)
     })
 
     return () => {
