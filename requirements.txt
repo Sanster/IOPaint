@@ -2,6 +2,7 @@ torch>=1.9.0
 opencv-python
 flask==2.2.3
 flask-socketio
+simple-websocket
 flask_cors
 flaskwebgui==0.3.5
 pydantic

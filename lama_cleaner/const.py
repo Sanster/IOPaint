@@ -55,6 +55,7 @@ Run Stable Diffusion text encoder model on CPU to save GPU memory.
 SD_CONTROLNET_HELP = """
 Run Stable Diffusion inpainting model with ControlNet. You can switch control method in webui.
 """
+DEFAULT_CONTROLNET_METHOD = "control_v11p_sd15_canny"
 SD_CONTROLNET_CHOICES = [
     "control_v11p_sd15_canny",
     "control_v11p_sd15_openpose",
@@ -133,6 +134,7 @@ class Config(BaseModel):
     model: str = DEFAULT_MODEL
     sd_local_model_path: str = None
     sd_controlnet: bool = False
+    sd_controlnet_method: str = DEFAULT_CONTROLNET_METHOD
     device: str = DEFAULT_DEVICE
     gui: bool = False
     no_gui_auto_close: bool = False

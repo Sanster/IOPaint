@@ -35,6 +35,7 @@ def _save(img, name):
 def test_remove_bg():
     model = RemoveBG()
     res = model.forward(bgr_img)
+    res = cv2.cvtColor(res, cv2.COLOR_RGBA2BGRA)
     _save(res, "test_remove_bg.png")
 
 

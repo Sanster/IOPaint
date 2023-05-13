@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
-import asyncio
-import hashlib
 import os
-
-from lama_cleaner.plugins.anime_seg import AnimeSeg
+import hashlib
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
@@ -32,6 +29,7 @@ from lama_cleaner.plugins import (
     MakeGIF,
     GFPGANPlugin,
     RestoreFormerPlugin,
+    AnimeSeg,
 )
 from lama_cleaner.schema import Config
 
@@ -84,7 +82,15 @@ BUILD_DIR = os.environ.get("LAMA_CLEANER_BUILD_DIR", "app/build")
 
 class NoFlaskwebgui(logging.Filter):
     def filter(self, record):
-        return "flaskwebgui-keep-server-alive" not in record.getMessage()
+        msg = record.getMessage()
+        if "Running on http:" in msg:
+            print(msg[msg.index("Running on http:") :])
+
+        return (
+            "flaskwebgui-keep-server-alive" not in msg
+            and "socket.io" not in msg
+            and "This is a development server." not in msg
+        )
 
 
 logging.getLogger("werkzeug").addFilter(NoFlaskwebgui())
@@ -92,6 +98,9 @@ logging.getLogger("werkzeug").addFilter(NoFlaskwebgui())
 app = Flask(__name__, static_folder=os.path.join(BUILD_DIR, "static"))
 app.config["JSON_AS_ASCII"] = False
 CORS(app, expose_headers=["Content-Disposition"])
+
+sio_logger = logging.getLogger("sio-logger")
+sio_logger.setLevel(logging.ERROR)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 model: ModelManager = None
@@ -254,6 +263,7 @@ def process():
         p2p_image_guidance_scale=form["p2pImageGuidanceScale"],
         p2p_guidance_scale=form["p2pGuidanceScale"],
         controlnet_conditioning_scale=form["controlnet_conditioning_scale"],
+        controlnet_method=form["controlnet_method"],
     )
 
     if config.sd_seed == -1:
@@ -263,7 +273,6 @@ def process():
 
     logger.info(f"Origin image shape: {original_shape}")
     image = resize_max_size(image, size_limit=size_limit, interpolation=interpolation)
-    logger.info(f"Resized image shape: {image.shape}")
 
     mask = resize_max_size(mask, size_limit=size_limit, interpolation=interpolation)
 
@@ -436,17 +445,6 @@ def switch_model():
     return f"ok, switch to {new_name}", 200
 
 
-@app.route("/controlnet_method", methods=["POST"])
-def switch_controlnet_method():
-    new_method = request.form.get("method")
-
-    try:
-        model.switch_controlnet_method(new_method)
-    except NotImplementedError:
-        return f"Failed switch to {new_method} not implemented", 500
-    return f"Switch to {new_method}", 200
-
-
 @app.route("/")
 def index():
     return send_file(os.path.join(BUILD_DIR, "index.html"))
@@ -603,4 +601,10 @@ def main(args):
         )
         ui.run()
     else:
-        socketio.run(app, host=args.host, port=args.port, debug=args.debug)
+        socketio.run(
+            app,
+            host=args.host,
+            port=args.port,
+            debug=args.debug,
+            allow_unsafe_werkzeug=True,
+        )

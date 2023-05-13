@@ -440,6 +440,7 @@ export interface Settings {
 
   // ControlNet
   controlnetConditioningScale: number
+  controlnetMethod: string
 }
 
 const defaultHDSettings: ModelsHDSettings = {
@@ -546,6 +547,18 @@ export enum SDSampler {
   uni_pc = 'uni_pc',
 }
 
+export enum ControlNetMethod {
+  canny = 'canny',
+  inpaint = 'inpaint',
+  openpose = 'openpose',
+}
+
+export const ControlNetMethodMap: any = {
+  canny: 'control_v11p_sd15_canny',
+  inpaint: 'control_v11p_sd15_inpaint',
+  openpose: 'control_v11p_sd15_openpose',
+}
+
 export enum SDMode {
   text2img = 'text2img',
   img2img = 'img2img',
@@ -597,7 +610,8 @@ export const settingStateDefault: Settings = {
   p2pGuidanceScale: 7.5,
 
   // ControlNet
-  controlnetConditioningScale: 0.4,
+  controlnetConditioningScale: 1.0,
+  controlnetMethod: ControlNetMethod.canny,
 }
 
 const localStorageEffect =

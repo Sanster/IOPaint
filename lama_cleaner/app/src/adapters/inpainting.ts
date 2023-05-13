@@ -1,5 +1,5 @@
 import { PluginName } from '../components/Plugins/Plugins'
-import { Rect, Settings } from '../store/Atoms'
+import { ControlNetMethodMap, Rect, Settings } from '../store/Atoms'
 import { dataURItoBlob, loadImage, srcToFile } from '../utils'
 
 export const API_ENDPOINT = `${process.env.REACT_APP_INPAINTING_URL}`
@@ -91,6 +91,10 @@ export default async function inpaint(
   fd.append(
     'controlnet_conditioning_scale',
     settings.controlnetConditioningScale.toString()
+  )
+  fd.append(
+    'controlnet_method',
+    ControlNetMethodMap[settings.controlnetMethod.toString()]
   )
 
   try {

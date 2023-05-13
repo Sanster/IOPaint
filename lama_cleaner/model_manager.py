@@ -1,6 +1,8 @@
 import torch
 import gc
 
+from loguru import logger
+
 from lama_cleaner.const import SD15_MODELS
 from lama_cleaner.helper import switch_mps_device
 from lama_cleaner.model.controlnet import ControlNet
@@ -58,6 +60,7 @@ class ModelManager:
             raise NotImplementedError(f"Not supported model: {name}")
 
     def __call__(self, image, mask, config: Config):
+        self.switch_controlnet_method(control_method=config.controlnet_method)
         return self.model(image, mask, config)
 
     def switch(self, new_name: str, **kwargs):
@@ -86,7 +89,9 @@ class ModelManager:
         del self.model
         torch_gc()
 
+        old_method = self.kwargs["sd_controlnet_method"]
         self.kwargs["sd_controlnet_method"] = control_method
         self.model = self.init_model(
             self.name, switch_mps_device(self.name, self.device), **self.kwargs
         )
+        logger.info(f"Switch ControlNet method from {old_method} to {control_method}")

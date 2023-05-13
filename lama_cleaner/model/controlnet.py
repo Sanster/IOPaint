@@ -203,6 +203,7 @@ class ControlNet(DiffusionInpaintModel):
                 negative_prompt=config.negative_prompt,
                 generator=torch.manual_seed(config.sd_seed),
                 output_type="np.array",
+                callback=self.callback
             ).images[0]
         else:
             if "canny" in self.sd_controlnet_method:
