@@ -19,7 +19,12 @@ import { ThemeChanger } from './ThemeChanger'
 import SettingIcon from '../Settings/SettingIcon'
 import PromptInput from './PromptInput'
 import CoffeeIcon from '../CoffeeIcon/CoffeeIcon'
-import emitter, { EVENT_CUSTOM_MASK, RERUN_LAST_MASK } from '../../event'
+import emitter, {
+  DREAM_BUTTON_MOUSE_ENTER,
+  DREAM_BUTTON_MOUSE_LEAVE,
+  EVENT_CUSTOM_MASK,
+  RERUN_LAST_MASK,
+} from '../../event'
 import { useImage } from '../../utils'
 import useHotKey from '../../hooks/useHotkey'
 
@@ -52,6 +57,14 @@ const Header = () => {
   const handleRerunLastMask = useCallback(() => {
     emitter.emit(RERUN_LAST_MASK)
   }, [])
+
+  const onRerunMouseEnter = () => {
+    emitter.emit(DREAM_BUTTON_MOUSE_ENTER)
+  }
+
+  const onRerunMouseLeave = () => {
+    emitter.emit(DREAM_BUTTON_MOUSE_LEAVE)
+  }
 
   useHotKey(
     'r',
@@ -207,6 +220,8 @@ const Header = () => {
               disabled={isInpainting}
               toolTip="Rerun last mask [r]"
               onClick={handleRerunLastMask}
+              onMouseEnter={onRerunMouseEnter}
+              onMouseLeave={onRerunMouseLeave}
             />
           </div>
         </div>
