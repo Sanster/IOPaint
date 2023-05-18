@@ -96,5 +96,5 @@ class Config(BaseModel):
     p2p_guidance_scale: float = 7.5
 
     # ControlNet
-    controlnet_conditioning_scale: float = 1.0
+    controlnet_conditioning_scale: float = 0.4
     controlnet_method: str = "control_v11p_sd15_canny"

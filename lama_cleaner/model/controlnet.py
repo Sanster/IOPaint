@@ -68,13 +68,28 @@ def load_from_local_model(
 
     logger.info(f"Converting {local_model_path} to diffusers controlnet pipeline")
 
-    pipe = download_from_original_stable_diffusion_ckpt(
-        local_model_path,
-        num_in_channels=4 if is_native_control_inpaint else 9,
-        from_safetensors=local_model_path.endswith("safetensors"),
-        device="cpu",
-        load_safety_checker=False,
-    )
+    try:
+        pipe = download_from_original_stable_diffusion_ckpt(
+            local_model_path,
+            num_in_channels=4 if is_native_control_inpaint else 9,
+            from_safetensors=local_model_path.endswith("safetensors"),
+            device="cpu",
+            load_safety_checker=False,
+        )
+    except Exception as e:
+        err_msg = str(e)
+        logger.exception(e)
+        if is_native_control_inpaint and "[320, 9, 3, 3]" in err_msg:
+            logger.error(
+                "control_v11p_sd15_inpaint method requires normal SD model, not inpainting SD model"
+            )
+        if not is_native_control_inpaint and "[320, 4, 3, 3]" in err_msg:
+            logger.error(
+                f"{controlnet.config['_name_or_path']} method requires inpainting SD model, "
+                f"you can convert any SD model to inpainting model in AUTO1111: \n"
+                f"https://www.reddit.com/r/StableDiffusion/comments/zyi24j/how_to_turn_any_model_into_an_inpainting_model/"
+            )
+        exit(-1)
 
     inpaint_pipe = pipe_class(
         vae=pipe.vae,
@@ -203,7 +218,7 @@ class ControlNet(DiffusionInpaintModel):
                 negative_prompt=config.negative_prompt,
                 generator=torch.manual_seed(config.sd_seed),
                 output_type="np.array",
-                callback=self.callback
+                callback=self.callback,
             ).images[0]
         else:
             if "canny" in self.sd_controlnet_method:
@@ -219,6 +234,17 @@ class ControlNet(DiffusionInpaintModel):
 
                 processor = OpenposeDetector.from_pretrained("lllyasviel/ControlNet")
                 control_image = processor(image, hand_and_face=True)
+            elif "depth" in self.sd_controlnet_method:
+                from transformers import pipeline
+
+                depth_estimator = pipeline("depth-estimation")
+                depth_image = depth_estimator(PIL.Image.fromarray(image))["depth"]
+                depth_image = np.array(depth_image)
+                depth_image = depth_image[:, :, None]
+                depth_image = np.concatenate(
+                    [depth_image, depth_image, depth_image], axis=2
+                )
+                control_image = PIL.Image.fromarray(depth_image)
             else:
                 raise NotImplementedError(
                     f"{self.sd_controlnet_method} not implemented"

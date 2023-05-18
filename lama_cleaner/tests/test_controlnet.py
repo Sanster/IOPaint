@@ -44,7 +44,21 @@ def test_runway_sd_1_5(
         sd_cpu_textencoder=cpu_textencoder,
         sd_controlnet_method=sd_controlnet_method,
     )
-    cfg = get_config(strategy, prompt="a fox sitting on a bench", sd_steps=sd_steps)
+
+    controlnet_conditioning_scale = {
+        "control_v11p_sd15_canny": 0.4,
+        "control_v11p_sd15_openpose": 0.4,
+        "control_v11p_sd15_inpaint": 1.0,
+        "control_v11f1p_sd15_depth": 1.0,
+    }[sd_controlnet_method]
+
+    cfg = get_config(
+        strategy,
+        prompt="a fox sitting on a bench",
+        sd_steps=sd_steps,
+        controlnet_conditioning_scale=controlnet_conditioning_scale,
+        controlnet_method=sd_controlnet_method,
+    )
     cfg.sd_sampler = sampler
 
     name = f"device_{sd_device}_{sampler}_cpu_textencoder_disable_nsfw"
@@ -85,6 +99,7 @@ def test_local_file_path(sd_device, sampler):
         HDStrategy.ORIGINAL,
         prompt="a fox sitting on a bench",
         sd_steps=sd_steps,
+        controlnet_method="control_v11p_sd15_canny",
     )
     cfg.sd_sampler = sampler
 
@@ -126,6 +141,7 @@ def test_local_file_path_controlnet_native_inpainting(sd_device, sampler):
         sd_steps=sd_steps,
         controlnet_conditioning_scale=1.0,
         sd_strength=1.0,
+        controlnet_method="control_v11p_sd15_inpaint",
     )
     cfg.sd_sampler = sampler
 

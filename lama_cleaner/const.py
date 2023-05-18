@@ -60,6 +60,7 @@ SD_CONTROLNET_CHOICES = [
     "control_v11p_sd15_canny",
     "control_v11p_sd15_openpose",
     "control_v11p_sd15_inpaint",
+    "control_v11f1p_sd15_depth"
 ]
 
 SD_LOCAL_MODEL_HELP = """
