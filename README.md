@@ -1,3 +1,6 @@
+<p align="center">
+   <img alt="logo" height=256 src="./assets/logo.png" />
+</p>
 <h1 align="center">Lama Cleaner</h1>
 <p align="center">A free and open-source inpainting tool powered by SOTA AI model.</p>
 
