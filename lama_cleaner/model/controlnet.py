@@ -152,7 +152,9 @@ class ControlNet(DiffusionInpaintModel):
         controlnet = ControlNetModel.from_pretrained(
             f"lllyasviel/{sd_controlnet_method}", torch_dtype=torch_dtype
         )
+        self.is_local_sd_model = False
         if kwargs.get("sd_local_model_path", None):
+            self.is_local_sd_model = True
             self.model = load_from_local_model(
                 kwargs["sd_local_model_path"],
                 torch_dtype=torch_dtype,
@@ -194,7 +196,6 @@ class ControlNet(DiffusionInpaintModel):
         mask: [H, W, 1] 255 means area to repaint
         return: BGR IMAGE
         """
-
         scheduler_config = self.model.scheduler.config
         scheduler = get_scheduler(config.sd_sampler, scheduler_config)
         self.model.scheduler = scheduler

@@ -110,6 +110,7 @@ device = None
 input_image_path: str = None
 is_disable_model_switch: bool = False
 is_controlnet: bool = False
+controlnet_method: str = "control_v11p_sd15_canny"
 is_enable_file_manager: bool = False
 is_enable_auto_saving: bool = False
 is_desktop: bool = False
@@ -286,7 +287,7 @@ def process():
             return "CUDA out of memory", 500
         else:
             logger.exception(e)
-            return "Internal Server Error", 500
+            return f"{str(e)}", 500
     finally:
         logger.info(f"process time: {(time.time() - start) * 1000}ms")
         torch.cuda.empty_cache()
@@ -407,6 +408,7 @@ def run_plugin():
 def get_server_config():
     return {
         "isControlNet": is_controlnet,
+        "controlNetMethod": controlnet_method,
         "isDisableModelSwitchState": is_disable_model_switch,
         "isEnableAutoSaving": is_enable_auto_saving,
         "enableFileManager": is_enable_file_manager,
@@ -526,6 +528,7 @@ def main(args):
     global output_dir
     global is_enable_auto_saving
     global is_controlnet
+    global controlnet_method
     global image_quality
 
     build_plugins(args)
@@ -534,6 +537,7 @@ def main(args):
 
     if args.sd_controlnet and args.model in SD15_MODELS:
         is_controlnet = True
+        controlnet_method = args.sd_controlnet_method
 
     output_dir = args.output_dir
     if output_dir:

@@ -19,6 +19,27 @@ export enum AIModel {
   PIX2PIX = 'instruct_pix2pix',
 }
 
+export enum ControlNetMethod {
+  canny = 'canny',
+  inpaint = 'inpaint',
+  openpose = 'openpose',
+  depth = 'depth',
+}
+
+export const ControlNetMethodMap: any = {
+  canny: 'control_v11p_sd15_canny',
+  inpaint: 'control_v11p_sd15_inpaint',
+  openpose: 'control_v11p_sd15_openpose',
+  depth: 'control_v11f1p_sd15_depth',
+}
+
+export const ControlNetMethodMap2: any = {
+  control_v11p_sd15_canny: 'canny',
+  control_v11p_sd15_inpaint: 'inpaint',
+  control_v11p_sd15_openpose: 'openpose',
+  control_v11f1p_sd15_depth: 'depth',
+}
+
 export const maskState = atom<File | undefined>({
   key: 'maskState',
   default: undefined,
@@ -52,6 +73,7 @@ interface AppState {
   gifImage: HTMLImageElement | undefined
   brushSize: number
   isControlNet: boolean
+  controlNetMethod: string
   plugins: string[]
   isPluginRunning: boolean
 }
@@ -74,6 +96,7 @@ export const appState = atom<AppState>({
     gifImage: undefined,
     brushSize: 40,
     isControlNet: false,
+    controlNetMethod: ControlNetMethod.canny,
     plugins: [],
     isPluginRunning: false,
   },
@@ -119,6 +142,7 @@ export const serverConfigState = selector({
     const app = get(appState)
     return {
       isControlNet: app.isControlNet,
+      controlNetMethod: app.controlNetMethod,
       isDisableModelSwitchState: app.isDisableModelSwitch,
       isEnableAutoSaving: app.isEnableAutoSaving,
       enableFileManager: app.enableFileManager,
@@ -127,7 +151,14 @@ export const serverConfigState = selector({
   },
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
-    set(appState, { ...app, ...newValue })
+    const methodShortName = ControlNetMethodMap2[newValue.controlNetMethod]
+    set(appState, { ...app, ...newValue, controlnetMethod: methodShortName })
+
+    const setting = get(settingState)
+    set(settingState, {
+      ...setting,
+      controlnetMethod: methodShortName,
+    })
   },
 })
 
@@ -547,18 +578,6 @@ export enum SDSampler {
   uni_pc = 'uni_pc',
 }
 
-export enum ControlNetMethod {
-  canny = 'canny',
-  inpaint = 'inpaint',
-  openpose = 'openpose',
-}
-
-export const ControlNetMethodMap: any = {
-  canny: 'control_v11p_sd15_canny',
-  inpaint: 'control_v11p_sd15_inpaint',
-  openpose: 'control_v11p_sd15_openpose',
-}
-
 export enum SDMode {
   text2img = 'text2img',
   img2img = 'img2img',
@@ -610,7 +629,7 @@ export const settingStateDefault: Settings = {
   p2pGuidanceScale: 7.5,
 
   // ControlNet
-  controlnetConditioningScale: 1.0,
+  controlnetConditioningScale: 0.4,
   controlnetMethod: ControlNetMethod.canny,
 }
 

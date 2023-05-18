@@ -85,6 +85,24 @@ class ModelManager:
             return
         if self.kwargs["sd_controlnet_method"] == control_method:
             return
+        if self.model.is_local_sd_model:
+            # is_native_control_inpaint 表示加载了普通 SD 模型
+            if (
+                self.model.is_native_control_inpaint
+                and control_method != "control_v11p_sd15_inpaint"
+            ):
+                raise RuntimeError(
+                    f"--sd-local-model-path load a normal SD model, "
+                    f"to use {control_method} you should load an inpainting SD model"
+                )
+            elif (
+                not self.model.is_native_control_inpaint
+                and control_method == "control_v11p_sd15_inpaint"
+            ):
+                raise RuntimeError(
+                    f"--sd-local-model-path load an inpainting SD model, "
+                    f"to use {control_method} you should load a norml SD model"
+                )
 
         del self.model
         torch_gc()
