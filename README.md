@@ -86,3 +86,19 @@ great online services [here](https://cleanup.pictures/).
 - Install dependencies:`cd lama_cleaner/app/ && pnpm install`
 - Start development server: `pnpm start`
 - Build: `pnpm build`
+
+## Removing Lama Cleaner from your system
+
+### Pip uninstall
+
+```
+pip uninstall lama-cleaner
+```
+
+### Remove huggingface directory
+
+On Mac
+
+```
+rm -r /Users/<user>/.cache/huggingface
+```
