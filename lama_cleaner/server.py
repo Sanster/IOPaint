@@ -281,7 +281,6 @@ def process():
     try:
         res_np_img = model(image, mask, config)
     except RuntimeError as e:
-        torch.cuda.empty_cache()
         if "CUDA out of memory. " in str(e):
             # NOTE: the string may change?
             return "CUDA out of memory", 500
@@ -290,7 +289,7 @@ def process():
             return f"{str(e)}", 500
     finally:
         logger.info(f"process time: {(time.time() - start) * 1000}ms")
-        torch.cuda.empty_cache()
+        torch_gc()
 
     res_np_img = cv2.cvtColor(res_np_img.astype(np.uint8), cv2.COLOR_BGR2RGB)
     if alpha_channel is not None:
