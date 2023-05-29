@@ -197,12 +197,18 @@ def parse_args():
                 setattr(args, k, v)
 
     if args.device == "cuda":
-        import torch
+        import platform
 
-        if torch.cuda.is_available() is False:
-            parser.error(
-                "torch.cuda.is_available() is False, please use --device cpu or check your pytorch installation"
-            )
+        if platform.system() == "Darwin":
+            logger.info("MacOS does not support cuda, use cpu instead")
+            setattr(args, "device", "cpu")
+        else:
+            import torch
+
+            if torch.cuda.is_available() is False:
+                parser.error(
+                    "torch.cuda.is_available() is False, please use --device cpu or check your pytorch installation"
+                )
 
     if args.sd_local_model_path and args.model == "sd1.5":
         if not os.path.exists(args.sd_local_model_path):
