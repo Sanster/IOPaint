@@ -48,6 +48,7 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
 
 - Completely free and open-source, fully self-hosted, support CPU & GPU & M1/2
 - [Windows 1-Click Installer](https://lama-cleaner-docs.vercel.app/install/windows_1click_installer)
+- [WIP: A native macOS app](https://github.com/Sanster/lama-cleaner/discussions/314)
 - Multiple SOTA AI [models](https://lama-cleaner-docs.vercel.app/models)
   - Erase model: LaMa/LDM/ZITS/MAT/FcF/Manga
   - Erase and Replace model: Stable Diffusion/Paint by Example
