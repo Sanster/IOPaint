@@ -138,11 +138,20 @@ def save_image():
     filename = request.form["filename"]
     origin_image_bytes = input["image"].read()  # RGB
     ext = get_image_ext(origin_image_bytes)
-    image, _, exif_infos = load_img(origin_image_bytes, return_exif=True)
+    image, alpha_channel, exif_infos = load_img(origin_image_bytes, return_exif=True)
     save_path = os.path.join(output_dir, filename)
 
+    if alpha_channel is not None:
+        if alpha_channel.shape[:2] != image.shape[:2]:
+            alpha_channel = cv2.resize(
+                alpha_channel, dsize=(image.shape[1], image.shape[0])
+            )
+        image = np.concatenate((image, alpha_channel[:, :, np.newaxis]), axis=-1)
+
+    pil_image = Image.fromarray(image)
+
     img_bytes = pil_to_bytes(
-        Image.fromarray(image),
+        pil_image,
         ext,
         quality=image_quality,
         exif_infos=exif_infos,
