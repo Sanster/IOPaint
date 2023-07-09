@@ -1,3 +1,4 @@
+from typing import Optional
 from enum import Enum
 
 from PIL.Image import Image
@@ -88,7 +89,7 @@ class Config(BaseModel):
     paint_by_example_mask_blur: int = 0
     paint_by_example_seed: int = 42
     paint_by_example_match_histograms: bool = False
-    paint_by_example_example_image: Image = None
+    paint_by_example_example_image: Optional[Image] = None
 
     # InstructPix2Pix
     p2p_steps: int = 50
