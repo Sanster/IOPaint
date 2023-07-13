@@ -99,7 +99,7 @@ class FileManager:
         if os.path.isabs(path):
             return path
         else:
-            return os.path.join(self.app.root_path, path)
+            return os.path.abspath(path)
 
     @property
     def thumbnail_directory(self):
@@ -108,7 +108,7 @@ class FileManager:
         if os.path.isabs(path):
             return path
         else:
-            return os.path.join(self.app.root_path, path)
+            return os.path.abspath(path)
 
     @property
     def root_url(self):
