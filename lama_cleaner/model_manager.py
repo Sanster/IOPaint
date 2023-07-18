@@ -85,6 +85,9 @@ class ModelManager:
             return
         if self.kwargs["sd_controlnet_method"] == control_method:
             return
+        if not hasattr(self.model, "is_local_sd_model"):
+            return
+
         if self.model.is_local_sd_model:
             # is_native_control_inpaint 表示加载了普通 SD 模型
             if (
