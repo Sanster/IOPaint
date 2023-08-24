@@ -6,12 +6,12 @@
   column-gap: 1rem;
   background-color: var(--page-bg);
   color: var(--btn-text-color);
-  font-family: 'WorkSans', sans-serif;
   width: max-content;
   padding: 0.5rem;
   place-items: center;
   border-radius: 0.5rem;
   z-index: 1;
+  user-select: none;
   cursor: pointer;
 
   &:hover {
@@ -26,6 +26,7 @@
 }
 
 .btn-primary-disabled {
+  user-select: none;
   background-color: var(--page-bg);
   pointer-events: none;
   opacity: 0.5;

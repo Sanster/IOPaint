@@ -5,25 +5,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from lama_cleaner.const import (
-    AVAILABLE_MODELS,
-    NO_HALF_HELP,
-    CPU_OFFLOAD_HELP,
-    DISABLE_NSFW_HELP,
-    SD_CPU_TEXTENCODER_HELP,
-    LOCAL_FILES_ONLY_HELP,
-    AVAILABLE_DEVICES,
-    ENABLE_XFORMERS_HELP,
-    MODEL_DIR_HELP,
-    OUTPUT_DIR_HELP,
-    INPUT_HELP,
-    GUI_HELP,
-    DEFAULT_DEVICE,
-    NO_GUI_AUTO_CLOSE_HELP,
-    DEFAULT_MODEL_DIR,
-    DEFAULT_MODEL,
-    MPS_SUPPORT_MODELS,
-)
+from lama_cleaner.const import *
 from lama_cleaner.runtime import dump_environment_info
 
 
@@ -55,6 +37,13 @@ def parse_args():
     parser.add_argument(
         "--sd-cpu-textencoder", action="store_true", help=SD_CPU_TEXTENCODER_HELP
     )
+    parser.add_argument("--sd-controlnet", action="store_true", help=SD_CONTROLNET_HELP)
+    parser.add_argument(
+        "--sd-controlnet-method",
+        default=DEFAULT_CONTROLNET_METHOD,
+        choices=SD_CONTROLNET_CHOICES,
+    )
+    parser.add_argument("--sd-local-model-path", default=None, help=SD_LOCAL_MODEL_HELP)
     parser.add_argument(
         "--local-files-only", action="store_true", help=LOCAL_FILES_ONLY_HELP
     )
@@ -85,6 +74,85 @@ def parse_args():
         action="store_true",
         help="Disable model switch in frontend",
     )
+    parser.add_argument(
+        "--quality",
+        default=95,
+        type=int,
+        help=QUALITY_HELP,
+    )
+
+    # Plugins
+    parser.add_argument(
+        "--enable-interactive-seg",
+        action="store_true",
+        help=INTERACTIVE_SEG_HELP,
+    )
+    parser.add_argument(
+        "--interactive-seg-model",
+        default="vit_l",
+        choices=AVAILABLE_INTERACTIVE_SEG_MODELS,
+        help=INTERACTIVE_SEG_MODEL_HELP,
+    )
+    parser.add_argument(
+        "--interactive-seg-device",
+        default="cpu",
+        choices=AVAILABLE_INTERACTIVE_SEG_DEVICES,
+    )
+    parser.add_argument(
+        "--enable-remove-bg",
+        action="store_true",
+        help=REMOVE_BG_HELP,
+    )
+    parser.add_argument(
+        "--enable-anime-seg",
+        action="store_true",
+        help=ANIMESEG_HELP,
+    )
+    parser.add_argument(
+        "--enable-realesrgan",
+        action="store_true",
+        help=REALESRGAN_HELP,
+    )
+    parser.add_argument(
+        "--realesrgan-device",
+        default="cpu",
+        type=str,
+        choices=REALESRGAN_AVAILABLE_DEVICES,
+    )
+    parser.add_argument(
+        "--realesrgan-model",
+        default=RealESRGANModelName.realesr_general_x4v3.value,
+        type=str,
+        choices=RealESRGANModelNameList,
+    )
+    parser.add_argument(
+        "--realesrgan-no-half",
+        action="store_true",
+        help="Disable half precision for RealESRGAN",
+    )
+    parser.add_argument("--enable-gfpgan", action="store_true", help=GFPGAN_HELP)
+    parser.add_argument(
+        "--gfpgan-device", default="cpu", type=str, choices=GFPGAN_AVAILABLE_DEVICES
+    )
+    parser.add_argument(
+        "--enable-restoreformer", action="store_true", help=RESTOREFORMER_HELP
+    )
+    parser.add_argument(
+        "--restoreformer-device",
+        default="cpu",
+        type=str,
+        choices=RESTOREFORMER_AVAILABLE_DEVICES,
+    )
+    parser.add_argument(
+        "--enable-gif",
+        action="store_true",
+        help=GIF_HELP,
+    )
+    parser.add_argument(
+        "--install-plugins-package",
+        action="store_true",
+    )
+    #########
 
     # useless args
     parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
@@ -101,21 +169,24 @@ def parse_args():
 
     # collect system info to help debug
     dump_environment_info()
+    if args.install_plugins_package:
+        from lama_cleaner.installer import install_plugins_package
+
+        install_plugins_package()
+        exit()
 
     if args.config_installer:
         if args.installer_config is None:
             parser.error(
-                f"args.config_installer==True, must set args.installer_config to store config file"
+                "args.config_installer==True, must set args.installer_config to store config file"
             )
         from lama_cleaner.web_config import main
 
-        logger.info(f"Launching installer web config page")
+        logger.info("Launching installer web config page")
         main(args.installer_config)
         exit()
 
     if args.load_installer_config:
-        from lama_cleaner.web_config import load_config
-
         if args.installer_config and not os.path.exists(args.installer_config):
             parser.error(f"args.installer_config={args.installer_config} not exists")
 
@@ -126,13 +197,30 @@ def parse_args():
                 setattr(args, k, v)
 
     if args.device == "cuda":
-        import torch
+        import platform
 
-        if torch.cuda.is_available() is False:
+        if platform.system() == "Darwin":
+            logger.info("MacOS does not support cuda, use cpu instead")
+            setattr(args, "device", "cpu")
+        else:
+            import torch
+
+            if torch.cuda.is_available() is False:
+                parser.error(
+                    "torch.cuda.is_available() is False, please use --device cpu or check your pytorch installation"
+                )
+
+    if args.sd_local_model_path and args.model == "sd1.5":
+        if not os.path.exists(args.sd_local_model_path):
             parser.error(
-                "torch.cuda.is_available() is False, please use --device cpu or check your pytorch installation"
+                f"invalid --sd-local-model-path: {args.sd_local_model_path} not exists"
+            )
+        if not os.path.isfile(args.sd_local_model_path):
+            parser.error(
+                f"invalid --sd-local-model-path: {args.sd_local_model_path} is a directory"
             )
 
+    os.environ["U2NET_HOME"] = DEFAULT_MODEL_DIR
     if args.model_dir and args.model_dir is not None:
         if os.path.isfile(args.model_dir):
             parser.error(f"invalid --model-dir: {args.model_dir} is a file")
@@ -142,6 +230,7 @@ def parse_args():
             Path(args.model_dir).mkdir(exist_ok=True, parents=True)
 
         os.environ["XDG_CACHE_HOME"] = args.model_dir
+        os.environ["U2NET_HOME"] = args.model_dir
 
     if args.input and args.input is not None:
         if not os.path.exists(args.input):

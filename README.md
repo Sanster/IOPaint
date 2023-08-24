@@ -1,3 +1,6 @@
+<p align="center">
+   <img alt="logo" height=256 src="./assets/logo.png" />
+</p>
 <h1 align="center">Lama Cleaner</h1>
 <p align="center">A free and open-source inpainting tool powered by SOTA AI model.</p>
 
@@ -43,13 +46,18 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
 
 ## Features
 
-- Completely free and open-source, fully self-hosted, support CPU & GPU
+- Completely free and open-source, fully self-hosted, support CPU & GPU & M1/2
 - [Windows 1-Click Installer](https://lama-cleaner-docs.vercel.app/install/windows_1click_installer)
-- Classical image inpainting algorithm powered by [cv2](https://docs.opencv.org/3.4/df/d3d/tutorial_py_inpainting.html)
+- [Native macOS app beta test](https://github.com/Sanster/lama-cleaner/discussions/314#discussioncomment-6746440)
 - Multiple SOTA AI [models](https://lama-cleaner-docs.vercel.app/models)
-- Various inpainting [strategy](https://lama-cleaner-docs.vercel.app/features/inpainting_strategy)
-- Run as a [desktop application](https://lama-cleaner-docs.vercel.app/features/desktop_app)
-- [Interactive Segmentation](https://lama-cleaner-docs.vercel.app/features/Interactive_segmentation) on any object.
+  - Erase model: LaMa/LDM/ZITS/MAT/FcF/Manga
+  - Erase and Replace model: Stable Diffusion/Paint by Example
+- [Plugins](https://lama-cleaner-docs.vercel.app/plugins) for post-processing:
+  - [RemoveBG](https://github.com/danielgatis/rembg): Remove images background 
+  - [RealESRGAN](https://github.com/xinntao/Real-ESRGAN): Super Resolution
+  - [GFPGAN](https://github.com/TencentARC/GFPGAN): Face Restoration
+  - [RestoreFormer](https://github.com/wzhouxiff/RestoreFormer): Face Restoration
+  - [Segment Anything](https://lama-cleaner-docs.vercel.app/plugins#interactive-segmentation): Accurate and fast interactive object segmentation
 - More features at [lama-cleaner-docs](https://lama-cleaner-docs.vercel.app/)
 
 ## Quick Start
@@ -58,7 +66,7 @@ Lama Cleaner make it easy to use SOTA AI model in just two commands:
 
 ```bash
 # In order to use the GPU, install cuda version of pytorch first.
-# pip install torch==1.13.1+cu117 --extra-index-url https://download.pytorch.org/whl/cu117
+# pip install torch==1.13.1+cu117 torchvision==0.14.1 --extra-index-url https://download.pytorch.org/whl/cu117
 pip install lama-cleaner
 lama-cleaner --model=lama --device=cpu --port=8080
 ```

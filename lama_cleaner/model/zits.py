@@ -2,8 +2,6 @@ import os
 import time
 
 import cv2
-import skimage
-from skimage import color, feature
 import torch
 import torch.nn.functional as F
 
@@ -170,15 +168,19 @@ def load_image(img, mask, device, sigma256=3.0):
     # https://scikit-image.org/docs/stable/api/skimage.feature.html#skimage.feature.canny
     # low_threshold: Lower bound for hysteresis thresholding (linking edges). If None, low_threshold is set to 10% of dtype’s max.
     # high_threshold: Upper bound for hysteresis thresholding (linking edges). If None, high_threshold is set to 20% of dtype’s max.
-    gray_256 = color.rgb2gray(img_256)
-    edge_256 = feature.canny(gray_256, sigma=sigma256, mask=None).astype(float)
-    # cv2.imwrite("skimage_gray.jpg", (_gray_256*255).astype(np.uint8))
-    # cv2.imwrite("skimage_edge.jpg", (_edge_256*255).astype(np.uint8))
 
-    # gray_256 = cv2.cvtColor(img_256, cv2.COLOR_RGB2GRAY)
-    # gray_256_blured = cv2.GaussianBlur(gray_256, ksize=(3,3), sigmaX=sigma256, sigmaY=sigma256)
-    # edge_256 = cv2.Canny(gray_256_blured, threshold1=int(255*0.1), threshold2=int(255*0.2))
-    # cv2.imwrite("edge.jpg", edge_256)
+    try:
+        import skimage
+        gray_256 = skimage.color.rgb2gray(img_256)
+        edge_256 = skimage.feature.canny(gray_256, sigma=3.0, mask=None).astype(float)
+        # cv2.imwrite("skimage_gray.jpg", (gray_256*255).astype(np.uint8))
+        # cv2.imwrite("skimage_edge.jpg", (edge_256*255).astype(np.uint8))
+    except:
+        gray_256 = cv2.cvtColor(img_256, cv2.COLOR_RGB2GRAY)
+        gray_256_blured = cv2.GaussianBlur(gray_256, ksize=(7, 7), sigmaX=sigma256, sigmaY=sigma256)
+        edge_256 = cv2.Canny(gray_256_blured, threshold1=int(255*0.1), threshold2=int(255*0.2))
+
+    # cv2.imwrite("opencv_edge.jpg", edge_256)
 
     # line
     img_512 = resize(img, 512, 512)
@@ -381,10 +383,14 @@ class ZITS(InpaintModel):
 
         for line, score in zip(lines_masked, scores_masked):
             if score > mask_th:
-                rr, cc, value = skimage.draw.line_aa(
-                    *to_int(line[0:2]), *to_int(line[2:4])
-                )
-                lmap[rr, cc] = np.maximum(lmap[rr, cc], value)
+                try:
+                    import skimage
+                    rr, cc, value = skimage.draw.line_aa(
+                        *to_int(line[0:2]), *to_int(line[2:4])
+                    )
+                    lmap[rr, cc] = np.maximum(lmap[rr, cc], value)
+                except:
+                    cv2.line(lmap, to_int(line[0:2][::-1]), to_int(line[2:4][::-1]), (1, 1, 1), 1, cv2.LINE_AA)
 
         lmap = np.clip(lmap * 255, 0, 255).astype(np.uint8)
         lines_tensor.append(to_tensor(lmap).unsqueeze(0))

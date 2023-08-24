@@ -20,7 +20,7 @@ def test_instruct_pix2pix(disable_nsfw, cpu_offload):
     model = ModelManager(name="instruct_pix2pix",
                          device=torch.device(device),
                          hf_access_token="",
-                         sd_run_local=True,
+                         sd_run_local=False,
                          disable_nsfw=disable_nsfw,
                          sd_cpu_textencoder=False,
                          cpu_offload=cpu_offload)
@@ -45,7 +45,7 @@ def test_instruct_pix2pix_snow(disable_nsfw, cpu_offload):
     model = ModelManager(name="instruct_pix2pix",
                          device=torch.device(device),
                          hf_access_token="",
-                         sd_run_local=True,
+                         sd_run_local=False,
                          disable_nsfw=disable_nsfw,
                          sd_cpu_textencoder=False,
                          cpu_offload=cpu_offload)

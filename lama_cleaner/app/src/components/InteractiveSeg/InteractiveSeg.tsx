@@ -12,7 +12,16 @@ interface ItemProps {
 const Item = (props: ItemProps) => {
   const { x, y, positive } = props
   const name = positive ? 'click-item-positive' : 'click-item-negative'
-  return <div className={`click-item ${name}`} style={{ left: x, top: y }} />
+  return (
+    <div
+      className={`click-item ${name}`}
+      style={{
+        left: x,
+        top: y,
+        transform: 'translate(-50%, -50%)',
+      }}
+    />
+  )
 }
 
 const InteractiveSeg = () => {

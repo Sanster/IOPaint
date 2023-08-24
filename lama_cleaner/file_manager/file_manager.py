@@ -7,8 +7,8 @@ import time
 from io import BytesIO
 from pathlib import Path
 import numpy as np
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+# from watchdog.events import FileSystemEventHandler
+# from watchdog.observers import Observer
 
 from PIL import Image, ImageOps, PngImagePlugin
 from loguru import logger
@@ -19,7 +19,7 @@ from .storage_backends import FilesystemStorageBackend
 from .utils import aspect_to_string, generate_filename, glob_img
 
 
-class FileManager(FileSystemEventHandler):
+class FileManager:
     def __init__(self, app=None):
         self.app = app
         self._default_root_directory = "media"
@@ -43,19 +43,19 @@ class FileManager(FileSystemEventHandler):
             "output": datetime.utcnow(),
         }
 
-    def start(self):
-        self.image_dir_filenames = self._media_names(self.root_directory)
-        self.output_dir_filenames = self._media_names(self.output_dir)
-
-        logger.info(f"Start watching image directory: {self.root_directory}")
-        self.image_dir_observer = Observer()
-        self.image_dir_observer.schedule(self, self.root_directory, recursive=False)
-        self.image_dir_observer.start()
-
-        logger.info(f"Start watching output directory: {self.output_dir}")
-        self.output_dir_observer = Observer()
-        self.output_dir_observer.schedule(self, self.output_dir, recursive=False)
-        self.output_dir_observer.start()
+    # def start(self):
+    #     self.image_dir_filenames = self._media_names(self.root_directory)
+    #     self.output_dir_filenames = self._media_names(self.output_dir)
+    #
+    #     logger.info(f"Start watching image directory: {self.root_directory}")
+    #     self.image_dir_observer = Observer()
+    #     self.image_dir_observer.schedule(self, self.root_directory, recursive=False)
+    #     self.image_dir_observer.start()
+    #
+    #     logger.info(f"Start watching output directory: {self.output_dir}")
+    #     self.output_dir_observer = Observer()
+    #     self.output_dir_observer.schedule(self, self.output_dir, recursive=False)
+    #     self.output_dir_observer.start()
 
     def on_modified(self, event):
         if not os.path.isdir(event.src_path):
@@ -137,6 +137,7 @@ class FileManager(FileSystemEventHandler):
                     "height": img.height,
                     "width": img.width,
                     "ctime": os.path.getctime(path),
+                    "mtime": os.path.getmtime(path),
                 }
             )
         return res

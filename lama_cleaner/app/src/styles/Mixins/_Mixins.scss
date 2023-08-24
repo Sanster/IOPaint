@@ -1,7 +1,6 @@
 @mixin accented-display($bg-color) {
   background: $bg-color;
   color: rgb(0, 0, 0);
-  font-family: 'WorkSans';
   padding: 0.5rem;
   border-radius: 0.5rem;
 }

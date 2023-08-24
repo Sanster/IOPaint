@@ -3,6 +3,8 @@ import { useRecoilState, useRecoilValue } from 'recoil'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { useToggle } from 'react-use'
 import {
+  ControlNetMethod,
+  isControlNetState,
   isInpaintingState,
   negativePropmtState,
   propmtState,
@@ -26,6 +28,7 @@ const SidePanel = () => {
     useRecoilState(negativePropmtState)
   const isInpainting = useRecoilValue(isInpaintingState)
   const prompt = useRecoilValue(propmtState)
+  const isControlNet = useRecoilValue(isControlNetState)
 
   const handleOnInput = (evt: FormEvent<HTMLTextAreaElement>) => {
     evt.preventDefault()
@@ -45,6 +48,44 @@ const SidePanel = () => {
     }
   }
 
+  const renderConterNetSetting = () => {
+    return (
+      <>
+        <SettingBlock
+          className="sub-setting-block"
+          title="ControlNet"
+          input={
+            <Selector
+              width={80}
+              value={setting.controlnetMethod as string}
+              options={Object.values(ControlNetMethod)}
+              onChange={val => {
+                const method = val as ControlNetMethod
+                setSettingState(old => {
+                  return { ...old, controlnetMethod: method }
+                })
+              }}
+            />
+          }
+        />
+
+        <NumberInputSetting
+          title="ControlNet Weight"
+          width={INPUT_WIDTH}
+          allowFloat
+          value={`${setting.controlnetConditioningScale}`}
+          desc="Lowered this value if there is a big misalignment between the text prompt and the control image"
+          onValue={value => {
+            const val = value.length === 0 ? 0 : parseFloat(value)
+            setSettingState(old => {
+              return { ...old, controlnetConditioningScale: val }
+            })
+          }}
+        />
+      </>
+    )
+  }
+
   return (
     <div className="side-panel">
       <PopoverPrimitive.Root open={open}>
@@ -56,6 +97,8 @@ const SidePanel = () => {
         </PopoverPrimitive.Trigger>
         <PopoverPrimitive.Portal>
           <PopoverPrimitive.Content className="side-panel-content">
+            {isControlNet && renderConterNetSetting()}
+
             <SettingBlock
               title="Croper"
               input={

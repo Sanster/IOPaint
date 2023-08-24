@@ -1,22 +1,14 @@
-import random
+import gc
 
 import PIL.Image
 import cv2
 import numpy as np
 import torch
-from diffusers import (
-    PNDMScheduler,
-    DDIMScheduler,
-    LMSDiscreteScheduler,
-    EulerDiscreteScheduler,
-    EulerAncestralDiscreteScheduler,
-    DPMSolverMultistepScheduler,
-)
 from loguru import logger
 
 from lama_cleaner.model.base import DiffusionInpaintModel
-from lama_cleaner.model.utils import torch_gc, set_seed
-from lama_cleaner.schema import Config, SDSampler
+from lama_cleaner.model.utils import torch_gc, get_scheduler
+from lama_cleaner.schema import Config
 
 
 class CPUTextEncoderWrapper:
@@ -39,6 +31,37 @@ class CPUTextEncoderWrapper:
     @property
     def dtype(self):
         return self.torch_dtype
+
+
+def load_from_local_model(local_model_path, torch_dtype, disable_nsfw=True):
+    from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
+        download_from_original_stable_diffusion_ckpt,
+    )
+    from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
+
+    logger.info(f"Converting {local_model_path} to diffusers pipeline")
+
+    pipe = download_from_original_stable_diffusion_ckpt(
+        local_model_path,
+        num_in_channels=9,
+        from_safetensors=local_model_path.endswith("safetensors"),
+        device="cpu",
+    )
+
+    inpaint_pipe = StableDiffusionInpaintPipeline(
+        vae=pipe.vae,
+        text_encoder=pipe.text_encoder,
+        tokenizer=pipe.tokenizer,
+        unet=pipe.unet,
+        scheduler=pipe.scheduler,
+        safety_checker=None if disable_nsfw else pipe.safety_checker,
+        feature_extractor=None if disable_nsfw else pipe.safety_checker,
+        requires_safety_checker=not disable_nsfw,
+    )
+
+    del pipe
+    gc.collect()
+    return inpaint_pipe.to(torch_dtype=torch_dtype)
 
 
 class SD(DiffusionInpaintModel):
@@ -65,13 +88,20 @@ class SD(DiffusionInpaintModel):
 
         use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
         torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
-        self.model = StableDiffusionInpaintPipeline.from_pretrained(
-            self.model_id_or_path,
-            revision="fp16" if use_gpu and fp16 else "main",
-            torch_dtype=torch_dtype,
-            use_auth_token=kwargs["hf_access_token"],
-            **model_kwargs
-        )
+
+        if kwargs.get("sd_local_model_path", None):
+            self.model = load_from_local_model(
+                kwargs["sd_local_model_path"],
+                torch_dtype=torch_dtype,
+            )
+        else:
+            self.model = StableDiffusionInpaintPipeline.from_pretrained(
+                self.model_id_or_path,
+                revision="fp16" if use_gpu and fp16 else "main",
+                torch_dtype=torch_dtype,
+                use_auth_token=kwargs["hf_access_token"],
+                **model_kwargs,
+            )
 
         # https://huggingface.co/docs/diffusers/v0.7.0/en/api/pipelines/stable_diffusion#diffusers.StableDiffusionInpaintPipeline.enable_attention_slicing
         self.model.enable_attention_slicing()
@@ -101,22 +131,7 @@ class SD(DiffusionInpaintModel):
         """
 
         scheduler_config = self.model.scheduler.config
-
-        if config.sd_sampler == SDSampler.ddim:
-            scheduler = DDIMScheduler.from_config(scheduler_config)
-        elif config.sd_sampler == SDSampler.pndm:
-            scheduler = PNDMScheduler.from_config(scheduler_config)
-        elif config.sd_sampler == SDSampler.k_lms:
-            scheduler = LMSDiscreteScheduler.from_config(scheduler_config)
-        elif config.sd_sampler == SDSampler.k_euler:
-            scheduler = EulerDiscreteScheduler.from_config(scheduler_config)
-        elif config.sd_sampler == SDSampler.k_euler_a:
-            scheduler = EulerAncestralDiscreteScheduler.from_config(scheduler_config)
-        elif config.sd_sampler == SDSampler.dpm_plus_plus:
-            scheduler = DPMSolverMultistepScheduler.from_config(scheduler_config)
-        else:
-            raise ValueError(config.sd_sampler)
-
+        scheduler = get_scheduler(config.sd_sampler, scheduler_config)
         self.model.scheduler = scheduler
 
         if config.sd_mask_blur != 0:

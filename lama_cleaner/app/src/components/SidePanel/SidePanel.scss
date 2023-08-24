@@ -4,26 +4,26 @@
   position: absolute;
   top: 68px;
   right: 1.5rem;
-  padding: 0.3rem 0.3rem;
+  padding: 0.1rem 0.3rem;
   z-index: 4;
 
   border-radius: 0.8rem;
   border-style: solid;
   border-color: var(--border-color);
   border-width: 1px;
+  background-color: var(--page-bg);
 }
 
 .side-panel-trigger {
-  font-family: 'WorkSans', sans-serif;
   font-size: 16px;
   border: 0px;
 }
 
 .side-panel-content {
+  outline: none;
   position: relative;
-  font-family: 'WorkSans', sans-serif;
   font-size: 14px;
-  top: 1rem;
+  top: 8px;
   right: 1.5rem;
   padding: 1rem 1rem;
   z-index: 9;

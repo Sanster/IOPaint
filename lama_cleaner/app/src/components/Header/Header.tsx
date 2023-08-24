@@ -19,7 +19,12 @@ import { ThemeChanger } from './ThemeChanger'
 import SettingIcon from '../Settings/SettingIcon'
 import PromptInput from './PromptInput'
 import CoffeeIcon from '../CoffeeIcon/CoffeeIcon'
-import emitter, { EVENT_CUSTOM_MASK, RERUN_LAST_MASK } from '../../event'
+import emitter, {
+  DREAM_BUTTON_MOUSE_ENTER,
+  DREAM_BUTTON_MOUSE_LEAVE,
+  EVENT_CUSTOM_MASK,
+  RERUN_LAST_MASK,
+} from '../../event'
 import { useImage } from '../../utils'
 import useHotKey from '../../hooks/useHotkey'
 
@@ -52,6 +57,14 @@ const Header = () => {
   const handleRerunLastMask = useCallback(() => {
     emitter.emit(RERUN_LAST_MASK)
   }, [])
+
+  const onRerunMouseEnter = () => {
+    emitter.emit(DREAM_BUTTON_MOUSE_ENTER)
+  }
+
+  const onRerunMouseLeave = () => {
+    emitter.emit(DREAM_BUTTON_MOUSE_LEAVE)
+  }
 
   useHotKey(
     'r',
@@ -92,7 +105,7 @@ const Header = () => {
           <label htmlFor={uploadElemId}>
             <Button
               icon={<PhotoIcon />}
-              style={{ border: 0, gap: 0 }}
+              style={{ border: 0, gap: 0, padding: 6 }}
               disabled={isInpainting}
               toolTip="Upload image"
             >
@@ -147,7 +160,17 @@ const Header = () => {
                   }}
                   accept="image/png, image/jpeg"
                 />
-                Mask
+                <div
+                  style={{
+                    height: 16,
+                    width: 16,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  M
+                </div>
               </Button>
             </label>
 
@@ -197,6 +220,8 @@ const Header = () => {
               disabled={isInpainting}
               toolTip="Rerun last mask [r]"
               onClick={handleRerunLastMask}
+              onMouseEnter={onRerunMouseEnter}
+              onMouseLeave={onRerunMouseLeave}
             />
           </div>
         </div>

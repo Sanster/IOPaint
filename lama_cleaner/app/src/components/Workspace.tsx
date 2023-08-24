@@ -24,6 +24,9 @@ import SidePanel from './SidePanel/SidePanel'
 import PESidePanel from './SidePanel/PESidePanel'
 import FileManager from './FileManager/FileManager'
 import P2PSidePanel from './SidePanel/P2PSidePanel'
+import Plugins from './Plugins/Plugins'
+import Flex from './shared/Layout'
+import ImageSize from './ImageSize/ImageSize'
 
 const Workspace = () => {
   const setFile = useSetRecoilState(fileState)
@@ -102,6 +105,10 @@ const Workspace = () => {
       {isSD ? <SidePanel /> : <></>}
       {isPaintByExample ? <PESidePanel /> : <></>}
       {isPix2Pix ? <P2PSidePanel /> : <></>}
+      <Flex style={{ position: 'absolute', top: 68, left: 24, gap: 12 }}>
+        <Plugins />
+        <ImageSize />
+      </Flex>
       <FileManager
         photoWidth={256}
         show={showFileManager}

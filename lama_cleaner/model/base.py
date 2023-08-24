@@ -6,7 +6,12 @@ import torch
 import numpy as np
 from loguru import logger
 
-from lama_cleaner.helper import boxes_from_mask, resize_max_size, pad_img_to_modulo, switch_mps_device
+from lama_cleaner.helper import (
+    boxes_from_mask,
+    resize_max_size,
+    pad_img_to_modulo,
+    switch_mps_device,
+)
 from lama_cleaner.schema import Config, HDStrategy
 
 
@@ -199,7 +204,9 @@ class InpaintModel:
 
             # only calculate histograms for non-masked parts
             source_histogram, _ = np.histogram(source_channel[mask == 0], 256, [0, 256])
-            reference_histogram, _ = np.histogram(reference_channel[mask == 0], 256, [0, 256])
+            reference_histogram, _ = np.histogram(
+                reference_channel[mask == 0], 256, [0, 256]
+            )
 
             source_cdf = self._calculate_cdf(source_histogram)
             reference_cdf = self._calculate_cdf(reference_histogram)
@@ -273,9 +280,10 @@ class DiffusionInpaintModel(InpaintModel):
         origin_size = image.shape[:2]
         downsize_image = resize_max_size(image, size_limit=longer_side_length)
         downsize_mask = resize_max_size(mask, size_limit=longer_side_length)
-        logger.info(
-            f"Resize image to do sd inpainting: {image.shape} -> {downsize_image.shape}"
-        )
+        if config.sd_scale != 1:
+            logger.info(
+                f"Resize image to do sd inpainting: {image.shape} -> {downsize_image.shape}"
+            )
         inpaint_result = self._pad_forward(downsize_image, downsize_mask, config)
         # only paste masked area result
         inpaint_result = cv2.resize(
@@ -284,5 +292,7 @@ class DiffusionInpaintModel(InpaintModel):
             interpolation=cv2.INTER_CUBIC,
         )
         original_pixel_indices = mask < 127
-        inpaint_result[original_pixel_indices] = image[:, :, ::-1][original_pixel_indices]
+        inpaint_result[original_pixel_indices] = image[:, :, ::-1][
+            original_pixel_indices
+        ]
         return inpaint_result

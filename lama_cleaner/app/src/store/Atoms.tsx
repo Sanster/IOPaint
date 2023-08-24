@@ -19,6 +19,27 @@ export enum AIModel {
   PIX2PIX = 'instruct_pix2pix',
 }
 
+export enum ControlNetMethod {
+  canny = 'canny',
+  inpaint = 'inpaint',
+  openpose = 'openpose',
+  depth = 'depth',
+}
+
+export const ControlNetMethodMap: any = {
+  canny: 'control_v11p_sd15_canny',
+  inpaint: 'control_v11p_sd15_inpaint',
+  openpose: 'control_v11p_sd15_openpose',
+  depth: 'control_v11f1p_sd15_depth',
+}
+
+export const ControlNetMethodMap2: any = {
+  control_v11p_sd15_canny: 'canny',
+  control_v11p_sd15_inpaint: 'inpaint',
+  control_v11p_sd15_openpose: 'openpose',
+  control_v11f1p_sd15_depth: 'depth',
+}
+
 export const maskState = atom<File | undefined>({
   key: 'maskState',
   default: undefined,
@@ -51,6 +72,10 @@ interface AppState {
   enableFileManager: boolean
   gifImage: HTMLImageElement | undefined
   brushSize: number
+  isControlNet: boolean
+  controlNetMethod: string
+  plugins: string[]
+  isPluginRunning: boolean
 }
 
 export const appState = atom<AppState>({
@@ -70,6 +95,10 @@ export const appState = atom<AppState>({
     enableFileManager: false,
     gifImage: undefined,
     brushSize: 40,
+    isControlNet: false,
+    controlNetMethod: ControlNetMethod.canny,
+    plugins: [],
+    isPluginRunning: false,
   },
 })
 
@@ -92,6 +121,44 @@ export const isInpaintingState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, isInpainting: newValue })
+  },
+})
+
+export const isPluginRunningState = selector({
+  key: 'isPluginRunningState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.isPluginRunning
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, isPluginRunning: newValue })
+  },
+})
+
+export const serverConfigState = selector({
+  key: 'serverConfigState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return {
+      isControlNet: app.isControlNet,
+      controlNetMethod: app.controlNetMethod,
+      isDisableModelSwitchState: app.isDisableModelSwitch,
+      isEnableAutoSaving: app.isEnableAutoSaving,
+      enableFileManager: app.enableFileManager,
+      plugins: app.plugins,
+    }
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    const methodShortName = ControlNetMethodMap2[newValue.controlNetMethod]
+    set(appState, { ...app, ...newValue, controlnetMethod: methodShortName })
+
+    const setting = get(settingState)
+    set(settingState, {
+      ...setting,
+      controlnetMethod: methodShortName,
+    })
   },
 })
 
@@ -215,6 +282,16 @@ export const isInteractiveSegRunningState = selector({
   },
 })
 
+export const isProcessingState = selector({
+  key: 'isProcessingState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return (
+      app.isInteractiveSegRunning || app.isPluginRunning || app.isInpainting
+    )
+  },
+})
+
 export const interactiveSegClicksState = selector({
   key: 'interactiveSegClicksState',
   get: ({ get }) => {
@@ -236,6 +313,18 @@ export const isDisableModelSwitchState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, isDisableModelSwitch: newValue })
+  },
+})
+
+export const isControlNetState = selector({
+  key: 'isControlNetState',
+  get: ({ get }) => {
+    const app = get(appState)
+    return app.isControlNet
+  },
+  set: ({ get, set }, newValue: any) => {
+    const app = get(appState)
+    set(appState, { ...app, isControlNet: newValue })
   },
 })
 
@@ -379,6 +468,10 @@ export interface Settings {
   p2pSteps: number
   p2pImageGuidanceScale: number
   p2pGuidanceScale: number
+
+  // ControlNet
+  controlnetConditioningScale: number
+  controlnetMethod: string
 }
 
 const defaultHDSettings: ModelsHDSettings = {
@@ -482,6 +575,7 @@ export enum SDSampler {
   kEuler = 'k_euler',
   kEulerA = 'k_euler_a',
   dpmPlusPlus = 'dpm++',
+  uni_pc = 'uni_pc',
 }
 
 export enum SDMode {
@@ -510,7 +604,7 @@ export const settingStateDefault: Settings = {
   sdStrength: 0.75,
   sdSteps: 50,
   sdGuidanceScale: 7.5,
-  sdSampler: SDSampler.pndm,
+  sdSampler: SDSampler.uni_pc,
   sdSeed: 42,
   sdSeedFixed: false,
   sdNumSamples: 1,
@@ -533,6 +627,10 @@ export const settingStateDefault: Settings = {
   p2pSteps: 50,
   p2pImageGuidanceScale: 1.5,
   p2pGuidanceScale: 7.5,
+
+  // ControlNet
+  controlnetConditioningScale: 0.4,
+  controlnetMethod: ControlNetMethod.canny,
 }
 
 const localStorageEffect =
@@ -662,5 +760,72 @@ export const isDiffusionModelsState = selector({
     const isPaintByExample = get(isPaintByExampleState)
     const isPix2Pix = get(isPix2PixState)
     return isSD || isPaintByExample || isPix2Pix
+  },
+})
+
+export enum SortBy {
+  NAME = 'name',
+  CTIME = 'ctime',
+  MTIME = 'mtime',
+}
+
+export enum SortOrder {
+  DESCENDING = 'desc',
+  ASCENDING = 'asc',
+}
+
+interface FileManagerState {
+  sortBy: SortBy
+  sortOrder: SortOrder
+  layout: 'rows' | 'masonry'
+  searchText: string
+}
+
+const FILE_MANAGER_STATE_KEY = 'fileManagerState'
+
+export const fileManagerState = atom<FileManagerState>({
+  key: FILE_MANAGER_STATE_KEY,
+  default: {
+    sortBy: SortBy.CTIME,
+    sortOrder: SortOrder.DESCENDING,
+    layout: 'masonry',
+    searchText: '',
+  },
+  effects: [localStorageEffect(FILE_MANAGER_STATE_KEY)],
+})
+
+export const fileManagerSortBy = selector({
+  key: 'fileManagerSortBy',
+  get: ({ get }) => get(fileManagerState).sortBy,
+  set: ({ get, set }, newValue: any) => {
+    const val = get(fileManagerState)
+    set(fileManagerState, { ...val, sortBy: newValue })
+  },
+})
+
+export const fileManagerSortOrder = selector({
+  key: 'fileManagerSortOrder',
+  get: ({ get }) => get(fileManagerState).sortOrder,
+  set: ({ get, set }, newValue: any) => {
+    const val = get(fileManagerState)
+    set(fileManagerState, { ...val, sortOrder: newValue })
+  },
+})
+
+export const fileManagerLayout = selector({
+  key: 'fileManagerLayout',
+  get: ({ get }) => get(fileManagerState).layout,
+  set: ({ get, set }, newValue: any) => {
+    const val = get(fileManagerState)
+    set(fileManagerState, { ...val, layout: newValue })
+  },
+})
+
+export const fileManagerSearchText = selector({
+  key: 'fileManagerSearchText',
+  get: ({ get }) => get(fileManagerState).searchText,
+  set: ({ get, set }, newValue: any) => {
+    const val = get(fileManagerState)
+    set(fileManagerState, { ...val, searchText: newValue })
   },
 })

@@ -21,6 +21,7 @@ from lama_cleaner.model.utils import (
     MinibatchStdLayer,
     to_2tuple,
     normalize_2nd_moment,
+    set_seed,
 )
 from lama_cleaner.schema import Config
 
@@ -51,7 +52,7 @@ class ModulatedConv2d(nn.Module):
         )
         self.out_channels = out_channels
         self.kernel_size = kernel_size
-        self.weight_gain = 1 / np.sqrt(in_channels * (kernel_size**2))
+        self.weight_gain = 1 / np.sqrt(in_channels * (kernel_size ** 2))
         self.padding = self.kernel_size // 2
         self.up = up
         self.down = down
@@ -212,7 +213,7 @@ class DecBlockFirst(nn.Module):
         super().__init__()
         self.fc = FullyConnectedLayer(
             in_features=in_channels * 2,
-            out_features=in_channels * 4**2,
+            out_features=in_channels * 4 ** 2,
             activation=activation,
         )
         self.conv = StyleConv(
@@ -311,7 +312,7 @@ class DecBlock(nn.Module):
             in_channels=in_channels,
             out_channels=out_channels,
             style_dim=style_dim,
-            resolution=2**res,
+            resolution=2 ** res,
             kernel_size=3,
             up=2,
             use_noise=use_noise,
@@ -322,7 +323,7 @@ class DecBlock(nn.Module):
             in_channels=out_channels,
             out_channels=out_channels,
             style_dim=style_dim,
-            resolution=2**res,
+            resolution=2 ** res,
             kernel_size=3,
             use_noise=use_noise,
             activation=activation,
@@ -361,6 +362,7 @@ class MappingNet(torch.nn.Module):
         activation="lrelu",  # Activation function: 'relu', 'lrelu', etc.
         lr_multiplier=0.01,  # Learning rate multiplier for the mapping layers.
         w_avg_beta=0.995,  # Decay for tracking the moving average of W during training, None = do not track.
+        torch_dtype=torch.float32,
     ):
         super().__init__()
         self.z_dim = z_dim
@@ -369,6 +371,7 @@ class MappingNet(torch.nn.Module):
         self.num_ws = num_ws
         self.num_layers = num_layers
         self.w_avg_beta = w_avg_beta
+        self.torch_dtype = torch_dtype
 
         if embed_features is None:
             embed_features = w_dim
@@ -401,12 +404,11 @@ class MappingNet(torch.nn.Module):
     ):
         # Embed, normalize, and concat inputs.
         x = None
-        with torch.autograd.profiler.record_function("input"):
-            if self.z_dim > 0:
-                x = normalize_2nd_moment(z.to(torch.float32))
-            if self.c_dim > 0:
-                y = normalize_2nd_moment(self.embed(c.to(torch.float32)))
-                x = torch.cat([x, y], dim=1) if x is not None else y
+        if self.z_dim > 0:
+            x = normalize_2nd_moment(z)
+        if self.c_dim > 0:
+            y = normalize_2nd_moment(self.embed(c))
+            x = torch.cat([x, y], dim=1) if x is not None else y
 
         # Main layers.
         for idx in range(self.num_layers):
@@ -415,26 +417,21 @@ class MappingNet(torch.nn.Module):
 
         # Update moving average of W.
         if self.w_avg_beta is not None and self.training and not skip_w_avg_update:
-            with torch.autograd.profiler.record_function("update_w_avg"):
-                self.w_avg.copy_(
-                    x.detach().mean(dim=0).lerp(self.w_avg, self.w_avg_beta)
-                )
+            self.w_avg.copy_(x.detach().mean(dim=0).lerp(self.w_avg, self.w_avg_beta))
 
         # Broadcast.
         if self.num_ws is not None:
-            with torch.autograd.profiler.record_function("broadcast"):
-                x = x.unsqueeze(1).repeat([1, self.num_ws, 1])
+            x = x.unsqueeze(1).repeat([1, self.num_ws, 1])
 
         # Apply truncation.
         if truncation_psi != 1:
-            with torch.autograd.profiler.record_function("truncate"):
-                assert self.w_avg_beta is not None
-                if self.num_ws is None or truncation_cutoff is None:
-                    x = self.w_avg.lerp(x, truncation_psi)
-                else:
-                    x[:, :truncation_cutoff] = self.w_avg.lerp(
-                        x[:, :truncation_cutoff], truncation_psi
-                    )
+            assert self.w_avg_beta is not None
+            if self.num_ws is None or truncation_cutoff is None:
+                x = self.w_avg.lerp(x, truncation_psi)
+            else:
+                x[:, :truncation_cutoff] = self.w_avg.lerp(
+                    x[:, :truncation_cutoff], truncation_psi
+                )
 
         return x
 
@@ -510,7 +507,7 @@ class Discriminator(torch.nn.Module):
         self.img_channels = img_channels
 
         resolution_log2 = int(np.log2(img_resolution))
-        assert img_resolution == 2**resolution_log2 and img_resolution >= 4
+        assert img_resolution == 2 ** resolution_log2 and img_resolution >= 4
         self.resolution_log2 = resolution_log2
 
         def nf(stage):
@@ -546,7 +543,7 @@ class Discriminator(torch.nn.Module):
         )
         self.Dis = nn.Sequential(*Dis)
 
-        self.fc0 = FullyConnectedLayer(nf(2) * 4**2, nf(2), activation=activation)
+        self.fc0 = FullyConnectedLayer(nf(2) * 4 ** 2, nf(2), activation=activation)
         self.fc1 = FullyConnectedLayer(nf(2), 1 if cmap_dim == 0 else cmap_dim)
 
     def forward(self, images_in, masks_in, c):
@@ -565,7 +562,7 @@ class Discriminator(torch.nn.Module):
 
 def nf(stage, channel_base=32768, channel_decay=1.0, channel_max=512):
     NF = {512: 64, 256: 128, 128: 256, 64: 512, 32: 512, 16: 512, 8: 512, 4: 512}
-    return NF[2**stage]
+    return NF[2 ** stage]
 
 
 class Mlp(nn.Module):
@@ -662,7 +659,7 @@ class Conv2dLayerPartial(nn.Module):
         )
 
         self.weight_maskUpdater = torch.ones(1, 1, kernel_size, kernel_size)
-        self.slide_winsize = kernel_size**2
+        self.slide_winsize = kernel_size ** 2
         self.stride = down
         self.padding = kernel_size // 2 if kernel_size % 2 == 1 else 0
 
@@ -678,9 +675,9 @@ class Conv2dLayerPartial(nn.Module):
                     stride=self.stride,
                     padding=self.padding,
                 )
-                mask_ratio = self.slide_winsize / (update_mask + 1e-8)
+                mask_ratio = self.slide_winsize / (update_mask.to(torch.float32) + 1e-8)
                 update_mask = torch.clamp(update_mask, 0, 1)  # 0 or 1
-                mask_ratio = torch.mul(mask_ratio, update_mask)
+                mask_ratio = torch.mul(mask_ratio, update_mask).to(x.dtype)
             x = self.conv(x)
             x = torch.mul(x, mask_ratio)
             return x, update_mask
@@ -713,13 +710,12 @@ class WindowAttention(nn.Module):
         attn_drop=0.0,
         proj_drop=0.0,
     ):
-
         super().__init__()
         self.dim = dim
         self.window_size = window_size  # Wh, Ww
         self.num_heads = num_heads
         head_dim = dim // num_heads
-        self.scale = qk_scale or head_dim**-0.5
+        self.scale = qk_scale or head_dim ** -0.5
 
         self.q = FullyConnectedLayer(in_features=dim, out_features=dim)
         self.k = FullyConnectedLayer(in_features=dim, out_features=dim)
@@ -735,7 +731,7 @@ class WindowAttention(nn.Module):
             mask: (0/-inf) mask with shape of (num_windows, Wh*Ww, Wh*Ww) or None
         """
         B_, N, C = x.shape
-        norm_x = F.normalize(x, p=2.0, dim=-1)
+        norm_x = F.normalize(x, p=2.0, dim=-1, eps=torch.finfo(x.dtype).eps)
         q = (
             self.q(norm_x)
             .reshape(B_, N, self.num_heads, C // self.num_heads)
@@ -772,7 +768,6 @@ class WindowAttention(nn.Module):
                 ).repeat(1, N, 1)
 
         attn = self.softmax(attn)
-
         x = (attn @ v).transpose(1, 2).reshape(B_, N, C)
         x = self.proj(x)
         return x, mask_windows
@@ -936,7 +931,9 @@ class SwinTransformerBlock(nn.Module):
             )  # nW*B, window_size*window_size, C
         else:
             attn_windows, mask_windows = self.attn(
-                x_windows, mask_windows, mask=self.calculate_mask(x_size).to(x.device)
+                x_windows,
+                mask_windows,
+                mask=self.calculate_mask(x_size).to(x.dtype).to(x.device),
             )  # nW*B, window_size*window_size, C
 
         # merge windows
@@ -1058,7 +1055,6 @@ class BasicLayer(nn.Module):
         downsample=None,
         use_checkpoint=False,
     ):
-
         super().__init__()
         self.dim = dim
         self.input_resolution = input_resolution
@@ -1215,7 +1211,7 @@ class Encoder(nn.Module):
         self.resolution = []
 
         for idx, i in enumerate(range(res_log2, 3, -1)):  # from input size to 16x16
-            res = 2**i
+            res = 2 ** i
             self.resolution.append(res)
             if i == res_log2:
                 block = EncFromRGB(img_channels * 2 + 1, nf(i), activation)
@@ -1300,7 +1296,7 @@ class DecBlockFirstV2(nn.Module):
             in_channels=in_channels,
             out_channels=out_channels,
             style_dim=style_dim,
-            resolution=2**res,
+            resolution=2 ** res,
             kernel_size=3,
             use_noise=use_noise,
             activation=activation,
@@ -1345,7 +1341,7 @@ class DecBlock(nn.Module):
             in_channels=in_channels,
             out_channels=out_channels,
             style_dim=style_dim,
-            resolution=2**res,
+            resolution=2 ** res,
             kernel_size=3,
             up=2,
             use_noise=use_noise,
@@ -1356,7 +1352,7 @@ class DecBlock(nn.Module):
             in_channels=out_channels,
             out_channels=out_channels,
             style_dim=style_dim,
-            resolution=2**res,
+            resolution=2 ** res,
             kernel_size=3,
             use_noise=use_noise,
             activation=activation,
@@ -1393,7 +1389,7 @@ class Decoder(nn.Module):
         for res in range(5, res_log2 + 1):
             setattr(
                 self,
-                "Dec_%dx%d" % (2**res, 2**res),
+                "Dec_%dx%d" % (2 ** res, 2 ** res),
                 DecBlock(
                     res,
                     nf(res - 1),
@@ -1410,7 +1406,7 @@ class Decoder(nn.Module):
     def forward(self, x, ws, gs, E_features, noise_mode="random"):
         x, img = self.Dec_16x16(x, ws, gs, E_features, noise_mode=noise_mode)
         for res in range(5, self.res_log2 + 1):
-            block = getattr(self, "Dec_%dx%d" % (2**res, 2**res))
+            block = getattr(self, "Dec_%dx%d" % (2 ** res, 2 ** res))
             x, img = block(x, img, ws, gs, E_features, noise_mode=noise_mode)
 
         return img
@@ -1435,7 +1431,7 @@ class DecStyleBlock(nn.Module):
             in_channels=in_channels,
             out_channels=out_channels,
             style_dim=style_dim,
-            resolution=2**res,
+            resolution=2 ** res,
             kernel_size=3,
             up=2,
             use_noise=use_noise,
@@ -1446,7 +1442,7 @@ class DecStyleBlock(nn.Module):
             in_channels=out_channels,
             out_channels=out_channels,
             style_dim=style_dim,
-            resolution=2**res,
+            resolution=2 ** res,
             kernel_size=3,
             use_noise=use_noise,
             activation=activation,
@@ -1644,7 +1640,7 @@ class SynthesisNet(nn.Module):
     ):
         super().__init__()
         resolution_log2 = int(np.log2(img_resolution))
-        assert img_resolution == 2**resolution_log2 and img_resolution >= 4
+        assert img_resolution == 2 ** resolution_log2 and img_resolution >= 4
 
         self.num_layers = resolution_log2 * 2 - 3 * 2
         self.img_resolution = img_resolution
@@ -1785,7 +1781,7 @@ class Discriminator(torch.nn.Module):
         self.img_channels = img_channels
 
         resolution_log2 = int(np.log2(img_resolution))
-        assert img_resolution == 2**resolution_log2 and img_resolution >= 4
+        assert img_resolution == 2 ** resolution_log2 and img_resolution >= 4
         self.resolution_log2 = resolution_log2
 
         if cmap_dim == None:
@@ -1816,7 +1812,7 @@ class Discriminator(torch.nn.Module):
         )
         self.Dis = nn.Sequential(*Dis)
 
-        self.fc0 = FullyConnectedLayer(nf(2) * 4**2, nf(2), activation=activation)
+        self.fc0 = FullyConnectedLayer(nf(2) * 4 ** 2, nf(2), activation=activation)
         self.fc1 = FullyConnectedLayer(nf(2), 1 if cmap_dim == 0 else cmap_dim)
 
         # for 64x64
@@ -1841,7 +1837,7 @@ class Discriminator(torch.nn.Module):
         self.Dis_stg1 = nn.Sequential(*Dis_stg1)
 
         self.fc0_stg1 = FullyConnectedLayer(
-            nf(2) // 2 * 4**2, nf(2) // 2, activation=activation
+            nf(2) // 2 * 4 ** 2, nf(2) // 2, activation=activation
         )
         self.fc1_stg1 = FullyConnectedLayer(
             nf(2) // 2, 1 if cmap_dim == 0 else cmap_dim
@@ -1882,14 +1878,25 @@ class MAT(InpaintModel):
 
     def init_model(self, device, **kwargs):
         seed = 240  # pick up a random number
-        random.seed(seed)
-        np.random.seed(seed)
-        torch.manual_seed(seed)
+        set_seed(seed)
 
-        G = Generator(z_dim=512, c_dim=0, w_dim=512, img_resolution=512, img_channels=3)
+        fp16 = not kwargs.get("no_half", False)
+        use_gpu = "cuda" in str(device) and torch.cuda.is_available()
+        self.torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
+
+        G = Generator(
+            z_dim=512,
+            c_dim=0,
+            w_dim=512,
+            img_resolution=512,
+            img_channels=3,
+            mapping_kwargs={"torch_dtype": self.torch_dtype},
+        ).to(self.torch_dtype)
+        # fmt: off
         self.model = load_model(G, MAT_MODEL_URL, device, MAT_MODEL_MD5)
-        self.z = torch.from_numpy(np.random.randn(1, G.z_dim)).to(device)  # [1., 512]
-        self.label = torch.zeros([1, self.model.c_dim], device=device)
+        self.z = torch.from_numpy(np.random.randn(1, G.z_dim)).to(self.torch_dtype).to(device)
+        self.label = torch.zeros([1, self.model.c_dim], device=device).to(self.torch_dtype)
+        # fmt: on
 
     @staticmethod
     def is_downloaded() -> bool:
@@ -1909,8 +1916,10 @@ class MAT(InpaintModel):
         mask = 255 - mask
         mask = norm_img(mask)
 
-        image = torch.from_numpy(image).unsqueeze(0).to(self.device)
-        mask = torch.from_numpy(mask).unsqueeze(0).to(self.device)
+        image = (
+            torch.from_numpy(image).unsqueeze(0).to(self.torch_dtype).to(self.device)
+        )
+        mask = torch.from_numpy(mask).unsqueeze(0).to(self.torch_dtype).to(self.device)
 
         output = self.model(
             image, mask, self.z, self.label, truncation_psi=1, noise_mode="none"
