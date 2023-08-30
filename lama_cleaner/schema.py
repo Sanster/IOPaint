@@ -55,6 +55,7 @@ class Config(BaseModel):
     # Crop image to this size before doing sd inpainting
     # The value is always on the original image scale
     use_croper: bool = False
+    croper_is_outpainting: bool = False
     croper_x: int = None
     croper_y: int = None
     croper_height: int = None
@@ -77,6 +78,10 @@ class Config(BaseModel):
     # -1 mean random seed
     sd_seed: int = 42
     sd_match_histograms: bool = False
+
+    # out-painting
+    sd_outpainting_softness: float = 30.0
+    sd_outpainting_space: float = 50.0
 
     # Configs for opencv inpainting
     # opencv document https://docs.opencv.org/4.6.0/d7/d8b/group__photo__inpaint.html#gga8002a65f5a3328fbf15df81b842d3c3ca05e763003a805e6c11c673a9f4ba7d07

@@ -12,6 +12,7 @@ from lama_cleaner.helper import (
     pad_img_to_modulo,
     switch_mps_device,
 )
+from lama_cleaner.model.g_diffuser_bot import expand_image, np_img_grey_to_rgb
 from lama_cleaner.schema import Config, HDStrategy
 
 
@@ -266,14 +267,92 @@ class DiffusionInpaintModel(InpaintModel):
         """
         # boxes = boxes_from_mask(mask)
         if config.use_croper:
-            crop_img, crop_mask, (l, t, r, b) = self._apply_cropper(image, mask, config)
-            crop_image = self._scaled_pad_forward(crop_img, crop_mask, config)
-            inpaint_result = image[:, :, ::-1]
-            inpaint_result[t:b, l:r, :] = crop_image
+            if config.croper_is_outpainting:
+                inpaint_result = self._do_outpainting(image, config)
+            else:
+                crop_img, crop_mask, (l, t, r, b) = self._apply_cropper(
+                    image, mask, config
+                )
+                crop_image = self._scaled_pad_forward(crop_img, crop_mask, config)
+                inpaint_result = image[:, :, ::-1]
+                inpaint_result[t:b, l:r, :] = crop_image
         else:
             inpaint_result = self._scaled_pad_forward(image, mask, config)
 
         return inpaint_result
+
+    def _do_outpainting(self, image, config: Config):
+        # cropper 和 image 在同一个坐标系下，croper_x/y 可能为负数
+        # 从 image 中 crop 出 outpainting 区域
+        image_h, image_w = image.shape[:2]
+        cropper_l = config.croper_x
+        cropper_t = config.croper_y
+        cropper_r = config.croper_x + config.croper_width
+        cropper_b = config.croper_y + config.croper_height
+        image_l = 0
+        image_t = 0
+        image_r = image_w
+        image_b = image_h
+
+        # 类似求 IOU
+        l = max(cropper_l, image_l)
+        t = max(cropper_t, image_t)
+        r = min(cropper_r, image_r)
+        b = min(cropper_b, image_b)
+
+        assert (
+            0 <= l < r and 0 <= t < b
+        ), f"cropper and image not overlap, {l},{t},{r},{b}"
+
+        cropped_image = image[t:b, l:r, :]
+        padding_l = max(0, image_l - cropper_l)
+        padding_t = max(0, image_t - cropper_t)
+        padding_r = max(0, cropper_r - image_r)
+        padding_b = max(0, cropper_b - image_b)
+
+        zero_padding_count = [padding_l, padding_t, padding_r, padding_b].count(0)
+
+        if zero_padding_count not in [0, 3]:
+            logger.warning(
+                f"padding count({zero_padding_count}) not 0 or 3, may result in bad edge outpainting"
+            )
+
+        expanded_image, mask_image = expand_image(
+            cropped_image,
+            left=padding_l,
+            top=padding_t,
+            right=padding_r,
+            bottom=padding_b,
+            softness=config.sd_outpainting_softness,
+            space=config.sd_outpainting_space,
+        )
+
+        # 最终扩大了的 image, BGR
+        expanded_cropped_result_image = self._scaled_pad_forward(
+            expanded_image, mask_image, config
+        )
+
+        # RGB -> BGR
+        outpainting_image = cv2.copyMakeBorder(
+            image,
+            left=padding_l,
+            top=padding_t,
+            right=padding_r,
+            bottom=padding_b,
+            borderType=cv2.BORDER_CONSTANT,
+            value=0,
+        )[:, :, ::-1]
+
+        # 把 cropped_result_image 贴到 outpainting_image 上，这一步不需要 blend
+        paste_t = 0 if config.croper_y < 0 else config.croper_y
+        paste_l = 0 if config.croper_x < 0 else config.croper_x
+
+        outpainting_image[
+            paste_t : paste_t + expanded_cropped_result_image.shape[0],
+            paste_l : paste_l + expanded_cropped_result_image.shape[1],
+            :,
+        ] = expanded_cropped_result_image
+        return outpainting_image
 
     def _scaled_pad_forward(self, image, mask, config: Config):
         longer_side_length = int(config.sd_scale * max(image.shape[:2]))
@@ -291,8 +370,14 @@ class DiffusionInpaintModel(InpaintModel):
             (origin_size[1], origin_size[0]),
             interpolation=cv2.INTER_CUBIC,
         )
-        original_pixel_indices = mask < 127
-        inpaint_result[original_pixel_indices] = image[:, :, ::-1][
-            original_pixel_indices
-        ]
+
+        # blend result, copy from g_diffuser_bot
+        # mask_rgb = 1.0 - np_img_grey_to_rgb(mask / 255.0)
+        # inpaint_result = np.clip(
+        #     inpaint_result * (1.0 - mask_rgb) + image * mask_rgb, 0.0, 255.0
+        # )
+        # original_pixel_indices = mask < 127
+        # inpaint_result[original_pixel_indices] = image[:, :, ::-1][
+        #     original_pixel_indices
+        # ]
         return inpaint_result
