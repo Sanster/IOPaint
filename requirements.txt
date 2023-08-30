@@ -9,7 +9,7 @@ pydantic
 rich
 loguru
 yacs
-diffusers==0.16.1
+diffusers==0.20.1
 transformers==4.27.4
 gradio
 piexif==1.1.3
