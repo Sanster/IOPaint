@@ -147,7 +147,7 @@ class SD(DiffusionInpaintModel):
             mask_image=PIL.Image.fromarray(mask[:, :, -1], mode="L"),
             num_inference_steps=config.sd_steps,
             guidance_scale=config.sd_guidance_scale,
-            output_type="np.array",
+            output_type="np",
             callback=self.callback,
             height=img_h,
             width=img_w,

@@ -7,6 +7,7 @@ from lama_cleaner.const import SD15_MODELS
 from lama_cleaner.helper import switch_mps_device
 from lama_cleaner.model.controlnet import ControlNet
 from lama_cleaner.model.fcf import FcF
+from lama_cleaner.model.kandinsky import Kandinsky22
 from lama_cleaner.model.lama import LaMa
 from lama_cleaner.model.ldm import LDM
 from lama_cleaner.model.manga import Manga
@@ -33,6 +34,7 @@ models = {
     "sd2": SD2,
     "paint_by_example": PaintByExample,
     "instruct_pix2pix": InstructPix2Pix,
+    Kandinsky22.name: Kandinsky22,
 }
 
 

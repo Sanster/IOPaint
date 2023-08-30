@@ -59,7 +59,7 @@ class InstructPix2Pix(DiffusionInpaintModel):
             num_inference_steps=config.p2p_steps,
             image_guidance_scale=config.p2p_image_guidance_scale,
             guidance_scale=config.p2p_guidance_scale,
-            output_type="np.array",
+            output_type="np",
             generator=torch.manual_seed(config.sd_seed)
         ).images[0]
 

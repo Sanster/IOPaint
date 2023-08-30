@@ -218,7 +218,7 @@ class ControlNet(DiffusionInpaintModel):
                 controlnet_conditioning_scale=config.controlnet_conditioning_scale,
                 negative_prompt=config.negative_prompt,
                 generator=torch.manual_seed(config.sd_seed),
-                output_type="np.array",
+                output_type="np",
                 callback=self.callback,
             ).images[0]
         else:
@@ -262,7 +262,7 @@ class ControlNet(DiffusionInpaintModel):
                 mask_image=mask_image,
                 num_inference_steps=config.sd_steps,
                 guidance_scale=config.sd_guidance_scale,
-                output_type="np.array",
+                output_type="np",
                 callback=self.callback,
                 height=img_h,
                 width=img_w,

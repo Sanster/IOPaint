@@ -17,6 +17,7 @@ export enum AIModel {
   Mange = 'manga',
   PAINT_BY_EXAMPLE = 'paint_by_example',
   PIX2PIX = 'instruct_pix2pix',
+  KANDINSKY21 = 'kandinsky2.1',
 }
 
 export enum ControlNetMethod {
@@ -566,6 +567,13 @@ const defaultHDSettings: ModelsHDSettings = {
     hdStrategyCropMargin: 128,
     enabled: true,
   },
+  [AIModel.KANDINSKY21]: {
+    hdStrategy: HDStrategy.ORIGINAL,
+    hdStrategyResizeLimit: 768,
+    hdStrategyCropTrigerSize: 512,
+    hdStrategyCropMargin: 128,
+    enabled: false,
+  },
 }
 
 export enum SDSampler {
@@ -719,7 +727,8 @@ export const isSDState = selector({
       settings.model === AIModel.SD15 ||
       settings.model === AIModel.SD2 ||
       settings.model === AIModel.ANYTHING4 ||
-      settings.model === AIModel.REALISTIC_VISION_1_4
+      settings.model === AIModel.REALISTIC_VISION_1_4 ||
+      settings.model === AIModel.KANDINSKY21
     )
   },
 })

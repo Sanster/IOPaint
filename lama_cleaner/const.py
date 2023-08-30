@@ -29,6 +29,7 @@ AVAILABLE_MODELS = [
     "sd2",
     "paint_by_example",
     "instruct_pix2pix",
+    "kandinsky2.1"
 ]
 SD15_MODELS = ["sd1.5", "anything4", "realisticVision1.4"]
 

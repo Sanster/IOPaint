@@ -270,6 +270,12 @@ function ModelSettingBlock() {
           'https://arxiv.org/abs/2211.09800',
           'https://github.com/timothybrooks/instruct-pix2pix'
         )
+      case AIModel.KANDINSKY21:
+        return renderModelDesc(
+          'Kandinsky 2.1',
+          'https://huggingface.co/kandinsky-community/kandinsky-2-1-inpaint',
+          'https://huggingface.co/kandinsky-community/kandinsky-2-1-inpaint'
+        )
       default:
         return <></>
     }
