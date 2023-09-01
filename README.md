@@ -29,26 +29,11 @@
 
 https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-965f-5c6683141375.mp4
 
-## Sponsor
-
-<table>
-   <tr>
-    <td >
-        <img src="./assets/GitHub_Copilot_logo.svg" style="background: white;padding: 8px;"/>
-    </td>
-    <td >
-      <a href="https://ko-fi.com/Z8Z1CZJGY/tiers" target="_blank" >
-        ❤️ Your logo
-      </a>
-    </td>
-  </tr>
-</table>
-
 ## Features
 
 - Completely free and open-source, fully self-hosted, support CPU & GPU & M1/2
 - [Windows 1-Click Installer](https://lama-cleaner-docs.vercel.app/install/windows_1click_installer)
-- [Native macOS app beta test](https://github.com/Sanster/lama-cleaner/discussions/314#discussioncomment-6746440)
+- [Native macOS app](https://opticlean.io/)
 - Multiple SOTA AI [models](https://lama-cleaner-docs.vercel.app/models)
   - Erase model: LaMa/LDM/ZITS/MAT/FcF/Manga
   - Erase and Replace model: Stable Diffusion/Paint by Example
