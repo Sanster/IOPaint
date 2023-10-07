@@ -12,6 +12,7 @@ MPS_SUPPORT_MODELS = [
     "sd2",
     "paint_by_example",
     "controlnet",
+    "kandinsky2.2",
 ]
 
 DEFAULT_MODEL = "lama"
@@ -29,7 +30,7 @@ AVAILABLE_MODELS = [
     "sd2",
     "paint_by_example",
     "instruct_pix2pix",
-    "kandinsky2.1"
+    "kandinsky2.2",
 ]
 SD15_MODELS = ["sd1.5", "anything4", "realisticVision1.4"]
 
@@ -61,7 +62,7 @@ SD_CONTROLNET_CHOICES = [
     "control_v11p_sd15_canny",
     "control_v11p_sd15_openpose",
     "control_v11p_sd15_inpaint",
-    "control_v11f1p_sd15_depth"
+    "control_v11f1p_sd15_depth",
 ]
 
 SD_LOCAL_MODEL_HELP = """
@@ -115,7 +116,7 @@ RealESRGANModelNameList = [e.value for e in RealESRGANModelName]
 
 INTERACTIVE_SEG_HELP = "Enable interactive segmentation using Segment Anything."
 INTERACTIVE_SEG_MODEL_HELP = "Model size: vit_b < vit_l < vit_h. Bigger model size means better segmentation but slower speed."
-AVAILABLE_INTERACTIVE_SEG_MODELS = ["vit_b", "vit_l", "vit_h"]
+AVAILABLE_INTERACTIVE_SEG_MODELS = ["vit_b", "vit_l", "vit_h", "vit_t"]
 AVAILABLE_INTERACTIVE_SEG_DEVICES = ["cuda", "cpu", "mps"]
 REMOVE_BG_HELP = "Enable remove background. Always run on CPU"
 ANIMESEG_HELP = "Enable anime segmentation. Always run on CPU"
