@@ -1,0 +1,23 @@
+name: DevOps
+on:
+  push:
+  pull_request:
+env:
+  GHCR_REGISTRY: ghcr.io
+
+jobs:
+  ##############################################################################
+  # Dockerfile tests job
+  #
+  test_dockerfiles:
+    runs-on: ubuntu-latest
+    name: Linters for Dockerfile
+    steps:
+    - name: Git checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: hadolint
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        recursive: true
