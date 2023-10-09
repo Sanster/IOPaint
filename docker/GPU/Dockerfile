@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     software-properties-common \
     libsm6 libxext6 ffmpeg libfontconfig1 libxrender1 libgl1-mesa-glx \
     curl python3-pip && \
-    apt-get clean \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir --upgrade pip && \
