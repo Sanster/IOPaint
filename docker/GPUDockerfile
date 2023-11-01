@@ -6,12 +6,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl python3-pip
 
 RUN pip3 install --upgrade pip
-RUN pip3 install torch==1.13.1 
-RUN pip3 install https://files.pythonhosted.org/packages/6a/c8/f5c62870f9c3c4c9a87dc260869894860e2f33552addec83bdb4cda1e315/xformers-0.0.16-cp38-cp38-manylinux2014_x86_64.whl --platform manylinux2014_x86_64 --no-deps --dry-run
+RUN pip3 install torch==2.1.0 torchvision==0.16.0 --index-url https://download.pytorch.org/whl/cu118
+RUN pip3 install xformers==0.0.22.post4 --index-url https://download.pytorch.org/whl/cu118
 
 ARG version 
 
 RUN pip3 install lama-cleaner==$version
+RUN lama-cleaner --install-plugins-package
 
 EXPOSE 8080
 

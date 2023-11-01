@@ -8,6 +8,7 @@ GIT_REPO="https://github.com/Sanster/lama-cleaner"
 echo "Building cpu docker image..."
 
 docker buildx build \
+--platform linux/amd64 \
 --file ./docker/CPUDockerfile \
 --label org.opencontainers.image.title=lama-cleaner \
 --label org.opencontainers.image.description="$IMAGE_DESC" \
@@ -18,9 +19,10 @@ docker buildx build \
 --tag cwq1913/lama-cleaner:cpu-$GIT_TAG .
 
 
-echo "Building NVIDIA GPU docker image..."
+# echo "Building NVIDIA GPU docker image..."
 
 docker buildx build \
+--platform linux/amd64 \
 --file ./docker/GPUDockerfile \
 --label org.opencontainers.image.title=lama-cleaner \
 --label org.opencontainers.image.description="$IMAGE_DESC" \
