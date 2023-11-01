@@ -44,6 +44,7 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
   - [RestoreFormer](https://github.com/wzhouxiff/RestoreFormer): Face Restoration
   - [Segment Anything](https://lama-cleaner-docs.vercel.app/plugins#interactive-segmentation): Accurate and fast interactive object segmentation
 - [FileManager](https://lama-cleaner-docs.vercel.app/features/file_manager): Browse your pictures conveniently and save them directly to the output directory.
+- [Docker Image](https://lama-cleaner-docs.vercel.app/install/docker)
 - More features at [lama-cleaner-docs](https://lama-cleaner-docs.vercel.app/)
 
 ## Quick Start
