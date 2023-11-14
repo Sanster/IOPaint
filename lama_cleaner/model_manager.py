@@ -15,6 +15,7 @@ from lama_cleaner.model.mat import MAT
 from lama_cleaner.model.paint_by_example import PaintByExample
 from lama_cleaner.model.instruct_pix2pix import InstructPix2Pix
 from lama_cleaner.model.sd import SD15, SD2, Anything4, RealisticVision14
+from lama_cleaner.model.sdxl import SDXL
 from lama_cleaner.model.utils import torch_gc
 from lama_cleaner.model.zits import ZITS
 from lama_cleaner.model.opencv2 import OpenCV2
@@ -35,6 +36,7 @@ models = {
     "paint_by_example": PaintByExample,
     "instruct_pix2pix": InstructPix2Pix,
     Kandinsky22.name: Kandinsky22,
+    SDXL.name: SDXL,
 }
 
 

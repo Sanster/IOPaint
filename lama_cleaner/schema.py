@@ -66,8 +66,12 @@ class Config(BaseModel):
     sd_scale: float = 1.0
     # Blur the edge of mask area. The higher the number the smoother blend with the original image
     sd_mask_blur: int = 0
-    # Ignore this value, it's useless for inpainting
-    sd_strength: float = 0.75
+    # Indicates extent to transform the reference `image`. Must be between 0 and 1. `image` is used as a
+    # starting point and more noise is added the higher the `strength`. The number of denoising steps depends
+    # on the amount of noise initially added. When `strength` is 1, added noise is maximum and the denoising
+    # process runs for the full number of iterations specified in `num_inference_steps`. A value of 1
+    # essentially ignores `image`.
+    sd_strength: float = 1.0
     # The number of denoising steps. More denoising steps usually lead to a
     # higher quality image at the expense of slower inference.
     sd_steps: int = 50
@@ -80,8 +84,8 @@ class Config(BaseModel):
     sd_match_histograms: bool = False
 
     # out-painting
-    sd_outpainting_softness: float = 30.0
-    sd_outpainting_space: float = 50.0
+    sd_outpainting_softness: float = 20.0
+    sd_outpainting_space: float = 20.0
 
     # Configs for opencv inpainting
     # opencv document https://docs.opencv.org/4.6.0/d7/d8b/group__photo__inpaint.html#gga8002a65f5a3328fbf15df81b842d3c3ca05e763003a805e6c11c673a9f4ba7d07

@@ -13,6 +13,7 @@ MPS_SUPPORT_MODELS = [
     "paint_by_example",
     "controlnet",
     "kandinsky2.2",
+    "sdxl",
 ]
 
 DEFAULT_MODEL = "lama"
@@ -23,6 +24,7 @@ AVAILABLE_MODELS = [
     "mat",
     "fcf",
     "sd1.5",
+    "sdxl",
     "anything4",
     "realisticVision1.4",
     "cv2",

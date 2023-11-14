@@ -151,6 +151,7 @@ def expand_image(
         hard_mask[:, 0 : origin_w // 2] = 255
     if right != 0:
         hard_mask[:, origin_w // 2 :] = 255
+
     hard_mask = cv2.copyMakeBorder(
         hard_mask, top, bottom, left, right, cv2.BORDER_CONSTANT, value=255
     )
@@ -166,12 +167,12 @@ if __name__ == "__main__":
     init_image = cv2.imread(str(image_path))
     init_image, mask_image = expand_image(
         init_image,
-        200,
-        200,
-        0,
-        0,
-        60,
-        50,
+        top=100,
+        right=100,
+        bottom=100,
+        left=100,
+        softness=20,
+        space=20,
     )
     print(mask_image.dtype, mask_image.min(), mask_image.max())
     print(init_image.dtype, init_image.min(), init_image.max())
