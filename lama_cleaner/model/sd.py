@@ -146,6 +146,7 @@ class SD(DiffusionInpaintModel):
             negative_prompt=config.negative_prompt,
             mask_image=PIL.Image.fromarray(mask[:, :, -1], mode="L"),
             num_inference_steps=config.sd_steps,
+            strength=config.sd_strength,
             guidance_scale=config.sd_guidance_scale,
             output_type="np",
             callback=self.callback,
