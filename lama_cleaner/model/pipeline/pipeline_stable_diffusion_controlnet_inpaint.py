@@ -11,14 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Union, List, Optional, Callable, Dict, Any
 
 # Copy from https://github.com/mikonvergence/ControlNetInpaint/blob/main/src/pipeline_stable_diffusion_controlnet_inpaint.py
 
 import torch
 import PIL.Image
 import numpy as np
+from diffusers.pipelines.stable_diffusion import StableDiffusionPipelineOutput
 
 from diffusers.pipelines.stable_diffusion.pipeline_stable_diffusion_controlnet import *
+from diffusers.utils import replace_example_docstring
 
 EXAMPLE_DOC_STRING = """
     Examples:
