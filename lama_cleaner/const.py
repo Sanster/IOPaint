@@ -33,8 +33,10 @@ AVAILABLE_MODELS = [
     "paint_by_example",
     "instruct_pix2pix",
     "kandinsky2.2",
+    "sdxl"
 ]
 SD15_MODELS = ["sd1.5", "anything4", "realisticVision1.4"]
+MODELS_SUPPORT_FREEU = SD15_MODELS + ['sd2', "sdxl"]
 
 AVAILABLE_DEVICES = ["cuda", "cpu", "mps"]
 DEFAULT_DEVICE = "cuda"

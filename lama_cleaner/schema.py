@@ -31,6 +31,13 @@ class SDSampler(str, Enum):
     uni_pc = "uni_pc"
 
 
+class FREEUConfig(BaseModel):
+    s1: float = 1.0
+    s2: float = 1.0
+    b1: float = 1.0
+    b2: float = 1.0
+
+
 class Config(BaseModel):
     class Config:
         arbitrary_types_allowed = True
@@ -86,6 +93,10 @@ class Config(BaseModel):
     # out-painting
     sd_outpainting_softness: float = 20.0
     sd_outpainting_space: float = 20.0
+
+    # freeu
+    sd_freeu: bool = False
+    sd_freeu_config: FREEUConfig = FREEUConfig()
 
     # Configs for opencv inpainting
     # opencv document https://docs.opencv.org/4.6.0/d7/d8b/group__photo__inpaint.html#gga8002a65f5a3328fbf15df81b842d3c3ca05e763003a805e6c11c673a9f4ba7d07
