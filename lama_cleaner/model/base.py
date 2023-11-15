@@ -390,3 +390,12 @@ class DiffusionInpaintModel(InpaintModel):
             sd_sampler = SDSampler.lcm
         scheduler = get_scheduler(sd_sampler, scheduler_config)
         self.model.scheduler = scheduler
+
+    def forward_post_process(self, result, image, mask, config):
+        if config.sd_match_histograms:
+            result = self._match_histograms(result, image[:, :, ::-1], mask)
+
+        if config.sd_mask_blur != 0:
+            k = 2 * config.sd_mask_blur + 1
+            mask = cv2.GaussianBlur(mask, (k, k), 0)
+        return result, image, mask
