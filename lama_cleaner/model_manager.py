@@ -3,7 +3,7 @@ import gc
 
 from loguru import logger
 
-from lama_cleaner.const import SD15_MODELS, MODELS_SUPPORT_FREEU
+from lama_cleaner.const import SD15_MODELS, MODELS_SUPPORT_FREEU, MODELS_SUPPORT_LCM_LORA
 from lama_cleaner.helper import switch_mps_device
 from lama_cleaner.model.controlnet import ControlNet
 from lama_cleaner.model.fcf import FcF
@@ -66,6 +66,7 @@ class ModelManager:
     def __call__(self, image, mask, config: Config):
         self.switch_controlnet_method(control_method=config.controlnet_method)
         self.enable_disable_freeu(config)
+        self.enable_disable_lcm_lora(config)
         return self.model(image, mask, config)
 
     def switch(self, new_name: str, **kwargs):
@@ -137,3 +138,12 @@ class ModelManager:
                 )
             else:
                 self.model.model.disable_freeu()
+
+    def enable_disable_lcm_lora(self, config: Config):
+        if self.name in MODELS_SUPPORT_LCM_LORA:
+            if config.sd_lcm_lora:
+                if not self.model.model.pipe.get_list_adapters():
+                    self.model.model.load_lora_weights(self.model.lcm_lora_id)
+            else:
+                self.model.model.disable_lora()
+

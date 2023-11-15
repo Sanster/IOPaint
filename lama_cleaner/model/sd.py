@@ -8,7 +8,7 @@ from loguru import logger
 
 from lama_cleaner.model.base import DiffusionInpaintModel
 from lama_cleaner.model.utils import torch_gc, get_scheduler
-from lama_cleaner.schema import Config
+from lama_cleaner.schema import Config, SDSampler
 
 
 class CPUTextEncoderWrapper:
@@ -67,6 +67,7 @@ def load_from_local_model(local_model_path, torch_dtype, disable_nsfw=True):
 class SD(DiffusionInpaintModel):
     pad_mod = 8
     min_size = 512
+    lcm_lora_id = "latent-consistency/lcm-lora-sdv1-5"
 
     def init_model(self, device: torch.device, **kwargs):
         from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
@@ -129,10 +130,7 @@ class SD(DiffusionInpaintModel):
         mask: [H, W, 1] 255 means area to repaint
         return: BGR IMAGE
         """
-
-        scheduler_config = self.model.scheduler.config
-        scheduler = get_scheduler(config.sd_sampler, scheduler_config)
-        self.model.scheduler = scheduler
+        self.set_scheduler(config)
 
         if config.sd_mask_blur != 0:
             k = 2 * config.sd_mask_blur + 1

@@ -30,6 +30,8 @@ class SDSampler(str, Enum):
     dpm_plus_plus = "dpm++"
     uni_pc = "uni_pc"
 
+    lcm = "lcm"
+
 
 class FREEUConfig(BaseModel):
     s1: float = 1.0
@@ -97,6 +99,9 @@ class Config(BaseModel):
     # freeu
     sd_freeu: bool = False
     sd_freeu_config: FREEUConfig = FREEUConfig()
+
+    # lcm-lora
+    sd_lcm_lora: bool = False
 
     # Configs for opencv inpainting
     # opencv document https://docs.opencv.org/4.6.0/d7/d8b/group__photo__inpaint.html#gga8002a65f5a3328fbf15df81b842d3c3ca05e763003a805e6c11c673a9f4ba7d07

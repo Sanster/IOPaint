@@ -13,6 +13,7 @@ class SDXL(DiffusionInpaintModel):
     name = "sdxl"
     pad_mod = 8
     min_size = 512
+    lcm_lora_id = "latent-consistency/lcm-lora-sdxl"
 
     def init_model(self, device: torch.device, **kwargs):
         from diffusers.pipelines import AutoPipelineForInpainting
@@ -56,10 +57,7 @@ class SDXL(DiffusionInpaintModel):
         mask: [H, W, 1] 255 means area to repaint
         return: BGR IMAGE
         """
-
-        scheduler_config = self.model.scheduler.config
-        scheduler = get_scheduler(config.sd_sampler, scheduler_config)
-        self.model.scheduler = scheduler
+        self.set_scheduler(config)
 
         if config.sd_mask_blur != 0:
             k = 2 * config.sd_mask_blur + 1
@@ -80,7 +78,7 @@ class SDXL(DiffusionInpaintModel):
             height=img_h,
             width=img_w,
             generator=torch.manual_seed(config.sd_seed),
-            callback_steps=1
+            callback_steps=1,
         ).images[0]
 
         output = (output * 255).round().astype("uint8")

@@ -13,7 +13,8 @@ from lama_cleaner.helper import (
     switch_mps_device,
 )
 from lama_cleaner.model.g_diffuser_bot import expand_image, np_img_grey_to_rgb
-from lama_cleaner.schema import Config, HDStrategy
+from lama_cleaner.model.utils import get_scheduler
+from lama_cleaner.schema import Config, HDStrategy, SDSampler
 
 
 class InpaintModel:
@@ -381,3 +382,11 @@ class DiffusionInpaintModel(InpaintModel):
         #     original_pixel_indices
         # ]
         return inpaint_result
+
+    def set_scheduler(self, config: Config):
+        scheduler_config = self.model.scheduler.config
+        sd_sampler = config.sd_sampler
+        if config.sd_lcm_lora:
+            sd_sampler = SDSampler.lcm
+        scheduler = get_scheduler(sd_sampler, scheduler_config)
+        self.model.scheduler = scheduler

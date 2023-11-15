@@ -37,6 +37,7 @@ AVAILABLE_MODELS = [
 ]
 SD15_MODELS = ["sd1.5", "anything4", "realisticVision1.4"]
 MODELS_SUPPORT_FREEU = SD15_MODELS + ['sd2', "sdxl"]
+MODELS_SUPPORT_LCM_LORA = SD15_MODELS + ["sdxl"]
 
 AVAILABLE_DEVICES = ["cuda", "cpu", "mps"]
 DEFAULT_DEVICE = "cuda"
