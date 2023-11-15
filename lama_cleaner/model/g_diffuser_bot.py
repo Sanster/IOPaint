@@ -85,59 +85,44 @@ def image_blur(data, std=3.14, mode="linear"):
     return np.real(convolve(data, kernel / np.sqrt(np.sum(kernel * kernel))))
 
 
-def soften_mask(np_rgba_image, softness, space):
+def soften_mask(mask_img, softness, space):
     if softness == 0:
-        return np_rgba_image
+        return mask_img
     softness = min(softness, 1.0)
     space = np.clip(space, 0.0, 1.0)
-    original_max_opacity = np.max(np_rgba_image[:, :, 3])
-    out_mask = np_rgba_image[:, :, 3] <= 0.0
-    blurred_mask = image_blur(np_rgba_image[:, :, 3], 3.5 / softness, mode="linear")
+    original_max_opacity = np.max(mask_img)
+    out_mask = mask_img <= 0.0
+    blurred_mask = image_blur(mask_img, 3.5 / softness, mode="linear")
     blurred_mask = np.maximum(blurred_mask - np.max(blurred_mask[out_mask]), 0.0)
-    np_rgba_image[
-        :, :, 3
-    ] *= blurred_mask  # preserve partial opacity in original input mask
-    np_rgba_image[:, :, 3] /= np.max(np_rgba_image[:, :, 3])  # renormalize
-    np_rgba_image[:, :, 3] = np.clip(
-        np_rgba_image[:, :, 3] - space, 0.0, 1.0
-    )  # make space
-    np_rgba_image[:, :, 3] /= np.max(np_rgba_image[:, :, 3])  # and renormalize again
-    np_rgba_image[:, :, 3] *= original_max_opacity  # restore original max opacity
-    return np_rgba_image
+    mask_img *= blurred_mask  # preserve partial opacity in original input mask
+    mask_img /= np.max(mask_img)  # renormalize
+    mask_img = np.clip(mask_img - space, 0.0, 1.0)  # make space
+    mask_img /= np.max(mask_img)  # and renormalize again
+    mask_img *= original_max_opacity  # restore original max opacity
+    return mask_img
 
 
 def expand_image(
     cv2_img, top: int, right: int, bottom: int, left: int, softness: float, space: float
 ):
+    assert cv2_img.shape[2] == 3
     origin_h, origin_w = cv2_img.shape[:2]
     new_width = cv2_img.shape[1] + left + right
     new_height = cv2_img.shape[0] + top + bottom
-    new_img = np.zeros((new_height, new_width, 4), np.uint8)  # expanded image is rgba
 
-    print(
-        "Expanding input image from {0}x{1} to {2}x{3}".format(
-            cv2_img.shape[1], cv2_img.shape[0], new_width, new_height
-        )
+    # TODO: which is better?
+    # new_img = np.random.randint(0, 255, (new_height, new_width, 3), np.uint8)
+    new_img = cv2.copyMakeBorder(
+        cv2_img, top, bottom, left, right, cv2.BORDER_REPLICATE
     )
-    if cv2_img.shape[2] == 3:  # rgb input image
-        new_img[
-            top : top + cv2_img.shape[0], left : left + cv2_img.shape[1], 0:3
-        ] = cv2_img
-        new_img[
-            top : top + cv2_img.shape[0], left : left + cv2_img.shape[1], 3
-        ] = 255  # fully opaque
-    elif cv2_img.shape[2] == 4:  # rgba input image
-        new_img[top : top + cv2_img.shape[0], left : left + cv2_img.shape[1]] = cv2_img
-    else:
-        raise Exception(
-            "Unsupported image format: {0} channels".format(cv2_img.shape[2])
-        )
+    mask_img = np.zeros((new_height, new_width), np.uint8)
+    mask_img[top : top + cv2_img.shape[0], left : left + cv2_img.shape[1]] = 255
 
     if softness > 0.0:
-        new_img = soften_mask(new_img / 255.0, softness / 100.0, space / 100.0)
-        new_img = (np.clip(new_img, 0.0, 1.0) * 255.0).astype(np.uint8)
+        mask_img = soften_mask(mask_img / 255.0, softness / 100.0, space / 100.0)
+        mask_img = (np.clip(mask_img, 0.0, 1.0) * 255.0).astype(np.uint8)
 
-    mask_image = 255.0 - new_img[:, :, 3]  # extract mask from alpha channel and invert
+    mask_image = 255.0 - mask_img  # extract mask from alpha channel and invert
     rgb_init_image = (
         0.0 + new_img[:, :, 0:3]
     )  # strip mask from init_img leaving only rgb channels
@@ -153,7 +138,7 @@ def expand_image(
         hard_mask[:, origin_w // 2 :] = 255
 
     hard_mask = cv2.copyMakeBorder(
-        hard_mask, top, bottom, left, right, cv2.BORDER_CONSTANT, value=255
+        hard_mask, top, bottom, left, right, cv2.BORDER_DEFAULT, value=255
     )
     mask_image = np.where(hard_mask > 0, mask_image, 0)
     return rgb_init_image.astype(np.uint8), mask_image.astype(np.uint8)
