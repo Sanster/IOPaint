@@ -103,6 +103,9 @@ class Config(BaseModel):
     # lcm-lora
     sd_lcm_lora: bool = False
 
+    # preserving the unmasked area at the expense of some more unnatural transitions between the masked and unmasked areas.
+    sd_prevent_unmasked_area: bool = True
+
     # Configs for opencv inpainting
     # opencv document https://docs.opencv.org/4.6.0/d7/d8b/group__photo__inpaint.html#gga8002a65f5a3328fbf15df81b842d3c3ca05e763003a805e6c11c673a9f4ba7d07
     cv2_flag: str = "INPAINT_NS"

@@ -67,8 +67,9 @@ class InpaintModel:
 
         result, image, mask = self.forward_post_process(result, image, mask, config)
 
-        mask = mask[:, :, np.newaxis]
-        result = result * (mask / 255) + image[:, :, ::-1] * (1 - (mask / 255))
+        if config.sd_prevent_unmasked_area:
+            mask = mask[:, :, np.newaxis]
+            result = result * (mask / 255) + image[:, :, ::-1] * (1 - (mask / 255))
         return result
 
     def forward_post_process(self, result, image, mask, config):

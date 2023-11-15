@@ -95,17 +95,20 @@ def test_runway_sd_1_5(sd_device, strategy, sampler, cpu_textencoder, disable_ns
     )
 
 
-@pytest.mark.parametrize("sd_device", ["cuda"])
+@pytest.mark.parametrize("sd_device", ["mps"])
 @pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
 @pytest.mark.parametrize("sampler", [SDSampler.ddim])
-def test_runway_sd_1_5_negative_prompt(sd_device, strategy, sampler):
+@pytest.mark.parametrize("sd_prevent_unmasked_area", [False, True])
+def test_runway_sd_1_5_negative_prompt(
+    sd_device, strategy, sampler, sd_prevent_unmasked_area
+):
     def callback(i, t, latents):
         pass
 
     if sd_device == "cuda" and not torch.cuda.is_available():
         return
 
-    sd_steps = 50 if sd_device == "cuda" else 1
+    sd_steps = 50 if sd_device == "cuda" else 20
     model = ModelManager(
         name="sd1.5",
         device=torch.device(sd_device),
@@ -122,6 +125,7 @@ def test_runway_sd_1_5_negative_prompt(sd_device, strategy, sampler):
         negative_prompt="orange, yellow, small",
         sd_sampler=sampler,
         sd_match_histograms=True,
+        sd_prevent_unmasked_area=sd_prevent_unmasked_area,
     )
 
     name = f"{sampler}_negative_prompt"
@@ -129,7 +133,7 @@ def test_runway_sd_1_5_negative_prompt(sd_device, strategy, sampler):
     assert_equal(
         model,
         cfg,
-        f"runway_sd_{strategy.capitalize()}_{name}.png",
+        f"runway_sd_{strategy.capitalize()}_{name}_prevent_unmasked_area_{sd_prevent_unmasked_area}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
         fx=1,

@@ -151,6 +151,7 @@ class SD(DiffusionInpaintModel):
             height=img_h,
             width=img_w,
             generator=torch.manual_seed(config.sd_seed),
+            callback_steps=1,
         ).images[0]
 
         output = (output * 255).round().astype("uint8")
