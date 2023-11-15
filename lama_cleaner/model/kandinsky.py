@@ -60,6 +60,7 @@ class Kandinsky(DiffusionInpaintModel):
             output_type="np",
             callback=self.callback,
             generator=generator,
+            callback_steps=1,
         ).images[0]
 
         output = (output * 255).round().astype("uint8")

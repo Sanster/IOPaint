@@ -17,10 +17,8 @@ from typing import Union, List, Optional, Callable, Dict, Any
 
 import torch
 import PIL.Image
-import numpy as np
-from diffusers.pipelines.stable_diffusion import StableDiffusionPipelineOutput
 
-from diffusers.pipelines.stable_diffusion.pipeline_stable_diffusion_controlnet import *
+from diffusers.pipelines.controlnet.pipeline_controlnet import *
 from diffusers.utils import replace_example_docstring
 
 EXAMPLE_DOC_STRING = """
