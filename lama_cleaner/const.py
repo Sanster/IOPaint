@@ -33,10 +33,10 @@ AVAILABLE_MODELS = [
     "paint_by_example",
     "instruct_pix2pix",
     "kandinsky2.2",
-    "sdxl"
+    "sdxl",
 ]
 SD15_MODELS = ["sd1.5", "anything4", "realisticVision1.4"]
-MODELS_SUPPORT_FREEU = SD15_MODELS + ['sd2', "sdxl"]
+MODELS_SUPPORT_FREEU = SD15_MODELS + ["sd2", "sdxl"]
 MODELS_SUPPORT_LCM_LORA = SD15_MODELS + ["sdxl"]
 
 AVAILABLE_DEVICES = ["cuda", "cpu", "mps"]
@@ -109,6 +109,14 @@ Prevent backend auto close after the GUI window closed.
 QUALITY_HELP = """
 Quality of image encoding, 0-100. Default is 95, higher quality will generate larger file size.
 """
+
+FREEU_DEFAULT_CONFIGS = {
+    "sd2": dict(s1=0.9, s2=0.2, b1=1.1, b2=1.2),
+    "sdxl": dict(s1=0.6, s2=0.4, b1=1.1, b2=1.2),
+    "sd1.5": dict(s1=0.9, s2=0.2, b1=1.2, b2=1.4),
+    "anything4": dict(s1=0.9, s2=0.2, b1=1.2, b2=1.4),
+    "realisticVision1.4": dict(s1=0.9, s2=0.2, b1=1.2, b2=1.4),
+}
 
 
 class RealESRGANModelName(str, Enum):

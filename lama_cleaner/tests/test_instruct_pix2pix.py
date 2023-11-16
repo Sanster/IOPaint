@@ -10,13 +10,13 @@ from lama_cleaner.schema import HDStrategy
 current_dir = Path(__file__).parent.absolute().resolve()
 save_dir = current_dir / 'result'
 save_dir.mkdir(exist_ok=True, parents=True)
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cuda' if torch.cuda.is_available() else 'mps'
 
 
 @pytest.mark.parametrize("disable_nsfw", [True, False])
 @pytest.mark.parametrize("cpu_offload", [False, True])
 def test_instruct_pix2pix(disable_nsfw, cpu_offload):
-    sd_steps = 50 if device == 'cuda' else 1
+    sd_steps = 50 if device == 'cuda' else 20
     model = ModelManager(name="instruct_pix2pix",
                          device=torch.device(device),
                          hf_access_token="",
@@ -41,7 +41,7 @@ def test_instruct_pix2pix(disable_nsfw, cpu_offload):
 @pytest.mark.parametrize("disable_nsfw", [False])
 @pytest.mark.parametrize("cpu_offload", [False])
 def test_instruct_pix2pix_snow(disable_nsfw, cpu_offload):
-    sd_steps = 50 if device == 'cuda' else 1
+    sd_steps = 50 if device == 'cuda' else 20
     model = ModelManager(name="instruct_pix2pix",
                          device=torch.device(device),
                          hf_access_token="",

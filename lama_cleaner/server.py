@@ -18,7 +18,12 @@ import torch
 from PIL import Image
 from loguru import logger
 
-from lama_cleaner.const import SD15_MODELS
+from lama_cleaner.const import (
+    SD15_MODELS,
+    FREEU_DEFAULT_CONFIGS,
+    MODELS_SUPPORT_FREEU,
+    MODELS_SUPPORT_LCM_LORA,
+)
 from lama_cleaner.file_manager import FileManager
 from lama_cleaner.model.utils import torch_gc
 from lama_cleaner.model_manager import ModelManager
@@ -421,6 +426,9 @@ def get_server_config():
         "isEnableAutoSaving": is_enable_auto_saving,
         "enableFileManager": is_enable_file_manager,
         "plugins": list(plugins.keys()),
+        "freeSupportedModels": MODELS_SUPPORT_FREEU,
+        "freeuDefaultConfigs": FREEU_DEFAULT_CONFIGS,
+        "lcmLoraSupportedModels": MODELS_SUPPORT_LCM_LORA,
     }, 200
 
 
