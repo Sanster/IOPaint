@@ -38,11 +38,11 @@ https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-9
   - Erase model: LaMa/LDM/ZITS/MAT/FcF/Manga
   - Erase and Replace model: Stable Diffusion/Paint by Example
 - [Plugins](https://lama-cleaner-docs.vercel.app/plugins) for post-processing:
-  - [RemoveBG](https://github.com/danielgatis/rembg): Remove images background 
-  - [RealESRGAN](https://github.com/xinntao/Real-ESRGAN): Super Resolution
-  - [GFPGAN](https://github.com/TencentARC/GFPGAN): Face Restoration
-  - [RestoreFormer](https://github.com/wzhouxiff/RestoreFormer): Face Restoration
-  - [Segment Anything](https://lama-cleaner-docs.vercel.app/plugins#interactive-segmentation): Accurate and fast interactive object segmentation
+  - [RemoveBG](https://lama-cleaner-docs.vercel.app/plugins/rembg): Remove images background 
+  - [RealESRGAN](https://lama-cleaner-docs.vercel.app/plugins/RealESRGAN): Super Resolution
+  - [GFPGAN](https://lama-cleaner-docs.vercel.app/plugins/GFPGAN): Face Restoration
+  - [RestoreFormer](https://lama-cleaner-docs.vercel.app/plugins/RestoreFormer): Face Restoration
+  - [Segment Anything](https://lama-cleaner-docs.vercel.app/plugins/interactive_seg): Accurate and fast interactive object segmentation
 - [FileManager](https://lama-cleaner-docs.vercel.app/features/file_manager): Browse your pictures conveniently and save them directly to the output directory.
 - [Docker Image](https://lama-cleaner-docs.vercel.app/install/docker)
 - More features at [lama-cleaner-docs](https://lama-cleaner-docs.vercel.app/)
