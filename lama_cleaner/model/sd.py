@@ -132,6 +132,12 @@ class SD(DiffusionInpaintModel):
         # model will be downloaded when app start, and can't switch in frontend settings
         return True
 
+    @classmethod
+    def download(cls):
+        from diffusers import StableDiffusionInpaintPipeline
+
+        StableDiffusionInpaintPipeline.from_pretrained(cls.model_id_or_path)
+
 
 class SD15(SD):
     name = "sd1.5"

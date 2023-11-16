@@ -76,3 +76,11 @@ class Kandinsky(DiffusionInpaintModel):
 class Kandinsky22(Kandinsky):
     name = "kandinsky2.2"
     model_name = "kandinsky-community/kandinsky-2-2-decoder-inpaint"
+
+    @staticmethod
+    def download():
+        from diffusers import AutoPipelineForInpainting
+
+        AutoPipelineForInpainting.from_pretrained(
+            "kandinsky-community/kandinsky-2-2-decoder-inpaint"
+        )

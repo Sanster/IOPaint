@@ -7,7 +7,7 @@ import torch
 import time
 from loguru import logger
 
-from lama_cleaner.helper import get_cache_path_by_url, load_jit_model
+from lama_cleaner.helper import get_cache_path_by_url, load_jit_model, download_model
 from lama_cleaner.model.base import InpaintModel
 from lama_cleaner.schema import Config
 
@@ -41,6 +41,11 @@ class Manga(InpaintModel):
             MANGA_LINE_MODEL_URL, device, MANGA_LINE_MODEL_MD5
         )
         self.seed = 42
+
+    @staticmethod
+    def download():
+        download_model(MANGA_INPAINTOR_MODEL_URL, MANGA_INPAINTOR_MODEL_MD5)
+        download_model(MANGA_LINE_MODEL_URL, MANGA_LINE_MODEL_MD5)
 
     @staticmethod
     def is_downloaded() -> bool:

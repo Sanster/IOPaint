@@ -8,6 +8,7 @@ from lama_cleaner.helper import (
     norm_img,
     get_cache_path_by_url,
     load_jit_model,
+    download_model,
 )
 from lama_cleaner.model.base import InpaintModel
 from lama_cleaner.schema import Config
@@ -22,6 +23,10 @@ LAMA_MODEL_MD5 = os.environ.get("LAMA_MODEL_MD5", "e3aa4aaa15225a33ec84f9f4bc47e
 class LaMa(InpaintModel):
     name = "lama"
     pad_mod = 8
+
+    @staticmethod
+    def download():
+        download_model(LAMA_MODEL_URL, LAMA_MODEL_MD5)
 
     def init_model(self, device, **kwargs):
         self.model = load_jit_model(LAMA_MODEL_URL, device, LAMA_MODEL_MD5).eval()

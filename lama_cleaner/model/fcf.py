@@ -14,6 +14,7 @@ from lama_cleaner.helper import (
     norm_img,
     boxes_from_mask,
     resize_max_size,
+    download_model,
 )
 from lama_cleaner.model.base import InpaintModel
 from torch import conv2d, nn
@@ -870,7 +871,6 @@ class SpectralTransform(nn.Module):
         )
 
     def forward(self, x):
-
         x = self.downsample(x)
         x = self.conv1(x)
         output = self.fu(x)
@@ -1437,7 +1437,6 @@ class SynthesisNetwork(torch.nn.Module):
             setattr(self, f"b{res}", block)
 
     def forward(self, x_global, mask, feats, ws, fname=None, **block_kwargs):
-
         img = None
 
         x, img = self.foreword(x_global, ws, feats, img)
@@ -1655,6 +1654,10 @@ class FcF(InpaintModel):
         )
         self.model = load_model(G, FCF_MODEL_URL, device, FCF_MODEL_MD5)
         self.label = torch.zeros([1, self.model.c_dim], device=device)
+
+    @staticmethod
+    def download():
+        download_model(FCF_MODEL_URL, FCF_MODEL_MD5)
 
     @staticmethod
     def is_downloaded() -> bool:

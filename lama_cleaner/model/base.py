@@ -51,6 +51,10 @@ class InpaintModel:
         """
         ...
 
+    @staticmethod
+    def download():
+        ...
+
     def _pad_forward(self, image, mask, config: Config):
         origin_height, origin_width = image.shape[:2]
         pad_image = pad_img_to_modulo(

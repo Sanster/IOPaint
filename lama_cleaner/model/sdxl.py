@@ -5,7 +5,6 @@ import torch
 from loguru import logger
 
 from lama_cleaner.model.base import DiffusionInpaintModel
-from lama_cleaner.model.utils import torch_gc, get_scheduler
 from lama_cleaner.schema import Config
 
 
@@ -51,6 +50,14 @@ class SDXL(DiffusionInpaintModel):
 
         self.callback = kwargs.pop("callback", None)
 
+    @staticmethod
+    def download():
+        from diffusers import AutoPipelineForInpainting
+
+        AutoPipelineForInpainting.from_pretrained(
+            "diffusers/stable-diffusion-xl-1.0-inpainting-0.1"
+        )
+
     def forward(self, image, mask, config: Config):
         """Input image and output image have same size
         image: [H, W, C] RGB
@@ -84,7 +91,6 @@ class SDXL(DiffusionInpaintModel):
         output = (output * 255).round().astype("uint8")
         output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
         return output
-
 
     @staticmethod
     def is_downloaded() -> bool:

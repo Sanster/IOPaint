@@ -6,13 +6,29 @@ from pathlib import Path
 from loguru import logger
 
 from lama_cleaner.const import *
+from lama_cleaner.download import cli_download_model
 from lama_cleaner.runtime import dump_environment_info
+
+DOWNLOAD_SUBCOMMAND = "download"
+
+
+def download_parse_args(parser):
+    subparsers = parser.add_subparsers(dest="subcommand")
+    subparser = subparsers.add_parser(DOWNLOAD_SUBCOMMAND, help="Download models")
+    subparser.add_argument(
+        "--model", help="Erase model name(lama/mat...) or model id on huggingface"
+    )
+    subparser.add_argument(
+        "--model-dir", type=str, default=DEFAULT_MODEL_DIR, help=MODEL_DIR_HELP
+    )
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
+    download_parse_args(parser)
+
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", default=8080, type=int)
 
@@ -166,9 +182,12 @@ def parse_args():
     )
 
     args = parser.parse_args()
-
     # collect system info to help debug
     dump_environment_info()
+    if args.subcommand == DOWNLOAD_SUBCOMMAND:
+        cli_download_model(args.model, args.model_dir)
+        return
+
     if args.install_plugins_package:
         from lama_cleaner.installer import install_plugins_package
 

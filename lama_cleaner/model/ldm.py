@@ -261,6 +261,12 @@ class LDM(InpaintModel):
         self.model = LatentDiffusion(self.diffusion_model, device)
 
     @staticmethod
+    def download():
+        download_model(LDM_DIFFUSION_MODEL_URL, LDM_DIFFUSION_MODEL_MD5)
+        download_model(LDM_DECODE_MODEL_URL, LDM_DECODE_MODEL_MD5)
+        download_model(LDM_ENCODE_MODEL_URL, LDM_ENCODE_MODEL_MD5)
+
+    @staticmethod
     def is_downloaded() -> bool:
         model_paths = [
             get_cache_path_by_url(LDM_DIFFUSION_MODEL_URL),

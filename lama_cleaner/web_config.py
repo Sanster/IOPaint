@@ -185,7 +185,7 @@ def main(config_file: str):
                 )
                 sd_controlnet_method = gr.Radio(
                     SD_CONTROLNET_CHOICES,
-                    lable="ControlNet method",
+                    label="ControlNet method",
                     value=init_config.sd_controlnet_method,
                 )
                 no_half = gr.Checkbox(init_config.no_half, label=f"{NO_HALF_HELP}")
