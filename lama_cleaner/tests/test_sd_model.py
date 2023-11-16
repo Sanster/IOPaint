@@ -240,7 +240,14 @@ def test_runway_sd_1_5_cpu_offload(sd_device, strategy, sampler):
 
 @pytest.mark.parametrize("sd_device", ["cuda", "mps"])
 @pytest.mark.parametrize("sampler", [SDSampler.uni_pc])
-def test_local_file_path(sd_device, sampler):
+@pytest.mark.parametrize(
+    "local_model_path",
+    [
+        "/Users/cwq/data/models/sd-v1-5-inpainting.ckpt",
+        "/Users/cwq/data/models/sd-v1-5-inpainting.safetensors",
+    ],
+)
+def test_local_file_path(sd_device, sampler, local_model_path):
     if sd_device == "cuda" and not torch.cuda.is_available():
         return
 
@@ -253,7 +260,7 @@ def test_local_file_path(sd_device, sampler):
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         cpu_offload=True,
-        sd_local_model_path="/Users/cwq/data/models/sd-v1-5-inpainting.ckpt",
+        sd_local_model_path=local_model_path,
     )
     cfg = get_config(
         HDStrategy.ORIGINAL,
@@ -262,7 +269,7 @@ def test_local_file_path(sd_device, sampler):
     )
     cfg.sd_sampler = sampler
 
-    name = f"device_{sd_device}_{sampler}"
+    name = f"device_{sd_device}_{sampler}_{Path(local_model_path).stem}"
 
     assert_equal(
         model,

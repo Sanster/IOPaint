@@ -34,37 +34,6 @@ class CPUTextEncoderWrapper(torch.nn.Module):
         return self.torch_dtype
 
 
-def load_from_local_model(local_model_path, torch_dtype, disable_nsfw=True):
-    from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
-        download_from_original_stable_diffusion_ckpt,
-    )
-    from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
-
-    logger.info(f"Converting {local_model_path} to diffusers pipeline")
-
-    pipe = download_from_original_stable_diffusion_ckpt(
-        local_model_path,
-        num_in_channels=9,
-        from_safetensors=local_model_path.endswith("safetensors"),
-        device="cpu",
-    )
-
-    inpaint_pipe = StableDiffusionInpaintPipeline(
-        vae=pipe.vae,
-        text_encoder=pipe.text_encoder,
-        tokenizer=pipe.tokenizer,
-        unet=pipe.unet,
-        scheduler=pipe.scheduler,
-        safety_checker=None if disable_nsfw else pipe.safety_checker,
-        feature_extractor=None if disable_nsfw else pipe.safety_checker,
-        requires_safety_checker=not disable_nsfw,
-    )
-
-    del pipe
-    gc.collect()
-    return inpaint_pipe.to(torch_dtype=torch_dtype)
-
-
 class SD(DiffusionInpaintModel):
     pad_mod = 8
     min_size = 512
@@ -92,9 +61,8 @@ class SD(DiffusionInpaintModel):
         torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
 
         if kwargs.get("sd_local_model_path", None):
-            self.model = load_from_local_model(
-                kwargs["sd_local_model_path"],
-                torch_dtype=torch_dtype,
+            self.model = StableDiffusionInpaintPipeline.from_single_file(
+                kwargs["sd_local_model_path"], torch_dtype=torch_dtype, **model_kwargs
             )
         else:
             self.model = StableDiffusionInpaintPipeline.from_pretrained(
