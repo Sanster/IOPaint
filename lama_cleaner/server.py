@@ -2,6 +2,8 @@
 import os
 import hashlib
 
+from lama_cleaner.diffusers_utils import scan_models
+
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 import imghdr
@@ -430,6 +432,13 @@ def get_server_config():
         "freeuDefaultConfigs": FREEU_DEFAULT_CONFIGS,
         "lcmLoraSupportedModels": MODELS_SUPPORT_LCM_LORA,
     }, 200
+
+
+@app.route("/sd_models", methods=["GET"])
+def get_diffusers_models():
+    from diffusers.utils import DIFFUSERS_CACHE
+
+    return scan_models(DIFFUSERS_CACHE)
 
 
 @app.route("/model")
