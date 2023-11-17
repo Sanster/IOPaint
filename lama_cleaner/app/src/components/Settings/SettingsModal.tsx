@@ -28,7 +28,6 @@ interface SettingModalProps {
 export default function SettingModal(props: SettingModalProps) {
   const { onClose } = props
   const [setting, setSettingState] = useRecoilState(settingState)
-  const isSD = useRecoilValue(isSDState)
   const isDiffusionModels = useRecoilValue(isDiffusionModelsState)
 
   const handleOnClose = () => {
@@ -57,9 +56,8 @@ export default function SettingModal(props: SettingModalProps) {
       show={setting.show}
     >
       <DownloadMaskSettingBlock />
-      {isDiffusionModels ? <></> : <ManualRunInpaintingSettingBlock />}
+      <ManualRunInpaintingSettingBlock />
       <ModelSettingBlock />
-      {isDiffusionModels ? <></> : <HDSettingBlock />}
     </Modal>
   )
 }

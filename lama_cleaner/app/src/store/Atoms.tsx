@@ -3,6 +3,13 @@ import _ from 'lodash'
 import { HDStrategy, LDMSampler } from '../components/Settings/HDSettingBlock'
 import { ToastState } from '../components/shared/Toast'
 
+function strEnum<T extends string>(o: Array<T>): { [K in T]: K } {
+  return o.reduce((res, key) => {
+    res[key] = key
+    return res
+  }, Object.create(null))
+}
+
 export enum AIModel {
   LAMA = 'lama',
   LDM = 'ldm',
@@ -17,7 +24,7 @@ export enum AIModel {
   Mange = 'manga',
   PAINT_BY_EXAMPLE = 'paint_by_example',
   PIX2PIX = 'instruct_pix2pix',
-  KANDINSKY21 = 'kandinsky2.1',
+  KANDINSKY22 = 'kandinsky2.2',
 }
 
 export enum ControlNetMethod {
@@ -351,6 +358,20 @@ export const croperState = atom<Rect>({
   },
 })
 
+export const SIDE_PANEL_TAB = strEnum(['inpainting', 'outpainting'])
+export type SIDE_PANEL_TAB_TYPE = keyof typeof SIDE_PANEL_TAB
+
+export interface SidePanelState {
+  tab: SIDE_PANEL_TAB_TYPE
+}
+
+export const sidePanelTabState = atom<SidePanelState>({
+  key: 'sidePanelTabState',
+  default: {
+    tab: SIDE_PANEL_TAB.inpainting,
+  },
+})
+
 export const croperX = selector({
   key: 'croperX',
   get: ({ get }) => get(croperState).x,
@@ -384,6 +405,52 @@ export const croperWidth = selector({
   set: ({ get, set }, newValue: any) => {
     const rect = get(croperState)
     set(croperState, { ...rect, width: newValue })
+  },
+})
+
+export const extenderState = atom<Rect>({
+  key: 'extenderState',
+  default: {
+    x: 0,
+    y: 0,
+    width: 512,
+    height: 512,
+  },
+})
+
+export const extenderX = selector({
+  key: 'extenderX',
+  get: ({ get }) => get(extenderState).x,
+  set: ({ get, set }, newValue: any) => {
+    const rect = get(extenderState)
+    set(extenderState, { ...rect, x: newValue })
+  },
+})
+
+export const extenderY = selector({
+  key: 'extenderY',
+  get: ({ get }) => get(extenderState).y,
+  set: ({ get, set }, newValue: any) => {
+    const rect = get(extenderState)
+    set(extenderState, { ...rect, y: newValue })
+  },
+})
+
+export const extenderHeight = selector({
+  key: 'extenderHeight',
+  get: ({ get }) => get(extenderState).height,
+  set: ({ get, set }, newValue: any) => {
+    const rect = get(extenderState)
+    set(extenderState, { ...rect, height: newValue })
+  },
+})
+
+export const extenderWidth = selector({
+  key: 'extenderWidth',
+  get: ({ get }) => get(extenderState).width,
+  set: ({ get, set }, newValue: any) => {
+    const rect = get(extenderState)
+    set(extenderState, { ...rect, width: newValue })
   },
 })
 
@@ -567,7 +634,7 @@ const defaultHDSettings: ModelsHDSettings = {
     hdStrategyCropMargin: 128,
     enabled: true,
   },
-  [AIModel.KANDINSKY21]: {
+  [AIModel.KANDINSKY22]: {
     hdStrategy: HDStrategy.ORIGINAL,
     hdStrategyResizeLimit: 768,
     hdStrategyCropTrigerSize: 512,
@@ -728,7 +795,7 @@ export const isSDState = selector({
       settings.model === AIModel.SD2 ||
       settings.model === AIModel.ANYTHING4 ||
       settings.model === AIModel.REALISTIC_VISION_1_4 ||
-      settings.model === AIModel.KANDINSKY21
+      settings.model === AIModel.KANDINSKY22
     )
   },
 })

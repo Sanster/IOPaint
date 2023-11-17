@@ -1,6 +1,7 @@
-import React, { FormEvent } from 'react'
+import React, { FormEvent, useState } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
+import * as Tabs from '@radix-ui/react-tabs'
 import { useToggle } from 'react-use'
 import {
   ControlNetMethod,
@@ -10,6 +11,8 @@ import {
   propmtState,
   SDSampler,
   settingState,
+  SIDE_PANEL_TAB,
+  SIDE_PANEL_TAB_TYPE,
 } from '../../store/Atoms'
 import NumberInputSetting from '../Settings/NumberInputSetting'
 import SettingBlock from '../Settings/SettingBlock'
@@ -23,6 +26,7 @@ const INPUT_WIDTH = 30
 
 const SidePanel = () => {
   const [open, toggleOpen] = useToggle(true)
+  const [tab, setTab] = useState<SIDE_PANEL_TAB_TYPE>(SIDE_PANEL_TAB.inpainting)
   const [setting, setSettingState] = useRecoilState(settingState)
   const [negativePrompt, setNegativePrompt] =
     useRecoilState(negativePropmtState)
@@ -95,27 +99,58 @@ const SidePanel = () => {
         >
           Config
         </PopoverPrimitive.Trigger>
+
         <PopoverPrimitive.Portal>
           <PopoverPrimitive.Content className="side-panel-content">
-            {isControlNet && renderConterNetSetting()}
-
-            <SettingBlock
-              title="Croper"
-              input={
-                <Switch
-                  checked={setting.showCroper}
-                  onCheckedChange={value => {
-                    setSettingState(old => {
-                      return { ...old, showCroper: value }
-                    })
-                  }}
+            <Tabs.Root
+              className="TabsRoot"
+              style={{ alignSelf: 'center' }}
+              defaultValue={tab}
+              onValueChange={val => setTab(val as SIDE_PANEL_TAB_TYPE)}
+            >
+              <Tabs.List className="TabsList">
+                <Tabs.Trigger
+                  className="TabsTrigger"
+                  value={SIDE_PANEL_TAB.inpainting}
                 >
-                  <SwitchThumb />
-                </Switch>
-              }
-            />
+                  In Painting
+                </Tabs.Trigger>
+                <Tabs.Trigger
+                  className="TabsTrigger"
+                  value={SIDE_PANEL_TAB.outpainting}
+                >
+                  Out Painting
+                </Tabs.Trigger>
+              </Tabs.List>
+            </Tabs.Root>
 
-            <ImageResizeScale />
+            {isControlNet && tab === SIDE_PANEL_TAB.inpainting ? (
+              renderConterNetSetting()
+            ) : (
+              <></>
+            )}
+
+            {tab === SIDE_PANEL_TAB.inpainting ? (
+              <SettingBlock
+                title="Croper"
+                input={
+                  <Switch
+                    checked={setting.showCroper}
+                    onCheckedChange={value => {
+                      setSettingState(old => {
+                        return { ...old, showCroper: value }
+                      })
+                    }}
+                  >
+                    <SwitchThumb />
+                  </Switch>
+                }
+              />
+            ) : (
+              <></>
+            )}
+
+            {tab === SIDE_PANEL_TAB.inpainting ? <ImageResizeScale /> : <></>}
 
             {/* 
             <NumberInputSetting
@@ -158,35 +193,43 @@ const SidePanel = () => {
               }}
             />
 
-            <NumberInputSetting
-              title="Mask Blur"
-              width={INPUT_WIDTH}
-              value={`${setting.sdMaskBlur}`}
-              desc="Blur the edge of mask area. The higher the number the smoother blend with the original image"
-              onValue={value => {
-                const val = value.length === 0 ? 0 : parseInt(value, 10)
-                setSettingState(old => {
-                  return { ...old, sdMaskBlur: val }
-                })
-              }}
-            />
+            {tab === SIDE_PANEL_TAB.inpainting ? (
+              <NumberInputSetting
+                title="Mask Blur"
+                width={INPUT_WIDTH}
+                value={`${setting.sdMaskBlur}`}
+                desc="Blur the edge of mask area. The higher the number the smoother blend with the original image"
+                onValue={value => {
+                  const val = value.length === 0 ? 0 : parseInt(value, 10)
+                  setSettingState(old => {
+                    return { ...old, sdMaskBlur: val }
+                  })
+                }}
+              />
+            ) : (
+              <></>
+            )}
 
-            <SettingBlock
-              title="Match Histograms"
-              desc="Match the inpainting result histogram to the source image histogram, will improves the inpainting quality for some images."
-              input={
-                <Switch
-                  checked={setting.sdMatchHistograms}
-                  onCheckedChange={value => {
-                    setSettingState(old => {
-                      return { ...old, sdMatchHistograms: value }
-                    })
-                  }}
-                >
-                  <SwitchThumb />
-                </Switch>
-              }
-            />
+            {tab === SIDE_PANEL_TAB.outpainting ? (
+              <SettingBlock
+                title="Match Histograms"
+                desc="Match the inpainting result histogram to the source image histogram, will improves the inpainting quality for some images."
+                input={
+                  <Switch
+                    checked={setting.sdMatchHistograms}
+                    onCheckedChange={value => {
+                      setSettingState(old => {
+                        return { ...old, sdMatchHistograms: value }
+                      })
+                    }}
+                  >
+                    <SwitchThumb />
+                  </Switch>
+                }
+              />
+            ) : (
+              <></>
+            )}
 
             <SettingBlock
               className="sub-setting-block"

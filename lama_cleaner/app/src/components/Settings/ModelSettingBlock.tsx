@@ -1,5 +1,6 @@
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { useRecoilState, useRecoilValue } from 'recoil'
+import * as Tabs from '@radix-ui/react-tabs'
 import {
   AIModel,
   CV2Flag,
@@ -9,13 +10,21 @@ import {
 import Selector from '../shared/Selector'
 import { Switch, SwitchThumb } from '../shared/Switch'
 import Tooltip from '../shared/Tooltip'
-import { LDMSampler } from './HDSettingBlock'
+import HDSettingBlock, { LDMSampler } from './HDSettingBlock'
 import NumberInputSetting from './NumberInputSetting'
 import SettingBlock from './SettingBlock'
+import Flex from '../shared/Layout'
+import ManualRunInpaintingSettingBlock from './ManualRunInpaintingSettingBlock'
+
+const ERASE_TAB = 'erase_tab'
+const INPAINTING_DIFFUSION_TAB = 'inpainting_diffusion_tab'
+const DIFFUSION_TAB = 'diffusion_tab'
+const OTHER_TAB = 'other_tab'
 
 function ModelSettingBlock() {
   const [setting, setSettingState] = useRecoilState(settingState)
   const isDisableModelSwitch = useRecoilValue(isDisableModelSwitchState)
+  const [tab, setTab] = useState(ERASE_TAB)
 
   const onModelChange = (value: AIModel) => {
     setSettingState(old => {
@@ -190,112 +199,63 @@ function ModelSettingBlock() {
     }
   }
 
-  const renderPaperCodeBadge = (): ReactNode => {
-    switch (setting.model) {
-      case AIModel.LAMA:
-        return renderModelDesc(
-          'Resolution-robust Large Mask Inpainting with Fourier Convolutions',
-          'https://arxiv.org/abs/2109.07161',
-          'https://github.com/saic-mdal/lama'
-        )
-      case AIModel.LDM:
-        return renderModelDesc(
-          'High-Resolution Image Synthesis with Latent Diffusion Models',
-          'https://arxiv.org/abs/2112.10752',
-          'https://github.com/CompVis/latent-diffusion'
-        )
-      case AIModel.ZITS:
-        return renderModelDesc(
-          'Incremental Transformer Structure Enhanced Image Inpainting with Masking Positional Encoding',
-          'https://arxiv.org/abs/2203.00867',
-          'https://github.com/DQiaole/ZITS_inpainting'
-        )
-      case AIModel.MAT:
-        return renderModelDesc(
-          'Mask-Aware Transformer for Large Hole Image Inpainting',
-          'https://arxiv.org/abs/2203.15270',
-          'https://github.com/fenglinglwb/MAT'
-        )
-      case AIModel.FCF:
-        return renderModelDesc(
-          'Keys to Better Image Inpainting: Structure and Texture Go Hand in Hand',
-          'https://arxiv.org/abs/2208.03382',
-          'https://github.com/SHI-Labs/FcF-Inpainting'
-        )
-      case AIModel.SD15:
-        return renderModelDesc(
-          'Stable Diffusion 1.5',
-          'https://ommer-lab.com/research/latent-diffusion-models/',
-          'https://github.com/CompVis/stable-diffusion'
-        )
-      case AIModel.ANYTHING4:
-        return renderModelDesc(
-          'andite/anything-v4.0',
-          'https://huggingface.co/andite/anything-v4.0',
-          'https://huggingface.co/andite/anything-v4.0'
-        )
-      case AIModel.REALISTIC_VISION_1_4:
-        return renderModelDesc(
-          'SG161222/Realistic_Vision_V1.4',
-          'https://huggingface.co/SG161222/Realistic_Vision_V1.4',
-          'https://huggingface.co/SG161222/Realistic_Vision_V1.4'
-        )
-      case AIModel.SD2:
-        return renderModelDesc(
-          'Stable Diffusion 2',
-          'https://ommer-lab.com/research/latent-diffusion-models/',
-          'https://github.com/Stability-AI/stablediffusion'
-        )
-      case AIModel.Mange:
-        return renderModelDesc(
-          'Manga Inpainting',
-          'https://www.cse.cuhk.edu.hk/~ttwong/papers/mangainpaint/mangainpaint.html',
-          'https://github.com/msxie92/MangaInpainting'
-        )
-      case AIModel.CV2:
-        return renderModelDesc(
-          'OpenCV Image Inpainting',
-          'https://docs.opencv.org/4.6.0/df/d3d/tutorial_py_inpainting.html',
-          'https://docs.opencv.org/4.6.0/df/d3d/tutorial_py_inpainting.html'
-        )
-      case AIModel.PAINT_BY_EXAMPLE:
-        return renderModelDesc(
-          'Paint by Example',
-          'https://arxiv.org/abs/2211.13227',
-          'https://github.com/Fantasy-Studio/Paint-by-Example'
-        )
-      case AIModel.PIX2PIX:
-        return renderModelDesc(
-          'InstructPix2Pix',
-          'https://arxiv.org/abs/2211.09800',
-          'https://github.com/timothybrooks/instruct-pix2pix'
-        )
-      case AIModel.KANDINSKY21:
-        return renderModelDesc(
-          'Kandinsky 2.1',
-          'https://huggingface.co/kandinsky-community/kandinsky-2-1-inpaint',
-          'https://huggingface.co/kandinsky-community/kandinsky-2-1-inpaint'
-        )
-      default:
-        return <></>
-    }
-  }
-
   return (
-    <SettingBlock
-      className="model-setting-block"
-      title="Model"
-      titleSuffix={renderPaperCodeBadge()}
-      input={
-        <Selector
-          value={setting.model as string}
-          options={Object.values(AIModel)}
-          onChange={val => onModelChange(val as AIModel)}
-          disabled={isDisableModelSwitch}
-        />
-      }
-      optionDesc={renderOptionDesc()}
-    />
+    // <SettingBlock
+    //   className="model-setting-block"
+    //   title="Model"
+    //   input={
+    //     <Selector
+    //       value={setting.model as string}
+    //       options={Object.values(AIModel)}
+    //       onChange={val => onModelChange(val as AIModel)}
+    //       disabled={isDisableModelSwitch}
+    //     />
+    //   }
+    //   optionDesc={renderOptionDesc()}
+    // />
+    <Flex
+      style={{
+        justifyContent: 'start',
+        flexDirection: 'column',
+        gap: 10,
+        alignItems: 'start',
+      }}
+    >
+      <Flex style={{ justifyContent: 'space-between', width: '100%' }}>
+        <div>Current Model</div>
+        <div>{setting.model}</div>
+      </Flex>
+      <Tabs.Root
+        className="TabsRoot"
+        defaultValue={ERASE_TAB}
+        onValueChange={val => setTab(val)}
+      >
+        <Tabs.List className="TabsList" aria-label="Object remove model">
+          <Tabs.Trigger className="TabsTrigger" value={ERASE_TAB}>
+            Erase
+          </Tabs.Trigger>
+          <Tabs.Trigger
+            className="TabsTrigger"
+            value={INPAINTING_DIFFUSION_TAB}
+          >
+            Inpainting Diffusion
+          </Tabs.Trigger>
+          <Tabs.Trigger className="TabsTrigger" value={DIFFUSION_TAB}>
+            Diffusion
+          </Tabs.Trigger>
+          <Tabs.Trigger className="TabsTrigger" value={OTHER_TAB}>
+            Other
+          </Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value={ERASE_TAB}>
+          <ManualRunInpaintingSettingBlock />
+          <HDSettingBlock />
+        </Tabs.Content>
+        <Tabs.Content value={INPAINTING_DIFFUSION_TAB}>123</Tabs.Content>
+        <Tabs.Content value={DIFFUSION_TAB}>123</Tabs.Content>
+        <Tabs.Content value={OTHER_TAB}>123</Tabs.Content>
+      </Tabs.Root>
+    </Flex>
   )
 }
 
