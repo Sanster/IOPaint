@@ -3,7 +3,11 @@ import gc
 
 from loguru import logger
 
-from lama_cleaner.const import SD15_MODELS, MODELS_SUPPORT_FREEU, MODELS_SUPPORT_LCM_LORA
+from lama_cleaner.const import (
+    SD15_MODELS,
+    MODELS_SUPPORT_FREEU,
+    MODELS_SUPPORT_LCM_LORA,
+)
 from lama_cleaner.helper import switch_mps_device
 from lama_cleaner.model.controlnet import ControlNet
 from lama_cleaner.model.fcf import FcF
@@ -12,6 +16,7 @@ from lama_cleaner.model.lama import LaMa
 from lama_cleaner.model.ldm import LDM
 from lama_cleaner.model.manga import Manga
 from lama_cleaner.model.mat import MAT
+from lama_cleaner.model.mi_gan import MIGAN
 from lama_cleaner.model.paint_by_example import PaintByExample
 from lama_cleaner.model.instruct_pix2pix import InstructPix2Pix
 from lama_cleaner.model.sd import SD15, SD2, Anything4, RealisticVision14
@@ -37,6 +42,7 @@ models = {
     "instruct_pix2pix": InstructPix2Pix,
     Kandinsky22.name: Kandinsky22,
     SDXL.name: SDXL,
+    MIGAN.name: MIGAN,
 }
 
 
@@ -146,4 +152,3 @@ class ModelManager:
                     self.model.model.load_lora_weights(self.model.lcm_lora_id)
             else:
                 self.model.model.disable_lora()
-

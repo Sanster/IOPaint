@@ -170,7 +170,7 @@ def test_cv2(strategy, cv2_flag, cv2_radius):
     assert_equal(
         model,
         cfg,
-        f"sd_{strategy.capitalize()}_{cv2_flag}_{cv2_radius}.png",
+        f"cv2_{strategy.capitalize()}_{cv2_flag}_{cv2_radius}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
@@ -188,7 +188,23 @@ def test_manga(strategy):
     assert_equal(
         model,
         cfg,
-        f"sd_{strategy.capitalize()}.png",
+        f"manga_{strategy.capitalize()}.png",
+        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
+    )
+
+
+@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
+def test_mi_gan(strategy):
+    model = ModelManager(
+        name="migan",
+        device=torch.device(device),
+    )
+    cfg = get_config(strategy)
+    assert_equal(
+        model,
+        cfg,
+        f"migan_{strategy.capitalize()}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
