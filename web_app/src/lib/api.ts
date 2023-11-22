@@ -236,35 +236,3 @@ export async function downloadToOutput(
     throw new Error(`Something went wrong: ${error}`)
   }
 }
-
-export async function makeGif(
-  originFile: File,
-  cleanImage: HTMLImageElement,
-  filename: string,
-  mimeType: string
-) {
-  const cleanFile = await srcToFile(cleanImage.src, filename, mimeType)
-  const fd = new FormData()
-  fd.append("name", PluginName.MakeGIF)
-  fd.append("image", originFile)
-  fd.append("clean_img", cleanFile)
-  fd.append("filename", filename)
-
-  try {
-    const res = await fetch(`${API_ENDPOINT}/run_plugin`, {
-      method: "POST",
-      body: fd,
-    })
-    if (!res.ok) {
-      const errMsg = await res.text()
-      throw new Error(errMsg)
-    }
-
-    const blob = await res.blob()
-    const newImage = new Image()
-    await loadImage(newImage, URL.createObjectURL(blob))
-    return newImage
-  } catch (error) {
-    throw new Error(`Something went wrong: ${error}`)
-  }
-}

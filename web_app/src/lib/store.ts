@@ -86,7 +86,6 @@ interface AppState {
   isInteractiveSegRunning: boolean
   interactiveSegClicks: number[][]
   enableFileManager: boolean
-  gifImage: HTMLImageElement | undefined
   brushSize: number
   isControlNet: boolean
   controlNetMethod: string
@@ -108,7 +107,6 @@ export const appState = atom<AppState>({
     isInteractiveSegRunning: false,
     interactiveSegClicks: [],
     enableFileManager: false,
-    gifImage: undefined,
     brushSize: 40,
     isControlNet: false,
     controlNetMethod: ControlNetMethod.canny,
@@ -222,18 +220,6 @@ export const enableFileManagerState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, enableFileManager: newValue })
-  },
-})
-
-export const gifImageState = selector({
-  key: "gifImageState",
-  get: ({ get }) => {
-    const app = get(appState)
-    return app.gifImage
-  },
-  set: ({ get, set }, newValue: any) => {
-    const app = get(appState)
-    set(appState, { ...app, gifImage: newValue })
   },
 })
 

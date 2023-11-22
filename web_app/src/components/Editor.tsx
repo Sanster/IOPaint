@@ -71,7 +71,6 @@ import { Slider } from "./ui/slider"
 // import InteractiveSegReplaceModal from "../InteractiveSeg/ReplaceModal"
 import { PluginName } from "@/lib/types"
 import { useHotkeys } from "react-hotkeys-hook"
-// import MakeGIF from "./MakeGIF"
 
 const TOOLBAR_SIZE = 200
 const MIN_BRUSH_SIZE = 10
@@ -1583,7 +1582,6 @@ export default function Editor() {
       onMouseMove={onMouseMove}
       onMouseUp={onPointerUp}
     >
-      {/* <MakeGIF renders={renders} /> */}
       {/* <InteractiveSegConfirmActions
         onAcceptClick={onInteractiveAccept}
         onCancelClick={onInteractiveCancel}

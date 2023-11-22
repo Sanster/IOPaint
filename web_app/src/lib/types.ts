@@ -5,5 +5,4 @@ export enum PluginName {
   GFPGAN = "GFPGAN",
   RestoreFormer = "RestoreFormer",
   InteractiveSeg = "InteractiveSeg",
-  MakeGIF = "MakeGIF",
 }
