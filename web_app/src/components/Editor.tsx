@@ -2,6 +2,7 @@ import { SyntheticEvent, useCallback, useEffect, useRef, useState } from "react"
 import { CursorArrowRaysIcon } from "@heroicons/react/24/outline"
 import { useToast } from "@/components/ui/use-toast"
 import {
+  ReactZoomPanPinchContentRef,
   ReactZoomPanPinchRef,
   TransformComponent,
   TransformWrapper,
@@ -55,6 +56,8 @@ import { Slider } from "./ui/slider"
 import { PluginName } from "@/lib/types"
 import { useHotkeys } from "react-hotkeys-hook"
 import { useStore } from "@/lib/states"
+import Cropper from "./Cropper"
+import { HotkeysEvent } from "react-hotkeys-hook/dist/types"
 
 const TOOLBAR_HEIGHT = 200
 const MIN_BRUSH_SIZE = 10
@@ -193,7 +196,7 @@ export default function Editor(props: EditorProps) {
   const windowSize = useWindowSize()
   const windowCenterX = windowSize.width / 2
   const windowCenterY = windowSize.height / 2
-  const viewportRef = useRef<ReactZoomPanPinchRef | null>(null)
+  const viewportRef = useRef<ReactZoomPanPinchContentRef | null>(null)
   // Indicates that the image has been loaded and is centered on first load
   const [initialCentered, setInitialCentered] = useState(false)
 
@@ -1119,9 +1122,8 @@ export default function Editor(props: EditorProps) {
     context,
   ])
 
-  const undo = () => {
-    // TODO: prevent default event
-    console.log("undo")
+  const undo = (keyboardEvent: KeyboardEvent, hotkeysEvent: HotkeysEvent) => {
+    keyboardEvent.preventDefault()
     if (runMannually && curLineGroup.length !== 0) {
       undoStroke()
     } else {
@@ -1186,7 +1188,8 @@ export default function Editor(props: EditorProps) {
     // draw(newRenders[newRenders.length - 1], [])
   }, [draw, renders, redoRenders, redoLineGroups, lineGroups, original])
 
-  const redo = () => {
+  const redo = (keyboardEvent: KeyboardEvent, hotkeysEvent: HotkeysEvent) => {
+    keyboardEvent.preventDefault()
     if (runMannually && redoCurLines.length !== 0) {
       redoStroke()
     } else {
@@ -1194,29 +1197,12 @@ export default function Editor(props: EditorProps) {
     }
   }
 
-  // Handle Cmd+shift+Z
-  const redoPredicate = (event: KeyboardEvent) => {
-    const isCmdZ =
-      (event.metaKey || event.ctrlKey) &&
-      event.shiftKey &&
-      event.key.toLowerCase() === "z"
-    // Handle tab switch
-    if (event.key === "Tab") {
-      event.preventDefault()
-    }
-    if (isCmdZ) {
-      event.preventDefault()
-      return true
-    }
-    return false
-  }
-
-  //   useKey(redoPredicate, redo, undefined, [
-  //     redoStroke,
-  //     redoRender,
-  //     runMannually,
-  //     redoCurLines,
-  //   ])
+  useHotkeys("shift+ctrl+z,shift+meta+z", redo, undefined, [
+    redoStroke,
+    redoRender,
+    runMannually,
+    redoCurLines,
+  ])
 
   const disableRedo = () => {
     if (isProcessing) {
@@ -1410,12 +1396,13 @@ export default function Editor(props: EditorProps) {
     let s = minScale
     if (viewportRef.current?.state?.scale !== undefined) {
       s = viewportRef.current?.state.scale
+      console.log("!!!!!!")
     }
     return s!
   }
 
   const getBrushStyle = (_x: number, _y: number) => {
-    const curScale = getCurScale()
+    const curScale = scale
     return {
       width: `${brushSize * curScale}px`,
       height: `${brushSize * curScale}px`,
@@ -1463,7 +1450,12 @@ export default function Editor(props: EditorProps) {
   const renderCanvas = () => {
     return (
       <TransformWrapper
-        ref={viewportRef}
+        // ref={viewportRef}
+        ref={(r) => {
+          if (r) {
+            viewportRef.current = r
+          }
+        }}
         panning={{ disabled: !isPanning, velocityDisabled: true }}
         wheel={{ step: 0.05 }}
         centerZoomedOut
@@ -1546,14 +1538,15 @@ export default function Editor(props: EditorProps) {
             </div>
           </div>
 
-          {/* <Croper
+          <Cropper
             maxHeight={imageHeight}
             maxWidth={imageWidth}
             minHeight={Math.min(256, imageHeight)}
             minWidth={Math.min(256, imageWidth)}
             scale={scale}
-            show={isDiffusionModels && settings.showCroper}
-          /> */}
+            show={true}
+            // show={isDiffusionModels && settings.showCroper}
+          />
 
           {/* {isInteractiveSeg ? <InteractiveSeg /> : <></>} */}
         </TransformComponent>

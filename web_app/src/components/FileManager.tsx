@@ -197,11 +197,12 @@ export default function FileManager(props: Props) {
             onClick={() => {
               setFileManagerLayout("masonry")
             }}
-            className={
-              fileManagerState.layout !== "masonry" ? "opacity-50" : ""
-            }
           >
-            <ViewGridIcon />
+            <ViewGridIcon
+              className={
+                fileManagerState.layout !== "masonry" ? "opacity-50" : ""
+              }
+            />
           </IconButton>
         </div>
       </div>

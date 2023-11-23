@@ -11,6 +11,13 @@ type FileManagerState = {
   searchText: string
 }
 
+type CropperState = {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 type AppState = {
   file: File | null
   imageHeight: number
@@ -26,6 +33,7 @@ type AppState = {
   prompt: string
 
   fileManagerState: FileManagerState
+  cropperState: CropperState
 }
 
 type AppAction = {
@@ -33,13 +41,19 @@ type AppAction = {
   setIsInpainting: (newValue: boolean) => void
   setBrushSize: (newValue: number) => void
   setImageSize: (width: number, height: number) => void
+  setPrompt: (newValue: string) => void
+
   setFileManagerSortBy: (newValue: SortBy) => void
   setFileManagerSortOrder: (newValue: SortOrder) => void
   setFileManagerLayout: (
     newValue: AppState["fileManagerState"]["layout"]
   ) => void
   setFileManagerSearchText: (newValue: string) => void
-  setPrompt: (newValue: string) => void
+
+  setCropperX: (newValue: number) => void
+  setCropperY: (newValue: number) => void
+  setCropperWidth: (newValue: number) => void
+  setCropperHeight: (newValue: number) => void
 }
 
 export const useStore = create<AppState & AppAction>()(
@@ -56,6 +70,12 @@ export const useStore = create<AppState & AppAction>()(
         isInteractiveSegRunning: false,
         interactiveSegClicks: [],
         prompt: "",
+        cropperState: {
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
+        },
         fileManagerState: {
           sortBy: SortBy.CTIME,
           sortOrder: SortOrder.DESCENDING,
@@ -66,15 +86,18 @@ export const useStore = create<AppState & AppAction>()(
           set((state: AppState) => {
             state.isInpainting = newValue
           }),
+
         setFile: (file: File) =>
           set((state: AppState) => {
             // TODO: 清空各种状态
             state.file = file
           }),
+
         setBrushSize: (newValue: number) =>
           set((state: AppState) => {
             state.brushSize = newValue
           }),
+
         setImageSize: (width: number, height: number) => {
           // 根据图片尺寸调整 brushSize 的 scale
           set((state: AppState) => {
@@ -83,22 +106,47 @@ export const useStore = create<AppState & AppAction>()(
             state.brushSizeScale = Math.max(Math.min(width, height), 512) / 512
           })
         },
+
         setPrompt: (newValue: string) =>
           set((state: AppState) => {
             state.prompt = newValue
           }),
+
+        setCropperX: (newValue: number) =>
+          set((state: AppState) => {
+            state.cropperState.x = newValue
+          }),
+
+        setCropperY: (newValue: number) =>
+          set((state: AppState) => {
+            state.cropperState.y = newValue
+          }),
+
+        setCropperWidth: (newValue: number) =>
+          set((state: AppState) => {
+            state.cropperState.width = newValue
+          }),
+
+        setCropperHeight: (newValue: number) =>
+          set((state: AppState) => {
+            state.cropperState.height = newValue
+          }),
+
         setFileManagerSortBy: (newValue: SortBy) =>
           set((state: AppState) => {
             state.fileManagerState.sortBy = newValue
           }),
+
         setFileManagerSortOrder: (newValue: SortOrder) =>
           set((state: AppState) => {
             state.fileManagerState.sortOrder = newValue
           }),
+
         setFileManagerLayout: (newValue: "rows" | "masonry") =>
           set((state: AppState) => {
             state.fileManagerState.layout = newValue
           }),
+
         setFileManagerSearchText: (newValue: string) =>
           set((state: AppState) => {
             state.fileManagerState.searchText = newValue
