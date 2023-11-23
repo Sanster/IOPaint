@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import useResolution from "@/hooks/useResolution"
 
 type FileSelectProps = {
@@ -34,10 +34,10 @@ export default function FileSelect(props: FileSelectProps) {
   }
 
   return (
-    <div className="absolute flex w-screen h-screen justify-center items-center ">
+    <div className="absolute flex w-screen h-screen justify-center items-center pointer-events-none">
       <label
         htmlFor={uploadElemId}
-        className="grid cursor-pointer border-[2px] border-[dashed] rounded-lg min-w-[600px] hover:cursor-pointer hover:bg-primary hover:text-primary-foreground"
+        className="grid border-[2px] border-[dashed] rounded-lg min-w-[600px] hover:bg-primary hover:text-primary-foreground pointer-events-auto"
       >
         <div
           className="grid p-16 w-full h-full"

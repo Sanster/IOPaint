@@ -1,15 +1,6 @@
-import React, {
-  SyntheticEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
-import {
-  CursorArrowRaysIcon,
-  ArrowsPointingOutIcon,
-  ArrowDownTrayIcon,
-} from "@heroicons/react/24/outline"
+import { SyntheticEvent, useCallback, useEffect, useRef, useState } from "react"
+import { CursorArrowRaysIcon } from "@heroicons/react/24/outline"
+import { useToast } from "@/components/ui/use-toast"
 import {
   ReactZoomPanPinchRef,
   TransformComponent,
@@ -19,7 +10,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
 import { useWindowSize } from "react-use"
 // import { useWindowSize, useKey, useKeyPressEvent } from "@uidotdev/usehooks"
 import inpaint, { downloadToOutput, runPlugin } from "@/lib/api"
-import { Button, IconButton } from "@/components/ui/button"
+import { IconButton } from "@/components/ui/button"
 import {
   askWritePermission,
   copyCanvasImage,
@@ -29,30 +20,22 @@ import {
   loadImage,
   srcToFile,
 } from "@/lib/utils"
-import { Eraser, Eye, Redo, Undo } from "lucide-react"
+import { Eraser, Eye, Redo, Undo, Expand, Download } from "lucide-react"
 import {
-  appState,
-  brushSizeState,
   croperState,
   enableFileManagerState,
-  fileState,
-  imageHeightState,
-  imageWidthState,
   interactiveSegClicksState,
   isDiffusionModelsState,
   isEnableAutoSavingState,
-  isInpaintingState,
   isInteractiveSegRunningState,
   isInteractiveSegState,
   isPix2PixState,
   isPluginRunningState,
   isProcessingState,
   negativePropmtState,
-  propmtState,
   runManuallyState,
   seedState,
   settingState,
-  toastState,
 } from "@/lib/store"
 // import Croper from "../Croper/Croper"
 import emitter, {
@@ -71,8 +54,9 @@ import { Slider } from "./ui/slider"
 // import InteractiveSegReplaceModal from "../InteractiveSeg/ReplaceModal"
 import { PluginName } from "@/lib/types"
 import { useHotkeys } from "react-hotkeys-hook"
+import { useStore } from "@/lib/states"
 
-const TOOLBAR_SIZE = 200
+const TOOLBAR_HEIGHT = 200
 const MIN_BRUSH_SIZE = 10
 const MAX_BRUSH_SIZE = 200
 const BRUSH_COLOR = "#ffcc00bb"
@@ -110,15 +94,45 @@ function mouseXY(ev: SyntheticEvent) {
   return { x: mouseEvent.offsetX, y: mouseEvent.offsetY }
 }
 
-export default function Editor() {
-  const [file, setFile] = useRecoilState(fileState)
-  const promptVal = useRecoilValue(propmtState)
+interface EditorProps {
+  file: File
+}
+
+export default function Editor(props: EditorProps) {
+  const { file } = props
+  const { toast } = useToast()
+
+  const [
+    isInpainting,
+    imageWidth,
+    imageHeight,
+    baseBrushSize,
+    brushScale,
+    promptVal,
+    setImageSize,
+    setBrushSize,
+    setIsInpainting,
+  ] = useStore((state) => [
+    state.isInpainting,
+    state.imageWidth,
+    state.imageHeight,
+    state.brushSize,
+    state.brushSizeScale,
+    state.prompt,
+    state.setImageSize,
+    state.setBrushSize,
+    state.setIsInpainting,
+  ])
+  const brushSize = baseBrushSize * brushScale
+
+  // 纯 local state
+  const [showOriginal, setShowOriginal] = useState(false)
+
+  //
   const negativePromptVal = useRecoilValue(negativePropmtState)
   const settings = useRecoilValue(settingState)
   const [seedVal, setSeed] = useRecoilState(seedState)
   const croperRect = useRecoilValue(croperState)
-  const setToastState = useSetRecoilState(toastState)
-  const [isInpainting, setIsInpainting] = useRecoilState(isInpaintingState)
   const setIsPluginRunning = useSetRecoilState(isPluginRunningState)
   const isProcessing = useRecoilValue(isProcessingState)
   const runMannually = useRecoilValue(runManuallyState)
@@ -152,8 +166,6 @@ export default function Editor() {
 
   const [clicks, setClicks] = useRecoilState(interactiveSegClicksState)
 
-  const [brushSize, setBrushSize] = useRecoilState(brushSizeState)
-
   const [original, isOriginalLoaded] = useImage(file)
   const [renders, setRenders] = useState<HTMLImageElement[]>([])
   const [context, setContext] = useState<CanvasRenderingContext2D>()
@@ -175,7 +187,6 @@ export default function Editor() {
     brushSize: 20,
   })
 
-  const [showOriginal, setShowOriginal] = useState(false)
   const [scale, setScale] = useState<number>(1)
   const [panned, setPanned] = useState<boolean>(false)
   const [minScale, setMinScale] = useState<number>(1.0)
@@ -197,10 +208,6 @@ export default function Editor() {
   const [redoLineGroups, setRedoLineGroups] = useState<LineGroup[]>([])
   const enableFileManager = useRecoilValue(enableFileManagerState)
   const isEnableAutoSaving = useRecoilValue(isEnableAutoSavingState)
-
-  const [imageWidth, setImageWidth] = useRecoilState(imageWidthState)
-  const [imageHeight, setImageHeight] = useRecoilState(imageHeightState)
-  const app = useRecoilValue(appState)
 
   const draw = useCallback(
     (render: HTMLImageElement, lineGroup: LineGroup) => {
@@ -422,11 +429,10 @@ export default function Editor() {
         // clear redo stack
         resetRedoState()
       } catch (e: any) {
-        setToastState({
-          open: true,
-          desc: e.message ? e.message : e.toString(),
-          state: "error",
-          duration: 4000,
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: e.message ? e.message : e.toString(),
         })
         drawOnCurrentRender([])
       }
@@ -464,11 +470,9 @@ export default function Editor() {
       } else if (isPix2Pix) {
         runInpainting(false, undefined, null)
       } else {
-        setToastState({
-          open: true,
-          desc: "Please draw mask on picture",
-          state: "error",
-          duration: 1500,
+        toast({
+          variant: "destructive",
+          description: "Please draw mask on picture.",
         })
       }
       emitter.emit(DREAM_BUTTON_MOUSE_LEAVE)
@@ -554,11 +558,9 @@ export default function Editor() {
         // 使用上一次 IS 的 mask 生成
         runInpainting(false, undefined, prevInteractiveSegMask, data.image)
       } else {
-        setToastState({
-          open: true,
-          desc: "Please draw mask on picture",
-          state: "error",
-          duration: 1500,
+        toast({
+          variant: "destructive",
+          description: "Please draw mask on picture.",
         })
       }
     })
@@ -577,11 +579,9 @@ export default function Editor() {
         // 使用上一次 IS 的 mask 生成
         runInpainting(false, undefined, prevInteractiveSegMask)
       } else {
-        setToastState({
-          open: true,
-          desc: "No mask to reuse",
-          state: "error",
-          duration: 1500,
+        toast({
+          variant: "destructive",
+          description: "No mask to reuse",
         })
       }
     })
@@ -628,8 +628,7 @@ export default function Editor() {
         const { blob } = res
         const newRender = new Image()
         await loadImage(newRender, blob)
-        setImageHeight(newRender.height)
-        setImageWidth(newRender.width)
+        setImageSize(newRender.height, newRender.width)
         const newRenders = [...renders, newRender]
         setRenders(newRenders)
         const newLineGroups = [...lineGroups, []]
@@ -638,15 +637,12 @@ export default function Editor() {
         const end = new Date()
         const time = end.getTime() - start.getTime()
 
-        setToastState({
-          open: true,
-          desc: `Run ${name} successfully in ${time / 1000}s`,
-          state: "success",
-          duration: 3000,
+        toast({
+          description: `Run ${name} successfully in ${time / 1000}s`,
         })
 
         const rW = windowSize.width / newRender.width
-        const rH = (windowSize.height - TOOLBAR_SIZE) / newRender.height
+        const rH = (windowSize.height - TOOLBAR_HEIGHT) / newRender.height
         let s = 1.0
         if (rW < 1 || rH < 1) {
           s = Math.min(rW, rH)
@@ -655,11 +651,9 @@ export default function Editor() {
         setScale(s)
         viewportRef.current?.centerView(s, 1)
       } catch (e: any) {
-        setToastState({
-          open: true,
-          desc: e.message ? e.message : e.toString(),
-          state: "error",
-          duration: 3000,
+        toast({
+          variant: "destructive",
+          description: e.message ? e.message : e.toString(),
         })
       } finally {
         setIsPluginRunning(false)
@@ -671,8 +665,7 @@ export default function Editor() {
       getCurrentRender,
       setIsPluginRunning,
       isProcessing,
-      setImageHeight,
-      setImageWidth,
+      setImageSize,
       lineGroups,
       viewportRef,
       windowSize,
@@ -753,11 +746,10 @@ export default function Editor() {
     }
 
     const [width, height] = getCurrentWidthHeight()
-    setImageWidth(width)
-    setImageHeight(height)
+    setImageSize(width, height)
 
     const rW = windowSize.width / width
-    const rH = (windowSize.height - TOOLBAR_SIZE) / height
+    const rH = (windowSize.height - TOOLBAR_HEIGHT) / height
 
     let s = 1.0
     if (rW < 1 || rH < 1) {
@@ -950,11 +942,9 @@ export default function Editor() {
       }
       img.src = blob
     } catch (e: any) {
-      setToastState({
-        open: true,
-        desc: e.message ? e.message : e.toString(),
-        state: "error",
-        duration: 4000,
+      toast({
+        variant: "destructive",
+        description: e.message ? e.message : e.toString(),
       })
     }
     setIsInteractiveSegRunning(false)
@@ -1280,18 +1270,14 @@ export default function Editor() {
     if ((enableFileManager || isEnableAutoSaving) && renders.length > 0) {
       try {
         downloadToOutput(renders[renders.length - 1], file.name, file.type)
-        setToastState({
-          open: true,
-          desc: `Save image success`,
-          state: "success",
-          duration: 2000,
+        toast({
+          description: "Save image success",
         })
       } catch (e: any) {
-        setToastState({
-          open: true,
-          desc: e.message ? e.message : e.toString(),
-          state: "error",
-          duration: 2000,
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: e.message ? e.message : e.toString(),
         })
       }
       return
@@ -1437,6 +1423,15 @@ export default function Editor() {
       top: `${_y}px`,
       transform: "translate(-50%, -50%)",
     }
+  }
+
+  const renderBrush = (style: any) => {
+    return (
+      <div
+        className="absolute rounded-[50%] border-[1px] border-[solid] border-[#ffcc00] pointer-events-none bg-[#ffcc00bb]"
+        style={style}
+      />
+    )
   }
 
   const handleSliderChange = (value: number) => {
@@ -1591,24 +1586,16 @@ export default function Editor() {
       {showBrush &&
         !isInpainting &&
         !isPanning &&
-        (isInteractiveSeg ? (
-          renderInteractiveSegCursor()
-        ) : (
-          <div
-            className="absolute rounded-[50%] border-[1px] border-[solid] pointer-events-none"
-            style={getBrushStyle(
-              isChangingBrushSizeByMouse ? changeBrushSizeByMouseInit.x : x,
-              isChangingBrushSizeByMouse ? changeBrushSizeByMouseInit.y : y
-            )}
-          />
-        ))}
+        (isInteractiveSeg
+          ? renderInteractiveSegCursor()
+          : renderBrush(
+              getBrushStyle(
+                isChangingBrushSizeByMouse ? changeBrushSizeByMouseInit.x : x,
+                isChangingBrushSizeByMouse ? changeBrushSizeByMouseInit.y : y
+              )
+            ))}
 
-      {showRefBrush && (
-        <div
-          className="absolute rounded-[50%] border-[1px] border-[solid] pointer-events-none"
-          style={getBrushStyle(windowCenterX, windowCenterY)}
-        />
-      )}
+      {showRefBrush && renderBrush(getBrushStyle(windowCenterX, windowCenterY))}
 
       <div className="fixed flex bottom-10 border px-4 py-2 rounded-[3rem] gap-8 items-center justify-center backdrop-filter backdrop-blur-md">
         <Slider
@@ -1617,7 +1604,7 @@ export default function Editor() {
           min={MIN_BRUSH_SIZE}
           max={MAX_BRUSH_SIZE}
           step={1}
-          value={[brushSize]}
+          value={[baseBrushSize]}
           onValueChange={(vals) => handleSliderChange(vals[0])}
           onClick={() => setShowRefBrush(false)}
         />
@@ -1627,7 +1614,7 @@ export default function Editor() {
             disabled={scale === minScale && panned === false}
             onClick={resetZoom}
           >
-            <ArrowsPointingOutIcon />
+            <Expand />
           </IconButton>
           <IconButton tooltip="Undo" onClick={undo} disabled={disableUndo()}>
             <Undo />
@@ -1662,24 +1649,22 @@ export default function Editor() {
             disabled={!renders.length}
             onClick={download}
           >
-            <ArrowDownTrayIcon />
+            <Download />
           </IconButton>
 
-          {settings.runInpaintingManually && !isDiffusionModels && (
-            <IconButton
-              tooltip="Run Inpainting"
-              disabled={
-                isProcessing ||
-                (!hadDrawSomething() && interactiveSegMask === null)
-              }
-              onClick={() => {
-                // ensured by disabled
-                runInpainting(false, undefined, interactiveSegMask)
-              }}
-            >
-              <Eraser />
-            </IconButton>
-          )}
+          <IconButton
+            tooltip="Run Inpainting"
+            disabled={
+              isProcessing ||
+              (!hadDrawSomething() && interactiveSegMask === null)
+            }
+            onClick={() => {
+              // ensured by disabled
+              runInpainting(false, undefined, interactiveSegMask)
+            }}
+          >
+            <Eraser />
+          </IconButton>
         </div>
       </div>
       {/* <InteractiveSegReplaceModal

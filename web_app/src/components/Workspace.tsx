@@ -1,36 +1,28 @@
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
 import Editor from "./Editor"
 // import SettingModal from "./Settings/SettingsModal"
-// import Toast from "./shared/Toast"
 import {
   AIModel,
-  fileState,
   isPaintByExampleState,
   isPix2PixState,
   isSDState,
   settingState,
-  showFileManagerState,
-  toastState,
 } from "@/lib/store"
-import {
-  currentModel,
-  getMediaFile,
-  modelDownloaded,
-  switchModel,
-} from "@/lib/api"
+import { currentModel, modelDownloaded, switchModel } from "@/lib/api"
+import { useStore } from "@/lib/states"
+import ImageSize from "./ImageSize"
+import Plugins from "./Plugins"
 // import SidePanel from "./SidePanel/SidePanel"
 // import PESidePanel from "./SidePanel/PESidePanel"
-// import FileManager from "./FileManager/FileManager"
 // import P2PSidePanel from "./SidePanel/P2PSidePanel"
 // import Plugins from "./Plugins/Plugins"
 // import Flex from "./shared/Layout"
 // import ImageSize from "./ImageSize/ImageSize"
 
 const Workspace = () => {
-  const setFile = useSetRecoilState(fileState)
+  const file = useStore((state) => state.file)
   const [settings, setSettingState] = useRecoilState(settingState)
-  const [toastVal, setToastState] = useRecoilState(toastState)
   const isSD = useRecoilValue(isSDState)
   const isPaintByExample = useRecoilValue(isPaintByExampleState)
   const isPix2Pix = useRecoilValue(isPix2PixState)
@@ -53,33 +45,34 @@ const Workspace = () => {
       loadingDuration = 9999999999
     }
 
-    setToastState({
-      open: true,
-      desc: loadingMessage,
-      state: "loading",
-      duration: loadingDuration,
-    })
+    // TODO 修改成 Modal
+    // setToastState({
+    //   open: true,
+    //   desc: loadingMessage,
+    //   state: "loading",
+    //   duration: loadingDuration,
+    // })
 
     switchModel(model)
       .then((res) => {
         if (res.ok) {
-          setToastState({
-            open: true,
-            desc: `Switch to ${model} model success`,
-            state: "success",
-            duration: 3000,
-          })
+          // setToastState({
+          //   open: true,
+          //   desc: `Switch to ${model} model success`,
+          //   state: "success",
+          //   duration: 3000,
+          // })
         } else {
           throw new Error("Server error")
         }
       })
       .catch(() => {
-        setToastState({
-          open: true,
-          desc: `Switch to ${model} model failed`,
-          state: "error",
-          duration: 3000,
-        })
+        // setToastState({
+        //   open: true,
+        //   desc: `Switch to ${model} model failed`,
+        //   state: "error",
+        //   duration: 3000,
+        // })
         setSettingState((old) => {
           return { ...old, model: curModel as AIModel }
         })
@@ -101,12 +94,12 @@ const Workspace = () => {
       {/* {isSD ? <SidePanel /> : <></>}
       {isPaintByExample ? <PESidePanel /> : <></>}
       {isPix2Pix ? <P2PSidePanel /> : <></>}
-      <Flex style={{ position: "absolute", top: 68, left: 24, gap: 12 }}>
+      {/* <SettingModal onClose={onSettingClose} /> */}
+      <div className="flex gap-3 absolute top-[68px] left-[24px] items-center">
         <Plugins />
         <ImageSize />
-      </Flex>
-      {/* <SettingModal onClose={onSettingClose} /> */}
-      <Editor />
+      </div>
+      {file ? <Editor file={file} /> : <></>}
     </>
   )
 }

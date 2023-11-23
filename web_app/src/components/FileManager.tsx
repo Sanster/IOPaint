@@ -7,28 +7,16 @@ import {
   FormEvent,
 } from "react"
 import _ from "lodash"
-import { useRecoilState } from "recoil"
 import PhotoAlbum from "react-photo-album"
-import {
-  BarsArrowDownIcon,
-  BarsArrowUpIcon,
-  FolderIcon,
-} from "@heroicons/react/24/outline"
+import { BarsArrowDownIcon, BarsArrowUpIcon } from "@heroicons/react/24/outline"
 import {
   MagnifyingGlassIcon,
   ViewHorizontalIcon,
   ViewGridIcon,
 } from "@radix-ui/react-icons"
-import { useDebounce, useToggle } from "react-use"
+import { useToggle } from "react-use"
+import { useDebounce } from "@uidotdev/usehooks"
 import FlexSearch from "flexsearch/dist/flexsearch.bundle.js"
-import {
-  fileManagerLayout,
-  fileManagerSearchText,
-  fileManagerSortBy,
-  fileManagerSortOrder,
-  SortBy,
-  SortOrder,
-} from "@/lib/store"
 import { useToast } from "@/components/ui/use-toast"
 import { API_ENDPOINT, getMedias } from "@/lib/api"
 import { IconButton } from "./ui/button"
@@ -45,6 +33,9 @@ import {
 import { ScrollArea } from "./ui/scroll-area"
 import { DialogTrigger } from "@radix-ui/react-dialog"
 import { useHotkeys } from "react-hotkeys-hook"
+import { useStore } from "@/lib/states"
+import { SortBy, SortOrder } from "@/lib/types"
+import { FolderClosed } from "lucide-react"
 
 interface Photo {
   src: string
@@ -83,6 +74,20 @@ export default function FileManager(props: Props) {
   const { onPhotoClick, photoWidth } = props
   const [open, toggleOpen] = useToggle(false)
 
+  const [
+    fileManagerState,
+    setFileManagerLayout,
+    setFileManagerSortBy,
+    setFileManagerSortOrder,
+    setFileManagerSearchText,
+  ] = useStore((state) => [
+    state.fileManagerState,
+    state.setFileManagerLayout,
+    state.setFileManagerSortBy,
+    state.setFileManagerSortOrder,
+    state.setFileManagerSearchText,
+  ])
+
   useHotkeys("f", () => {
     toggleOpen()
   })
@@ -91,24 +96,10 @@ export default function FileManager(props: Props) {
   const [scrollTop, setScrollTop] = useState(0)
   const [closeScrollTop, setCloseScrollTop] = useState(0)
 
-  const [sortBy, setSortBy] = useRecoilState<SortBy>(fileManagerSortBy)
-  const [sortOrder, setSortOrder] = useRecoilState(fileManagerSortOrder)
-  const [layout, setLayout] = useRecoilState(fileManagerLayout)
-  const [debouncedSearchText, setDebouncedSearchText] = useRecoilState(
-    fileManagerSearchText
-  )
   const ref = useRef(null)
-  const [searchText, setSearchText] = useState(debouncedSearchText)
+  const debouncedSearchText = useDebounce(fileManagerState.searchText, 300)
   const [tab, setTab] = useState(IMAGE_TAB)
   const [photos, setPhotos] = useState<Photo[]>([])
-
-  const [, cancel] = useDebounce(
-    () => {
-      setDebouncedSearchText(searchText)
-    },
-    300,
-    [searchText]
-  )
 
   useEffect(() => {
     if (!open) {
@@ -153,7 +144,11 @@ export default function FileManager(props: Props) {
           )
         }
 
-        filteredFilenames = _.orderBy(filteredFilenames, sortBy, sortOrder)
+        filteredFilenames = _.orderBy(
+          filteredFilenames,
+          fileManagerState.sortBy,
+          fileManagerState.sortOrder
+        )
 
         const newPhotos = filteredFilenames.map((filename: Filename) => {
           const width = photoWidth
@@ -171,7 +166,7 @@ export default function FileManager(props: Props) {
       }
     }
     fetchData()
-  }, [tab, debouncedSearchText, sortBy, sortOrder, photoWidth, open])
+  }, [tab, debouncedSearchText, fileManagerState, photoWidth, open])
 
   const onScroll = (event: SyntheticEvent) => {
     setScrollTop(event.currentTarget.scrollTop)
@@ -190,19 +185,21 @@ export default function FileManager(props: Props) {
           <IconButton
             tooltip="Rows layout"
             onClick={() => {
-              setLayout("rows")
+              setFileManagerLayout("rows")
             }}
           >
             <ViewHorizontalIcon
-              className={layout !== "rows" ? "opacity-50" : ""}
+              className={fileManagerState.layout !== "rows" ? "opacity-50" : ""}
             />
           </IconButton>
           <IconButton
             tooltip="Grid layout"
             onClick={() => {
-              setLayout("masonry")
+              setFileManagerLayout("masonry")
             }}
-            className={layout !== "masonry" ? "opacity-50" : ""}
+            className={
+              fileManagerState.layout !== "masonry" ? "opacity-50" : ""
+            }
           >
             <ViewGridIcon />
           </IconButton>
@@ -213,9 +210,9 @@ export default function FileManager(props: Props) {
 
   return (
     <Dialog open={open} onOpenChange={toggleOpen}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <IconButton tooltip="File Manager">
-          <FolderIcon />
+          <FolderClosed />
         </IconButton>
       </DialogTrigger>
       <DialogContent className="h-4/5 max-w-6xl">
@@ -225,14 +222,14 @@ export default function FileManager(props: Props) {
             <MagnifyingGlassIcon className="absolute left-[8px]" />
             <Input
               ref={ref}
-              value={searchText}
+              value={fileManagerState.searchText}
               className="w-[250px] pl-[30px]"
               tabIndex={-1}
               onInput={(evt: FormEvent<HTMLInputElement>) => {
                 evt.preventDefault()
                 evt.stopPropagation()
                 const target = evt.target as HTMLInputElement
-                setSearchText(target.value)
+                setFileManagerSearchText(target.value)
               }}
               placeholder="Search by file name"
             />
@@ -248,17 +245,17 @@ export default function FileManager(props: Props) {
           <div className="flex gap-2">
             <div className="flex gap-1">
               <Select
-                value={SortByMap[sortBy]}
+                value={SortByMap[fileManagerState.sortBy]}
                 onValueChange={(val) => {
                   switch (val) {
                     case SORT_BY_NAME:
-                      setSortBy(SortBy.NAME)
+                      setFileManagerSortBy(SortBy.NAME)
                       break
                     case SORT_BY_CREATED_TIME:
-                      setSortBy(SortBy.CTIME)
+                      setFileManagerSortBy(SortBy.CTIME)
                       break
                     case SORT_BY_MODIFIED_TIME:
-                      setSortBy(SortBy.MTIME)
+                      setFileManagerSortBy(SortBy.MTIME)
                       break
                     default:
                       break
@@ -279,11 +276,11 @@ export default function FileManager(props: Props) {
                 </SelectContent>
               </Select>
 
-              {sortOrder === SortOrder.DESCENDING ? (
+              {fileManagerState.sortOrder === SortOrder.DESCENDING ? (
                 <IconButton
                   tooltip="Descending Order"
                   onClick={() => {
-                    setSortOrder(SortOrder.ASCENDING)
+                    setFileManagerSortOrder(SortOrder.ASCENDING)
                   }}
                 >
                   <BarsArrowDownIcon />
@@ -292,7 +289,7 @@ export default function FileManager(props: Props) {
                 <IconButton
                   tooltip="Ascending Order"
                   onClick={() => {
-                    setSortOrder(SortOrder.DESCENDING)
+                    setFileManagerSortOrder(SortOrder.DESCENDING)
                   }}
                 >
                   <BarsArrowUpIcon />
@@ -308,7 +305,7 @@ export default function FileManager(props: Props) {
           ref={onRefChange}
         >
           <PhotoAlbum
-            layout={layout}
+            layout={fileManagerState.layout}
             photos={photos}
             spacing={12}
             padding={0}

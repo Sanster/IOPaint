@@ -1,5 +1,4 @@
 import { Keyboard } from "lucide-react"
-import useHotKey from "@/hooks/useHotkey"
 import { IconButton } from "@/components/ui/button"
 import { useToggle } from "@uidotdev/usehooks"
 import {
@@ -10,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog"
+import { useHotkeys } from "react-hotkeys-hook"
 
 interface ShortcutProps {
   content: string
@@ -21,7 +21,7 @@ function ShortCut(props: ShortcutProps) {
 
   return (
     <div className="flex justify-between">
-      <div className="shortcut-description">{content}</div>
+      <div>{content}</div>
       <div className="flex gap-[8px]">
         {keys.map((k) => (
           // TODO: 优化快捷键显示
@@ -49,13 +49,13 @@ const CmdOrCtrl = () => {
 export function Shortcuts() {
   const [open, toggleOpen] = useToggle(false)
 
-  useHotKey("h", () => {
+  useHotkeys("h", () => {
     toggleOpen()
   })
 
   return (
     <Dialog open={open} onOpenChange={toggleOpen}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <IconButton tooltip="Hotkeys">
           <Keyboard />
         </IconButton>
@@ -63,7 +63,7 @@ export function Shortcuts() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Hotkeys</DialogTitle>
-          <DialogDescription className="flex gap-2 flex-col pt-4">
+          <div className="flex gap-2 flex-col pt-4">
             <ShortCut content="Pan" keys={["Space + Drag"]} />
             <ShortCut content="Reset Zoom/Pan" keys={["Esc"]} />
             <ShortCut content="Decrease Brush Size" keys={["["]} />
@@ -87,7 +87,7 @@ export function Shortcuts() {
             <ShortCut content="Toggle Hotkeys Dialog" keys={["H"]} />
             <ShortCut content="Toggle Settings Dialog" keys={["S"]} />
             <ShortCut content="Toggle File Manager" keys={["F"]} />
-          </DialogDescription>
+          </div>
         </DialogHeader>
       </DialogContent>
     </Dialog>

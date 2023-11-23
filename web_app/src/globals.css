@@ -26,6 +26,11 @@
   transform: scale(1.03);
 }
 
+
+.icon-button-icon-wrapper svg {
+  stroke-width: 1px;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

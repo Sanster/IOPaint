@@ -65,25 +65,33 @@ export interface IconButtonProps extends ButtonProps {
   tooltip: string
 }
 
-const IconButton = (props: IconButtonProps) => {
-  const { tooltip, children, ...rest } = props
-  return (
-    <>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" {...rest} asChild>
-              <div className="p-[8px]">{children}</div>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{tooltip}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </>
-  )
-}
+const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
+  ({ tooltip, children, ...rest }, ref) => {
+    return (
+      <>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                {...rest}
+                ref={ref}
+                tabIndex={-1}
+                className="cursor-default"
+              >
+                <div className="icon-button-icon-wrapper">{children}</div>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{tooltip}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </>
+    )
+  }
+)
 
 export interface UploadButtonProps extends IconButtonProps {
   onFileUpload: (file: File) => void
@@ -106,7 +114,9 @@ const ImageUploadButton = (props: UploadButtonProps) => {
   return (
     <>
       <label htmlFor={uploadElemId}>
-        <IconButton {...rest}>{children}</IconButton>
+        <IconButton {...rest} asChild>
+          {children}
+        </IconButton>
       </label>
       <Input
         style={{ display: "none" }}

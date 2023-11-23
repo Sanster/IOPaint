@@ -1,23 +1,6 @@
 import { atom, selector } from "recoil"
 import _ from "lodash"
-
-export enum HDStrategy {
-  ORIGINAL = "Original",
-  RESIZE = "Resize",
-  CROP = "Crop",
-}
-
-export enum LDMSampler {
-  ddim = "ddim",
-  plms = "plms",
-}
-
-function strEnum<T extends string>(o: Array<T>): { [K in T]: K } {
-  return o.reduce((res, key) => {
-    res[key] = key
-    return res
-  }, Object.create(null))
-}
+import { CV2Flag, HDStrategy, LDMSampler, ModelsHDSettings } from "./types"
 
 export enum AIModel {
   LAMA = "lama",
@@ -75,18 +58,12 @@ export interface Rect {
 }
 
 interface AppState {
-  file: File | undefined
-  imageHeight: number
-  imageWidth: number
-  disableShortCuts: boolean
-  isInpainting: boolean
   isDisableModelSwitch: boolean
   isEnableAutoSaving: boolean
   isInteractiveSeg: boolean
   isInteractiveSegRunning: boolean
   interactiveSegClicks: number[][]
   enableFileManager: boolean
-  brushSize: number
   isControlNet: boolean
   controlNetMethod: string
   plugins: string[]
@@ -96,18 +73,12 @@ interface AppState {
 export const appState = atom<AppState>({
   key: "appState",
   default: {
-    file: undefined,
-    imageHeight: 0,
-    imageWidth: 0,
-    disableShortCuts: false,
-    isInpainting: false,
     isDisableModelSwitch: false,
     isEnableAutoSaving: false,
     isInteractiveSeg: false,
     isInteractiveSegRunning: false,
     interactiveSegClicks: [],
     enableFileManager: false,
-    brushSize: 40,
     isControlNet: false,
     controlNetMethod: ControlNetMethod.canny,
     plugins: [],
@@ -115,26 +86,9 @@ export const appState = atom<AppState>({
   },
 })
 
-export const propmtState = atom<string>({
-  key: "promptState",
-  default: "",
-})
-
 export const negativePropmtState = atom<string>({
   key: "negativePromptState",
   default: "",
-})
-
-export const isInpaintingState = selector({
-  key: "isInpainting",
-  get: ({ get }) => {
-    const app = get(appState)
-    return app.isInpainting
-  },
-  set: ({ get, set }, newValue: any) => {
-    const app = get(appState)
-    set(appState, { ...app, isInpainting: newValue })
-  },
 })
 
 export const isPluginRunningState = selector({
@@ -175,42 +129,6 @@ export const serverConfigState = selector({
   },
 })
 
-export const brushSizeState = selector({
-  key: "brushSizeState",
-  get: ({ get }) => {
-    const app = get(appState)
-    return app.brushSize
-  },
-  set: ({ get, set }, newValue: any) => {
-    const app = get(appState)
-    set(appState, { ...app, brushSize: newValue })
-  },
-})
-
-export const imageHeightState = selector({
-  key: "imageHeightState",
-  get: ({ get }) => {
-    const app = get(appState)
-    return app.imageHeight
-  },
-  set: ({ get, set }, newValue: any) => {
-    const app = get(appState)
-    set(appState, { ...app, imageHeight: newValue })
-  },
-})
-
-export const imageWidthState = selector({
-  key: "imageWidthState",
-  get: ({ get }) => {
-    const app = get(appState)
-    return app.imageWidth
-  },
-  set: ({ get, set }, newValue: any) => {
-    const app = get(appState)
-    set(appState, { ...app, imageWidth: newValue })
-  },
-})
-
 export const enableFileManagerState = selector({
   key: "enableFileManagerState",
   get: ({ get }) => {
@@ -220,30 +138,6 @@ export const enableFileManagerState = selector({
   set: ({ get, set }, newValue: any) => {
     const app = get(appState)
     set(appState, { ...app, enableFileManager: newValue })
-  },
-})
-
-export const fileState = selector({
-  key: "fileState",
-  get: ({ get }) => {
-    const app = get(appState)
-    return app.file
-  },
-  set: ({ get, set }, newValue: any) => {
-    const app = get(appState)
-    set(appState, {
-      ...app,
-      file: newValue,
-      interactiveSegClicks: [],
-      isInteractiveSeg: false,
-      isInteractiveSegRunning: false,
-    })
-
-    const setting = get(settingState)
-    set(settingState, {
-      ...setting,
-      sdScale: 100,
-    })
   },
 })
 
@@ -275,9 +169,7 @@ export const isProcessingState = selector({
   key: "isProcessingState",
   get: ({ get }) => {
     const app = get(appState)
-    return (
-      app.isInteractiveSegRunning || app.isPluginRunning || app.isInpainting
-    )
+    return app.isInteractiveSegRunning || app.isPluginRunning
   },
 })
 
@@ -336,20 +228,6 @@ export const croperState = atom<Rect>({
     y: 0,
     width: 512,
     height: 512,
-  },
-})
-
-export const SIDE_PANEL_TAB = strEnum(["inpainting", "outpainting"])
-export type SIDE_PANEL_TAB_TYPE = keyof typeof SIDE_PANEL_TAB
-
-export interface SidePanelState {
-  tab: SIDE_PANEL_TAB_TYPE
-}
-
-export const sidePanelTabState = atom<SidePanelState>({
-  key: "sidePanelTabState",
-  default: {
-    tab: SIDE_PANEL_TAB.inpainting,
   },
 })
 
@@ -435,43 +313,6 @@ export const extenderWidth = selector({
   },
 })
 
-interface ToastAtomState {
-  open: boolean
-  desc: string
-  state: ToastState
-  duration: number
-}
-
-export const toastState = atom<ToastAtomState>({
-  key: "toastState",
-  default: {
-    open: false,
-    desc: "",
-    state: "default",
-    duration: 3000,
-  },
-})
-
-export const shortcutsState = atom<boolean>({
-  key: "shortcutsState",
-  default: false,
-})
-
-export interface HDSettings {
-  hdStrategy: HDStrategy
-  hdStrategyResizeLimit: number
-  hdStrategyCropTrigerSize: number
-  hdStrategyCropMargin: number
-  enabled: boolean
-}
-
-type ModelsHDSettings = { [key in AIModel]: HDSettings }
-
-export enum CV2Flag {
-  INPAINT_NS = "INPAINT_NS",
-  INPAINT_TELEA = "INPAINT_TELEA",
-}
-
 export interface Settings {
   show: boolean
   showCroper: boolean
@@ -490,7 +331,6 @@ export interface Settings {
 
   // For SD
   sdMaskBlur: number
-  sdMode: SDMode
   sdStrength: number
   sdSteps: number
   sdGuidanceScale: number
@@ -656,7 +496,6 @@ export const settingStateDefault: Settings = {
 
   // SD
   sdMaskBlur: 5,
-  sdMode: SDMode.inpainting,
   sdStrength: 0.75,
   sdSteps: 50,
   sdGuidanceScale: 7.5,
@@ -817,72 +656,5 @@ export const isDiffusionModelsState = selector({
     const isPaintByExample = get(isPaintByExampleState)
     const isPix2Pix = get(isPix2PixState)
     return isSD || isPaintByExample || isPix2Pix
-  },
-})
-
-export enum SortBy {
-  NAME = "name",
-  CTIME = "ctime",
-  MTIME = "mtime",
-}
-
-export enum SortOrder {
-  DESCENDING = "desc",
-  ASCENDING = "asc",
-}
-
-interface FileManagerState {
-  sortBy: SortBy
-  sortOrder: SortOrder
-  layout: "rows" | "masonry"
-  searchText: string
-}
-
-const FILE_MANAGER_STATE_KEY = "fileManagerState"
-
-export const fileManagerState = atom<FileManagerState>({
-  key: FILE_MANAGER_STATE_KEY,
-  default: {
-    sortBy: SortBy.CTIME,
-    sortOrder: SortOrder.DESCENDING,
-    layout: "masonry",
-    searchText: "",
-  },
-  effects: [localStorageEffect(FILE_MANAGER_STATE_KEY)],
-})
-
-export const fileManagerSortBy = selector({
-  key: "fileManagerSortBy",
-  get: ({ get }) => get(fileManagerState).sortBy,
-  set: ({ get, set }, newValue: any) => {
-    const val = get(fileManagerState)
-    set(fileManagerState, { ...val, sortBy: newValue })
-  },
-})
-
-export const fileManagerSortOrder = selector({
-  key: "fileManagerSortOrder",
-  get: ({ get }) => get(fileManagerState).sortOrder,
-  set: ({ get, set }, newValue: any) => {
-    const val = get(fileManagerState)
-    set(fileManagerState, { ...val, sortOrder: newValue })
-  },
-})
-
-export const fileManagerLayout = selector({
-  key: "fileManagerLayout",
-  get: ({ get }) => get(fileManagerState).layout,
-  set: ({ get, set }, newValue: any) => {
-    const val = get(fileManagerState)
-    set(fileManagerState, { ...val, layout: newValue })
-  },
-})
-
-export const fileManagerSearchText = selector({
-  key: "fileManagerSearchText",
-  get: ({ get }) => get(fileManagerState).searchText,
-  set: ({ get, set }, newValue: any) => {
-    const val = get(fileManagerState)
-    set(fileManagerState, { ...val, searchText: newValue })
   },
 })

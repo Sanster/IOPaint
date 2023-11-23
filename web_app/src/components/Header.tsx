@@ -1,19 +1,15 @@
-import { FolderIcon, PhotoIcon } from "@heroicons/react/24/outline"
 import { PlayIcon } from "@radix-ui/react-icons"
 import React, { useCallback, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil"
 import { useHotkeys } from "react-hotkeys-hook"
 import {
   enableFileManagerState,
-  fileState,
-  isInpaintingState,
   isPix2PixState,
   isSDState,
   maskState,
   runManuallyState,
-  showFileManagerState,
 } from "@/lib/store"
-import { Button, IconButton, ImageUploadButton } from "@/components/ui/button"
+import { IconButton, ImageUploadButton } from "@/components/ui/button"
 import Shortcuts from "@/components/Shortcuts"
 // import SettingIcon from "../Settings/SettingIcon"
 // import PromptInput from "./PromptInput"
@@ -28,15 +24,19 @@ import { useImage } from "@/hooks/useImage"
 
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import PromptInput from "./PromptInput"
-import { RotateCw } from "lucide-react"
+import { RotateCw, Image } from "lucide-react"
 import FileManager from "./FileManager"
 import { getMediaFile } from "@/lib/api"
+import { useStore } from "@/lib/states"
 
 const Header = () => {
-  const isInpainting = useRecoilValue(isInpaintingState)
-  const [file, setFile] = useRecoilState(fileState)
+  const [file, isInpainting, setFile] = useStore((state) => [
+    state.file,
+    state.isInpainting,
+    state.setFile,
+  ])
   const [mask, setMask] = useRecoilState(maskState)
-  const [maskImage, maskImageLoaded] = useImage(mask)
+  // const [maskImage, maskImageLoaded] = useImage(mask)
   const isSD = useRecoilValue(isSDState)
   const isPix2Pix = useRecoilValue(isPix2PixState)
   const runManually = useRecoilValue(runManuallyState)
@@ -88,15 +88,13 @@ const Header = () => {
             setFile(file)
           }}
         >
-          <PhotoIcon />
+          <Image />
         </ImageUploadButton>
 
         <div
+          className="flex items-center"
           style={{
             visibility: file ? "visible" : "hidden",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
           }}
         >
           <ImageUploadButton
@@ -133,13 +131,13 @@ const Header = () => {
                   <PlayIcon />
                 </IconButton>
               </PopoverTrigger>
-              <PopoverContent>
+              {/* <PopoverContent>
                 {maskImageLoaded ? (
                   <img src={maskImage.src} alt="Custom mask" />
                 ) : (
                   <></>
                 )}
-              </PopoverContent>
+              </PopoverContent> */}
             </Popover>
           ) : (
             <></>
@@ -159,12 +157,10 @@ const Header = () => {
 
       {isSD ? <PromptInput /> : <></>}
 
-      <div className="header-icons-wrapper">
-        {/* <CoffeeIcon /> */}
-        <div className="header-icons">
-          <Shortcuts />
-          {/* <SettingIcon /> */}
-        </div>
+      {/* <CoffeeIcon /> */}
+      <div>
+        <Shortcuts />
+        {/* <SettingIcon /> */}
       </div>
     </header>
   )

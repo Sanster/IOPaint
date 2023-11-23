@@ -1,18 +1,19 @@
 import React, { FormEvent } from "react"
-import { useRecoilState, useRecoilValue } from "recoil"
 import emitter, {
   DREAM_BUTTON_MOUSE_ENTER,
   DREAM_BUTTON_MOUSE_LEAVE,
   EVENT_PROMPT,
 } from "@/lib/event"
-import { appState, isInpaintingState, propmtState } from "@/lib/store"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
+import { useStore } from "@/lib/states"
 
 const PromptInput = () => {
-  const app = useRecoilValue(appState)
-  const [prompt, setPrompt] = useRecoilState(propmtState)
-  const isInpainting = useRecoilValue(isInpaintingState)
+  const [isInpainting, prompt, setPrompt] = useStore((state) => [
+    state.isInpainting,
+    state.prompt,
+    state.setPrompt,
+  ])
 
   const handleOnInput = (evt: FormEvent<HTMLInputElement>) => {
     evt.preventDefault()
@@ -22,7 +23,7 @@ const PromptInput = () => {
   }
 
   const handleRepaintClick = () => {
-    if (prompt.length !== 0 && !app.isInpainting) {
+    if (prompt.length !== 0 && isInpainting) {
       emitter.emit(EVENT_PROMPT)
     }
   }
@@ -53,7 +54,7 @@ const PromptInput = () => {
       <Button
         size="sm"
         onClick={handleRepaintClick}
-        disabled={prompt.length === 0 || app.isInpainting}
+        disabled={prompt.length === 0 || isInpainting}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >

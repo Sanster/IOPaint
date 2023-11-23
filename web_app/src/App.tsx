@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { nanoid } from "nanoid"
-import { useRecoilState, useSetRecoilState } from "recoil"
-import { fileState, serverConfigState } from "@/lib/store"
+import { useSetRecoilState } from "recoil"
+import { serverConfigState } from "@/lib/store"
 import useInputImage from "@/hooks/useInputImage"
 import { keepGUIAlive } from "@/lib/utils"
 import { getServerConfig, isDesktop } from "@/lib/api"
@@ -9,6 +9,7 @@ import Header from "@/components/Header"
 import Workspace from "@/components/Workspace"
 import FileSelect from "@/components/FileSelect"
 import { Toaster } from "./components/ui/toaster"
+import { useStore } from "./lib/states"
 
 const SUPPORTED_FILE_TYPE = [
   "image/jpeg",
@@ -18,13 +19,15 @@ const SUPPORTED_FILE_TYPE = [
   "image/tiff",
 ]
 function Home() {
-  const [file, setFile] = useRecoilState(fileState)
+  const [file, setFile] = useStore((state) => [state.file, state.setFile])
+
   const userInputImage = useInputImage()
   const setServerConfigState = useSetRecoilState(serverConfigState)
 
-  // Set Input Image
   useEffect(() => {
-    setFile(userInputImage)
+    if (userInputImage) {
+      setFile(userInputImage)
+    }
   }, [userInputImage, setFile])
 
   // Keeping GUI Window Open

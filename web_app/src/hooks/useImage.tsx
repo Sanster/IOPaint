@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
 
-function useImage(file?: File): [HTMLImageElement, boolean] {
+function useImage(file: File | null): [HTMLImageElement, boolean] {
   const [image] = useState(new Image())
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    if (file === undefined) {
+    if (!file) {
       return
     }
     image.onload = () => {

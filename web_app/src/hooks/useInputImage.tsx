@@ -2,7 +2,7 @@ import { API_ENDPOINT } from "@/lib/api"
 import { useCallback, useEffect, useState } from "react"
 
 export default function useInputImage() {
-  const [inputImage, setInputImage] = useState<File>()
+  const [inputImage, setInputImage] = useState<File | null>(null)
 
   const fetchInputImage = useCallback(() => {
     const headers = new Headers()
