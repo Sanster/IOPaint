@@ -1,14 +1,17 @@
-import { create, StoreApi, UseBoundStore } from "zustand"
+import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { immer } from "zustand/middleware/immer"
-import { SortBy, SortOrder } from "./types"
+import { CV2Flag, LDMSampler, ModelInfo, SortBy, SortOrder } from "./types"
 import { DEFAULT_BRUSH_SIZE } from "./const"
+import { SDSampler } from "./store"
 
 type FileManagerState = {
   sortBy: SortBy
   sortOrder: SortOrder
   layout: "rows" | "masonry"
   searchText: string
+  inputDirectory: string
+  outputDirectory: string
 }
 
 type CropperState = {
@@ -18,79 +21,254 @@ type CropperState = {
   height: number
 }
 
+export type Settings = {
+  model: ModelInfo
+  enableDownloadMask: boolean
+  enableManualInpainting: boolean
+  enableUploadMask: boolean
+  showCroper: boolean
+
+  // For LDM
+  ldmSteps: number
+  ldmSampler: LDMSampler
+
+  // For ZITS
+  zitsWireframe: boolean
+
+  // For OpenCV2
+  cv2Radius: number
+  cv2Flag: CV2Flag
+
+  // For Diffusion moel
+  prompt: string
+  negativePrompt: string
+  seed: number
+  seedFixed: boolean
+
+  // For SD
+  sdMaskBlur: number
+  sdStrength: number
+  sdSteps: number
+  sdGuidanceScale: number
+  sdSampler: SDSampler
+  sdMatchHistograms: boolean
+  sdScale: number
+
+  // Paint by Example
+  paintByExampleSteps: number
+  paintByExampleGuidanceScale: number
+  paintByExampleMaskBlur: number
+  paintByExampleMatchHistograms: boolean
+
+  // InstructPix2Pix
+  p2pSteps: number
+  p2pImageGuidanceScale: number
+  p2pGuidanceScale: number
+
+  // ControlNet
+  controlnetConditioningScale: number
+  controlnetMethod: string
+}
+
+type ServerConfig = {
+  plugins: string[]
+  availableControlNet: Record<string, string[]>
+  enableFileManager: boolean
+  enableAutoSaving: boolean
+}
+
+type InteractiveSegState = {
+  isInteractiveSeg: boolean
+  isInteractiveSegRunning: boolean
+  clicks: number[][]
+}
+
 type AppState = {
   file: File | null
+  customMask: File | null
   imageHeight: number
   imageWidth: number
   brushSize: number
   brushSizeScale: number
-
   isInpainting: boolean
-  isInteractiveSeg: boolean // 是否正处于 sam 状态
-  isInteractiveSegRunning: boolean
-  interactiveSegClicks: number[][]
+  isPluginRunning: boolean
 
-  prompt: string
-
+  interactiveSegState: InteractiveSegState
   fileManagerState: FileManagerState
   cropperState: CropperState
+  serverConfig: ServerConfig
+
+  settings: Settings
 }
 
 type AppAction = {
   setFile: (file: File) => void
+  setCustomFile: (file: File) => void
   setIsInpainting: (newValue: boolean) => void
+  setIsPluginRunning: (newValue: boolean) => void
   setBrushSize: (newValue: number) => void
   setImageSize: (width: number, height: number) => void
-  setPrompt: (newValue: string) => void
-
-  setFileManagerSortBy: (newValue: SortBy) => void
-  setFileManagerSortOrder: (newValue: SortOrder) => void
-  setFileManagerLayout: (
-    newValue: AppState["fileManagerState"]["layout"]
-  ) => void
-  setFileManagerSearchText: (newValue: string) => void
 
   setCropperX: (newValue: number) => void
   setCropperY: (newValue: number) => void
   setCropperWidth: (newValue: number) => void
   setCropperHeight: (newValue: number) => void
+
+  setServerConfig: (newValue: ServerConfig) => void
+  setSeed: (newValue: number) => void
+  updateSettings: (newSettings: Partial<Settings>) => void
+  updateFileManagerState: (newState: Partial<FileManagerState>) => void
+  updateInteractiveSegState: (newState: Partial<InteractiveSegState>) => void
+  resetInteractiveSegState: () => void
+  shouldShowPromptInput: () => boolean
+}
+
+const defaultValues: AppState = {
+  file: null,
+  customMask: null,
+  imageHeight: 0,
+  imageWidth: 0,
+  brushSize: DEFAULT_BRUSH_SIZE,
+  brushSizeScale: 1,
+  isInpainting: false,
+  isPluginRunning: false,
+
+  interactiveSegState: {
+    isInteractiveSeg: false,
+    isInteractiveSegRunning: false,
+    clicks: [],
+  },
+
+  cropperState: {
+    x: 0,
+    y: 0,
+    width: 512,
+    height: 512,
+  },
+  fileManagerState: {
+    sortBy: SortBy.CTIME,
+    sortOrder: SortOrder.DESCENDING,
+    layout: "masonry",
+    searchText: "",
+    inputDirectory: "",
+    outputDirectory: "",
+  },
+  serverConfig: {
+    plugins: [],
+    availableControlNet: { SD: [], SD2: [], SDXL: [] },
+    enableFileManager: false,
+    enableAutoSaving: false,
+  },
+  settings: {
+    model: {
+      name: "lama",
+      path: "lama",
+      model_type: "inpaint",
+      support_controlnet: false,
+      support_freeu: false,
+      support_lcm_lora: false,
+      is_single_file_diffusers: false,
+    },
+    showCroper: false,
+    enableDownloadMask: false,
+    enableManualInpainting: false,
+    enableUploadMask: false,
+    ldmSteps: 30,
+    ldmSampler: LDMSampler.ddim,
+    zitsWireframe: true,
+    cv2Radius: 5,
+    cv2Flag: CV2Flag.INPAINT_NS,
+    prompt: "",
+    negativePrompt: "",
+    seed: 42,
+    seedFixed: false,
+    sdMaskBlur: 5,
+    sdStrength: 1.0,
+    sdSteps: 50,
+    sdGuidanceScale: 7.5,
+    sdSampler: SDSampler.uni_pc,
+    sdMatchHistograms: false,
+    sdScale: 100,
+    paintByExampleSteps: 50,
+    paintByExampleGuidanceScale: 7.5,
+    paintByExampleMaskBlur: 5,
+    paintByExampleMatchHistograms: false,
+    p2pSteps: 50,
+    p2pImageGuidanceScale: 1.5,
+    p2pGuidanceScale: 7.5,
+    controlnetConditioningScale: 0.4,
+    controlnetMethod: "lllyasviel/control_v11p_sd15_canny",
+  },
 }
 
 export const useStore = create<AppState & AppAction>()(
   immer(
     persist(
       (set, get) => ({
-        file: null,
-        imageHeight: 0,
-        imageWidth: 0,
-        brushSize: DEFAULT_BRUSH_SIZE,
-        brushSizeScale: 1,
-        isInpainting: false,
-        isInteractiveSeg: false,
-        isInteractiveSegRunning: false,
-        interactiveSegClicks: [],
-        prompt: "",
-        cropperState: {
-          x: 0,
-          y: 0,
-          width: 0,
-          height: 0,
+        ...defaultValues,
+
+        shouldShowPromptInput: (): boolean => {
+          const model_type = get().settings.model.model_type
+          return ["diffusers_sd"].includes(model_type)
         },
-        fileManagerState: {
-          sortBy: SortBy.CTIME,
-          sortOrder: SortOrder.DESCENDING,
-          layout: "masonry",
-          searchText: "",
+
+        setServerConfig: (newValue: ServerConfig) => {
+          set((state: AppState) => {
+            state.serverConfig = newValue
+          })
         },
+
+        updateSettings: (newSettings: Partial<Settings>) => {
+          set((state: AppState) => {
+            state.settings = {
+              ...state.settings,
+              ...newSettings,
+            }
+          })
+        },
+
+        updateFileManagerState: (newState: Partial<FileManagerState>) => {
+          set((state: AppState) => {
+            state.fileManagerState = {
+              ...state.fileManagerState,
+              ...newState,
+            }
+          })
+        },
+
+        updateInteractiveSegState: (newState: Partial<InteractiveSegState>) => {
+          set((state: AppState) => {
+            state.interactiveSegState = {
+              ...state.interactiveSegState,
+              ...newState,
+            }
+          })
+        },
+        resetInteractiveSegState: () => {
+          set((state: AppState) => {
+            state.interactiveSegState = defaultValues.interactiveSegState
+          })
+        },
+
         setIsInpainting: (newValue: boolean) =>
           set((state: AppState) => {
             state.isInpainting = newValue
+          }),
+
+        setIsPluginRunning: (newValue: boolean) =>
+          set((state: AppState) => {
+            state.isPluginRunning = newValue
           }),
 
         setFile: (file: File) =>
           set((state: AppState) => {
             // TODO: 清空各种状态
             state.file = file
+          }),
+
+        setCustomFile: (file: File) =>
+          set((state: AppState) => {
+            state.customMask = file
           }),
 
         setBrushSize: (newValue: number) =>
@@ -106,11 +284,6 @@ export const useStore = create<AppState & AppAction>()(
             state.brushSizeScale = Math.max(Math.min(width, height), 512) / 512
           })
         },
-
-        setPrompt: (newValue: string) =>
-          set((state: AppState) => {
-            state.prompt = newValue
-          }),
 
         setCropperX: (newValue: number) =>
           set((state: AppState) => {
@@ -132,32 +305,18 @@ export const useStore = create<AppState & AppAction>()(
             state.cropperState.height = newValue
           }),
 
-        setFileManagerSortBy: (newValue: SortBy) =>
+        setSeed: (newValue: number) =>
           set((state: AppState) => {
-            state.fileManagerState.sortBy = newValue
-          }),
-
-        setFileManagerSortOrder: (newValue: SortOrder) =>
-          set((state: AppState) => {
-            state.fileManagerState.sortOrder = newValue
-          }),
-
-        setFileManagerLayout: (newValue: "rows" | "masonry") =>
-          set((state: AppState) => {
-            state.fileManagerState.layout = newValue
-          }),
-
-        setFileManagerSearchText: (newValue: string) =>
-          set((state: AppState) => {
-            state.fileManagerState.searchText = newValue
+            state.settings.seed = newValue
           }),
       }),
       {
         name: "ZUSTAND_STATE", // name of the item in the storage (must be unique)
+        version: 0,
         partialize: (state) =>
           Object.fromEntries(
             Object.entries(state).filter(([key]) =>
-              ["fileManagerState", "prompt"].includes(key)
+              ["fileManagerState", "prompt", "settings"].includes(key)
             )
           ),
       }

@@ -1,18 +1,20 @@
-import { PluginName } from "@/lib/types"
-import { ControlNetMethodMap, Rect, Settings } from "@/lib/store"
-import { dataURItoBlob, loadImage, srcToFile } from "@/lib/utils"
+import { ModelInfo, Rect } from "@/lib/types"
+import { Settings } from "@/lib/states"
+import { dataURItoBlob, srcToFile } from "@/lib/utils"
+import axios from "axios"
 
 export const API_ENDPOINT = import.meta.env.VITE_BACKEND
   ? import.meta.env.VITE_BACKEND
   : ""
 
+const api = axios.create({
+  baseURL: API_ENDPOINT,
+})
+
 export default async function inpaint(
   imageFile: File,
   settings: Settings,
   croperRect: Rect,
-  prompt?: string,
-  negativePrompt?: string,
-  seed?: number,
   maskBase64?: string,
   customMask?: File,
   paintByExampleImage?: File
@@ -26,38 +28,29 @@ export default async function inpaint(
     fd.append("mask", customMask)
   }
 
-  const hdSettings = settings.hdSettings[settings.model]
   fd.append("ldmSteps", settings.ldmSteps.toString())
   fd.append("ldmSampler", settings.ldmSampler.toString())
   fd.append("zitsWireframe", settings.zitsWireframe.toString())
-  fd.append("hdStrategy", hdSettings.hdStrategy)
-  fd.append("hdStrategyCropMargin", hdSettings.hdStrategyCropMargin.toString())
-  fd.append(
-    "hdStrategyCropTrigerSize",
-    hdSettings.hdStrategyCropTrigerSize.toString()
-  )
-  fd.append(
-    "hdStrategyResizeLimit",
-    hdSettings.hdStrategyResizeLimit.toString()
-  )
+  fd.append("hdStrategy", "Crop")
+  fd.append("hdStrategyCropMargin", "128")
+  fd.append("hdStrategyCropTrigerSize", "640")
+  fd.append("hdStrategyResizeLimit", "2048")
 
-  fd.append("prompt", prompt === undefined ? "" : prompt)
-  fd.append(
-    "negativePrompt",
-    negativePrompt === undefined ? "" : negativePrompt
-  )
+  fd.append("prompt", settings.prompt)
+  fd.append("negativePrompt", settings.negativePrompt)
   fd.append("croperX", croperRect.x.toString())
   fd.append("croperY", croperRect.y.toString())
   fd.append("croperHeight", croperRect.height.toString())
   fd.append("croperWidth", croperRect.width.toString())
-  fd.append("useCroper", settings.showCroper ? "true" : "false")
+  // fd.append("useCroper", settings.showCroper ? "true" : "false")
+  fd.append("useCroper", "false")
 
   fd.append("sdMaskBlur", settings.sdMaskBlur.toString())
   fd.append("sdStrength", settings.sdStrength.toString())
   fd.append("sdSteps", settings.sdSteps.toString())
   fd.append("sdGuidanceScale", settings.sdGuidanceScale.toString())
   fd.append("sdSampler", settings.sdSampler.toString())
-  fd.append("sdSeed", seed ? seed.toString() : "-1")
+  fd.append("sdSeed", settings.seed.toString())
   fd.append("sdMatchHistograms", settings.sdMatchHistograms ? "true" : "false")
   fd.append("sdScale", (settings.sdScale / 100).toString())
 
@@ -69,7 +62,7 @@ export default async function inpaint(
     "paintByExampleGuidanceScale",
     settings.paintByExampleGuidanceScale.toString()
   )
-  fd.append("paintByExampleSeed", seed ? seed.toString() : "-1")
+  fd.append("paintByExampleSeed", settings.seed.toString())
   fd.append(
     "paintByExampleMaskBlur",
     settings.paintByExampleMaskBlur.toString()
@@ -94,10 +87,7 @@ export default async function inpaint(
     "controlnet_conditioning_scale",
     settings.controlnetConditioningScale.toString()
   )
-  fd.append(
-    "controlnet_method",
-    ControlNetMethodMap[settings.controlnetMethod.toString()]
-  )
+  fd.append("controlnet_method", settings.controlnetMethod.toString())
 
   try {
     const res = await fetch(`${API_ENDPOINT}/inpaint`, {
@@ -135,6 +125,10 @@ export function currentModel() {
   return fetch(`${API_ENDPOINT}/model`, {
     method: "GET",
   })
+}
+
+export function fetchModelInfos(): Promise<ModelInfo[]> {
+  return api.get("/models").then((response) => response.data)
 }
 
 export function isDesktop() {

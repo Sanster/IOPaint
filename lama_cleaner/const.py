@@ -4,16 +4,14 @@ from enum import Enum
 from pydantic import BaseModel
 
 
-MPS_SUPPORT_MODELS = [
-    "instruct_pix2pix",
-    "sd1.5",
-    "anything4",
-    "realisticVision1.4",
-    "sd2",
-    "paint_by_example",
-    "controlnet",
-    "kandinsky2.2",
-    "sdxl",
+MPS_UNSUPPORT_MODELS = [
+    "lama",
+    "ldm",
+    "zits",
+    "mat",
+    "fcf",
+    "cv2",
+    "manga",
 ]
 
 DEFAULT_MODEL = "lama"
@@ -36,18 +34,13 @@ AVAILABLE_MODELS = [
     "sdxl",
 ]
 SD15_MODELS = ["sd1.5", "anything4", "realisticVision1.4"]
-MODELS_SUPPORT_FREEU = SD15_MODELS + ["sd2", "sdxl", "instruct_pix2pix"]
-MODELS_SUPPORT_LCM_LORA = SD15_MODELS + ["sdxl"]
-
-FREEU_DEFAULT_CONFIGS = {
-    "sd2": dict(s1=0.9, s2=0.2, b1=1.1, b2=1.2),
-    "sdxl": dict(s1=0.6, s2=0.4, b1=1.1, b2=1.2),
-    "sd1.5": dict(s1=0.9, s2=0.2, b1=1.2, b2=1.4),
-    "anything4": dict(s1=0.9, s2=0.2, b1=1.2, b2=1.4),
-    "realisticVision1.4": dict(s1=0.9, s2=0.2, b1=1.2, b2=1.4),
-    "instruct_pix2pix": dict(s1=0.9, s2=0.2, b1=1.2, b2=1.4),
-}
-
+DIFFUSERS_MODEL_FP16_REVERSION = [
+    "runwayml/stable-diffusion-inpainting",
+    "Sanster/anything-4.0-inpainting",
+    "Sanster/Realistic_Vision_V1.4-inpainting",
+    "stabilityai/stable-diffusion-2-inpainting",
+    "timbrooks/instruct-pix2pix",
+]
 
 AVAILABLE_DEVICES = ["cuda", "cpu", "mps"]
 DEFAULT_DEVICE = "cuda"
@@ -70,14 +63,29 @@ Run Stable Diffusion text encoder model on CPU to save GPU memory.
 """
 
 SD_CONTROLNET_HELP = """
-Run Stable Diffusion inpainting model with ControlNet. You can switch control method in webui.
+Run Stable Diffusion normal or inpainting model with ControlNet.
 """
-DEFAULT_CONTROLNET_METHOD = "control_v11p_sd15_canny"
+DEFAULT_SD_CONTROLNET_METHOD = "thibaud/controlnet-sd21-openpose-diffusers"
 SD_CONTROLNET_CHOICES = [
-    "control_v11p_sd15_canny",
-    "control_v11p_sd15_openpose",
-    "control_v11p_sd15_inpaint",
-    "control_v11f1p_sd15_depth",
+    "lllyasviel/control_v11p_sd15_canny",
+    # "lllyasviel/control_v11p_sd15_seg",
+    "lllyasviel/control_v11p_sd15_openpose",
+    "lllyasviel/control_v11p_sd15_inpaint",
+    "lllyasviel/control_v11f1p_sd15_depth",
+]
+
+DEFAULT_SD2_CONTROLNET_METHOD = "thibaud/controlnet-sd21-canny-diffusers"
+SD2_CONTROLNET_CHOICES = [
+    "thibaud/controlnet-sd21-canny-diffusers",
+    "thibaud/controlnet-sd21-depth-diffusers",
+    "thibaud/controlnet-sd21-openpose-diffusers",
+]
+
+DEFAULT_SDXL_CONTROLNET_METHOD = "diffusers/controlnet-canny-sdxl-1.0"
+SDXL_CONTROLNET_CHOICES = [
+    "thibaud/controlnet-openpose-sdxl-1.0",
+    "diffusers/controlnet-canny-sdxl-1.0",
+    "diffusers/controlnet-depth-sdxl-1.0",
 ]
 
 SD_LOCAL_MODEL_HELP = """
@@ -152,7 +160,7 @@ class Config(BaseModel):
     model: str = DEFAULT_MODEL
     sd_local_model_path: str = None
     sd_controlnet: bool = False
-    sd_controlnet_method: str = DEFAULT_CONTROLNET_METHOD
+    sd_controlnet_method: str = DEFAULT_SD_CONTROLNET_METHOD
     device: str = DEFAULT_DEVICE
     gui: bool = False
     no_gui_auto_close: bool = False

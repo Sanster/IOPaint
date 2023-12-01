@@ -1,3 +1,19 @@
+export interface ModelInfo {
+  name: string
+  path: string
+  model_type:
+    | "inpaint"
+    | "diffusers_sd"
+    | "diffusers_sdxl"
+    | "diffusers_sd_inpaint"
+    | "diffusers_sdxl_inpaint"
+    | "diffusers_other"
+  support_controlnet: boolean
+  support_freeu: boolean
+  support_lcm_lora: boolean
+  is_single_file_diffusers: boolean
+}
+
 export enum PluginName {
   RemoveBG = "RemoveBG",
   AnimeSeg = "AnimeSeg",
@@ -18,12 +34,6 @@ export enum SortOrder {
   ASCENDING = "asc",
 }
 
-export enum HDStrategy {
-  ORIGINAL = "Original",
-  RESIZE = "Resize",
-  CROP = "Crop",
-}
-
 export enum LDMSampler {
   ddim = "ddim",
   plms = "plms",
@@ -34,12 +44,9 @@ export enum CV2Flag {
   INPAINT_TELEA = "INPAINT_TELEA",
 }
 
-export interface HDSettings {
-  hdStrategy: HDStrategy
-  hdStrategyResizeLimit: number
-  hdStrategyCropTrigerSize: number
-  hdStrategyCropMargin: number
-  enabled: boolean
+export interface Rect {
+  x: number
+  y: number
+  width: number
+  height: number
 }
-
-export type ModelsHDSettings = { [key in AIModel]: HDSettings }

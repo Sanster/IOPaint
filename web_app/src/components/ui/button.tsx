@@ -78,7 +78,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
                 {...rest}
                 ref={ref}
                 tabIndex={-1}
-                className="cursor-default"
+                className="cursor-default bg-background"
               >
                 <div className="icon-button-icon-wrapper">{children}</div>
               </Button>

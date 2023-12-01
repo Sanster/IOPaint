@@ -23,6 +23,7 @@ LAMA_MODEL_MD5 = os.environ.get("LAMA_MODEL_MD5", "e3aa4aaa15225a33ec84f9f4bc47e
 class LaMa(InpaintModel):
     name = "lama"
     pad_mod = 8
+    is_erase_model = True
 
     @staticmethod
     def download():

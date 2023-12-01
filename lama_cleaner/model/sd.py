@@ -1,4 +1,4 @@
-import gc
+import os
 
 import PIL.Image
 import cv2
@@ -6,32 +6,10 @@ import numpy as np
 import torch
 from loguru import logger
 
+from lama_cleaner.const import DIFFUSERS_MODEL_FP16_REVERSION
 from lama_cleaner.model.base import DiffusionInpaintModel
-from lama_cleaner.model.utils import torch_gc
+from lama_cleaner.model.helper.cpu_text_encoder import CPUTextEncoderWrapper
 from lama_cleaner.schema import Config
-
-
-class CPUTextEncoderWrapper(torch.nn.Module):
-    def __init__(self, text_encoder, torch_dtype):
-        super().__init__()
-        self.config = text_encoder.config
-        self.text_encoder = text_encoder.to(torch.device("cpu"), non_blocking=True)
-        self.text_encoder = self.text_encoder.to(torch.float32, non_blocking=True)
-        self.torch_dtype = torch_dtype
-        del text_encoder
-        torch_gc()
-
-    def __call__(self, x, **kwargs):
-        input_device = x.device
-        return [
-            self.text_encoder(x.to(self.text_encoder.device), **kwargs)[0]
-            .to(input_device)
-            .to(self.torch_dtype)
-        ]
-
-    @property
-    def dtype(self):
-        return self.torch_dtype
 
 
 class SD(DiffusionInpaintModel):
@@ -44,9 +22,7 @@ class SD(DiffusionInpaintModel):
 
         fp16 = not kwargs.get("no_half", False)
 
-        model_kwargs = {
-            "local_files_only": kwargs.get("local_files_only", kwargs["sd_run_local"])
-        }
+        model_kwargs = {}
         if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(
@@ -60,14 +36,20 @@ class SD(DiffusionInpaintModel):
         use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
         torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
 
-        if kwargs.get("sd_local_model_path", None):
+        if os.path.isfile(self.model_id_or_path):
             self.model = StableDiffusionInpaintPipeline.from_single_file(
-                kwargs["sd_local_model_path"], torch_dtype=torch_dtype, **model_kwargs
+                self.model_id_or_path, torch_dtype=torch_dtype, **model_kwargs
             )
         else:
             self.model = StableDiffusionInpaintPipeline.from_pretrained(
                 self.model_id_or_path,
-                revision="fp16" if use_gpu and fp16 else "main",
+                revision="fp16"
+                if (
+                    self.model_id_or_path in DIFFUSERS_MODEL_FP16_REVERSION
+                    and use_gpu
+                    and fp16
+                )
+                else "main",
                 torch_dtype=torch_dtype,
                 use_auth_token=kwargs["hf_access_token"],
                 **model_kwargs,

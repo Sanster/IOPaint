@@ -6,7 +6,7 @@ from pathlib import Path
 from loguru import logger
 
 from lama_cleaner.const import *
-from lama_cleaner.download import cli_download_model
+from lama_cleaner.download import cli_download_model, scan_models
 from lama_cleaner.runtime import dump_environment_info
 
 DOWNLOAD_SUBCOMMAND = "download"
@@ -46,7 +46,11 @@ def parse_args():
         "--installer-config", default=None, help="Config file for windows installer"
     )
 
-    parser.add_argument("--model", default=DEFAULT_MODEL, choices=AVAILABLE_MODELS)
+    parser.add_argument(
+        "--model",
+        default=DEFAULT_MODEL,
+        help=f"Available models: [{', '.join(AVAILABLE_MODELS)}], or model id on huggingface",
+    )
     parser.add_argument("--no-half", action="store_true", help=NO_HALF_HELP)
     parser.add_argument("--cpu-offload", action="store_true", help=CPU_OFFLOAD_HELP)
     parser.add_argument("--disable-nsfw", action="store_true", help=DISABLE_NSFW_HELP)
@@ -56,10 +60,9 @@ def parse_args():
     parser.add_argument("--sd-controlnet", action="store_true", help=SD_CONTROLNET_HELP)
     parser.add_argument(
         "--sd-controlnet-method",
-        default=DEFAULT_CONTROLNET_METHOD,
+        default=DEFAULT_SD_CONTROLNET_METHOD,
         choices=SD_CONTROLNET_CHOICES,
     )
-    parser.add_argument("--sd-local-model-path", default=None, help=SD_LOCAL_MODEL_HELP)
     parser.add_argument(
         "--local-files-only", action="store_true", help=LOCAL_FILES_ONLY_HELP
     )
@@ -170,7 +173,8 @@ def parse_args():
     )
     #########
 
-    # useless args
+    ### useless args ###
+    parser.add_argument("--sd-local-model-path", default=None, help=argparse.SUPPRESS)
     parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--hf_access_token", default="", help=argparse.SUPPRESS)
     parser.add_argument(
@@ -180,6 +184,7 @@ def parse_args():
     parser.add_argument(
         "--sd-enable-xformers", action="store_true", help=argparse.SUPPRESS
     )
+    ### end useless args ###
 
     args = parser.parse_args()
     # collect system info to help debug
@@ -250,6 +255,17 @@ def parse_args():
 
         os.environ["XDG_CACHE_HOME"] = args.model_dir
         os.environ["U2NET_HOME"] = args.model_dir
+
+    if args.sd_run_local or args.local_files_only:
+        os.environ["TRANSFORMERS_OFFLINE"] = "1"
+        os.environ["HF_HUB_OFFLINE"] = "1"
+
+    if args.model not in AVAILABLE_MODELS:
+        scanned_models = scan_models()
+        if args.model not in [it.name for it in scanned_models]:
+            parser.error(
+                f"invalid --model: {args.model} not exists. Available models: {AVAILABLE_MODELS} or {scanned_models}"
+            )
 
     if args.input and args.input is not None:
         if not os.path.exists(args.input):

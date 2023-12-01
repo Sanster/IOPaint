@@ -9,17 +9,17 @@ import { Input } from "./ui/input"
 import { useStore } from "@/lib/states"
 
 const PromptInput = () => {
-  const [isInpainting, prompt, setPrompt] = useStore((state) => [
+  const [isInpainting, prompt, updateSettings] = useStore((state) => [
     state.isInpainting,
-    state.prompt,
-    state.setPrompt,
+    state.settings.prompt,
+    state.updateSettings,
   ])
 
   const handleOnInput = (evt: FormEvent<HTMLInputElement>) => {
     evt.preventDefault()
     evt.stopPropagation()
     const target = evt.target as HTMLInputElement
-    setPrompt(target.value)
+    updateSettings({ prompt: target.value })
   }
 
   const handleRepaintClick = () => {

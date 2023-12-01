@@ -26,6 +26,7 @@ class MIGAN(InpaintModel):
     min_size = 512
     pad_mod = 512
     pad_to_square = True
+    is_erase_model = True
 
     def init_model(self, device, **kwargs):
         self.model = load_jit_model(MIGAN_MODEL_URL, device, MIGAN_MODEL_MD5).eval()

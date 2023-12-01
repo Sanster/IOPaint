@@ -237,6 +237,7 @@ class LatentDiffusion(DDPM):
 class LDM(InpaintModel):
     name = "ldm"
     pad_mod = 32
+    is_erase_model = True
 
     def __init__(self, device, fp16: bool = True, **kwargs):
         self.fp16 = fp16

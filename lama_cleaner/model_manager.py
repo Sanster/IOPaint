@@ -1,49 +1,14 @@
-import torch
 import gc
+from typing import List, Dict
 
+import torch
 from loguru import logger
 
-from lama_cleaner.const import (
-    SD15_MODELS,
-    MODELS_SUPPORT_FREEU,
-    MODELS_SUPPORT_LCM_LORA,
-)
+from lama_cleaner.download import scan_models
 from lama_cleaner.helper import switch_mps_device
-from lama_cleaner.model.controlnet import ControlNet
-from lama_cleaner.model.fcf import FcF
-from lama_cleaner.model.kandinsky import Kandinsky22
-from lama_cleaner.model.lama import LaMa
-from lama_cleaner.model.ldm import LDM
-from lama_cleaner.model.manga import Manga
-from lama_cleaner.model.mat import MAT
-from lama_cleaner.model.mi_gan import MIGAN
-from lama_cleaner.model.paint_by_example import PaintByExample
-from lama_cleaner.model.instruct_pix2pix import InstructPix2Pix
-from lama_cleaner.model.sd import SD15, SD2, Anything4, RealisticVision14
-from lama_cleaner.model.sdxl import SDXL
+from lama_cleaner.model import models, ControlNet, SD, SDXL
 from lama_cleaner.model.utils import torch_gc
-from lama_cleaner.model.zits import ZITS
-from lama_cleaner.model.opencv2 import OpenCV2
-from lama_cleaner.schema import Config
-
-models = {
-    "lama": LaMa,
-    "ldm": LDM,
-    "zits": ZITS,
-    "mat": MAT,
-    "fcf": FcF,
-    SD15.name: SD15,
-    Anything4.name: Anything4,
-    RealisticVision14.name: RealisticVision14,
-    "cv2": OpenCV2,
-    "manga": Manga,
-    "sd2": SD2,
-    "paint_by_example": PaintByExample,
-    "instruct_pix2pix": InstructPix2Pix,
-    Kandinsky22.name: Kandinsky22,
-    SDXL.name: SDXL,
-    MIGAN.name: MIGAN,
-}
+from lama_cleaner.schema import Config, ModelInfo, ModelType
 
 
 class ModelManager:
@@ -51,23 +16,39 @@ class ModelManager:
         self.name = name
         self.device = device
         self.kwargs = kwargs
+        self.available_models: Dict[str, ModelInfo] = {}
+        self.scan_models()
         self.model = self.init_model(name, device, **kwargs)
 
     def init_model(self, name: str, device, **kwargs):
-        if name in SD15_MODELS and kwargs.get("sd_controlnet", False):
-            return ControlNet(device, **{**kwargs, "name": name})
+        for old_name, model_cls in models.items():
+            if name == old_name and hasattr(model_cls, "model_id_or_path"):
+                name = model_cls.model_id_or_path
+        if name not in self.available_models:
+            raise NotImplementedError(f"Unsupported model: {name}")
 
-        if name in models:
-            model = models[name](device, **kwargs)
-        else:
-            raise NotImplementedError(f"Not supported model: {name}")
-        return model
+        sd_controlnet_enabled = kwargs.get("sd_controlnet", False)
+        model_info = self.available_models[name]
+        if model_info.model_type in [ModelType.INPAINT, ModelType.DIFFUSERS_OTHER]:
+            return models[name](device, **kwargs)
 
-    def is_downloaded(self, name: str) -> bool:
-        if name in models:
-            return models[name].is_downloaded()
+        if sd_controlnet_enabled:
+            return ControlNet(device, **{**kwargs, "model_info": model_info})
         else:
-            raise NotImplementedError(f"Not supported model: {name}")
+            if model_info.model_type in [
+                ModelType.DIFFUSERS_SD,
+                ModelType.DIFFUSERS_SDXL,
+            ]:
+                raise NotImplementedError(
+                    f"When using non inpaint Stable Diffusion model, you must enable controlnet"
+                )
+            if model_info.model_type == ModelType.DIFFUSERS_SD_INPAINT:
+                return SD(device, model_id_or_path=model_info.path, **kwargs)
+
+            if model_info.model_type == ModelType.DIFFUSERS_SDXL_INPAINT:
+                return SDXL(device, model_id_or_path=model_info.path, **kwargs)
+
+        raise NotImplementedError(f"Unsupported model: {name}")
 
     def __call__(self, image, mask, config: Config):
         self.switch_controlnet_method(control_method=config.controlnet_method)
@@ -75,9 +56,18 @@ class ModelManager:
         self.enable_disable_lcm_lora(config)
         return self.model(image, mask, config)
 
-    def switch(self, new_name: str, **kwargs):
+    def scan_models(self) -> List[ModelInfo]:
+        available_models = scan_models()
+        self.available_models = {it.name: it for it in available_models}
+        return available_models
+
+    def switch(self, new_name: str):
         if new_name == self.name:
             return
+
+        old_name = self.name
+        self.name = new_name
+
         try:
             if torch.cuda.memory_allocated() > 0:
                 # Clear current loaded model from memory
@@ -88,8 +78,8 @@ class ModelManager:
             self.model = self.init_model(
                 new_name, switch_mps_device(new_name, self.device), **self.kwargs
             )
-            self.name = new_name
-        except NotImplementedError as e:
+        except Exception as e:
+            self.name = old_name
             raise e
 
     def switch_controlnet_method(self, control_method: str):
@@ -97,27 +87,9 @@ class ModelManager:
             return
         if self.kwargs["sd_controlnet_method"] == control_method:
             return
-        if not hasattr(self.model, "is_local_sd_model"):
-            return
 
-        if self.model.is_local_sd_model:
-            # is_native_control_inpaint 表示加载了普通 SD 模型
-            if (
-                self.model.is_native_control_inpaint
-                and control_method != "control_v11p_sd15_inpaint"
-            ):
-                raise RuntimeError(
-                    f"--sd-local-model-path load a normal SD model, "
-                    f"to use {control_method} you should load an inpainting SD model"
-                )
-            elif (
-                not self.model.is_native_control_inpaint
-                and control_method == "control_v11p_sd15_inpaint"
-            ):
-                raise RuntimeError(
-                    f"--sd-local-model-path load an inpainting SD model, "
-                    f"to use {control_method} you should load a norml SD model"
-                )
+        if not self.available_models[self.name].support_controlnet():
+            return
 
         del self.model
         torch_gc()
@@ -133,7 +105,7 @@ class ModelManager:
         if str(self.model.device) == "mps":
             return
 
-        if self.name in MODELS_SUPPORT_FREEU:
+        if self.available_models[self.name].support_freeu():
             if config.sd_freeu:
                 freeu_config = config.sd_freeu_config
                 self.model.model.enable_freeu(
@@ -146,7 +118,7 @@ class ModelManager:
                 self.model.model.disable_freeu()
 
     def enable_disable_lcm_lora(self, config: Config):
-        if self.name in MODELS_SUPPORT_LCM_LORA:
+        if self.available_models[self.name].support_lcm_lora():
             if config.sd_lcm_lora:
                 if not self.model.model.pipe.get_list_adapters():
                     self.model.model.load_lora_weights(self.model.lcm_lora_id)

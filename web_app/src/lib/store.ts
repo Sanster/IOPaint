@@ -1,6 +1,6 @@
 import { atom, selector } from "recoil"
 import _ from "lodash"
-import { CV2Flag, HDStrategy, LDMSampler, ModelsHDSettings } from "./types"
+import { CV2Flag, LDMSampler } from "./types"
 
 export enum AIModel {
   LAMA = "lama",
@@ -320,7 +320,6 @@ export interface Settings {
   graduallyInpainting: boolean
   runInpaintingManually: boolean
   model: AIModel
-  hdSettings: ModelsHDSettings
 
   // For LDM
   ldmSteps: number
@@ -363,107 +362,6 @@ export interface Settings {
   controlnetMethod: string
 }
 
-const defaultHDSettings: ModelsHDSettings = {
-  [AIModel.LAMA]: {
-    hdStrategy: HDStrategy.CROP,
-    hdStrategyResizeLimit: 2048,
-    hdStrategyCropTrigerSize: 800,
-    hdStrategyCropMargin: 196,
-    enabled: true,
-  },
-  [AIModel.LDM]: {
-    hdStrategy: HDStrategy.CROP,
-    hdStrategyResizeLimit: 1080,
-    hdStrategyCropTrigerSize: 1080,
-    hdStrategyCropMargin: 128,
-    enabled: true,
-  },
-  [AIModel.ZITS]: {
-    hdStrategy: HDStrategy.CROP,
-    hdStrategyResizeLimit: 1024,
-    hdStrategyCropTrigerSize: 1024,
-    hdStrategyCropMargin: 128,
-    enabled: true,
-  },
-  [AIModel.MAT]: {
-    hdStrategy: HDStrategy.CROP,
-    hdStrategyResizeLimit: 1024,
-    hdStrategyCropTrigerSize: 512,
-    hdStrategyCropMargin: 128,
-    enabled: true,
-  },
-  [AIModel.FCF]: {
-    hdStrategy: HDStrategy.CROP,
-    hdStrategyResizeLimit: 512,
-    hdStrategyCropTrigerSize: 512,
-    hdStrategyCropMargin: 128,
-    enabled: false,
-  },
-  [AIModel.SD15]: {
-    hdStrategy: HDStrategy.ORIGINAL,
-    hdStrategyResizeLimit: 768,
-    hdStrategyCropTrigerSize: 512,
-    hdStrategyCropMargin: 128,
-    enabled: false,
-  },
-  [AIModel.ANYTHING4]: {
-    hdStrategy: HDStrategy.ORIGINAL,
-    hdStrategyResizeLimit: 768,
-    hdStrategyCropTrigerSize: 512,
-    hdStrategyCropMargin: 128,
-    enabled: false,
-  },
-  [AIModel.REALISTIC_VISION_1_4]: {
-    hdStrategy: HDStrategy.ORIGINAL,
-    hdStrategyResizeLimit: 768,
-    hdStrategyCropTrigerSize: 512,
-    hdStrategyCropMargin: 128,
-    enabled: false,
-  },
-  [AIModel.SD2]: {
-    hdStrategy: HDStrategy.ORIGINAL,
-    hdStrategyResizeLimit: 768,
-    hdStrategyCropTrigerSize: 512,
-    hdStrategyCropMargin: 128,
-    enabled: false,
-  },
-  [AIModel.PAINT_BY_EXAMPLE]: {
-    hdStrategy: HDStrategy.ORIGINAL,
-    hdStrategyResizeLimit: 768,
-    hdStrategyCropTrigerSize: 512,
-    hdStrategyCropMargin: 128,
-    enabled: false,
-  },
-  [AIModel.PIX2PIX]: {
-    hdStrategy: HDStrategy.ORIGINAL,
-    hdStrategyResizeLimit: 768,
-    hdStrategyCropTrigerSize: 512,
-    hdStrategyCropMargin: 128,
-    enabled: false,
-  },
-  [AIModel.Mange]: {
-    hdStrategy: HDStrategy.CROP,
-    hdStrategyResizeLimit: 1280,
-    hdStrategyCropTrigerSize: 1024,
-    hdStrategyCropMargin: 196,
-    enabled: true,
-  },
-  [AIModel.CV2]: {
-    hdStrategy: HDStrategy.RESIZE,
-    hdStrategyResizeLimit: 1080,
-    hdStrategyCropTrigerSize: 512,
-    hdStrategyCropMargin: 128,
-    enabled: true,
-  },
-  [AIModel.KANDINSKY22]: {
-    hdStrategy: HDStrategy.ORIGINAL,
-    hdStrategyResizeLimit: 768,
-    hdStrategyCropTrigerSize: 512,
-    hdStrategyCropMargin: 128,
-    enabled: false,
-  },
-}
-
 export enum SDSampler {
   ddim = "ddim",
   pndm = "pndm",
@@ -487,7 +385,6 @@ export const settingStateDefault: Settings = {
   graduallyInpainting: true,
   runInpaintingManually: false,
   model: AIModel.LAMA,
-  hdSettings: defaultHDSettings,
 
   ldmSteps: 25,
   ldmSampler: LDMSampler.plms,
@@ -585,24 +482,6 @@ export const seedState = selector({
           set(settingState, { ...settings, sdSeed: newValue })
         }
     }
-  },
-})
-
-export const hdSettingsState = selector({
-  key: "hdSettings",
-  get: ({ get }) => {
-    const settings = get(settingState)
-    return settings.hdSettings[settings.model]
-  },
-  set: ({ get, set }, newValue: any) => {
-    const settings = get(settingState)
-    const hdSettings = settings.hdSettings[settings.model]
-    const newHDSettings = { ...hdSettings, ...newValue }
-
-    set(settingState, {
-      ...settings,
-      hdSettings: { ...settings.hdSettings, [settings.model]: newHDSettings },
-    })
   },
 })
 

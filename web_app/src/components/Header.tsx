@@ -1,19 +1,8 @@
 import { PlayIcon } from "@radix-ui/react-icons"
-import React, { useCallback, useState } from "react"
-import { useRecoilState, useRecoilValue } from "recoil"
+import { useCallback, useState } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
-import {
-  enableFileManagerState,
-  isPix2PixState,
-  isSDState,
-  maskState,
-  runManuallyState,
-} from "@/lib/store"
 import { IconButton, ImageUploadButton } from "@/components/ui/button"
 import Shortcuts from "@/components/Shortcuts"
-// import SettingIcon from "../Settings/SettingIcon"
-// import PromptInput from "./PromptInput"
-// import CoffeeIcon from '../CoffeeIcon/CoffeeIcon'
 import emitter, {
   DREAM_BUTTON_MOUSE_ENTER,
   DREAM_BUTTON_MOUSE_LEAVE,
@@ -24,24 +13,37 @@ import { useImage } from "@/hooks/useImage"
 
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import PromptInput from "./PromptInput"
-import { RotateCw, Image } from "lucide-react"
+import { RotateCw, Image, Upload } from "lucide-react"
 import FileManager from "./FileManager"
 import { getMediaFile } from "@/lib/api"
 import { useStore } from "@/lib/states"
+import SettingsDialog from "./Settings"
+import { cn } from "@/lib/utils"
 
 const Header = () => {
-  const [file, isInpainting, setFile] = useStore((state) => [
+  const [
+    file,
+    customMask,
+    isInpainting,
+    enableFileManager,
+    enableManualInpainting,
+    enableUploadMask,
+    shouldShowPromptInput,
+    setFile,
+    setCustomFile,
+  ] = useStore((state) => [
     state.file,
+    state.customMask,
     state.isInpainting,
+    state.serverConfig.enableFileManager,
+    state.settings.enableManualInpainting,
+    state.settings.enableUploadMask,
+    state.shouldShowPromptInput(),
     state.setFile,
+    state.setCustomFile,
   ])
-  const [mask, setMask] = useRecoilState(maskState)
-  // const [maskImage, maskImageLoaded] = useImage(mask)
-  const isSD = useRecoilValue(isSDState)
-  const isPix2Pix = useRecoilValue(isPix2PixState)
-  const runManually = useRecoilValue(runManuallyState)
+  const [maskImage, maskImageLoaded] = useImage(customMask)
   const [openMaskPopover, setOpenMaskPopover] = useState(false)
-  const enableFileManager = useRecoilValue(enableFileManagerState)
 
   const handleRerunLastMask = useCallback(() => {
     emitter.emit(RERUN_LAST_MASK)
@@ -68,7 +70,7 @@ const Header = () => {
 
   return (
     <header className="h-[60px] px-6 py-4 absolute top-[0] flex justify-between items-center w-full z-20 backdrop-filter backdrop-blur-md border-b">
-      <div className="flex items-center">
+      <div className="flex items-center gap-1">
         {enableFileManager ? (
           <FileManager
             photoWidth={512}
@@ -92,38 +94,37 @@ const Header = () => {
         </ImageUploadButton>
 
         <div
-          className="flex items-center"
-          style={{
-            visibility: file ? "visible" : "hidden",
-          }}
+          className={cn([
+            "flex items-center gap-1",
+            file && enableUploadMask ? "visible" : "hidden",
+          ])}
         >
           <ImageUploadButton
             disabled={isInpainting}
             tooltip="Upload custom mask"
             onFileUpload={(file) => {
-              setMask(file)
-              console.info("Send custom mask")
-              if (!runManually) {
+              setCustomFile(file)
+              if (!enableManualInpainting) {
                 emitter.emit(EVENT_CUSTOM_MASK, { mask: file })
               }
             }}
           >
-            <div>M</div>
+            <Upload />
           </ImageUploadButton>
 
-          {mask ? (
+          {customMask ? (
             <Popover open={openMaskPopover}>
               <PopoverTrigger
                 className="btn-primary side-panel-trigger"
                 onMouseEnter={() => setOpenMaskPopover(true)}
                 onMouseLeave={() => setOpenMaskPopover(false)}
                 style={{
-                  visibility: mask ? "visible" : "hidden",
+                  visibility: customMask ? "visible" : "hidden",
                   outline: "none",
                 }}
                 onClick={() => {
-                  if (mask) {
-                    emitter.emit(EVENT_CUSTOM_MASK, { mask })
+                  if (customMask) {
+                    emitter.emit(EVENT_CUSTOM_MASK, { mask: customMask })
                   }
                 }}
               >
@@ -131,36 +132,36 @@ const Header = () => {
                   <PlayIcon />
                 </IconButton>
               </PopoverTrigger>
-              {/* <PopoverContent>
+              <PopoverContent>
                 {maskImageLoaded ? (
                   <img src={maskImage.src} alt="Custom mask" />
                 ) : (
                   <></>
                 )}
-              </PopoverContent> */}
+              </PopoverContent>
             </Popover>
           ) : (
             <></>
           )}
-
-          <IconButton
-            disabled={isInpainting}
-            tooltip="Rerun last mask"
-            onClick={handleRerunLastMask}
-            onMouseEnter={onRerunMouseEnter}
-            onMouseLeave={onRerunMouseLeave}
-          >
-            <RotateCw />
-          </IconButton>
         </div>
+
+        <IconButton
+          disabled={isInpainting}
+          tooltip="Rerun last mask"
+          onClick={handleRerunLastMask}
+          onMouseEnter={onRerunMouseEnter}
+          onMouseLeave={onRerunMouseLeave}
+        >
+          <RotateCw className={file ? "visible" : "hidden"} />
+        </IconButton>
       </div>
 
-      {isSD ? <PromptInput /> : <></>}
+      {shouldShowPromptInput ? <PromptInput /> : <></>}
 
-      {/* <CoffeeIcon /> */}
-      <div>
+      <div className="flex gap-1">
+        {/* <CoffeeIcon /> */}
         <Shortcuts />
-        {/* <SettingIcon /> */}
+        <SettingsDialog />
       </div>
     </header>
   )

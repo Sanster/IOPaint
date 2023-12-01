@@ -17,7 +17,7 @@ class InstructPix2Pix(DiffusionInpaintModel):
 
         fp16 = not kwargs.get("no_half", False)
 
-        model_kwargs = {"local_files_only": kwargs.get("local_files_only", False)}
+        model_kwargs = {}
         if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(
@@ -76,16 +76,6 @@ class InstructPix2Pix(DiffusionInpaintModel):
         output = (output * 255).round().astype("uint8")
         output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
         return output
-
-    #
-    # def forward_post_process(self, result, image, mask, config):
-    #     if config.sd_match_histograms:
-    #         result = self._match_histograms(result, image[:, :, ::-1], mask)
-    #
-    #     if config.sd_mask_blur != 0:
-    #         k = 2 * config.sd_mask_blur + 1
-    #         mask = cv2.GaussianBlur(mask, (k, k), 0)
-    #     return result, image, mask
 
     @staticmethod
     def is_downloaded() -> bool:

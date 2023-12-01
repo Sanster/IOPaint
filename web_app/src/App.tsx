@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { nanoid } from "nanoid"
-import { useSetRecoilState } from "recoil"
-import { serverConfigState } from "@/lib/store"
+
 import useInputImage from "@/hooks/useInputImage"
 import { keepGUIAlive } from "@/lib/utils"
 import { getServerConfig, isDesktop } from "@/lib/api"
@@ -19,10 +18,13 @@ const SUPPORTED_FILE_TYPE = [
   "image/tiff",
 ]
 function Home() {
-  const [file, setFile] = useStore((state) => [state.file, state.setFile])
+  const [file, setServerConfig, setFile] = useStore((state) => [
+    state.file,
+    state.setServerConfig,
+    state.setFile,
+  ])
 
   const userInputImage = useInputImage()
-  const setServerConfigState = useSetRecoilState(serverConfigState)
 
   useEffect(() => {
     if (userInputImage) {
@@ -44,8 +46,7 @@ function Home() {
   useEffect(() => {
     const fetchServerConfig = async () => {
       const serverConfig = await getServerConfig().then((res) => res.json())
-      console.log(serverConfig)
-      setServerConfigState(serverConfig)
+      setServerConfig(serverConfig)
     }
     fetchServerConfig()
   }, [])

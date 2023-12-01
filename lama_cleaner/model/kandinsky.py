@@ -20,7 +20,6 @@ class Kandinsky(DiffusionInpaintModel):
         torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
 
         model_kwargs = {
-            "local_files_only": kwargs.get("local_files_only", kwargs["sd_run_local"]),
             "torch_dtype": torch_dtype,
         }
 

@@ -226,6 +226,7 @@ class ZITS(InpaintModel):
     min_size = 256
     pad_mod = 32
     pad_to_square = True
+    is_erase_model = True
 
     def __init__(self, device, **kwargs):
         """

@@ -1,19 +1,17 @@
 # Copy from: https://github.com/silentsokolov/flask-thumbnails/blob/master/flask_thumbnails/utils.py
-import importlib
-import os
+import hashlib
 from pathlib import Path
 
 from typing import Union
 
 
-def generate_filename(original_filename, *options):
-    name, ext = os.path.splitext(original_filename)
+def generate_filename(directory: Path, original_filename, *options) -> str:
+    text = str(directory.absolute()) + original_filename
     for v in options:
-        if v:
-            name += "_%s" % v
-    name += ext
-
-    return name
+        text += "%s" % v
+    md5_hash = hashlib.md5()
+    md5_hash.update(text.encode("utf-8"))
+    return md5_hash.hexdigest() + ".jpg"
 
 
 def parse_size(size):
@@ -48,7 +46,7 @@ def aspect_to_string(size):
     return "x".join(map(str, size))
 
 
-IMG_SUFFIX = {'.jpg', '.jpeg', '.png', '.JPG', '.JPEG', '.PNG'}
+IMG_SUFFIX = {".jpg", ".jpeg", ".png", ".JPG", ".JPEG", ".PNG"}
 
 
 def glob_img(p: Union[Path, str], recursive: bool = False):

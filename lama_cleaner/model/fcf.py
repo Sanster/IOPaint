@@ -1626,6 +1626,7 @@ class FcF(InpaintModel):
     min_size = 512
     pad_mod = 512
     pad_to_square = True
+    is_erase_model = True
 
     def init_model(self, device, **kwargs):
         seed = 0

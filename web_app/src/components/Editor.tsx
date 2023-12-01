@@ -3,13 +3,10 @@ import { CursorArrowRaysIcon } from "@heroicons/react/24/outline"
 import { useToast } from "@/components/ui/use-toast"
 import {
   ReactZoomPanPinchContentRef,
-  ReactZoomPanPinchRef,
   TransformComponent,
   TransformWrapper,
 } from "react-zoom-pan-pinch"
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
-import { useWindowSize } from "react-use"
-// import { useWindowSize, useKey, useKeyPressEvent } from "@uidotdev/usehooks"
+import { useKeyPressEvent, useWindowSize } from "react-use"
 import inpaint, { downloadToOutput, runPlugin } from "@/lib/api"
 import { IconButton } from "@/components/ui/button"
 import {
@@ -22,23 +19,6 @@ import {
   srcToFile,
 } from "@/lib/utils"
 import { Eraser, Eye, Redo, Undo, Expand, Download } from "lucide-react"
-import {
-  croperState,
-  enableFileManagerState,
-  interactiveSegClicksState,
-  isDiffusionModelsState,
-  isEnableAutoSavingState,
-  isInteractiveSegRunningState,
-  isInteractiveSegState,
-  isPix2PixState,
-  isPluginRunningState,
-  isProcessingState,
-  negativePropmtState,
-  runManuallyState,
-  seedState,
-  settingState,
-} from "@/lib/store"
-// import Croper from "../Croper/Croper"
 import emitter, {
   EVENT_PROMPT,
   EVENT_CUSTOM_MASK,
@@ -49,19 +29,15 @@ import emitter, {
 } from "@/lib/event"
 import { useImage } from "@/hooks/useImage"
 import { Slider } from "./ui/slider"
-// import FileSelect from "../FileSelect/FileSelect"
-// import InteractiveSeg from "../InteractiveSeg/InteractiveSeg"
-// import InteractiveSegConfirmActions from "../InteractiveSeg/ConfirmActions"
-// import InteractiveSegReplaceModal from "../InteractiveSeg/ReplaceModal"
 import { PluginName } from "@/lib/types"
 import { useHotkeys } from "react-hotkeys-hook"
 import { useStore } from "@/lib/states"
 import Cropper from "./Cropper"
-import { HotkeysEvent } from "react-hotkeys-hook/dist/types"
 
 const TOOLBAR_HEIGHT = 200
 const MIN_BRUSH_SIZE = 10
 const MAX_BRUSH_SIZE = 200
+const COMPARE_SLIDER_DURATION_MS = 300
 const BRUSH_COLOR = "#ffcc00bb"
 
 interface Line {
@@ -110,48 +86,55 @@ export default function Editor(props: EditorProps) {
     imageWidth,
     imageHeight,
     baseBrushSize,
-    brushScale,
-    promptVal,
+    brushSizeScale,
+    settings,
+    enableAutoSaving,
+    cropperRect,
+    enableManualInpainting,
     setImageSize,
     setBrushSize,
     setIsInpainting,
+    setSeed,
+    interactiveSegState,
+    updateInteractiveSegState,
+    resetInteractiveSegState,
+    isPluginRunning,
+    setIsPluginRunning,
   ] = useStore((state) => [
     state.isInpainting,
     state.imageWidth,
     state.imageHeight,
     state.brushSize,
     state.brushSizeScale,
-    state.prompt,
+    state.settings,
+    state.serverConfig.enableAutoSaving,
+    state.cropperState,
+    state.settings.enableManualInpainting,
     state.setImageSize,
     state.setBrushSize,
     state.setIsInpainting,
+    state.setSeed,
+    state.interactiveSegState,
+    state.updateInteractiveSegState,
+    state.resetInteractiveSegState,
+    state.isPluginRunning,
+    state.setIsPluginRunning,
   ])
-  const brushSize = baseBrushSize * brushScale
+  const brushSize = baseBrushSize * brushSizeScale
 
   // 纯 local state
   const [showOriginal, setShowOriginal] = useState(false)
 
   //
-  const negativePromptVal = useRecoilValue(negativePropmtState)
-  const settings = useRecoilValue(settingState)
-  const [seedVal, setSeed] = useRecoilState(seedState)
-  const croperRect = useRecoilValue(croperState)
-  const setIsPluginRunning = useSetRecoilState(isPluginRunningState)
-  const isProcessing = useRecoilValue(isProcessingState)
-  const runMannually = useRecoilValue(runManuallyState)
-  const isDiffusionModels = useRecoilValue(isDiffusionModelsState)
-  const isPix2Pix = useRecoilValue(isPix2PixState)
-  const [isInteractiveSeg, setIsInteractiveSeg] = useRecoilState(
-    isInteractiveSegState
-  )
-  const setIsInteractiveSegRunning = useSetRecoilState(
-    isInteractiveSegRunningState
-  )
+  const isProcessing = isInpainting
+  const isDiffusionModels = false
+  const isPix2Pix = false
 
   const [showInteractiveSegModal, setShowInteractiveSegModal] = useState(false)
   const [interactiveSegMask, setInteractiveSegMask] = useState<
     HTMLImageElement | null | undefined
   >(null)
+
   // only used while interactive segmentation is on
   const [tmpInteractiveSegMask, setTmpInteractiveSegMask] = useState<
     HTMLImageElement | null | undefined
@@ -166,8 +149,6 @@ export default function Editor(props: EditorProps) {
   >(null)
   const [dreamButtonHoverLineGroup, setDreamButtonHoverLineGroup] =
     useState<LineGroup>([])
-
-  const [clicks, setClicks] = useRecoilState(interactiveSegClicksState)
 
   const [original, isOriginalLoaded] = useImage(file)
   const [renders, setRenders] = useState<HTMLImageElement[]>([])
@@ -201,7 +182,6 @@ export default function Editor(props: EditorProps) {
   const [initialCentered, setInitialCentered] = useState(false)
 
   const [isDraging, setIsDraging] = useState(false)
-  const [isMultiStrokeKeyPressed, setIsMultiStrokeKeyPressed] = useState(false)
 
   const [sliderPos, setSliderPos] = useState<number>(0)
 
@@ -209,8 +189,6 @@ export default function Editor(props: EditorProps) {
   const [redoRenders, setRedoRenders] = useState<HTMLImageElement[]>([])
   const [redoCurLines, setRedoCurLines] = useState<Line[]>([])
   const [redoLineGroups, setRedoLineGroups] = useState<LineGroup[]>([])
-  const enableFileManager = useRecoilValue(enableFileManagerState)
-  const isEnableAutoSaving = useRecoilValue(isEnableAutoSavingState)
 
   const draw = useCallback(
     (render: HTMLImageElement, lineGroup: LineGroup) => {
@@ -223,10 +201,10 @@ export default function Editor(props: EditorProps) {
 
       context.clearRect(0, 0, context.canvas.width, context.canvas.height)
       context.drawImage(render, 0, 0, imageWidth, imageHeight)
-      if (isInteractiveSeg && tmpInteractiveSegMask) {
+      if (interactiveSegState.isInteractiveSeg && tmpInteractiveSegMask) {
         context.drawImage(tmpInteractiveSegMask, 0, 0, imageWidth, imageHeight)
       }
-      if (!isInteractiveSeg && interactiveSegMask) {
+      if (!interactiveSegState.isInteractiveSeg && interactiveSegMask) {
         context.drawImage(interactiveSegMask, 0, 0, imageWidth, imageHeight)
       }
       if (dreamButtonHoverSegMask) {
@@ -243,7 +221,7 @@ export default function Editor(props: EditorProps) {
     },
     [
       context,
-      isInteractiveSeg,
+      interactiveSegState,
       tmpInteractiveSegMask,
       dreamButtonHoverSegMask,
       interactiveSegMask,
@@ -363,34 +341,31 @@ export default function Editor(props: EditorProps) {
       setCurLineGroup([])
       setIsDraging(false)
       setIsInpainting(true)
-      if (settings.graduallyInpainting) {
-        drawLinesOnMask([maskLineGroup], maskImage)
-      } else {
-        drawLinesOnMask(newLineGroups)
-      }
+      drawLinesOnMask([maskLineGroup], maskImage)
 
       let targetFile = file
-      if (settings.graduallyInpainting === true) {
-        if (useLastLineGroup === true) {
-          // renders.length == 1 还是用原来的
-          if (renders.length > 1) {
-            const lastRender = renders[renders.length - 2]
-            targetFile = await srcToFile(
-              lastRender.currentSrc,
-              file.name,
-              file.type
-            )
-          }
-        } else if (renders.length > 0) {
-          console.info("gradually inpainting on last result")
-
-          const lastRender = renders[renders.length - 1]
+      console.log(
+        `randers.length ${renders.length} useLastLineGroup: ${useLastLineGroup}`
+      )
+      if (useLastLineGroup === true) {
+        // renders.length == 1 还是用原来的
+        if (renders.length > 1) {
+          const lastRender = renders[renders.length - 2]
           targetFile = await srcToFile(
             lastRender.currentSrc,
             file.name,
             file.type
           )
         }
+      } else if (renders.length > 0) {
+        console.info("gradually inpainting on last result")
+
+        const lastRender = renders[renders.length - 1]
+        targetFile = await srcToFile(
+          lastRender.currentSrc,
+          file.name,
+          file.type
+        )
       }
 
       try {
@@ -398,10 +373,7 @@ export default function Editor(props: EditorProps) {
         const res = await inpaint(
           targetFile,
           settings,
-          croperRect,
-          promptVal,
-          negativePromptVal,
-          seedVal,
+          cropperRect,
           useCustomMask ? undefined : maskCanvas.toDataURL(),
           useCustomMask ? customMask : undefined,
           paintByExampleImage
@@ -445,18 +417,15 @@ export default function Editor(props: EditorProps) {
       setInteractiveSegMask(null)
     },
     [
+      renders,
       lineGroups,
       curLineGroup,
       maskCanvas,
-      settings.graduallyInpainting,
       settings,
-      croperRect,
-      promptVal,
-      negativePromptVal,
+      cropperRect,
       drawOnCurrentRender,
       hadDrawSomething,
       drawLinesOnMask,
-      seedVal,
     ]
   )
 
@@ -487,7 +456,6 @@ export default function Editor(props: EditorProps) {
   }, [
     hadDrawSomething,
     runInpainting,
-    promptVal,
     interactiveSegMask,
     prevInteractiveSegMask,
   ])
@@ -604,7 +572,7 @@ export default function Editor(props: EditorProps) {
 
   useEffect(() => {
     emitter.on(PluginName.InteractiveSeg, () => {
-      setIsInteractiveSeg(true)
+      // setIsInteractiveSeg(true)
       if (interactiveSegMask !== null) {
         setShowInteractiveSegModal(true)
       }
@@ -807,8 +775,8 @@ export default function Editor(props: EditorProps) {
     const offsetX = (windowSize.width - imageWidth * minScale) / 2
     const offsetY = (windowSize.height - imageHeight * minScale) / 2
     viewport.setTransform(offsetX, offsetY, minScale, 200, "easeOutQuad")
-    if (viewport.state) {
-      viewport.state.scale = minScale
+    if (viewport.instance.transformState.scale) {
+      viewport.instance.transformState.scale = minScale
     }
 
     setScale(minScale)
@@ -850,24 +818,12 @@ export default function Editor(props: EditorProps) {
     }
   }, [])
 
-  const onInteractiveCancel = useCallback(() => {
-    setIsInteractiveSeg(false)
-    setIsInteractiveSegRunning(false)
-    setClicks([])
-    setTmpInteractiveSegMask(null)
-  }, [])
-
   const handleEscPressed = () => {
     if (isProcessing) {
       return
     }
 
-    if (isInteractiveSeg) {
-      onInteractiveCancel()
-      return
-    }
-
-    if (isDraging || isMultiStrokeKeyPressed) {
+    if (isDraging) {
       setIsDraging(false)
       setCurLineGroup([])
       drawOnCurrentRender([])
@@ -879,9 +835,6 @@ export default function Editor(props: EditorProps) {
   useHotkeys("Escape", handleEscPressed, [
     isDraging,
     isInpainting,
-    isMultiStrokeKeyPressed,
-    isInteractiveSeg,
-    onInteractiveCancel,
     resetZoom,
     drawOnCurrentRender,
   ])
@@ -901,7 +854,7 @@ export default function Editor(props: EditorProps) {
       }
       return
     }
-    if (isInteractiveSeg) {
+    if (interactiveSegState.isInteractiveSeg) {
       return
     }
     if (isPanning) {
@@ -924,7 +877,7 @@ export default function Editor(props: EditorProps) {
       return
     }
 
-    setIsInteractiveSegRunning(true)
+    // setIsInteractiveSegRunning(true)
     const targetFile = await getCurrentRender()
     const prevMask = null
     try {
@@ -950,14 +903,14 @@ export default function Editor(props: EditorProps) {
         description: e.message ? e.message : e.toString(),
       })
     }
-    setIsInteractiveSegRunning(false)
+    // setIsInteractiveSegRunning(false)
   }
 
   const onPointerUp = (ev: SyntheticEvent) => {
     if (isMidClick(ev)) {
       setIsPanning(false)
     }
-    if (isInteractiveSeg) {
+    if (interactiveSegState.isInteractiveSeg) {
       return
     }
 
@@ -978,12 +931,7 @@ export default function Editor(props: EditorProps) {
       return
     }
 
-    if (isMultiStrokeKeyPressed) {
-      setIsDraging(false)
-      return
-    }
-
-    if (runMannually) {
+    if (enableManualInpainting) {
       setIsDraging(false)
     } else {
       runInpainting()
@@ -991,34 +939,34 @@ export default function Editor(props: EditorProps) {
   }
 
   const isOutsideCroper = (clickPnt: { x: number; y: number }) => {
-    if (clickPnt.x < croperRect.x) {
+    if (clickPnt.x < cropperRect.x) {
       return true
     }
-    if (clickPnt.y < croperRect.y) {
+    if (clickPnt.y < cropperRect.y) {
       return true
     }
-    if (clickPnt.x > croperRect.x + croperRect.width) {
+    if (clickPnt.x > cropperRect.x + cropperRect.width) {
       return true
     }
-    if (clickPnt.y > croperRect.y + croperRect.height) {
+    if (clickPnt.y > cropperRect.y + cropperRect.height) {
       return true
     }
     return false
   }
 
   const onCanvasMouseUp = (ev: SyntheticEvent) => {
-    if (isInteractiveSeg) {
+    if (interactiveSegState.isInteractiveSeg) {
       const xy = mouseXY(ev)
       const isX = xy.x
       const isY = xy.y
-      const newClicks: number[][] = [...clicks]
+      const newClicks: number[][] = [...interactiveSegState.clicks]
       if (isRightClick(ev)) {
         newClicks.push([isX, isY, 0, newClicks.length])
       } else {
         newClicks.push([isX, isY, 1, newClicks.length])
       }
       //   runInteractiveSeg(newClicks)
-      setClicks(newClicks)
+      updateInteractiveSegState({ clicks: newClicks })
     }
   }
 
@@ -1026,7 +974,7 @@ export default function Editor(props: EditorProps) {
     if (isProcessing) {
       return
     }
-    if (isInteractiveSeg) {
+    if (interactiveSegState.isInteractiveSeg) {
       return
     }
     if (isChangingBrushSizeByMouse) {
@@ -1063,7 +1011,7 @@ export default function Editor(props: EditorProps) {
     setIsDraging(true)
 
     let lineGroup: LineGroup = []
-    if (isMultiStrokeKeyPressed || runMannually) {
+    if (enableManualInpainting) {
       lineGroup = [...curLineGroup]
     }
     lineGroup.push({ size: brushSize, pts: [mouseXY(ev)] })
@@ -1122,9 +1070,9 @@ export default function Editor(props: EditorProps) {
     context,
   ])
 
-  const undo = (keyboardEvent: KeyboardEvent, hotkeysEvent: HotkeysEvent) => {
+  const undo = (keyboardEvent: KeyboardEvent | SyntheticEvent) => {
     keyboardEvent.preventDefault()
-    if (runMannually && curLineGroup.length !== 0) {
+    if (enableManualInpainting && curLineGroup.length !== 0) {
       undoStroke()
     } else {
       undoRender()
@@ -1134,7 +1082,7 @@ export default function Editor(props: EditorProps) {
   useHotkeys("meta+z,ctrl+z", undo, undefined, [
     undoStroke,
     undoRender,
-    runMannually,
+    enableManualInpainting,
     curLineGroup,
     context?.canvas,
     renders,
@@ -1148,7 +1096,7 @@ export default function Editor(props: EditorProps) {
       return false
     }
 
-    if (runMannually) {
+    if (enableManualInpainting) {
       if (curLineGroup.length === 0) {
         return true
       }
@@ -1188,9 +1136,9 @@ export default function Editor(props: EditorProps) {
     // draw(newRenders[newRenders.length - 1], [])
   }, [draw, renders, redoRenders, redoLineGroups, lineGroups, original])
 
-  const redo = (keyboardEvent: KeyboardEvent, hotkeysEvent: HotkeysEvent) => {
+  const redo = (keyboardEvent: KeyboardEvent | SyntheticEvent) => {
     keyboardEvent.preventDefault()
-    if (runMannually && redoCurLines.length !== 0) {
+    if (enableManualInpainting && redoCurLines.length !== 0) {
       redoStroke()
     } else {
       redoRender()
@@ -1200,7 +1148,7 @@ export default function Editor(props: EditorProps) {
   useHotkeys("shift+ctrl+z,shift+meta+z", redo, undefined, [
     redoStroke,
     redoRender,
-    runMannually,
+    enableManualInpainting,
     redoCurLines,
   ])
 
@@ -1212,7 +1160,7 @@ export default function Editor(props: EditorProps) {
       return false
     }
 
-    if (runMannually) {
+    if (enableManualInpainting) {
       if (redoCurLines.length === 0) {
         return true
       }
@@ -1223,37 +1171,39 @@ export default function Editor(props: EditorProps) {
     return false
   }
 
-  //   useKeyPressEvent(
-  //     "Tab",
-  //     (ev) => {
-  //       ev?.preventDefault()
-  //       ev?.stopPropagation()
-  //       if (hadRunInpainting()) {
-  //         setShowOriginal(() => {
-  //           window.setTimeout(() => {
-  //             setSliderPos(100)
-  //           }, 10)
-  //           return true
-  //         })
-  //       }
-  //     },
-  //     (ev) => {
-  //       ev?.preventDefault()
-  //       ev?.stopPropagation()
-  //       if (hadRunInpainting()) {
-  //         setSliderPos(0)
-  //         window.setTimeout(() => {
-  //           setShowOriginal(false)
-  //         }, 350)
-  //       }
-  //     }
-  //   )
+  useKeyPressEvent(
+    "Tab",
+    (ev) => {
+      ev?.preventDefault()
+      ev?.stopPropagation()
+      if (hadRunInpainting()) {
+        setShowOriginal(() => {
+          window.setTimeout(() => {
+            setSliderPos(100)
+          }, 10)
+          return true
+        })
+      }
+    },
+    (ev) => {
+      ev?.preventDefault()
+      ev?.stopPropagation()
+      if (hadRunInpainting()) {
+        window.setTimeout(() => {
+          setSliderPos(0)
+        }, 10)
+        window.setTimeout(() => {
+          setShowOriginal(false)
+        }, COMPARE_SLIDER_DURATION_MS)
+      }
+    }
+  )
 
   function download() {
     if (file === undefined) {
       return
     }
-    if ((enableFileManager || isEnableAutoSaving) && renders.length > 0) {
+    if (enableAutoSaving && renders.length > 0) {
       try {
         downloadToOutput(renders[renders.length - 1], file.name, file.type)
         toast({
@@ -1273,7 +1223,7 @@ export default function Editor(props: EditorProps) {
     const name = file.name.replace(/(\.[\w\d_-]+)$/i, "_cleanup$1")
     const curRender = renders[renders.length - 1]
     downloadImage(curRender.currentSrc, name)
-    if (settings.downloadMask) {
+    if (settings.enableDownloadMask) {
       let maskFileName = file.name.replace(/(\.[\w\d_-]+)$/i, "_mask$1")
       maskFileName = maskFileName.replace(/\.[^/.]+$/, ".jpg")
 
@@ -1305,104 +1255,98 @@ export default function Editor(props: EditorProps) {
     return undefined
   }, [showBrush, isPanning])
 
-  // Standard Hotkeys for Brush Size
-  //   useHotKey("[", () => {
-  //     setBrushSize((currentBrushSize: number) => {
-  //       if (currentBrushSize > 10) {
-  //         return currentBrushSize - 10
-  //       }
-  //       if (currentBrushSize <= 10 && currentBrushSize > 0) {
-  //         return currentBrushSize - 5
-  //       }
-  //       return currentBrushSize
-  //     })
-  //   })
+  useHotkeys(
+    "[",
+    () => {
+      let newBrushSize = baseBrushSize
+      if (baseBrushSize > 10) {
+        newBrushSize = baseBrushSize - 10
+      }
+      if (baseBrushSize <= 10 && baseBrushSize > 0) {
+        newBrushSize = baseBrushSize - 5
+      }
+      setBrushSize(newBrushSize)
+    },
+    [baseBrushSize]
+  )
 
-  //   useHotKey("]", () => {
-  //     setBrushSize((currentBrushSize: number) => {
-  //       return currentBrushSize + 10
-  //     })
-  //   })
+  useHotkeys(
+    "]",
+    () => {
+      setBrushSize(baseBrushSize + 10)
+    },
+    [baseBrushSize]
+  )
 
-  //   // Manual Inpainting Hotkey
-  //   useHotKey(
-  //     "shift+r",
-  //     () => {
-  //       if (runMannually && hadDrawSomething()) {
-  //         runInpainting()
-  //       }
-  //     },
-  //     {},
-  //     [runMannually, runInpainting, hadDrawSomething]
-  //   )
+  // Manual Inpainting Hotkey
+  useHotkeys(
+    "shift+r",
+    () => {
+      if (enableManualInpainting && hadDrawSomething()) {
+        runInpainting()
+      }
+    },
+    [enableManualInpainting, runInpainting, hadDrawSomething]
+  )
 
-  //   useHotKey(
-  //     "ctrl+c, cmd+c",
-  //     async () => {
-  //       const hasPermission = await askWritePermission()
-  //       if (hasPermission && renders.length > 0) {
-  //         if (context?.canvas) {
-  //           await copyCanvasImage(context?.canvas)
-  //           setToastState({
-  //             open: true,
-  //             desc: "Copy inpainting result to clipboard",
-  //             state: "success",
-  //             duration: 3000,
-  //           })
-  //         }
-  //       }
-  //     },
-  //     {},
-  //     [renders, context]
-  //   )
+  useHotkeys(
+    "ctrl+c, cmd+c",
+    async () => {
+      const hasPermission = await askWritePermission()
+      if (hasPermission && renders.length > 0) {
+        if (context?.canvas) {
+          await copyCanvasImage(context?.canvas)
+          toast({
+            title: "Copy inpainting result to clipboard",
+          })
+        }
+      }
+    },
+    [renders, context]
+  )
 
   // Toggle clean/zoom tool on spacebar.
-  //   useKeyPressEvent(
-  //     " ",
-  //     (ev) => {
-  //       if (!app.disableShortCuts) {
-  //         ev?.preventDefault()
-  //         ev?.stopPropagation()
-  //         setShowBrush(false)
-  //         setIsPanning(true)
-  //       }
-  //     },
-  //     (ev) => {
-  //       if (!app.disableShortCuts) {
-  //         ev?.preventDefault()
-  //         ev?.stopPropagation()
-  //         setShowBrush(true)
-  //         setIsPanning(false)
-  //       }
-  //     }
-  //   )
+  useKeyPressEvent(
+    " ",
+    (ev) => {
+      ev?.preventDefault()
+      ev?.stopPropagation()
+      setShowBrush(false)
+      setIsPanning(true)
+    },
+    (ev) => {
+      ev?.preventDefault()
+      ev?.stopPropagation()
+      setShowBrush(true)
+      setIsPanning(false)
+    }
+  )
 
-  //   useKeyPressEvent(
-  //     "Alt",
-  //     (ev) => {
-  //       ev?.preventDefault()
-  //       ev?.stopPropagation()
-  //       setIsChangingBrushSizeByMouse(true)
-  //       setChangeBrushSizeByMouseInit({ x, y, brushSize })
-  //     },
-  //     (ev) => {
-  //       ev?.preventDefault()
-  //       ev?.stopPropagation()
-  //       setIsChangingBrushSizeByMouse(false)
-  //     }
-  //   )
+  useKeyPressEvent(
+    "Alt",
+    (ev) => {
+      ev?.preventDefault()
+      ev?.stopPropagation()
+      setIsChangingBrushSizeByMouse(true)
+      setChangeBrushSizeByMouseInit({ x, y, brushSize })
+    },
+    (ev) => {
+      ev?.preventDefault()
+      ev?.stopPropagation()
+      setIsChangingBrushSizeByMouse(false)
+    }
+  )
 
   const getCurScale = (): number => {
     let s = minScale
-    if (viewportRef.current?.state?.scale !== undefined) {
-      s = viewportRef.current?.state.scale
-      console.log("!!!!!!")
+    if (viewportRef.current?.instance?.transformState.scale !== undefined) {
+      s = viewportRef.current?.instance?.transformState.scale
     }
     return s!
   }
 
   const getBrushStyle = (_x: number, _y: number) => {
-    const curScale = scale
+    const curScale = getCurScale()
     return {
       width: `${brushSize * curScale}px`,
       height: `${brushSize * curScale}px`,
@@ -1435,7 +1379,7 @@ export default function Editor(props: EditorProps) {
   const renderInteractiveSegCursor = () => {
     return (
       <div
-        className="interactive-seg-cursor"
+        className="absolute h-[20px] w-[20px] pointer-events-none rounded-[50%] bg-[rgba(21,_215,_121,_0.936)] [box-shadow:0_0_0_0_rgba(21,_215,_121,_0.936)] animate-pulse"
         style={{
           left: `${x}px`,
           top: `${y}px`,
@@ -1475,7 +1419,9 @@ export default function Editor(props: EditorProps) {
         }}
       >
         <TransformComponent
-          contentClass={isProcessing ? "pointer-events-none" : ""}
+          contentClass={
+            isProcessing ? "pointer-events-none animate-pulse duration-700" : ""
+          }
           contentStyle={{
             visibility: initialCentered ? "visible" : "hidden",
           }}
@@ -1486,7 +1432,7 @@ export default function Editor(props: EditorProps) {
               style={{
                 cursor: getCursor(),
                 clipPath: `inset(0 ${sliderPos}% 0 0)`,
-                transition: "clip-path 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+                transition: `clip-path ${COMPARE_SLIDER_DURATION_MS}ms`,
               }}
               onContextMenu={(e) => {
                 e.preventDefault()
@@ -1519,9 +1465,10 @@ export default function Editor(props: EditorProps) {
               {showOriginal && (
                 <>
                   <div
-                    className="[grid-area:original-image-content] h-full w-[6px] justify-self-end [transition:all_300ms_cubic-bezier(0.4,_0,_0.2,_1)]"
+                    className="[grid-area:original-image-content] z-10 bg-primary h-full w-[6px] justify-self-end"
                     style={{
                       marginRight: `${sliderPos}%`,
+                      transition: `margin-right ${COMPARE_SLIDER_DURATION_MS}ms`,
                     }}
                   />
                   <img
@@ -1543,12 +1490,12 @@ export default function Editor(props: EditorProps) {
             maxWidth={imageWidth}
             minHeight={Math.min(256, imageHeight)}
             minWidth={Math.min(256, imageWidth)}
-            scale={scale}
+            scale={getCurScale()}
+            // show={settings.showCroper}
             show={true}
-            // show={isDiffusionModels && settings.showCroper}
           />
 
-          {/* {isInteractiveSeg ? <InteractiveSeg /> : <></>} */}
+          {/* {interactiveSegState.isInteractiveSeg ? <InteractiveSeg /> : <></>} */}
         </TransformComponent>
       </TransformWrapper>
     )
@@ -1558,7 +1505,7 @@ export default function Editor(props: EditorProps) {
     setInteractiveSegMask(tmpInteractiveSegMask)
     setTmpInteractiveSegMask(null)
 
-    if (!runMannually && tmpInteractiveSegMask) {
+    if (!enableManualInpainting && tmpInteractiveSegMask) {
       runInpainting(false, undefined, tmpInteractiveSegMask)
     }
   }
@@ -1570,16 +1517,12 @@ export default function Editor(props: EditorProps) {
       onMouseMove={onMouseMove}
       onMouseUp={onPointerUp}
     >
-      {/* <InteractiveSegConfirmActions
-        onAcceptClick={onInteractiveAccept}
-        onCancelClick={onInteractiveCancel}
-      /> */}
       {renderCanvas()}
 
       {showBrush &&
         !isInpainting &&
         !isPanning &&
-        (isInteractiveSeg
+        (interactiveSegState.isInteractiveSeg
           ? renderInteractiveSegCursor()
           : renderBrush(
               getBrushStyle(
@@ -1590,20 +1533,21 @@ export default function Editor(props: EditorProps) {
 
       {showRefBrush && renderBrush(getBrushStyle(windowCenterX, windowCenterY))}
 
-      <div className="fixed flex bottom-10 border px-4 py-2 rounded-[3rem] gap-8 items-center justify-center backdrop-filter backdrop-blur-md">
+      <div className="fixed flex bottom-5 border px-4 py-2 rounded-[3rem] gap-8 items-center justify-center backdrop-filter backdrop-blur-md bg-background/50">
         <Slider
           className="w-48"
           defaultValue={[50]}
           min={MIN_BRUSH_SIZE}
           max={MAX_BRUSH_SIZE}
           step={1}
+          tabIndex={-1}
           value={[baseBrushSize]}
           onValueChange={(vals) => handleSliderChange(vals[0])}
           onClick={() => setShowRefBrush(false)}
         />
         <div className="flex gap-2">
           <IconButton
-            tooltip="Reset Zoom & Pan"
+            tooltip="Reset zoom & pan"
             disabled={scale === minScale && panned === false}
             onClick={resetZoom}
           >
@@ -1616,23 +1560,26 @@ export default function Editor(props: EditorProps) {
             <Redo />
           </IconButton>
           <IconButton
-            tooltip="Show Original"
-            className={showOriginal ? "eyeicon-active" : ""}
-            // onDown={(ev) => {
-            //   ev.preventDefault()
-            //   setShowOriginal(() => {
-            //     window.setTimeout(() => {
-            //       setSliderPos(100)
-            //     }, 10)
-            //     return true
-            //   })
-            // }}
-            // onUp={() => {
-            //   setSliderPos(0)
-            //   window.setTimeout(() => {
-            //     setShowOriginal(false)
-            //   }, 300)
-            // }}
+            tooltip="Show original image"
+            onPointerDown={(ev) => {
+              ev.preventDefault()
+              setShowOriginal(() => {
+                window.setTimeout(() => {
+                  setSliderPos(100)
+                }, 10)
+                return true
+              })
+            }}
+            onPointerUp={() => {
+              window.setTimeout(() => {
+                // 防止快速点击 show original image 按钮时图片消失
+                setSliderPos(0)
+              }, 10)
+
+              window.setTimeout(() => {
+                setShowOriginal(false)
+              }, COMPARE_SLIDER_DURATION_MS)
+            }}
             disabled={renders.length === 0}
           >
             <Eye />
@@ -1645,36 +1592,25 @@ export default function Editor(props: EditorProps) {
             <Download />
           </IconButton>
 
-          <IconButton
-            tooltip="Run Inpainting"
-            disabled={
-              isProcessing ||
-              (!hadDrawSomething() && interactiveSegMask === null)
-            }
-            onClick={() => {
-              // ensured by disabled
-              runInpainting(false, undefined, interactiveSegMask)
-            }}
-          >
-            <Eraser />
-          </IconButton>
+          {settings.enableManualInpainting ? (
+            <IconButton
+              tooltip="Run Inpainting"
+              disabled={
+                isProcessing ||
+                (!hadDrawSomething() && interactiveSegMask === null)
+              }
+              onClick={() => {
+                // ensured by disabled
+                runInpainting(false, undefined, interactiveSegMask)
+              }}
+            >
+              <Eraser />
+            </IconButton>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
-      {/* <InteractiveSegReplaceModal
-        show={showInteractiveSegModal}
-        onClose={() => {
-          onInteractiveCancel()
-          setShowInteractiveSegModal(false)
-        }}
-        onCleanClick={() => {
-          onInteractiveCancel()
-          setInteractiveSegMask(null)
-        }}
-        onReplaceClick={() => {
-          setShowInteractiveSegModal(false)
-          setIsInteractiveSeg(true)
-        }}
-      /> */}
     </div>
   )
 }

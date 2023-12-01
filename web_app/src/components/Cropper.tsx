@@ -1,5 +1,7 @@
 import { useStore } from "@/lib/states"
+import { cn } from "@/lib/utils"
 import React, { useEffect, useState } from "react"
+import { twMerge } from "tailwind-merge"
 
 const DOC_MOVE_OPTS = { capture: true, passive: false }
 
@@ -75,11 +77,6 @@ const Cropper = (props: Props) => {
     state.setCropperWidth,
     state.setCropperHeight,
   ])
-  //   const [x, setX] = useRecoilState(croperX)
-  //   const [y, setY] = useRecoilState(croperY)
-  //   const [height, setHeight] = useRecoilState(croperHeight)
-  //   const [width, setWidth] = useRecoilState(croperWidth)
-  //   const isInpainting = useRecoilValue(isInpaintingState)
 
   const [isResizing, setIsResizing] = useState(false)
   const [isMoving, setIsMoving] = useState(false)
@@ -100,7 +97,7 @@ const Cropper = (props: Props) => {
   })
 
   const onDragFocus = () => {
-    console.log("focus")
+    // console.log("focus")
   }
 
   const clampLeftRight = (newX: number, newWidth: number) => {
@@ -254,102 +251,64 @@ const Cropper = (props: Props) => {
     }
   }
 
-  const createCropSelection = () => {
+  const createDragHandle = (cursor: string, side1: string, side2: string) => {
+    const sideLength = 12
+    const draghandleCls = `w-[${sideLength}px] h-[${sideLength}px] z-4 absolute block border-2 border-primary borde pointer-events-auto hover:bg-primary`
+
+    let side2Cls = `${side2}-[-${sideLength / 2}px]`
+    if (side2 === "") {
+      if (side1 === "top" || side1 === "bottom") {
+        side2Cls = `left-[calc(50%-${sideLength / 2}px)]`
+      } else if (side1 === "left" || side1 === "right") {
+        side2Cls = `top-[calc(50%-${sideLength / 2}px)]`
+      }
+    }
+
     return (
       <div
-        className="drag-elements"
-        onFocus={onDragFocus}
-        onPointerDown={onCropPointerDown}
-      >
+        className={cn(
+          draghandleCls,
+          `${cursor}`,
+          side1 ? `${side1}-[-${sideLength / 2}px]` : "",
+          side2Cls
+        )}
+        data-ord={side1 + side2}
+        aria-label={side1 + side2}
+        tabIndex={-1}
+        role="button"
+      />
+    )
+  }
+
+  const createCropSelection = () => {
+    return (
+      <div onFocus={onDragFocus} onPointerDown={onCropPointerDown}>
         <div
-          className="drag-bar ord-top"
+          className="absolute pointer-events-auto top-0 left-0 w-full cursor-ns-resize h-[12px] mt-[-6px]"
           data-ord="top"
-          style={{ transform: `scale(${1 / scale})` }}
         />
         <div
-          className="drag-bar ord-right"
+          className="absolute pointer-events-auto top-0 right-0 h-full cursor-ew-resize w-[12px] mr-[-6px]"
           data-ord="right"
-          style={{ transform: `scale(${1 / scale})` }}
         />
         <div
-          className="drag-bar ord-bottom"
+          className="absolute pointer-events-auto bottom-0 left-0 w-full cursor-ns-resize h-[12px] mb-[-6px]"
           data-ord="bottom"
-          style={{ transform: `scale(${1 / scale})` }}
         />
         <div
-          className="drag-bar ord-left"
+          className="absolute pointer-events-auto top-0 left-0 h-full cursor-ew-resize w-[12px] ml-[-6px]"
           data-ord="left"
-          style={{ transform: `scale(${1 / scale})` }}
         />
 
-        <div
-          className="drag-handle ord-topleft"
-          data-ord="topleft"
-          aria-label="topleft"
-          tabIndex={0}
-          role="button"
-          style={{ transform: `scale(${1 / scale})` }}
-        />
+        {createDragHandle("cursor-nw-resize", "top", "left")}
+        {createDragHandle("cursor-ne-resize", "top", "right")}
+        {createDragHandle("cursor-se-resize", "bottom", "left")}
+        {createDragHandle("cursor-sw-resize", "bottom", "right")}
 
-        <div
-          className="drag-handle ord-topright"
-          data-ord="topright"
-          aria-label="topright"
-          tabIndex={0}
-          role="button"
-          style={{ transform: `scale(${1 / scale})` }}
-        />
-
-        <div
-          className="drag-handle ord-bottomleft"
-          data-ord="bottomleft"
-          aria-label="bottomleft"
-          tabIndex={0}
-          role="button"
-          style={{ transform: `scale(${1 / scale})` }}
-        />
-
-        <div
-          className="drag-handle ord-bottomright"
-          data-ord="bottomright"
-          aria-label="bottomright"
-          tabIndex={0}
-          role="button"
-          style={{ transform: `scale(${1 / scale})` }}
-        />
-
-        <div
-          className="drag-handle ord-top"
-          data-ord="top"
-          aria-label="top"
-          tabIndex={0}
-          role="button"
-          style={{ transform: `scale(${1 / scale})` }}
-        />
-        <div
-          className="drag-handle ord-right"
-          data-ord="right"
-          aria-label="right"
-          tabIndex={0}
-          role="button"
-          style={{ transform: `scale(${1 / scale})` }}
-        />
-        <div
-          className="drag-handle ord-bottom"
-          data-ord="bottom"
-          aria-label="bottom"
-          tabIndex={0}
-          role="button"
-          style={{ transform: `scale(${1 / scale})` }}
-        />
-        <div
-          className="drag-handle ord-left"
-          data-ord="left"
-          aria-label="left"
-          tabIndex={0}
-          role="button"
-          style={{ transform: `scale(${1 / scale})` }}
-        />
+        {createDragHandle("cursor-ns-resize", "top", "")}
+        {createDragHandle("cursor-ns-resize", "bottom", "")}
+        {createDragHandle("cursor-ew-resize", "left", "")}
+        {createDragHandle("cursor-ew-resize", "right", "")}
       </div>
     )
   }
@@ -370,17 +329,17 @@ const Cropper = (props: Props) => {
   const createInfoBar = () => {
     return (
       <div
-        className="border absolute pointer-events-auto text-[1rem] px-[0.8rem] py-[0.2rem] flex items-center justify-center gap-[12px] rounded-full hover:cursor-move"
-        onPointerDown={onInfoBarPointerDown}
+        className={twMerge(
+          "border absolute pointer-events-auto px-2 py-1 rounded-full hover:cursor-move bg-background",
+          "origin-top-left top-0 left-0"
+        )}
         style={{
-          transform: `scale(${1 / scale})`,
-          top: `${10 / scale}px`,
-          left: `${10 / scale}px`,
+          transform: `scale(${(1 / scale) * 0.8})`,
         }}
+        onPointerDown={onInfoBarPointerDown}
       >
-        <div>
-          {width} x {height}
-        </div>
+        {/* TODO: 移动的时候会显示 brush */}
+        {width} x {height}
       </div>
     )
   }

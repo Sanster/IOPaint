@@ -4,6 +4,61 @@ from enum import Enum
 from PIL.Image import Image
 from pydantic import BaseModel
 
+DIFFUSERS_SD_CLASS_NAME = "StableDiffusionPipeline"
+DIFFUSERS_SD_INPAINT_CLASS_NAME = "StableDiffusionInpaintPipeline"
+DIFFUSERS_SDXL_CLASS_NAME = "StableDiffusionXLPipeline"
+DIFFUSERS_SDXL_INPAINT_CLASS_NAME = "StableDiffusionXLInpaintPipeline"
+
+
+class ModelType(str, Enum):
+    INPAINT = "inpaint"  # LaMa, MAT...
+    DIFFUSERS_SD = "diffusers_sd"
+    DIFFUSERS_SD_INPAINT = "diffusers_sd_inpaint"
+    DIFFUSERS_SDXL = "diffusers_sdxl"
+    DIFFUSERS_SDXL_INPAINT = "diffusers_sdxl_inpaint"
+    DIFFUSERS_OTHER = "diffusers_other"
+
+
+FREEU_DEFAULT_CONFIGS = {
+    ModelType.DIFFUSERS_SD: dict(s1=0.9, s2=0.2, b1=1.2, b2=1.4),
+    ModelType.DIFFUSERS_SDXL: dict(s1=0.6, s2=0.4, b1=1.1, b2=1.2),
+}
+
+
+class ModelInfo(BaseModel):
+    name: str
+    path: str
+    model_type: ModelType
+    is_single_file_diffusers: bool = False
+
+    def support_lcm_lora(self) -> bool:
+        return self.model_type in [
+            ModelType.DIFFUSERS_SD,
+            ModelType.DIFFUSERS_SDXL,
+            ModelType.DIFFUSERS_SD_INPAINT,
+            ModelType.DIFFUSERS_SDXL_INPAINT,
+        ]
+
+    def support_controlnet(self) -> bool:
+        return self.model_type in [
+            ModelType.DIFFUSERS_SD,
+            ModelType.DIFFUSERS_SDXL,
+            ModelType.DIFFUSERS_SD_INPAINT,
+            ModelType.DIFFUSERS_SDXL_INPAINT,
+        ]
+
+    def support_freeu(self) -> bool:
+        return (
+            self.model_type
+            in [
+                ModelType.DIFFUSERS_SD,
+                ModelType.DIFFUSERS_SDXL,
+                ModelType.DIFFUSERS_SD_INPAINT,
+                ModelType.DIFFUSERS_SDXL_INPAINT,
+            ]
+            or "instruct-pix2pix" in self.name
+        )
+
 
 class HDStrategy(str, Enum):
     # Use original image size

@@ -10,6 +10,8 @@ import {
 import { Button } from "./ui/button"
 import { Fullscreen, MousePointerClick, Slice, Smile } from "lucide-react"
 import { MixIcon } from "@radix-ui/react-icons"
+import { useStore } from "@/lib/states"
+import { InteractiveSeg } from "./InteractiveSeg"
 
 export enum PluginName {
   RemoveBG = "RemoveBG",
@@ -48,17 +50,10 @@ const pluginMap = {
 }
 
 const Plugins = () => {
-  // const [open, toggleOpen] = useToggle(true)
-  // const serverConfig = useRecoilValue(serverConfigState)
-  // const isProcessing = useRecoilValue(isProcessingState)
-  const plugins = [
-    PluginName.RemoveBG,
-    PluginName.AnimeSeg,
-    PluginName.RealESRGAN,
-    PluginName.GFPGAN,
-    PluginName.RestoreFormer,
-    PluginName.InteractiveSeg,
-  ]
+  const [plugins, updateInteractiveSegState] = useStore((state) => [
+    state.serverConfig.plugins,
+    state.updateInteractiveSegState,
+  ])
 
   if (plugins.length === 0) {
     return null
@@ -68,6 +63,9 @@ const Plugins = () => {
     // if (!disabled) {
     //   emitter.emit(pluginName)
     // }
+    if (pluginName === PluginName.InteractiveSeg) {
+      updateInteractiveSegState({ isInteractiveSeg: true })
+    }
   }
 
   const onRealESRGANClick = (upscale: number) => {
@@ -98,8 +96,8 @@ const Plugins = () => {
   }
 
   const renderPlugins = () => {
-    return plugins.map((plugin: PluginName) => {
-      const { IconClass, showName } = pluginMap[plugin]
+    return plugins.map((plugin: string) => {
+      const { IconClass, showName } = pluginMap[plugin as PluginName]
       if (plugin === PluginName.RealESRGAN) {
         return renderRealESRGANPlugin()
       }
@@ -116,7 +114,10 @@ const Plugins = () => {
 
   return (
     <DropdownMenu modal={false}>
-      <DropdownMenuTrigger className="border rounded-lg z-10">
+      <DropdownMenuTrigger
+        className="border rounded-lg z-10 bg-background"
+        tabIndex={-1}
+      >
         <Button variant="ghost" size="icon" asChild>
           <MixIcon className="p-2" />
         </Button>

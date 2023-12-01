@@ -2,8 +2,6 @@
 import os
 import hashlib
 
-from lama_cleaner.diffusers_utils import scan_models
-
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 import imghdr
@@ -22,9 +20,9 @@ from loguru import logger
 
 from lama_cleaner.const import (
     SD15_MODELS,
-    FREEU_DEFAULT_CONFIGS,
-    MODELS_SUPPORT_FREEU,
-    MODELS_SUPPORT_LCM_LORA,
+    SD_CONTROLNET_CHOICES,
+    SDXL_CONTROLNET_CHOICES,
+    SD2_CONTROLNET_CHOICES,
 )
 from lama_cleaner.file_manager import FileManager
 from lama_cleaner.model.utils import torch_gc
@@ -118,8 +116,8 @@ input_image_path: str = None
 is_disable_model_switch: bool = False
 is_controlnet: bool = False
 controlnet_method: str = "control_v11p_sd15_canny"
-is_enable_file_manager: bool = False
-is_enable_auto_saving: bool = False
+enable_file_manager: bool = False
+enable_auto_saving: bool = False
 is_desktop: bool = False
 image_quality: int = 95
 plugins = {}
@@ -421,34 +419,35 @@ def run_plugin():
 
 @app.route("/server_config", methods=["GET"])
 def get_server_config():
+    controlnet = {
+        "SD": SD_CONTROLNET_CHOICES,
+        "SD2": SD2_CONTROLNET_CHOICES,
+        "SDXL": SDXL_CONTROLNET_CHOICES,
+    }
     return {
-        "isControlNet": is_controlnet,
-        "controlNetMethod": controlnet_method,
-        "isDisableModelSwitchState": is_disable_model_switch,
-        "isEnableAutoSaving": is_enable_auto_saving,
-        "enableFileManager": is_enable_file_manager,
         "plugins": list(plugins.keys()),
-        "freeSupportedModels": MODELS_SUPPORT_FREEU,
-        "freeuDefaultConfigs": FREEU_DEFAULT_CONFIGS,
-        "lcmLoraSupportedModels": MODELS_SUPPORT_LCM_LORA,
+        "availableControlNet": controlnet,
+        "enableFileManager": enable_file_manager,
+        "enableAutoSaving": enable_auto_saving,
     }, 200
 
 
-@app.route("/sd_models", methods=["GET"])
-def get_diffusers_models():
-    from diffusers.utils import DIFFUSERS_CACHE
-
-    return scan_models(DIFFUSERS_CACHE)
+@app.route("/models", methods=["GET"])
+def get_models():
+    return [
+        {
+            **it.dict(),
+            "support_lcm_lora": it.support_lcm_lora(),
+            "support_controlnet": it.support_controlnet(),
+            "support_freeu": it.support_freeu(),
+        }
+        for it in model.scan_models()
+    ]
 
 
 @app.route("/model")
 def current_model():
-    return model.name, 200
-
-
-@app.route("/model_downloaded/<name>")
-def model_downloaded(name):
-    return str(model.is_downloaded(name)), 200
+    return model.available_models[model.name].dict(), 200
 
 
 @app.route("/is_desktop")
@@ -467,8 +466,10 @@ def switch_model():
 
     try:
         model.switch(new_name)
-    except NotImplementedError:
-        return f"{new_name} not implemented", 403
+    except Exception as e:
+        error_message = str(e)
+        logger.error(error_message)
+        return f"Switch model failed: {error_message}", 500
     return f"ok, switch to {new_name}", 200
 
 
@@ -478,7 +479,7 @@ def index():
 
 
 @app.route("/inputimage")
-def set_input_photo():
+def get_cli_input_image():
     if input_image_path:
         with open(input_image_path, "rb") as f:
             image_in_bytes = f.read()
@@ -547,11 +548,10 @@ def main(args):
     global device
     global input_image_path
     global is_disable_model_switch
-    global is_enable_file_manager
+    global enable_file_manager
     global is_desktop
     global thumb
     global output_dir
-    global is_enable_auto_saving
     global is_controlnet
     global controlnet_method
     global image_quality
@@ -566,7 +566,9 @@ def main(args):
 
     output_dir = args.output_dir
     if output_dir:
-        is_enable_auto_saving = True
+        output_dir = os.path.abspath(output_dir)
+        logger.info(f"Output dir: {output_dir}")
+        enable_auto_saving = True
 
     device = torch.device(args.device)
     is_disable_model_switch = args.disable_model_switch
@@ -579,12 +581,12 @@ def main(args):
     if args.input and os.path.isdir(args.input):
         logger.info(f"Initialize file manager")
         thumb = FileManager(app)
-        is_enable_file_manager = True
+        enable_file_manager = True
         app.config["THUMBNAIL_MEDIA_ROOT"] = args.input
         app.config["THUMBNAIL_MEDIA_THUMBNAIL_ROOT"] = os.path.join(
-            args.output_dir, "lama_cleaner_thumbnails"
+            output_dir, "lama_cleaner_thumbnails"
         )
-        thumb.output_dir = Path(args.output_dir)
+        thumb.output_dir = Path(output_dir)
         # thumb.start()
         # try:
         #     while True:

@@ -8,7 +8,7 @@ import cv2
 from PIL import Image, ImageOps, PngImagePlugin
 import numpy as np
 import torch
-from lama_cleaner.const import MPS_SUPPORT_MODELS
+from lama_cleaner.const import MPS_UNSUPPORT_MODELS
 from loguru import logger
 from torch.hub import download_url_to_file, get_dir
 import hashlib
@@ -23,7 +23,7 @@ def md5sum(filename):
 
 
 def switch_mps_device(model_name, device):
-    if model_name not in MPS_SUPPORT_MODELS and str(device) == "mps":
+    if model_name in MPS_UNSUPPORT_MODELS and str(device) == "mps":
         logger.info(f"{model_name} not support mps, switch to cpu")
         return torch.device("cpu")
     return device

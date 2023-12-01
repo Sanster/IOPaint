@@ -7,6 +7,7 @@ import time
 from io import BytesIO
 from pathlib import Path
 import numpy as np
+
 # from watchdog.events import FileSystemEventHandler
 # from watchdog.observers import Observer
 
@@ -149,6 +150,7 @@ class FileManager:
     def get_thumbnail(
         self, directory: Path, original_filename: str, width, height, **options
     ):
+        directory = Path(directory)
         storage = FilesystemStorageBackend(self.app)
         crop = options.get("crop", "fit")
         background = options.get("background")
@@ -167,6 +169,7 @@ class FileManager:
         thumbnail_size = (width, height)
 
         thumbnail_filename = generate_filename(
+            directory,
             original_filename,
             aspect_to_string(thumbnail_size),
             crop,

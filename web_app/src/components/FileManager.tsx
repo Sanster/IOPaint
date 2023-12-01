@@ -74,18 +74,9 @@ export default function FileManager(props: Props) {
   const { onPhotoClick, photoWidth } = props
   const [open, toggleOpen] = useToggle(false)
 
-  const [
-    fileManagerState,
-    setFileManagerLayout,
-    setFileManagerSortBy,
-    setFileManagerSortOrder,
-    setFileManagerSearchText,
-  ] = useStore((state) => [
+  const [fileManagerState, updateFileManagerState] = useStore((state) => [
     state.fileManagerState,
-    state.setFileManagerLayout,
-    state.setFileManagerSortBy,
-    state.setFileManagerSortOrder,
-    state.setFileManagerSearchText,
+    state.updateFileManagerState,
   ])
 
   useHotkeys("f", () => {
@@ -185,7 +176,7 @@ export default function FileManager(props: Props) {
           <IconButton
             tooltip="Rows layout"
             onClick={() => {
-              setFileManagerLayout("rows")
+              updateFileManagerState({ layout: "rows" })
             }}
           >
             <ViewHorizontalIcon
@@ -195,7 +186,7 @@ export default function FileManager(props: Props) {
           <IconButton
             tooltip="Grid layout"
             onClick={() => {
-              setFileManagerLayout("masonry")
+              updateFileManagerState({ layout: "masonry" })
             }}
           >
             <ViewGridIcon
@@ -230,7 +221,7 @@ export default function FileManager(props: Props) {
                 evt.preventDefault()
                 evt.stopPropagation()
                 const target = evt.target as HTMLInputElement
-                setFileManagerSearchText(target.value)
+                updateFileManagerState({ searchText: target.value })
               }}
               placeholder="Search by file name"
             />
@@ -250,13 +241,13 @@ export default function FileManager(props: Props) {
                 onValueChange={(val) => {
                   switch (val) {
                     case SORT_BY_NAME:
-                      setFileManagerSortBy(SortBy.NAME)
+                      updateFileManagerState({ sortBy: SortBy.NAME })
                       break
                     case SORT_BY_CREATED_TIME:
-                      setFileManagerSortBy(SortBy.CTIME)
+                      updateFileManagerState({ sortBy: SortBy.CTIME })
                       break
                     case SORT_BY_MODIFIED_TIME:
-                      setFileManagerSortBy(SortBy.MTIME)
+                      updateFileManagerState({ sortBy: SortBy.MTIME })
                       break
                     default:
                       break
@@ -281,7 +272,7 @@ export default function FileManager(props: Props) {
                 <IconButton
                   tooltip="Descending Order"
                   onClick={() => {
-                    setFileManagerSortOrder(SortOrder.ASCENDING)
+                    updateFileManagerState({ sortOrder: SortOrder.ASCENDING })
                   }}
                 >
                   <BarsArrowDownIcon />
@@ -290,7 +281,7 @@ export default function FileManager(props: Props) {
                 <IconButton
                   tooltip="Ascending Order"
                   onClick={() => {
-                    setFileManagerSortOrder(SortOrder.DESCENDING)
+                    updateFileManagerState({ sortOrder: SortOrder.DESCENDING })
                   }}
                 >
                   <BarsArrowUpIcon />

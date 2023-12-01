@@ -8,6 +8,7 @@ flag_map = {"INPAINT_NS": cv2.INPAINT_NS, "INPAINT_TELEA": cv2.INPAINT_TELEA}
 class OpenCV2(InpaintModel):
     name = "cv2"
     pad_mod = 1
+    is_erase_model = True
 
     @staticmethod
     def is_downloaded() -> bool:

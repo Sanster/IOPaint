@@ -11,7 +11,7 @@ const ImageSize = () => {
   }
 
   return (
-    <div className="border rounded-lg px-2 py-[6px] z-10">
+    <div className="border rounded-lg px-2 py-[6px] z-10 bg-background">
       {imageWidth}x{imageHeight}
     </div>
   )
