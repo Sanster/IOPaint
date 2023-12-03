@@ -11,6 +11,7 @@ import { useStore } from "@/lib/states"
 import ImageSize from "./ImageSize"
 import Plugins from "./Plugins"
 import { InteractiveSeg } from "./InteractiveSeg"
+import SidePanel from "./SidePanel"
 // import SidePanel from "./SidePanel/SidePanel"
 // import PESidePanel from "./SidePanel/PESidePanel"
 // import P2PSidePanel from "./SidePanel/P2PSidePanel"
@@ -43,6 +44,7 @@ const Workspace = () => {
         <ImageSize />
       </div>
       <InteractiveSeg />
+      <SidePanel />
       {file ? <Editor file={file} /> : <></>}
     </>
   )

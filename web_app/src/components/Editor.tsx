@@ -1491,8 +1491,7 @@ export default function Editor(props: EditorProps) {
             minHeight={Math.min(256, imageHeight)}
             minWidth={Math.min(256, imageWidth)}
             scale={getCurScale()}
-            // show={settings.showCroper}
-            show={true}
+            show={settings.showCroper}
           />
 
           {/* {interactiveSegState.isInteractiveSeg ? <InteractiveSeg /> : <></>} */}

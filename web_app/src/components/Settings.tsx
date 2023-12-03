@@ -20,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Switch } from "./ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import { fetchModelInfos, switchModel } from "@/lib/api"
@@ -34,6 +34,14 @@ import {
   AlertDialogDescription,
   AlertDialogHeader,
 } from "./ui/alert-dialog"
+import {
+  MODEL_TYPE_DIFFUSERS_SD,
+  MODEL_TYPE_DIFFUSERS_SDXL,
+  MODEL_TYPE_DIFFUSERS_SDXL_INPAINT,
+  MODEL_TYPE_DIFFUSERS_SD_INPAINT,
+  MODEL_TYPE_INPAINT,
+  MODEL_TYPE_OTHER,
+} from "@/lib/const"
 
 const formSchema = z.object({
   enableFileManager: z.boolean(),
@@ -59,7 +67,7 @@ const TAB_NAMES = [TAB_MODEL, TAB_GENERAL]
 export function SettingsDialog() {
   const [open, toggleOpen] = useToggle(false)
   const [openModelSwitching, toggleOpenModelSwitching] = useToggle(false)
-  const [tab, setTab] = useState(TAB_GENERAL)
+  const [tab, setTab] = useState(TAB_MODEL)
   const [settings, updateSettings, fileManagerState, updateFileManagerState] =
     useStore((state) => [
       state.settings,
@@ -70,7 +78,7 @@ export function SettingsDialog() {
   const { toast } = useToast()
   const [model, setModel] = useState<ModelInfo>(settings.model)
 
-  const { data: modelInfos, isSuccess } = useQuery({
+  const { data: modelInfos, status } = useQuery({
     queryKey: ["modelInfos"],
     queryFn: fetchModelInfos,
   })
@@ -82,7 +90,6 @@ export function SettingsDialog() {
       enableDownloadMask: settings.enableDownloadMask,
       enableManualInpainting: settings.enableManualInpainting,
       enableUploadMask: settings.enableUploadMask,
-      enableFileManager: fileManagerState.enabled,
       inputDirectory: fileManagerState.inputDirectory,
       outputDirectory: fileManagerState.outputDirectory,
     },
@@ -98,11 +105,9 @@ export function SettingsDialog() {
 
     // TODO: validate input/output Directory
     updateFileManagerState({
-      enabled: values.enableFileManager,
       inputDirectory: values.inputDirectory,
       outputDirectory: values.outputDirectory,
     })
-
     if (model.name !== settings.model.name) {
       toggleOpenModelSwitching()
       switchModel(model.name)
@@ -127,19 +132,21 @@ export function SettingsDialog() {
         })
     }
   }
+
   useHotkeys("s", () => {
     toggleOpen()
-    form.handleSubmit(onSubmit)()
+    onSubmit(form.getValues())
   })
 
   function onOpenChange(value: boolean) {
     toggleOpen()
     if (!value) {
-      form.handleSubmit(onSubmit)()
+      onSubmit(form.getValues())
     }
   }
 
   function onModelSelect(info: ModelInfo) {
+    console.log(info)
     setModel(info)
   }
 
@@ -168,11 +175,11 @@ export function SettingsDialog() {
   }
 
   function renderModelSettings() {
-    if (!isSuccess) {
+    if (status !== "success") {
       return <></>
     }
 
-    let defaultTab = "inpaint"
+    let defaultTab = MODEL_TYPE_INPAINT
     for (let info of modelInfos) {
       if (model.name === info.name) {
         defaultTab = info.model_type
@@ -198,28 +205,35 @@ export function SettingsDialog() {
           </div>
           <Tabs defaultValue={defaultTab}>
             <TabsList>
-              <TabsTrigger value="inpaint">Inpaint</TabsTrigger>
-              <TabsTrigger value="diffusers_sd">Diffusion</TabsTrigger>
-              <TabsTrigger value="diffusers_sd_inpaint">
+              <TabsTrigger value={MODEL_TYPE_INPAINT}>Inpaint</TabsTrigger>
+              <TabsTrigger value={MODEL_TYPE_DIFFUSERS_SD}>
+                Diffusion
+              </TabsTrigger>
+              <TabsTrigger value={MODEL_TYPE_DIFFUSERS_SD_INPAINT}>
                 Diffusion inpaint
               </TabsTrigger>
-              <TabsTrigger value="diffusers_other">Diffusion other</TabsTrigger>
+              <TabsTrigger value={MODEL_TYPE_OTHER}>
+                Diffusion other
+              </TabsTrigger>
             </TabsList>
             <ScrollArea className="h-[240px] w-full mt-2">
-              <TabsContent value="inpaint">
-                {renderModelList(["inpaint"])}
+              <TabsContent value={MODEL_TYPE_INPAINT}>
+                {renderModelList([MODEL_TYPE_INPAINT])}
               </TabsContent>
-              <TabsContent value="diffusers_sd">
-                {renderModelList(["diffusers_sd", "diffusers_sdxl"])}
-              </TabsContent>
-              <TabsContent value="diffusers_sd_inpaint">
+              <TabsContent value={MODEL_TYPE_DIFFUSERS_SD}>
                 {renderModelList([
-                  "diffusers_sd_inpaint",
-                  "diffusers_sdxl_inpaint",
+                  MODEL_TYPE_DIFFUSERS_SD,
+                  MODEL_TYPE_DIFFUSERS_SDXL,
                 ])}
               </TabsContent>
-              <TabsContent value="diffusers_other">
-                {renderModelList(["diffusers_other"])}
+              <TabsContent value={MODEL_TYPE_DIFFUSERS_SD_INPAINT}>
+                {renderModelList([
+                  MODEL_TYPE_DIFFUSERS_SD_INPAINT,
+                  MODEL_TYPE_DIFFUSERS_SDXL_INPAINT,
+                ])}
+              </TabsContent>
+              <TabsContent value={MODEL_TYPE_OTHER}>
+                {renderModelList([MODEL_TYPE_OTHER])}
               </TabsContent>
             </ScrollArea>
           </Tabs>

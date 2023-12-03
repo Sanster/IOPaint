@@ -1,9 +1,16 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { immer } from "zustand/middleware/immer"
-import { CV2Flag, LDMSampler, ModelInfo, SortBy, SortOrder } from "./types"
+import {
+  CV2Flag,
+  FreeuConfig,
+  LDMSampler,
+  ModelInfo,
+  SDSampler,
+  SortBy,
+  SortOrder,
+} from "./types"
 import { DEFAULT_BRUSH_SIZE } from "./const"
-import { SDSampler } from "./store"
 
 type FileManagerState = {
   sortBy: SortBy
@@ -68,11 +75,14 @@ export type Settings = {
   // ControlNet
   controlnetConditioningScale: number
   controlnetMethod: string
+
+  enableLCMLora: boolean
+  enableFreeu: boolean
+  freeuConfig: FreeuConfig
 }
 
 type ServerConfig = {
   plugins: string[]
-  availableControlNet: Record<string, string[]>
   enableFileManager: boolean
   enableAutoSaving: boolean
 }
@@ -120,7 +130,8 @@ type AppAction = {
   updateFileManagerState: (newState: Partial<FileManagerState>) => void
   updateInteractiveSegState: (newState: Partial<InteractiveSegState>) => void
   resetInteractiveSegState: () => void
-  shouldShowPromptInput: () => boolean
+  showPromptInput: () => boolean
+  showSidePanel: () => boolean
 }
 
 const defaultValues: AppState = {
@@ -155,7 +166,6 @@ const defaultValues: AppState = {
   },
   serverConfig: {
     plugins: [],
-    availableControlNet: { SD: [], SD2: [], SDXL: [] },
     enableFileManager: false,
     enableAutoSaving: false,
   },
@@ -165,6 +175,7 @@ const defaultValues: AppState = {
       path: "lama",
       model_type: "inpaint",
       support_controlnet: false,
+      controlnets: [],
       support_freeu: false,
       support_lcm_lora: false,
       is_single_file_diffusers: false,
@@ -198,6 +209,9 @@ const defaultValues: AppState = {
     p2pGuidanceScale: 7.5,
     controlnetConditioningScale: 0.4,
     controlnetMethod: "lllyasviel/control_v11p_sd15_canny",
+    enableLCMLora: false,
+    enableFreeu: false,
+    freeuConfig: { s1: 0.9, s2: 0.2, b1: 1.2, b2: 1.4 },
   },
 }
 
@@ -207,9 +221,14 @@ export const useStore = create<AppState & AppAction>()(
       (set, get) => ({
         ...defaultValues,
 
-        shouldShowPromptInput: (): boolean => {
+        showPromptInput: (): boolean => {
           const model_type = get().settings.model.model_type
-          return ["diffusers_sd"].includes(model_type)
+          return ["diffusers_sd", "diffusers_sd_inpaint"].includes(model_type)
+        },
+
+        showSidePanel: (): boolean => {
+          const model_type = get().settings.model.model_type
+          return ["diffusers_sd", "diffusers_sd_inpaint"].includes(model_type)
         },
 
         setServerConfig: (newValue: ServerConfig) => {

@@ -9,6 +9,7 @@ export interface ModelInfo {
     | "diffusers_sdxl_inpaint"
     | "diffusers_other"
   support_controlnet: boolean
+  controlnets: string[]
   support_freeu: boolean
   support_lcm_lora: boolean
   is_single_file_diffusers: boolean
@@ -49,4 +50,21 @@ export interface Rect {
   y: number
   width: number
   height: number
+}
+
+export enum SDSampler {
+  ddim = "ddim",
+  pndm = "pndm",
+  klms = "k_lms",
+  kEuler = "k_euler",
+  kEulerA = "k_euler_a",
+  dpmPlusPlus = "dpm++",
+  uni_pc = "uni_pc",
+}
+
+export interface FreeuConfig {
+  s1: number
+  s2: number
+  b1: number
+  b2: number
 }

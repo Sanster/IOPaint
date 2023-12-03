@@ -36,6 +36,7 @@
     "clsx": "^2.0.0",
     "flexsearch": "^0.7.21",
     "immer": "^10.0.3",
+    "inter-ui": "^3.19.3",
     "lodash": "^4.17.21",
     "lucide-react": "^0.292.0",
     "mitt": "^3.0.1",

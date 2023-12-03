@@ -1,8 +1,6 @@
 import { useStore } from "@/lib/states"
 import { Button } from "./ui/button"
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog"
-import { MousePointerClick } from "lucide-react"
-import { DropdownMenuItem } from "./ui/dropdown-menu"
 
 interface InteractiveSegReplaceModal {
   show: boolean

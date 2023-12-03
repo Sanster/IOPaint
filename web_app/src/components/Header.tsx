@@ -38,7 +38,7 @@ const Header = () => {
     state.serverConfig.enableFileManager,
     state.settings.enableManualInpainting,
     state.settings.enableUploadMask,
-    state.shouldShowPromptInput(),
+    state.showPromptInput(),
     state.setFile,
     state.setCustomFile,
   ])

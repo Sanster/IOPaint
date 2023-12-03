@@ -63,6 +63,8 @@ const Cropper = (props: Props) => {
   const { minHeight, minWidth, maxHeight, maxWidth, scale, show } = props
 
   const [
+    imageWidth,
+    imageHeight,
     isInpainting,
     { x, y, width, height },
     setX,
@@ -70,6 +72,8 @@ const Cropper = (props: Props) => {
     setWidth,
     setHeight,
   ] = useStore((state) => [
+    state.imageWidth,
+    state.imageHeight,
     state.isInpainting,
     state.cropperState,
     state.setCropperX,
@@ -84,7 +88,9 @@ const Cropper = (props: Props) => {
   useEffect(() => {
     setX(Math.round((maxWidth - 512) / 2))
     setY(Math.round((maxHeight - 512) / 2))
-  }, [maxHeight, maxWidth])
+    // TODO: 换了一张较小的图片，cropper 的起始位置和边界要修改
+    // TODO: 一开始的 scale 不对
+  }, [maxHeight, maxWidth, imageWidth, imageHeight])
 
   const [evData, setEVData] = useState<EVData>({
     initX: 0,
@@ -253,25 +259,33 @@ const Cropper = (props: Props) => {
 
   const createDragHandle = (cursor: string, side1: string, side2: string) => {
     const sideLength = 12
-    const draghandleCls = `w-[${sideLength}px] h-[${sideLength}px] z-4 absolute block border-2 border-primary borde pointer-events-auto hover:bg-primary`
+    const halfSideLength = sideLength / 2
+    const draghandleCls = `w-[${sideLength}px] h-[${sideLength}px] z-[4] absolute content-[''] block border-2 border-primary borde pointer-events-auto hover:bg-primary`
 
-    let side2Cls = `${side2}-[-${sideLength / 2}px]`
+    let xTrans = "0"
+    let yTrans = "0"
+
+    let side2Key = side2
+    let side2Val = `${-halfSideLength}px`
     if (side2 === "") {
-      if (side1 === "top" || side1 === "bottom") {
-        side2Cls = `left-[calc(50%-${sideLength / 2}px)]`
-      } else if (side1 === "left" || side1 === "right") {
-        side2Cls = `top-[calc(50%-${sideLength / 2}px)]`
+      side2Val = "50%"
+      if (side1 === "left" || side1 === "right") {
+        side2Key = "top"
+        yTrans = "-50%"
+      } else {
+        side2Key = "left"
+        xTrans = "-50%"
       }
     }
 
     return (
       <div
-        className={cn(
-          draghandleCls,
-          `${cursor}`,
-          side1 ? `${side1}-[-${sideLength / 2}px]` : "",
-          side2Cls
-        )}
+        className={cn(draghandleCls, cursor)}
+        style={{
+          [side1]: -halfSideLength,
+          [side2Key]: side2Val,
+          transform: `translate(${xTrans}, ${yTrans}) scale(${1 / scale})`,
+        }}
         data-ord={side1 + side2}
         aria-label={side1 + side2}
         tabIndex={-1}
@@ -282,7 +296,11 @@ const Cropper = (props: Props) => {
 
   const createCropSelection = () => {
     return (
-      <div onFocus={onDragFocus} onPointerDown={onCropPointerDown}>
+      <div
+        onFocus={onDragFocus}
+        onPointerDown={onCropPointerDown}
+        className="absolute top-0 h-full w-full"
+      >
         <div
           className="absolute pointer-events-auto top-0 left-0 w-full cursor-ns-resize h-[12px] mt-[-6px]"
           data-ord="top"
@@ -299,12 +317,10 @@ const Cropper = (props: Props) => {
           className="absolute pointer-events-auto top-0 left-0 h-full cursor-ew-resize w-[12px] ml-[-6px]"
           data-ord="left"
         />
-
         {createDragHandle("cursor-nw-resize", "top", "left")}
         {createDragHandle("cursor-ne-resize", "top", "right")}
-        {createDragHandle("cursor-se-resize", "bottom", "left")}
-        {createDragHandle("cursor-sw-resize", "bottom", "right")}
-
+        {createDragHandle("cursor-sw-resize", "bottom", "left")}
+        {createDragHandle("cursor-se-resize", "bottom", "right")}
         {createDragHandle("cursor-ns-resize", "top", "")}
         {createDragHandle("cursor-ns-resize", "bottom", "")}
         {createDragHandle("cursor-ew-resize", "left", "")}
@@ -351,19 +367,20 @@ const Cropper = (props: Props) => {
         style={{
           height,
           width,
-          outlineWidth: `${DRAG_HANDLE_BORDER / scale}px`,
+          outlineWidth: `${(DRAG_HANDLE_BORDER / scale) * 1.3}px`,
         }}
       />
     )
   }
 
+  if (show === false) {
+    return null
+  }
+
   return (
-    <div
-      className="absolute h-full w-full overflow-hidden pointer-events-none"
-      style={{ visibility: show ? "visible" : "hidden" }}
-    >
+    <div className="absolute h-full w-full overflow-hidden pointer-events-none z-[2]">
       <div
-        className="relative pointer-events-none"
+        className="relative pointer-events-none z-[2] [box-shadow:0_0_0_9999px_rgba(0,_0,_0,_0.5)]"
         style={{ height, width, left: x, top: y }}
       >
         {createBorder()}
