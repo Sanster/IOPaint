@@ -28,7 +28,7 @@ const Header = () => {
     enableFileManager,
     enableManualInpainting,
     enableUploadMask,
-    shouldShowPromptInput,
+    model,
     setFile,
     setCustomFile,
   ] = useStore((state) => [
@@ -38,7 +38,7 @@ const Header = () => {
     state.serverConfig.enableFileManager,
     state.settings.enableManualInpainting,
     state.settings.enableUploadMask,
-    state.showPromptInput(),
+    state.settings.model,
     state.setFile,
     state.setCustomFile,
   ])
@@ -145,18 +145,22 @@ const Header = () => {
           )}
         </div>
 
-        <IconButton
-          disabled={isInpainting}
-          tooltip="Rerun last mask"
-          onClick={handleRerunLastMask}
-          onMouseEnter={onRerunMouseEnter}
-          onMouseLeave={onRerunMouseLeave}
-        >
-          <RotateCw className={file ? "visible" : "hidden"} />
-        </IconButton>
+        {file && !model.need_prompt ? (
+          <IconButton
+            disabled={isInpainting}
+            tooltip="Rerun last mask"
+            onClick={handleRerunLastMask}
+            onMouseEnter={onRerunMouseEnter}
+            onMouseLeave={onRerunMouseLeave}
+          >
+            <RotateCw />
+          </IconButton>
+        ) : (
+          <></>
+        )}
       </div>
 
-      {shouldShowPromptInput ? <PromptInput /> : <></>}
+      {model.need_prompt ? <PromptInput /> : <></>}
 
       <div className="flex gap-1">
         {/* <CoffeeIcon /> */}

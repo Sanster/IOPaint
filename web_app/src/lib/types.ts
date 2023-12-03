@@ -12,6 +12,7 @@ export interface ModelInfo {
   controlnets: string[]
   support_freeu: boolean
   support_lcm_lora: boolean
+  need_prompt: boolean
   is_single_file_diffusers: boolean
 }
 

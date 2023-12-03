@@ -179,6 +179,7 @@ const defaultValues: AppState = {
       support_freeu: false,
       support_lcm_lora: false,
       is_single_file_diffusers: false,
+      need_prompt: false,
     },
     showCroper: false,
     enableDownloadMask: false,

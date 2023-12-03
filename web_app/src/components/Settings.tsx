@@ -433,9 +433,9 @@ export function SettingsDialog() {
                     <></>
                   )} */}
 
-                  {/* <div className=" absolute right-">
-                  <Button type="submit">Ok</Button>
-                </div> */}
+                  <div className="absolute right-10 bottom-6">
+                    <Button onClick={() => toggleOpen()}>Ok</Button>
+                  </div>
                 </form>
               </div>
             </Form>
