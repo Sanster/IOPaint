@@ -9,6 +9,7 @@ import Workspace from "@/components/Workspace"
 import FileSelect from "@/components/FileSelect"
 import { Toaster } from "./components/ui/toaster"
 import { useStore } from "./lib/states"
+import { useWindowSize } from "react-use"
 
 const SUPPORTED_FILE_TYPE = [
   "image/jpeg",
@@ -18,19 +19,26 @@ const SUPPORTED_FILE_TYPE = [
   "image/tiff",
 ]
 function Home() {
-  const [file, setServerConfig, setFile] = useStore((state) => [
+  const [file, updateAppState, setServerConfig, setFile] = useStore((state) => [
     state.file,
+    state.updateAppState,
     state.setServerConfig,
     state.setFile,
   ])
 
   const userInputImage = useInputImage()
 
+  const windowSize = useWindowSize()
+
   useEffect(() => {
     if (userInputImage) {
       setFile(userInputImage)
     }
   }, [userInputImage, setFile])
+
+  useEffect(() => {
+    updateAppState({ windowSize })
+  }, [windowSize])
 
   // Keeping GUI Window Open
   useEffect(() => {

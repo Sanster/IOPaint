@@ -52,6 +52,7 @@
     "tailwind-merge": "^2.0.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.22.4",
+    "zundo": "^2.0.0",
     "zustand": "^4.4.6"
   },
   "devDependencies": {

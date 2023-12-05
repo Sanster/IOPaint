@@ -1,6 +1,8 @@
 import { type ClassValue, clsx } from "clsx"
 import { SyntheticEvent } from "react"
 import { twMerge } from "tailwind-merge"
+import { LineGroup } from "./types"
+import { BRUSH_COLOR } from "./const"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -130,4 +132,30 @@ export function downloadImage(uri: string, name: string) {
     // window.URL.revokeObjectURL(base64)
     link.remove()
   }, 100)
+}
+
+export function mouseXY(ev: SyntheticEvent) {
+  const mouseEvent = ev.nativeEvent as MouseEvent
+  return { x: mouseEvent.offsetX, y: mouseEvent.offsetY }
+}
+
+export function drawLines(
+  ctx: CanvasRenderingContext2D,
+  lines: LineGroup,
+  color = BRUSH_COLOR
+) {
+  ctx.strokeStyle = color
+  ctx.lineCap = "round"
+  ctx.lineJoin = "round"
+
+  lines.forEach((line) => {
+    if (!line?.pts.length || !line.size) {
+      return
+    }
+    ctx.lineWidth = line.size
+    ctx.beginPath()
+    ctx.moveTo(line.pts[0].x, line.pts[0].y)
+    line.pts.forEach((pt) => ctx.lineTo(pt.x, pt.y))
+    ctx.stroke()
+  })
 }

@@ -69,3 +69,20 @@ export interface FreeuConfig {
   b1: number
   b2: number
 }
+
+export interface Point {
+  x: number
+  y: number
+}
+
+export interface Line {
+  size?: number
+  pts: Point[]
+}
+
+export type LineGroup = Array<Line>
+
+export interface Size {
+  width: number
+  height: number
+}

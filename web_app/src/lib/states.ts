@@ -1,16 +1,22 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
+import { shallow } from "zustand/shallow"
 import { immer } from "zustand/middleware/immer"
+import { createWithEqualityFn } from "zustand/traditional"
 import {
   CV2Flag,
   FreeuConfig,
   LDMSampler,
+  Line,
+  LineGroup,
   ModelInfo,
+  Point,
   SDSampler,
+  Size,
   SortBy,
   SortOrder,
 } from "./types"
-import { DEFAULT_BRUSH_SIZE } from "./const"
+import { DEFAULT_BRUSH_SIZE, MODEL_TYPE_INPAINT } from "./const"
 
 type FileManagerState = {
   sortBy: SortBy
@@ -93,15 +99,28 @@ type InteractiveSegState = {
   clicks: number[][]
 }
 
+type EditorState = {
+  baseBrushSize: number
+  brushSizeScale: number
+  renders: HTMLImageElement[]
+  lineGroups: LineGroup[]
+  lastLineGroup: LineGroup
+  curLineGroup: LineGroup
+  // redo 相关
+  redoRenders: HTMLImageElement[]
+  redoCurLines: Line[]
+  redoLineGroups: LineGroup[]
+}
+
 type AppState = {
   file: File | null
   customMask: File | null
   imageHeight: number
   imageWidth: number
-  brushSize: number
-  brushSizeScale: number
   isInpainting: boolean
   isPluginRunning: boolean
+  windowSize: Size
+  editorState: EditorState
 
   interactiveSegState: InteractiveSegState
   fileManagerState: FileManagerState
@@ -112,11 +131,13 @@ type AppState = {
 }
 
 type AppAction = {
+  updateAppState: (newState: Partial<AppState>) => void
   setFile: (file: File) => void
   setCustomFile: (file: File) => void
   setIsInpainting: (newValue: boolean) => void
   setIsPluginRunning: (newValue: boolean) => void
-  setBrushSize: (newValue: number) => void
+  setBaseBrushSize: (newValue: number) => void
+  getBrushSize: () => number
   setImageSize: (width: number, height: number) => void
 
   setCropperX: (newValue: number) => void
@@ -132,6 +153,18 @@ type AppAction = {
   resetInteractiveSegState: () => void
   showPromptInput: () => boolean
   showSidePanel: () => boolean
+
+  // EditorState
+  updateEditorState: (newState: Partial<EditorState>) => void
+  runMannually: () => boolean
+  handleCanvasMouseDown: (point: Point) => void
+  handleCanvasMouseMove: (point: Point) => void
+  cleanCurLineGroup: () => void
+  resetRedoState: () => void
+  undo: () => void
+  redo: () => void
+  undoDisabled: () => boolean
+  redoDisabled: () => boolean
 }
 
 const defaultValues: AppState = {
@@ -139,10 +172,23 @@ const defaultValues: AppState = {
   customMask: null,
   imageHeight: 0,
   imageWidth: 0,
-  brushSize: DEFAULT_BRUSH_SIZE,
-  brushSizeScale: 1,
   isInpainting: false,
   isPluginRunning: false,
+  windowSize: {
+    height: 600,
+    width: 800,
+  },
+  editorState: {
+    baseBrushSize: DEFAULT_BRUSH_SIZE,
+    brushSizeScale: 1,
+    renders: [],
+    lineGroups: [],
+    lastLineGroup: [],
+    curLineGroup: [],
+    redoRenders: [],
+    redoCurLines: [],
+    redoLineGroups: [],
+  },
 
   interactiveSegState: {
     isInteractiveSeg: false,
@@ -216,130 +262,301 @@ const defaultValues: AppState = {
   },
 }
 
-export const useStore = create<AppState & AppAction>()(
-  immer(
-    persist(
-      (set, get) => ({
-        ...defaultValues,
+export const useStore = createWithEqualityFn<AppState & AppAction>()(
+  persist(
+    immer((set, get) => ({
+      ...defaultValues,
 
-        showPromptInput: (): boolean => {
-          const model_type = get().settings.model.model_type
-          return ["diffusers_sd", "diffusers_sd_inpaint"].includes(model_type)
-        },
-
-        showSidePanel: (): boolean => {
-          const model_type = get().settings.model.model_type
-          return ["diffusers_sd", "diffusers_sd_inpaint"].includes(model_type)
-        },
-
-        setServerConfig: (newValue: ServerConfig) => {
-          set((state: AppState) => {
-            state.serverConfig = newValue
-          })
-        },
-
-        updateSettings: (newSettings: Partial<Settings>) => {
-          set((state: AppState) => {
-            state.settings = {
-              ...state.settings,
-              ...newSettings,
-            }
-          })
-        },
-
-        updateFileManagerState: (newState: Partial<FileManagerState>) => {
-          set((state: AppState) => {
-            state.fileManagerState = {
-              ...state.fileManagerState,
+      // Edirot State //
+      updateEditorState: (newState: Partial<EditorState>) => {
+        set((state) => {
+          return {
+            ...state,
+            editorState: {
+              ...state.editorState,
               ...newState,
+            },
+          }
+        })
+      },
+
+      cleanCurLineGroup: () => {
+        get().updateEditorState({ curLineGroup: [] })
+      },
+
+      handleCanvasMouseDown: (point: Point) => {
+        let lineGroup: LineGroup = []
+        const state = get()
+        if (state.runMannually()) {
+          lineGroup = [...state.editorState.curLineGroup]
+        }
+        lineGroup.push({ size: state.getBrushSize(), pts: [point] })
+        set((state) => {
+          state.editorState.curLineGroup = lineGroup
+        })
+      },
+
+      handleCanvasMouseMove: (point: Point) => {
+        set((state) => {
+          const curLineGroup = state.editorState.curLineGroup
+          if (curLineGroup.length) {
+            curLineGroup[curLineGroup.length - 1].pts.push(point)
+          }
+        })
+      },
+
+      runMannually: (): boolean => {
+        const state = get()
+        return (
+          state.settings.enableManualInpainting ||
+          state.settings.model.model_type !== MODEL_TYPE_INPAINT
+        )
+      },
+
+      // undo/redo
+
+      undoDisabled: (): boolean => {
+        const editorState = get().editorState
+        if (editorState.renders.length > 0) {
+          return false
+        }
+        if (get().runMannually()) {
+          if (editorState.curLineGroup.length === 0) {
+            return true
+          }
+        } else if (editorState.renders.length === 0) {
+          return true
+        }
+        return false
+      },
+
+      undo: () => {
+        if (
+          get().runMannually() &&
+          get().editorState.curLineGroup.length !== 0
+        ) {
+          // undoStroke
+          set((state) => {
+            const editorState = state.editorState
+            if (editorState.curLineGroup.length === 0) {
+              return
             }
+            editorState.lastLineGroup = []
+            const lastLine = editorState.curLineGroup.pop()!
+            editorState.redoCurLines.push(lastLine)
           })
-        },
-
-        updateInteractiveSegState: (newState: Partial<InteractiveSegState>) => {
-          set((state: AppState) => {
-            state.interactiveSegState = {
-              ...state.interactiveSegState,
-              ...newState,
+        } else {
+          set((state) => {
+            const editorState = state.editorState
+            if (
+              editorState.renders.length === 0 ||
+              editorState.lineGroups.length === 0
+            ) {
+              return
             }
+            const lastLineGroup = editorState.lineGroups.pop()!
+            editorState.redoLineGroups.push(lastLineGroup)
+            editorState.redoCurLines = []
+            editorState.curLineGroup = []
+
+            const lastRender = editorState.renders.pop()!
+            editorState.redoRenders.push(lastRender)
           })
-        },
-        resetInteractiveSegState: () => {
-          set((state: AppState) => {
-            state.interactiveSegState = defaultValues.interactiveSegState
+        }
+      },
+
+      redoDisabled: (): boolean => {
+        const editorState = get().editorState
+        if (editorState.redoRenders.length > 0) {
+          return false
+        }
+        if (get().runMannually()) {
+          if (editorState.redoCurLines.length === 0) {
+            return true
+          }
+        } else if (editorState.redoRenders.length === 0) {
+          return true
+        }
+        return false
+      },
+
+      redo: () => {
+        if (
+          get().runMannually() &&
+          get().editorState.redoCurLines.length !== 0
+        ) {
+          set((state) => {
+            const editorState = state.editorState
+            if (editorState.redoCurLines.length === 0) {
+              return
+            }
+            const line = editorState.redoCurLines.pop()!
+            editorState.curLineGroup.push(line)
           })
-        },
+        } else {
+          set((state) => {
+            const editorState = state.editorState
+            if (
+              editorState.redoRenders.length === 0 ||
+              editorState.redoLineGroups.length === 0
+            ) {
+              return
+            }
+            const lastLineGroup = editorState.redoLineGroups.pop()!
+            editorState.lineGroups.push(lastLineGroup)
+            editorState.curLineGroup = []
 
-        setIsInpainting: (newValue: boolean) =>
-          set((state: AppState) => {
-            state.isInpainting = newValue
-          }),
-
-        setIsPluginRunning: (newValue: boolean) =>
-          set((state: AppState) => {
-            state.isPluginRunning = newValue
-          }),
-
-        setFile: (file: File) =>
-          set((state: AppState) => {
-            // TODO: 清空各种状态
-            state.file = file
-          }),
-
-        setCustomFile: (file: File) =>
-          set((state: AppState) => {
-            state.customMask = file
-          }),
-
-        setBrushSize: (newValue: number) =>
-          set((state: AppState) => {
-            state.brushSize = newValue
-          }),
-
-        setImageSize: (width: number, height: number) => {
-          // 根据图片尺寸调整 brushSize 的 scale
-          set((state: AppState) => {
-            state.imageWidth = width
-            state.imageHeight = height
-            state.brushSizeScale = Math.max(Math.min(width, height), 512) / 512
+            const lastRender = editorState.redoRenders.pop()!
+            editorState.renders.push(lastRender)
           })
-        },
+        }
+      },
 
-        setCropperX: (newValue: number) =>
-          set((state: AppState) => {
-            state.cropperState.x = newValue
-          }),
+      resetRedoState: () => {
+        set((state) => {
+          state.editorState.redoCurLines = []
+          state.editorState.redoLineGroups = []
+          state.editorState.redoRenders = []
+        })
+      },
 
-        setCropperY: (newValue: number) =>
-          set((state: AppState) => {
-            state.cropperState.y = newValue
-          }),
+      //****//
 
-        setCropperWidth: (newValue: number) =>
-          set((state: AppState) => {
-            state.cropperState.width = newValue
-          }),
+      updateAppState: (newState: Partial<AppState>) => {
+        set(() => newState)
+      },
 
-        setCropperHeight: (newValue: number) =>
-          set((state: AppState) => {
-            state.cropperState.height = newValue
-          }),
+      getBrushSize: (): number => {
+        return (
+          get().editorState.baseBrushSize * get().editorState.brushSizeScale
+        )
+      },
 
-        setSeed: (newValue: number) =>
-          set((state: AppState) => {
-            state.settings.seed = newValue
-          }),
-      }),
-      {
-        name: "ZUSTAND_STATE", // name of the item in the storage (must be unique)
-        version: 0,
-        partialize: (state) =>
-          Object.fromEntries(
-            Object.entries(state).filter(([key]) =>
-              ["fileManagerState", "prompt", "settings"].includes(key)
-            )
-          ),
-      }
-    )
-  )
+      showPromptInput: (): boolean => {
+        const model_type = get().settings.model.model_type
+        return ["diffusers_sd", "diffusers_sd_inpaint"].includes(model_type)
+      },
+
+      showSidePanel: (): boolean => {
+        const model_type = get().settings.model.model_type
+        return ["diffusers_sd", "diffusers_sd_inpaint"].includes(model_type)
+      },
+
+      setServerConfig: (newValue: ServerConfig) => {
+        set((state) => {
+          state.serverConfig = newValue
+        })
+      },
+
+      updateSettings: (newSettings: Partial<Settings>) => {
+        set((state) => {
+          state.settings = {
+            ...state.settings,
+            ...newSettings,
+          }
+        })
+      },
+
+      updateFileManagerState: (newState: Partial<FileManagerState>) => {
+        set((state) => {
+          state.fileManagerState = {
+            ...state.fileManagerState,
+            ...newState,
+          }
+        })
+      },
+
+      updateInteractiveSegState: (newState: Partial<InteractiveSegState>) => {
+        set((state) => {
+          state.interactiveSegState = {
+            ...state.interactiveSegState,
+            ...newState,
+          }
+        })
+      },
+      resetInteractiveSegState: () => {
+        set((state) => {
+          state.interactiveSegState = defaultValues.interactiveSegState
+        })
+      },
+
+      setIsInpainting: (newValue: boolean) =>
+        set((state) => {
+          state.isInpainting = newValue
+        }),
+
+      setIsPluginRunning: (newValue: boolean) =>
+        set((state) => {
+          state.isPluginRunning = newValue
+        }),
+
+      setFile: (file: File) =>
+        set((state) => {
+          // TODO: 清空各种状态
+          state.file = file
+        }),
+
+      setCustomFile: (file: File) =>
+        set((state) => {
+          state.customMask = file
+        }),
+
+      setBaseBrushSize: (newValue: number) =>
+        set((state) => {
+          state.editorState.baseBrushSize = newValue
+        }),
+
+      setImageSize: (width: number, height: number) => {
+        // 根据图片尺寸调整 brushSize 的 scale
+        set((state) => {
+          state.imageWidth = width
+          state.imageHeight = height
+          state.editorState.brushSizeScale =
+            Math.max(Math.min(width, height), 512) / 512
+        })
+      },
+
+      setCropperX: (newValue: number) =>
+        set((state) => {
+          state.cropperState.x = newValue
+        }),
+
+      setCropperY: (newValue: number) =>
+        set((state) => {
+          state.cropperState.y = newValue
+        }),
+
+      setCropperWidth: (newValue: number) =>
+        set((state) => {
+          state.cropperState.width = newValue
+        }),
+
+      setCropperHeight: (newValue: number) =>
+        set((state) => {
+          state.cropperState.height = newValue
+        }),
+
+      setSeed: (newValue: number) =>
+        set((state) => {
+          state.settings.seed = newValue
+        }),
+    })),
+    {
+      name: "ZUSTAND_STATE", // name of the item in the storage (must be unique)
+      version: 0,
+      partialize: (state) =>
+        Object.fromEntries(
+          Object.entries(state).filter(([key]) =>
+            ["fileManagerState", "settings"].includes(key)
+          )
+        ),
+    }
+  ),
+  shallow
 )
+
+// export const useStore = <U>(selector: (state: AppState & AppAction) => U) => {
+//   return createWithEqualityFn(selector, shallow)
+// }
+
+// export const useStore = createWithEqualityFn(useBaseStore, shallow)

@@ -13,9 +13,11 @@ import {
   askWritePermission,
   copyCanvasImage,
   downloadImage,
+  drawLines,
   isMidClick,
   isRightClick,
   loadImage,
+  mouseXY,
   srcToFile,
 } from "@/lib/utils"
 import { Eraser, Eye, Redo, Undo, Expand, Download } from "lucide-react"
@@ -29,7 +31,7 @@ import emitter, {
 } from "@/lib/event"
 import { useImage } from "@/hooks/useImage"
 import { Slider } from "./ui/slider"
-import { PluginName } from "@/lib/types"
+import { Line, LineGroup, PluginName } from "@/lib/types"
 import { useHotkeys } from "react-hotkeys-hook"
 import { useStore } from "@/lib/states"
 import Cropper from "./Cropper"
@@ -38,40 +40,6 @@ const TOOLBAR_HEIGHT = 200
 const MIN_BRUSH_SIZE = 10
 const MAX_BRUSH_SIZE = 200
 const COMPARE_SLIDER_DURATION_MS = 300
-const BRUSH_COLOR = "#ffcc00bb"
-
-interface Line {
-  size?: number
-  pts: { x: number; y: number }[]
-}
-
-type LineGroup = Array<Line>
-
-function drawLines(
-  ctx: CanvasRenderingContext2D,
-  lines: LineGroup,
-  color = BRUSH_COLOR
-) {
-  ctx.strokeStyle = color
-  ctx.lineCap = "round"
-  ctx.lineJoin = "round"
-
-  lines.forEach((line) => {
-    if (!line?.pts.length || !line.size) {
-      return
-    }
-    ctx.lineWidth = line.size
-    ctx.beginPath()
-    ctx.moveTo(line.pts[0].x, line.pts[0].y)
-    line.pts.forEach((pt) => ctx.lineTo(pt.x, pt.y))
-    ctx.stroke()
-  })
-}
-
-function mouseXY(ev: SyntheticEvent) {
-  const mouseEvent = ev.nativeEvent as MouseEvent
-  return { x: mouseEvent.offsetX, y: mouseEvent.offsetY }
-}
 
 interface EditorProps {
   file: File
@@ -85,14 +53,12 @@ export default function Editor(props: EditorProps) {
     isInpainting,
     imageWidth,
     imageHeight,
-    baseBrushSize,
-    brushSizeScale,
     settings,
     enableAutoSaving,
     cropperRect,
     enableManualInpainting,
     setImageSize,
-    setBrushSize,
+    setBaseBrushSize,
     setIsInpainting,
     setSeed,
     interactiveSegState,
@@ -100,18 +66,25 @@ export default function Editor(props: EditorProps) {
     resetInteractiveSegState,
     isPluginRunning,
     setIsPluginRunning,
+    handleCanvasMouseDown,
+    handleCanvasMouseMove,
+    cleanCurLineGroup,
+    updateEditorState,
+    resetRedoState,
+    undo,
+    redo,
+    undoDisabled,
+    redoDisabled,
   ] = useStore((state) => [
     state.isInpainting,
     state.imageWidth,
     state.imageHeight,
-    state.brushSize,
-    state.brushSizeScale,
     state.settings,
     state.serverConfig.enableAutoSaving,
     state.cropperState,
     state.settings.enableManualInpainting,
     state.setImageSize,
-    state.setBrushSize,
+    state.setBaseBrushSize,
     state.setIsInpainting,
     state.setSeed,
     state.interactiveSegState,
@@ -119,8 +92,24 @@ export default function Editor(props: EditorProps) {
     state.resetInteractiveSegState,
     state.isPluginRunning,
     state.setIsPluginRunning,
+    state.handleCanvasMouseDown,
+    state.handleCanvasMouseMove,
+    state.cleanCurLineGroup,
+    state.updateEditorState,
+    state.resetRedoState,
+    state.undo,
+    state.redo,
+    state.undoDisabled(),
+    state.redoDisabled(),
   ])
-  const brushSize = baseBrushSize * brushSizeScale
+  const baseBrushSize = useStore((state) => state.editorState.baseBrushSize)
+  const brushSize = useStore((state) => state.getBrushSize())
+  const renders = useStore((state) => state.editorState.renders)
+  const lineGroups = useStore((state) => state.editorState.lineGroups)
+
+  const lastLineGroup = useStore((state) => state.editorState.lastLineGroup)
+  const curLineGroup = useStore((state) => state.editorState.curLineGroup)
+  const redoLineGroups = useStore((state) => state.editorState.redoLineGroups)
 
   // 纯 local state
   const [showOriginal, setShowOriginal] = useState(false)
@@ -151,14 +140,10 @@ export default function Editor(props: EditorProps) {
     useState<LineGroup>([])
 
   const [original, isOriginalLoaded] = useImage(file)
-  const [renders, setRenders] = useState<HTMLImageElement[]>([])
   const [context, setContext] = useState<CanvasRenderingContext2D>()
   const [maskCanvas] = useState<HTMLCanvasElement>(() => {
     return document.createElement("canvas")
   })
-  const [lineGroups, setLineGroups] = useState<LineGroup[]>([])
-  const [lastLineGroup, setLastLineGroup] = useState<LineGroup>([])
-  const [curLineGroup, setCurLineGroup] = useState<LineGroup>([])
   const [{ x, y }, setCoords] = useState({ x: -1, y: -1 })
   const [showBrush, setShowBrush] = useState(false)
   const [showRefBrush, setShowRefBrush] = useState(false)
@@ -184,11 +169,6 @@ export default function Editor(props: EditorProps) {
   const [isDraging, setIsDraging] = useState(false)
 
   const [sliderPos, setSliderPos] = useState<number>(0)
-
-  // redo 相关
-  const [redoRenders, setRedoRenders] = useState<HTMLImageElement[]>([])
-  const [redoCurLines, setRedoCurLines] = useState<Line[]>([])
-  const [redoLineGroups, setRedoLineGroups] = useState<LineGroup[]>([])
 
   const draw = useCallback(
     (render: HTMLImageElement, lineGroup: LineGroup) => {
@@ -276,27 +256,50 @@ export default function Editor(props: EditorProps) {
         )
       }
     },
-    [context, maskCanvas, isPix2Pix, imageWidth, imageHeight]
+    [context, maskCanvas, imageWidth, imageHeight]
   )
 
   const hadDrawSomething = useCallback(() => {
-    if (isPix2Pix) {
-      return true
-    }
     return curLineGroup.length !== 0
-  }, [curLineGroup, isPix2Pix])
+  }, [curLineGroup])
 
-  const drawOnCurrentRender = useCallback(
-    (lineGroup: LineGroup) => {
-      console.log("[drawOnCurrentRender] draw on current render")
-      if (renders.length === 0) {
-        draw(original, lineGroup)
-      } else {
-        draw(renders[renders.length - 1], lineGroup)
-      }
-    },
-    [original, renders, draw]
-  )
+  // const drawOnCurrentRender = useCallback(
+  //   (lineGroup: LineGroup) => {
+  //     console.log("[drawOnCurrentRender] draw on current render")
+  //     if (renders.length === 0) {
+  //       draw(original, lineGroup)
+  //     } else {
+  //       draw(renders[renders.length - 1], lineGroup)
+  //     }
+  //   },
+  //   [original, renders, draw]
+  // )
+
+  useEffect(() => {
+    if (!context) {
+      return
+    }
+
+    const render = renders.length === 0 ? original : renders[renders.length - 1]
+
+    console.log(
+      `[draw] render size: ${render.width}x${render.height} image size: ${imageWidth}x${imageHeight} canvas size: ${context.canvas.width}x${context.canvas.height}`
+    )
+
+    context.clearRect(0, 0, context.canvas.width, context.canvas.height)
+    context.drawImage(render, 0, 0, imageWidth, imageHeight)
+    // if (interactiveSegState.isInteractiveSeg && tmpInteractiveSegMask) {
+    //   context.drawImage(tmpInteractiveSegMask, 0, 0, imageWidth, imageHeight)
+    // }
+    // if (!interactiveSegState.isInteractiveSeg && interactiveSegMask) {
+    //   context.drawImage(interactiveSegMask, 0, 0, imageWidth, imageHeight)
+    // }
+    // if (dreamButtonHoverSegMask) {
+    //   context.drawImage(dreamButtonHoverSegMask, 0, 0, imageWidth, imageHeight)
+    // }
+    drawLines(context, curLineGroup)
+    // drawLines(context, dreamButtonHoverLineGroup)
+  }, [renders, file, original, context, curLineGroup, imageHeight, imageWidth])
 
   const runInpainting = useCallback(
     async (
@@ -332,13 +335,13 @@ export default function Editor(props: EditorProps) {
           return
         }
 
-        setLastLineGroup(curLineGroup)
+        // setLastLineGroup(curLineGroup)
         maskLineGroup = curLineGroup
       }
 
       const newLineGroups = [...lineGroups, maskLineGroup]
 
-      setCurLineGroup([])
+      cleanCurLineGroup()
       setIsDraging(false)
       setIsInpainting(true)
       drawLinesOnMask([maskLineGroup], maskImage)
@@ -391,15 +394,17 @@ export default function Editor(props: EditorProps) {
         if (useLastLineGroup === true) {
           const prevRenders = renders.slice(0, -1)
           const newRenders = [...prevRenders, newRender]
-          setRenders(newRenders)
+          // setRenders(newRenders)
+          updateEditorState({ renders: newRenders })
         } else {
           const newRenders = [...renders, newRender]
-          setRenders(newRenders)
+          updateEditorState({ renders: newRenders })
         }
 
         draw(newRender, [])
         // Only append new LineGroup after inpainting success
-        setLineGroups(newLineGroups)
+        // setLineGroups(newLineGroups)
+        updateEditorState({ lineGroups: newLineGroups })
 
         // clear redo stack
         resetRedoState()
@@ -409,7 +414,7 @@ export default function Editor(props: EditorProps) {
           title: "Uh oh! Something went wrong.",
           description: e.message ? e.message : e.toString(),
         })
-        drawOnCurrentRender([])
+        // drawOnCurrentRender([])
       }
       setIsInpainting(false)
       setPrevInteractiveSegMask(maskImage)
@@ -423,7 +428,7 @@ export default function Editor(props: EditorProps) {
       maskCanvas,
       settings,
       cropperRect,
-      drawOnCurrentRender,
+      // drawOnCurrentRender,
       hadDrawSomething,
       drawLinesOnMask,
     ]
@@ -488,7 +493,7 @@ export default function Editor(props: EditorProps) {
     hadDrawSomething,
     interactiveSegMask,
     prevInteractiveSegMask,
-    drawOnCurrentRender,
+    // drawOnCurrentRender,
     lineGroups,
     redoLineGroups,
   ])
@@ -499,13 +504,13 @@ export default function Editor(props: EditorProps) {
       if (!hadDrawSomething() && !interactiveSegMask) {
         setDreamButtonHoverSegMask(null)
         setDreamButtonHoverLineGroup([])
-        drawOnCurrentRender([])
+        // drawOnCurrentRender([])
       }
     })
     return () => {
       emitter.off(DREAM_BUTTON_MOUSE_LEAVE)
     }
-  }, [hadDrawSomething, interactiveSegMask, drawOnCurrentRender])
+  }, [hadDrawSomething, interactiveSegMask])
 
   useEffect(() => {
     emitter.on(EVENT_CUSTOM_MASK, (data: any) => {
@@ -601,9 +606,10 @@ export default function Editor(props: EditorProps) {
         await loadImage(newRender, blob)
         setImageSize(newRender.height, newRender.width)
         const newRenders = [...renders, newRender]
-        setRenders(newRenders)
+        // setRenders(newRenders)
+        updateEditorState({ renders: newRenders })
         const newLineGroups = [...lineGroups, []]
-        setLineGroups(newLineGroups)
+        updateEditorState({ lineGroups: newLineGroups })
 
         const end = new Date()
         const time = end.getTime() - start.getTime()
@@ -632,7 +638,7 @@ export default function Editor(props: EditorProps) {
     },
     [
       renders,
-      setRenders,
+      // setRenders,
       getCurrentRender,
       setIsPluginRunning,
       isProcessing,
@@ -640,7 +646,7 @@ export default function Editor(props: EditorProps) {
       lineGroups,
       viewportRef,
       windowSize,
-      setLineGroups,
+      // setLineGroups,
     ]
   )
 
@@ -737,7 +743,7 @@ export default function Editor(props: EditorProps) {
       context.canvas.width = width
       context.canvas.height = height
       console.log("[on file load] set canvas size && drawOnCurrentRender")
-      drawOnCurrentRender([])
+      // drawOnCurrentRender([])
     }
 
     if (!initialCentered) {
@@ -747,13 +753,13 @@ export default function Editor(props: EditorProps) {
       setInitialCentered(true)
     }
   }, [
-    // context?.canvas,
+    context?.canvas,
     viewportRef,
     original,
     isOriginalLoaded,
     windowSize,
     initialCentered,
-    drawOnCurrentRender,
+    // drawOnCurrentRender,
     getCurrentWidthHeight,
   ])
 
@@ -790,12 +796,6 @@ export default function Editor(props: EditorProps) {
     minScale,
   ])
 
-  const resetRedoState = () => {
-    setRedoCurLines([])
-    setRedoLineGroups([])
-    setRedoRenders([])
-  }
-
   useEffect(() => {
     window.addEventListener("resize", () => {
       resetZoom()
@@ -825,8 +825,8 @@ export default function Editor(props: EditorProps) {
 
     if (isDraging) {
       setIsDraging(false)
-      setCurLineGroup([])
-      drawOnCurrentRender([])
+      // setCurLineGroup([])
+      // drawOnCurrentRender([])
     } else {
       resetZoom()
     }
@@ -836,7 +836,7 @@ export default function Editor(props: EditorProps) {
     isDraging,
     isInpainting,
     resetZoom,
-    drawOnCurrentRender,
+    // drawOnCurrentRender,
   ])
 
   const onMouseMove = (ev: SyntheticEvent) => {
@@ -845,15 +845,15 @@ export default function Editor(props: EditorProps) {
   }
 
   const onMouseDrag = (ev: SyntheticEvent) => {
-    if (isChangingBrushSizeByMouse) {
-      const initX = changeBrushSizeByMouseInit.x
-      // move right: increase brush size
-      const newSize = changeBrushSizeByMouseInit.brushSize + (x - initX)
-      if (newSize <= MAX_BRUSH_SIZE && newSize >= MIN_BRUSH_SIZE) {
-        setBrushSize(newSize)
-      }
-      return
-    }
+    // if (isChangingBrushSizeByMouse) {
+    //   const initX = changeBrushSizeByMouseInit.x
+    //   // move right: increase brush size
+    //   const newSize = changeBrushSizeByMouseInit.brushSize + (x - initX)
+    //   if (newSize <= MAX_BRUSH_SIZE && newSize >= MIN_BRUSH_SIZE) {
+    //     setBaseBrushSize(newSize)
+    //   }
+    //   return
+    // }
     if (interactiveSegState.isInteractiveSeg) {
       return
     }
@@ -866,10 +866,12 @@ export default function Editor(props: EditorProps) {
     if (curLineGroup.length === 0) {
       return
     }
-    const lineGroup = [...curLineGroup]
-    lineGroup[lineGroup.length - 1].pts.push(mouseXY(ev))
-    setCurLineGroup(lineGroup)
-    drawOnCurrentRender(lineGroup)
+
+    handleCanvasMouseMove(mouseXY(ev))
+    // const lineGroup = [...curLineGroup]
+    // lineGroup[lineGroup.length - 1].pts.push(mouseXY(ev))
+    // setCurLineGroup(lineGroup)
+    // drawOnCurrentRender(lineGroup)
   }
 
   const runInteractiveSeg = async (newClicks: number[][]) => {
@@ -1010,166 +1012,29 @@ export default function Editor(props: EditorProps) {
 
     setIsDraging(true)
 
-    let lineGroup: LineGroup = []
-    if (enableManualInpainting) {
-      lineGroup = [...curLineGroup]
-    }
-    lineGroup.push({ size: brushSize, pts: [mouseXY(ev)] })
-    setCurLineGroup(lineGroup)
-    drawOnCurrentRender(lineGroup)
-  }
-
-  const undoStroke = useCallback(() => {
-    if (curLineGroup.length === 0) {
-      return
-    }
-    setLastLineGroup([])
-
-    const lastLine = curLineGroup.pop()!
-    const newRedoCurLines = [...redoCurLines, lastLine]
-    setRedoCurLines(newRedoCurLines)
-
-    const newLineGroup = [...curLineGroup]
-    setCurLineGroup(newLineGroup)
-    drawOnCurrentRender(newLineGroup)
-  }, [curLineGroup, redoCurLines, drawOnCurrentRender])
-
-  const undoRender = useCallback(() => {
-    if (!renders.length) {
-      return
-    }
-
-    // save line Group
-    const latestLineGroup = lineGroups.pop()!
-    setRedoLineGroups([...redoLineGroups, latestLineGroup])
-    // If render is undo, clear strokes
-    setRedoCurLines([])
-
-    setLineGroups([...lineGroups])
-    setCurLineGroup([])
-    setIsDraging(false)
-
-    // save render
-    const lastRender = renders.pop()!
-    setRedoRenders([...redoRenders, lastRender])
-
-    const newRenders = [...renders]
-    setRenders(newRenders)
-    // if (newRenders.length === 0) {
-    //   draw(original, [])
-    // } else {
-    //   draw(newRenders[newRenders.length - 1], [])
+    // let lineGroup: LineGroup = []
+    // if (enableManualInpainting) {
+    //   lineGroup = [...curLineGroup]
     // }
-  }, [
-    draw,
-    renders,
-    redoRenders,
-    redoLineGroups,
-    lineGroups,
-    original,
-    context,
-  ])
+    // lineGroup.push({ size: brushSize, pts: [mouseXY(ev)] })
+    // setCurLineGroup(lineGroup)
 
-  const undo = (keyboardEvent: KeyboardEvent | SyntheticEvent) => {
+    handleCanvasMouseDown(mouseXY(ev))
+
+    // drawOnCurrentRender(lineGroup)
+  }
+
+  const handleUndo = (keyboardEvent: KeyboardEvent | SyntheticEvent) => {
     keyboardEvent.preventDefault()
-    if (enableManualInpainting && curLineGroup.length !== 0) {
-      undoStroke()
-    } else {
-      undoRender()
-    }
+    undo()
   }
+  useHotkeys("meta+z,ctrl+z", handleUndo)
 
-  useHotkeys("meta+z,ctrl+z", undo, undefined, [
-    undoStroke,
-    undoRender,
-    enableManualInpainting,
-    curLineGroup,
-    context?.canvas,
-    renders,
-  ])
-
-  const disableUndo = () => {
-    if (isProcessing) {
-      return true
-    }
-    if (renders.length > 0) {
-      return false
-    }
-
-    if (enableManualInpainting) {
-      if (curLineGroup.length === 0) {
-        return true
-      }
-    } else if (renders.length === 0) {
-      return true
-    }
-
-    return false
-  }
-
-  const redoStroke = useCallback(() => {
-    if (redoCurLines.length === 0) {
-      return
-    }
-    const line = redoCurLines.pop()!
-    setRedoCurLines([...redoCurLines])
-
-    const newLineGroup = [...curLineGroup, line]
-    setCurLineGroup(newLineGroup)
-    drawOnCurrentRender(newLineGroup)
-  }, [curLineGroup, redoCurLines, drawOnCurrentRender])
-
-  const redoRender = useCallback(() => {
-    if (redoRenders.length === 0) {
-      return
-    }
-    const lineGroup = redoLineGroups.pop()!
-    setRedoLineGroups([...redoLineGroups])
-
-    setLineGroups([...lineGroups, lineGroup])
-    setCurLineGroup([])
-    setIsDraging(false)
-
-    const render = redoRenders.pop()!
-    const newRenders = [...renders, render]
-    setRenders(newRenders)
-    // draw(newRenders[newRenders.length - 1], [])
-  }, [draw, renders, redoRenders, redoLineGroups, lineGroups, original])
-
-  const redo = (keyboardEvent: KeyboardEvent | SyntheticEvent) => {
+  const handleRedo = (keyboardEvent: KeyboardEvent | SyntheticEvent) => {
     keyboardEvent.preventDefault()
-    if (enableManualInpainting && redoCurLines.length !== 0) {
-      redoStroke()
-    } else {
-      redoRender()
-    }
+    redo()
   }
-
-  useHotkeys("shift+ctrl+z,shift+meta+z", redo, undefined, [
-    redoStroke,
-    redoRender,
-    enableManualInpainting,
-    redoCurLines,
-  ])
-
-  const disableRedo = () => {
-    if (isProcessing) {
-      return true
-    }
-    if (redoRenders.length > 0) {
-      return false
-    }
-
-    if (enableManualInpainting) {
-      if (redoCurLines.length === 0) {
-        return true
-      }
-    } else if (redoRenders.length === 0) {
-      return true
-    }
-
-    return false
-  }
+  useHotkeys("shift+ctrl+z,shift+meta+z", handleRedo)
 
   useKeyPressEvent(
     "Tab",
@@ -1265,7 +1130,7 @@ export default function Editor(props: EditorProps) {
       if (baseBrushSize <= 10 && baseBrushSize > 0) {
         newBrushSize = baseBrushSize - 5
       }
-      setBrushSize(newBrushSize)
+      setBaseBrushSize(newBrushSize)
     },
     [baseBrushSize]
   )
@@ -1273,7 +1138,7 @@ export default function Editor(props: EditorProps) {
   useHotkeys(
     "]",
     () => {
-      setBrushSize(baseBrushSize + 10)
+      setBaseBrushSize(baseBrushSize + 10)
     },
     [baseBrushSize]
   )
@@ -1366,7 +1231,7 @@ export default function Editor(props: EditorProps) {
   }
 
   const handleSliderChange = (value: number) => {
-    setBrushSize(value)
+    setBaseBrushSize(value)
 
     if (!showRefBrush) {
       setShowRefBrush(true)
@@ -1552,10 +1417,18 @@ export default function Editor(props: EditorProps) {
           >
             <Expand />
           </IconButton>
-          <IconButton tooltip="Undo" onClick={undo} disabled={disableUndo()}>
+          <IconButton
+            tooltip="Undo"
+            onClick={handleUndo}
+            disabled={undoDisabled}
+          >
             <Undo />
           </IconButton>
-          <IconButton tooltip="Redo" onClick={redo} disabled={disableRedo()}>
+          <IconButton
+            tooltip="Redo"
+            onClick={handleRedo}
+            disabled={redoDisabled}
+          >
             <Redo />
           </IconButton>
           <IconButton

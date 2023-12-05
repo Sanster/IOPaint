@@ -32,6 +32,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./ui/sheet"
+import { ChevronLeft } from "lucide-react"
+import { Button } from "./ui/button"
 
 const SidePanel = () => {
   const [settings, updateSettings, showSidePanel] = useStore((state) => [
@@ -214,9 +216,11 @@ const SidePanel = () => {
     <Sheet open={open} onOpenChange={toggleOpen} modal={false}>
       <SheetTrigger
         tabIndex={-1}
-        className="z-10 outline-none absolute top-[68px] right-6 px-3 py-2 rounded-lg border-solid border hover:bg-primary hover:text-primary-foreground"
+        className="z-10 outline-none absolute top-[68px] right-6 rounded-lg border bg-background"
       >
-        Config
+        <Button variant="ghost" size="icon" asChild className="p-1.5">
+          <ChevronLeft strokeWidth={1} />
+        </Button>
       </SheetTrigger>
       <SheetContent
         side="right"

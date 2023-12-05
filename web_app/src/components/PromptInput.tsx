@@ -45,7 +45,7 @@ const PromptInput = () => {
   return (
     <div className="flex gap-4 items-center">
       <Input
-        className="min-w-[600px]"
+        className="min-w-[500px]"
         value={prompt}
         onInput={handleOnInput}
         onKeyUp={onKeyUp}

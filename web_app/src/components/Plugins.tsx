@@ -8,7 +8,13 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
 import { Button } from "./ui/button"
-import { Fullscreen, MousePointerClick, Slice, Smile } from "lucide-react"
+import {
+  Blocks,
+  Fullscreen,
+  MousePointerClick,
+  Slice,
+  Smile,
+} from "lucide-react"
 import { MixIcon } from "@radix-ui/react-icons"
 import { useStore } from "@/lib/states"
 import { InteractiveSeg } from "./InteractiveSeg"
@@ -118,8 +124,8 @@ const Plugins = () => {
         className="border rounded-lg z-10 bg-background"
         tabIndex={-1}
       >
-        <Button variant="ghost" size="icon" asChild>
-          <MixIcon className="p-2" />
+        <Button variant="ghost" size="icon" asChild className="p-1.5">
+          <Blocks strokeWidth={1} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="bottom" align="start">
