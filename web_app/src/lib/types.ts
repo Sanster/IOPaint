@@ -25,6 +25,10 @@ export enum PluginName {
   InteractiveSeg = "InteractiveSeg",
 }
 
+export interface PluginParams {
+  upscale: number
+}
+
 export enum SortBy {
   NAME = "name",
   CTIME = "ctime",

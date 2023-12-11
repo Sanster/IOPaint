@@ -15,18 +15,13 @@ export default async function inpaint(
   imageFile: File,
   settings: Settings,
   croperRect: Rect,
-  maskBase64?: string,
-  customMask?: File,
-  paintByExampleImage?: File
+  mask: File | Blob,
+  paintByExampleImage: File | null = null
 ) {
   // 1080, 2000, Original
   const fd = new FormData()
   fd.append("image", imageFile)
-  if (maskBase64 !== undefined) {
-    fd.append("mask", dataURItoBlob(maskBase64))
-  } else if (customMask !== undefined) {
-    fd.append("mask", customMask)
-  }
+  fd.append("mask", mask)
 
   fd.append("ldmSteps", settings.ldmSteps.toString())
   fd.append("ldmSampler", settings.ldmSampler.toString())
@@ -42,8 +37,7 @@ export default async function inpaint(
   fd.append("croperY", croperRect.y.toString())
   fd.append("croperHeight", croperRect.height.toString())
   fd.append("croperWidth", croperRect.width.toString())
-  // fd.append("useCroper", settings.showCroper ? "true" : "false")
-  fd.append("useCroper", "false")
+  fd.append("useCroper", settings.showCroper ? "true" : "false")
 
   fd.append("sdMaskBlur", settings.sdMaskBlur.toString())
   fd.append("sdStrength", settings.sdStrength.toString())
@@ -147,7 +141,6 @@ export async function runPlugin(
   name: string,
   imageFile: File,
   upscale?: number,
-  maskFile?: File | null,
   clicks?: number[][]
 ) {
   const fd = new FormData()
@@ -158,9 +151,6 @@ export async function runPlugin(
   }
   if (clicks) {
     fd.append("clicks", JSON.stringify(clicks))
-  }
-  if (maskFile) {
-    fd.append("mask", maskFile)
   }
 
   try {

@@ -419,14 +419,8 @@ def run_plugin():
 
 @app.route("/server_config", methods=["GET"])
 def get_server_config():
-    controlnet = {
-        "SD": SD_CONTROLNET_CHOICES,
-        "SD2": SD2_CONTROLNET_CHOICES,
-        "SDXL": SDXL_CONTROLNET_CHOICES,
-    }
     return {
         "plugins": list(plugins.keys()),
-        "availableControlNet": controlnet,
         "enableFileManager": enable_file_manager,
         "enableAutoSaving": enable_auto_saving,
     }, 200
@@ -434,20 +428,12 @@ def get_server_config():
 
 @app.route("/models", methods=["GET"])
 def get_models():
-    return [
-        {
-            **it.dict(),
-            "support_lcm_lora": it.support_lcm_lora(),
-            "support_controlnet": it.support_controlnet(),
-            "support_freeu": it.support_freeu(),
-        }
-        for it in model.scan_models()
-    ]
+    return [it.model_dump() for it in model.scan_models()]
 
 
 @app.route("/model")
 def current_model():
-    return model.available_models[model.name].dict(), 200
+    return model.available_models[model.name].model_dump(), 200
 
 
 @app.route("/is_desktop")
@@ -600,8 +586,20 @@ def main(args):
     else:
         input_image_path = args.input
 
+    # 为了兼容性
+    model_name_map = {
+        "sd1.5": "runwayml/stable-diffusion-inpainting",
+        "anything4": "Sanster/anything-4.0-inpainting",
+        "realisticVision1.4": "Sanster/Realistic_Vision_V1.4-inpainting",
+        "sd2": "stabilityai/stable-diffusion-2-inpainting",
+        "sdxl": "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
+        "kandinsky2.2": "kandinsky-community/kandinsky-2-2-decoder-inpaint",
+        "paint_by_example": "Fantasy-Studio/Paint-by-Example",
+        "instruct_pix2pix": "timbrooks/instruct-pix2pix",
+    }
+
     model = ModelManager(
-        name=args.model,
+        name=model_name_map.get(args.model, args.model),
         sd_controlnet=args.sd_controlnet,
         sd_controlnet_method=args.sd_controlnet_method,
         device=device,

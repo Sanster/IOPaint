@@ -1,8 +1,14 @@
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
 
 from PIL.Image import Image
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
+
+from lama_cleaner.const import (
+    SDXL_CONTROLNET_CHOICES,
+    SD2_CONTROLNET_CHOICES,
+    SD_CONTROLNET_CHOICES,
+)
 
 DIFFUSERS_SD_CLASS_NAME = "StableDiffusionPipeline"
 DIFFUSERS_SD_INPAINT_CLASS_NAME = "StableDiffusionInpaintPipeline"
@@ -31,6 +37,36 @@ class ModelInfo(BaseModel):
     model_type: ModelType
     is_single_file_diffusers: bool = False
 
+    @computed_field
+    @property
+    def need_prompt(self) -> bool:
+        return self.model_type in [
+            ModelType.DIFFUSERS_SD,
+            ModelType.DIFFUSERS_SDXL,
+            ModelType.DIFFUSERS_SD_INPAINT,
+            ModelType.DIFFUSERS_SDXL_INPAINT,
+        ] or self.name in [
+            "timbrooks/instruct-pix2pix",
+            "kandinsky-community/kandinsky-2-2-decoder-inpaint",
+        ]
+
+    @computed_field
+    @property
+    def controlnets(self) -> List[str]:
+        if self.model_type in [
+            ModelType.DIFFUSERS_SDXL,
+            ModelType.DIFFUSERS_SDXL_INPAINT,
+        ]:
+            return SDXL_CONTROLNET_CHOICES
+        if self.model_type in [ModelType.DIFFUSERS_SD, ModelType.DIFFUSERS_SD_INPAINT]:
+            if self.name in ["stabilityai/stable-diffusion-2-inpainting"]:
+                return SD2_CONTROLNET_CHOICES
+            else:
+                return SD_CONTROLNET_CHOICES
+        return []
+
+    @computed_field
+    @property
     def support_lcm_lora(self) -> bool:
         return self.model_type in [
             ModelType.DIFFUSERS_SD,
@@ -39,6 +75,8 @@ class ModelInfo(BaseModel):
             ModelType.DIFFUSERS_SDXL_INPAINT,
         ]
 
+    @computed_field
+    @property
     def support_controlnet(self) -> bool:
         return self.model_type in [
             ModelType.DIFFUSERS_SD,
@@ -47,6 +85,8 @@ class ModelInfo(BaseModel):
             ModelType.DIFFUSERS_SDXL_INPAINT,
         ]
 
+    @computed_field
+    @property
     def support_freeu(self) -> bool:
         return (
             self.model_type
@@ -56,7 +96,7 @@ class ModelInfo(BaseModel):
                 ModelType.DIFFUSERS_SD_INPAINT,
                 ModelType.DIFFUSERS_SDXL_INPAINT,
             ]
-            or "instruct-pix2pix" in self.name
+            or "timbrooks/instruct-pix2pix" in self.name
         )
 
 

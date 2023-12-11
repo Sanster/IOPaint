@@ -1,19 +1,17 @@
 import React, { FormEvent } from "react"
-import emitter, {
-  DREAM_BUTTON_MOUSE_ENTER,
-  DREAM_BUTTON_MOUSE_LEAVE,
-  EVENT_PROMPT,
-} from "@/lib/event"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { useStore } from "@/lib/states"
 
 const PromptInput = () => {
-  const [isInpainting, prompt, updateSettings] = useStore((state) => [
-    state.isInpainting,
-    state.settings.prompt,
-    state.updateSettings,
-  ])
+  const [isProcessing, prompt, updateSettings, runInpainting] = useStore(
+    (state) => [
+      state.getIsProcessing(),
+      state.settings.prompt,
+      state.updateSettings,
+      state.runInpainting,
+    ]
+  )
 
   const handleOnInput = (evt: FormEvent<HTMLInputElement>) => {
     evt.preventDefault()
@@ -22,25 +20,25 @@ const PromptInput = () => {
     updateSettings({ prompt: target.value })
   }
 
-  const handleRepaintClick = () => {
-    if (prompt.length !== 0 && isInpainting) {
-      emitter.emit(EVENT_PROMPT)
+  const handleRepaintClick = async () => {
+    if (prompt.length !== 0 && !isProcessing) {
+      await runInpainting()
     }
   }
 
   const onKeyUp = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !isInpainting) {
+    if (e.key === "Enter" && !isProcessing) {
       handleRepaintClick()
     }
   }
 
-  const onMouseEnter = () => {
-    emitter.emit(DREAM_BUTTON_MOUSE_ENTER)
-  }
+  // const onMouseEnter = () => {
+  //   emitter.emit(DREAM_BUTTON_MOUSE_ENTER)
+  // }
 
-  const onMouseLeave = () => {
-    emitter.emit(DREAM_BUTTON_MOUSE_LEAVE)
-  }
+  // const onMouseLeave = () => {
+  //   emitter.emit(DREAM_BUTTON_MOUSE_LEAVE)
+  // }
 
   return (
     <div className="flex gap-4 items-center">
@@ -54,9 +52,9 @@ const PromptInput = () => {
       <Button
         size="sm"
         onClick={handleRepaintClick}
-        disabled={prompt.length === 0 || isInpainting}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
+        disabled={prompt.length === 0 || isProcessing}
+        // onMouseEnter={onMouseEnter}
+        // onMouseLeave={onMouseLeave}
       >
         Dream
       </Button>

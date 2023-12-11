@@ -39,17 +39,18 @@ const InteractiveSegReplaceModal = (props: InteractiveSegReplaceModal) => {
 }
 
 const InteractiveSegConfirmActions = () => {
-  const [interactiveSegState, resetInteractiveSegState] = useStore((state) => [
+  const [
+    interactiveSegState,
+    resetInteractiveSegState,
+    handleInteractiveSegAccept,
+  ] = useStore((state) => [
     state.interactiveSegState,
     state.resetInteractiveSegState,
+    state.handleInteractiveSegAccept,
   ])
 
   if (!interactiveSegState.isInteractiveSeg) {
     return null
-  }
-
-  const onAcceptClick = () => {
-    resetInteractiveSegState()
   }
 
   return (
@@ -66,7 +67,7 @@ const InteractiveSegConfirmActions = () => {
       <Button
         size="sm"
         onClick={() => {
-          onAcceptClick()
+          handleInteractiveSegAccept()
         }}
       >
         Accept
@@ -84,11 +85,11 @@ interface ItemProps {
 const Item = (props: ItemProps) => {
   const { x, y, positive } = props
   const name = positive
-    ? "bg-[rgba(21,_215,_121,_0.936)] outline-[6px_solid_rgba(98,_255,_179,_0.31)]"
-    : "bg-[rgba(237,_49,_55,_0.942)] outline-[6px_solid_rgba(255,_89,_95,_0.31)]"
+    ? "bg-[rgba(21,_215,_121,_0.936)] outline-[rgba(98,255,179,0.31)]"
+    : "bg-[rgba(237,_49,_55,_0.942)] outline-[rgba(255,89,95,0.31)]"
   return (
     <div
-      className={`absolute h-[8px] w-[8px] rounded-[50%] ${name}`}
+      className={`absolute h-[10px] w-[10px] rounded-[50%] ${name} outline-8 outline`}
       style={{
         left: x,
         top: y,

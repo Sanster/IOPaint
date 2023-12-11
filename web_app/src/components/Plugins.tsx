@@ -15,9 +15,7 @@ import {
   Slice,
   Smile,
 } from "lucide-react"
-import { MixIcon } from "@radix-ui/react-icons"
 import { useStore } from "@/lib/states"
-import { InteractiveSeg } from "./InteractiveSeg"
 
 export enum PluginName {
   RemoveBG = "RemoveBG",
@@ -56,44 +54,49 @@ const pluginMap = {
 }
 
 const Plugins = () => {
-  const [plugins, updateInteractiveSegState] = useStore((state) => [
-    state.serverConfig.plugins,
-    state.updateInteractiveSegState,
-  ])
+  const [file, plugins, updateInteractiveSegState, runRenderablePlugin] =
+    useStore((state) => [
+      state.file,
+      state.serverConfig.plugins,
+      state.updateInteractiveSegState,
+      state.runRenderablePlugin,
+    ])
+  const disabled = !file
 
   if (plugins.length === 0) {
     return null
   }
 
   const onPluginClick = (pluginName: string) => {
-    // if (!disabled) {
-    //   emitter.emit(pluginName)
-    // }
     if (pluginName === PluginName.InteractiveSeg) {
       updateInteractiveSegState({ isInteractiveSeg: true })
+    } else {
+      runRenderablePlugin(pluginName)
     }
-  }
-
-  const onRealESRGANClick = (upscale: number) => {
-    // if (!disabled) {
-    //   emitter.emit(PluginName.RealESRGAN, { upscale })
-    // }
   }
 
   const renderRealESRGANPlugin = () => {
     return (
       <DropdownMenuSub key="RealESRGAN">
-        <DropdownMenuSubTrigger>
+        <DropdownMenuSubTrigger disabled={disabled}>
           <div className="flex gap-2 items-center">
             <Fullscreen />
             RealESRGAN
           </div>
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent>
-          <DropdownMenuItem onClick={() => onRealESRGANClick(2)}>
+          <DropdownMenuItem
+            onClick={() =>
+              runRenderablePlugin(PluginName.RealESRGAN, { upscale: 2 })
+            }
+          >
             upscale 2x
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onRealESRGANClick(4)}>
+          <DropdownMenuItem
+            onClick={() =>
+              runRenderablePlugin(PluginName.RealESRGAN, { upscale: 4 })
+            }
+          >
             upscale 4x
           </DropdownMenuItem>
         </DropdownMenuSubContent>
@@ -108,7 +111,11 @@ const Plugins = () => {
         return renderRealESRGANPlugin()
       }
       return (
-        <DropdownMenuItem key={plugin} onClick={() => onPluginClick(plugin)}>
+        <DropdownMenuItem
+          key={plugin}
+          onClick={() => onPluginClick(plugin)}
+          disabled={disabled}
+        >
           <div className="flex gap-2 items-center">
             <IconClass className="p-1" />
             {showName}
@@ -121,7 +128,7 @@ const Plugins = () => {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger
-        className="border rounded-lg z-10 bg-background"
+        className="border rounded-lg z-10 bg-background outline-none"
         tabIndex={-1}
       >
         <Button variant="ghost" size="icon" asChild className="p-1.5">

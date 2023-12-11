@@ -159,3 +159,28 @@ export function drawLines(
     ctx.stroke()
   })
 }
+
+export const generateMask = (
+  imageWidth: number,
+  imageHeight: number,
+  lineGroups: LineGroup[],
+  maskImages: HTMLImageElement[] = []
+): HTMLCanvasElement => {
+  const maskCanvas = document.createElement("canvas")
+  maskCanvas.width = imageWidth
+  maskCanvas.height = imageHeight
+  const ctx = maskCanvas.getContext("2d")
+  if (!ctx) {
+    throw new Error("could not retrieve mask canvas")
+  }
+
+  maskImages.forEach((maskImage) => {
+    ctx.drawImage(maskImage, 0, 0, imageWidth, imageHeight)
+  })
+
+  lineGroups.forEach((lineGroup) => {
+    drawLines(ctx, lineGroup, "white")
+  })
+
+  return maskCanvas
+}

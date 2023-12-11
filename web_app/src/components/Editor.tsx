@@ -6,14 +6,15 @@ import {
   TransformComponent,
   TransformWrapper,
 } from "react-zoom-pan-pinch"
-import { useKeyPressEvent, useWindowSize } from "react-use"
-import inpaint, { downloadToOutput, runPlugin } from "@/lib/api"
+import { useKeyPressEvent } from "react-use"
+import { downloadToOutput, runPlugin } from "@/lib/api"
 import { IconButton } from "@/components/ui/button"
 import {
   askWritePermission,
   copyCanvasImage,
   downloadImage,
   drawLines,
+  generateMask,
   isMidClick,
   isRightClick,
   loadImage,
@@ -21,20 +22,13 @@ import {
   srcToFile,
 } from "@/lib/utils"
 import { Eraser, Eye, Redo, Undo, Expand, Download } from "lucide-react"
-import emitter, {
-  EVENT_PROMPT,
-  EVENT_CUSTOM_MASK,
-  EVENT_PAINT_BY_EXAMPLE,
-  RERUN_LAST_MASK,
-  DREAM_BUTTON_MOUSE_ENTER,
-  DREAM_BUTTON_MOUSE_LEAVE,
-} from "@/lib/event"
 import { useImage } from "@/hooks/useImage"
 import { Slider } from "./ui/slider"
-import { Line, LineGroup, PluginName } from "@/lib/types"
+import { PluginName } from "@/lib/types"
 import { useHotkeys } from "react-hotkeys-hook"
 import { useStore } from "@/lib/states"
 import Cropper from "./Cropper"
+import { InteractiveSegPoints } from "./InteractiveSeg"
 
 const TOOLBAR_HEIGHT = 200
 const MIN_BRUSH_SIZE = 10
@@ -50,6 +44,8 @@ export default function Editor(props: EditorProps) {
   const { toast } = useToast()
 
   const [
+    idForUpdateView,
+    windowSize,
     isInpainting,
     imageWidth,
     imageHeight,
@@ -75,7 +71,13 @@ export default function Editor(props: EditorProps) {
     redo,
     undoDisabled,
     redoDisabled,
+    isProcessing,
+    updateAppState,
+    runMannually,
+    runInpainting,
   ] = useStore((state) => [
+    state.idForUpdateView,
+    state.windowSize,
     state.isInpainting,
     state.imageWidth,
     state.imageHeight,
@@ -101,65 +103,32 @@ export default function Editor(props: EditorProps) {
     state.redo,
     state.undoDisabled(),
     state.redoDisabled(),
+    state.getIsProcessing(),
+    state.updateAppState,
+    state.runMannually(),
+    state.runInpainting,
   ])
   const baseBrushSize = useStore((state) => state.editorState.baseBrushSize)
   const brushSize = useStore((state) => state.getBrushSize())
   const renders = useStore((state) => state.editorState.renders)
+  const extraMasks = useStore((state) => state.editorState.extraMasks)
   const lineGroups = useStore((state) => state.editorState.lineGroups)
-
   const lastLineGroup = useStore((state) => state.editorState.lastLineGroup)
   const curLineGroup = useStore((state) => state.editorState.curLineGroup)
   const redoLineGroups = useStore((state) => state.editorState.redoLineGroups)
 
-  // 纯 local state
+  // Local State
   const [showOriginal, setShowOriginal] = useState(false)
-
-  //
-  const isProcessing = isInpainting
-  const isDiffusionModels = false
-  const isPix2Pix = false
-
-  const [showInteractiveSegModal, setShowInteractiveSegModal] = useState(false)
-  const [interactiveSegMask, setInteractiveSegMask] = useState<
-    HTMLImageElement | null | undefined
-  >(null)
-
-  // only used while interactive segmentation is on
-  const [tmpInteractiveSegMask, setTmpInteractiveSegMask] = useState<
-    HTMLImageElement | null | undefined
-  >(null)
-  const [prevInteractiveSegMask, setPrevInteractiveSegMask] = useState<
-    HTMLImageElement | null | undefined
-  >(null)
-
-  // 仅用于在 dream button hover 时显示提示
-  const [dreamButtonHoverSegMask, setDreamButtonHoverSegMask] = useState<
-    HTMLImageElement | null | undefined
-  >(null)
-  const [dreamButtonHoverLineGroup, setDreamButtonHoverLineGroup] =
-    useState<LineGroup>([])
-
   const [original, isOriginalLoaded] = useImage(file)
   const [context, setContext] = useState<CanvasRenderingContext2D>()
-  const [maskCanvas] = useState<HTMLCanvasElement>(() => {
-    return document.createElement("canvas")
-  })
   const [{ x, y }, setCoords] = useState({ x: -1, y: -1 })
   const [showBrush, setShowBrush] = useState(false)
   const [showRefBrush, setShowRefBrush] = useState(false)
   const [isPanning, setIsPanning] = useState<boolean>(false)
-  const [isChangingBrushSizeByMouse, setIsChangingBrushSizeByMouse] =
-    useState<boolean>(false)
-  const [changeBrushSizeByMouseInit, setChangeBrushSizeByMouseInit] = useState({
-    x: -1,
-    y: -1,
-    brushSize: 20,
-  })
 
   const [scale, setScale] = useState<number>(1)
   const [panned, setPanned] = useState<boolean>(false)
   const [minScale, setMinScale] = useState<number>(1.0)
-  const windowSize = useWindowSize()
   const windowCenterX = windowSize.width / 2
   const windowCenterY = windowSize.height / 2
   const viewportRef = useRef<ReactZoomPanPinchContentRef | null>(null)
@@ -170,401 +139,76 @@ export default function Editor(props: EditorProps) {
 
   const [sliderPos, setSliderPos] = useState<number>(0)
 
-  const draw = useCallback(
-    (render: HTMLImageElement, lineGroup: LineGroup) => {
-      if (!context) {
-        return
-      }
-      console.log(
-        `[draw] render size: ${render.width}x${render.height} image size: ${imageWidth}x${imageHeight} canvas size: ${context.canvas.width}x${context.canvas.height}`
-      )
-
-      context.clearRect(0, 0, context.canvas.width, context.canvas.height)
-      context.drawImage(render, 0, 0, imageWidth, imageHeight)
-      if (interactiveSegState.isInteractiveSeg && tmpInteractiveSegMask) {
-        context.drawImage(tmpInteractiveSegMask, 0, 0, imageWidth, imageHeight)
-      }
-      if (!interactiveSegState.isInteractiveSeg && interactiveSegMask) {
-        context.drawImage(interactiveSegMask, 0, 0, imageWidth, imageHeight)
-      }
-      if (dreamButtonHoverSegMask) {
-        context.drawImage(
-          dreamButtonHoverSegMask,
-          0,
-          0,
-          imageWidth,
-          imageHeight
-        )
-      }
-      drawLines(context, lineGroup)
-      drawLines(context, dreamButtonHoverLineGroup)
-    },
-    [
-      context,
-      interactiveSegState,
-      tmpInteractiveSegMask,
-      dreamButtonHoverSegMask,
-      interactiveSegMask,
-      imageHeight,
-      imageWidth,
-      dreamButtonHoverLineGroup,
-    ]
-  )
-
-  const drawLinesOnMask = useCallback(
-    (_lineGroups: LineGroup[], maskImage?: HTMLImageElement | null) => {
-      if (!context?.canvas.width || !context?.canvas.height) {
-        throw new Error("canvas has invalid size")
-      }
-      maskCanvas.width = context?.canvas.width
-      maskCanvas.height = context?.canvas.height
-      const ctx = maskCanvas.getContext("2d")
-      if (!ctx) {
-        throw new Error("could not retrieve mask canvas")
-      }
-
-      if (maskImage !== undefined && maskImage !== null) {
-        // TODO: check whether draw yellow mask works on backend
-        ctx.drawImage(maskImage, 0, 0, imageWidth, imageHeight)
-      }
-
-      _lineGroups.forEach((lineGroup) => {
-        drawLines(ctx, lineGroup, "white")
-      })
-
-      if (
-        (maskImage === undefined || maskImage === null) &&
-        _lineGroups.length === 1 &&
-        _lineGroups[0].length === 0 &&
-        isPix2Pix
-      ) {
-        // For InstructPix2Pix without mask
-        drawLines(
-          ctx,
-          [
-            {
-              size: 9999999999,
-              pts: [
-                { x: 0, y: 0 },
-                { x: imageWidth, y: 0 },
-                { x: imageWidth, y: imageHeight },
-                { x: 0, y: imageHeight },
-              ],
-            },
-          ],
-          "white"
-        )
-      }
-    },
-    [context, maskCanvas, imageWidth, imageHeight]
-  )
-
   const hadDrawSomething = useCallback(() => {
     return curLineGroup.length !== 0
   }, [curLineGroup])
 
-  // const drawOnCurrentRender = useCallback(
-  //   (lineGroup: LineGroup) => {
-  //     console.log("[drawOnCurrentRender] draw on current render")
-  //     if (renders.length === 0) {
-  //       draw(original, lineGroup)
-  //     } else {
-  //       draw(renders[renders.length - 1], lineGroup)
-  //     }
-  //   },
-  //   [original, renders, draw]
-  // )
-
   useEffect(() => {
-    if (!context) {
+    if (
+      !context ||
+      !isOriginalLoaded ||
+      imageWidth === 0 ||
+      imageHeight === 0
+    ) {
       return
     }
 
     const render = renders.length === 0 ? original : renders[renders.length - 1]
 
     console.log(
-      `[draw] render size: ${render.width}x${render.height} image size: ${imageWidth}x${imageHeight} canvas size: ${context.canvas.width}x${context.canvas.height}`
+      `[draw] renders.length: ${renders.length} render size: ${render.width}x${render.height} image size: ${imageWidth}x${imageHeight} canvas size: ${context.canvas.width}x${context.canvas.height}`
     )
+
+    context.canvas.width = imageWidth
+    context.canvas.height = imageHeight
 
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
     context.drawImage(render, 0, 0, imageWidth, imageHeight)
-    // if (interactiveSegState.isInteractiveSeg && tmpInteractiveSegMask) {
-    //   context.drawImage(tmpInteractiveSegMask, 0, 0, imageWidth, imageHeight)
-    // }
-    // if (!interactiveSegState.isInteractiveSeg && interactiveSegMask) {
-    //   context.drawImage(interactiveSegMask, 0, 0, imageWidth, imageHeight)
-    // }
+
+    extraMasks.forEach((maskImage) => {
+      context.drawImage(maskImage, 0, 0, imageWidth, imageHeight)
+    })
+
+    if (
+      interactiveSegState.isInteractiveSeg &&
+      interactiveSegState.tmpInteractiveSegMask
+    ) {
+      context.drawImage(
+        interactiveSegState.tmpInteractiveSegMask,
+        0,
+        0,
+        imageWidth,
+        imageHeight
+      )
+    }
+    if (
+      !interactiveSegState.isInteractiveSeg &&
+      interactiveSegState.interactiveSegMask
+    ) {
+      context.drawImage(
+        interactiveSegState.interactiveSegMask,
+        0,
+        0,
+        imageWidth,
+        imageHeight
+      )
+    }
     // if (dreamButtonHoverSegMask) {
     //   context.drawImage(dreamButtonHoverSegMask, 0, 0, imageWidth, imageHeight)
     // }
     drawLines(context, curLineGroup)
     // drawLines(context, dreamButtonHoverLineGroup)
-  }, [renders, file, original, context, curLineGroup, imageHeight, imageWidth])
-
-  const runInpainting = useCallback(
-    async (
-      useLastLineGroup?: boolean,
-      customMask?: File,
-      maskImage?: HTMLImageElement | null,
-      paintByExampleImage?: File
-    ) => {
-      // customMask: mask uploaded by user
-      // maskImage: mask from interactive segmentation
-      if (file === undefined) {
-        return
-      }
-      const useCustomMask = customMask !== undefined && customMask !== null
-      const useMaskImage = maskImage !== undefined && maskImage !== null
-      // useLastLineGroup 的影响
-      // 1. 使用上一次的 mask
-      // 2. 结果替换当前 render
-      console.log("runInpainting")
-      console.log({
-        useCustomMask,
-        useMaskImage,
-      })
-
-      let maskLineGroup: LineGroup = []
-      if (useLastLineGroup === true) {
-        if (lastLineGroup.length === 0) {
-          return
-        }
-        maskLineGroup = lastLineGroup
-      } else if (!useCustomMask) {
-        if (!hadDrawSomething() && !useMaskImage) {
-          return
-        }
-
-        // setLastLineGroup(curLineGroup)
-        maskLineGroup = curLineGroup
-      }
-
-      const newLineGroups = [...lineGroups, maskLineGroup]
-
-      cleanCurLineGroup()
-      setIsDraging(false)
-      setIsInpainting(true)
-      drawLinesOnMask([maskLineGroup], maskImage)
-
-      let targetFile = file
-      console.log(
-        `randers.length ${renders.length} useLastLineGroup: ${useLastLineGroup}`
-      )
-      if (useLastLineGroup === true) {
-        // renders.length == 1 还是用原来的
-        if (renders.length > 1) {
-          const lastRender = renders[renders.length - 2]
-          targetFile = await srcToFile(
-            lastRender.currentSrc,
-            file.name,
-            file.type
-          )
-        }
-      } else if (renders.length > 0) {
-        console.info("gradually inpainting on last result")
-
-        const lastRender = renders[renders.length - 1]
-        targetFile = await srcToFile(
-          lastRender.currentSrc,
-          file.name,
-          file.type
-        )
-      }
-
-      try {
-        console.log("before run inpaint")
-        const res = await inpaint(
-          targetFile,
-          settings,
-          cropperRect,
-          useCustomMask ? undefined : maskCanvas.toDataURL(),
-          useCustomMask ? customMask : undefined,
-          paintByExampleImage
-        )
-        if (!res) {
-          throw new Error("Something went wrong on server side.")
-        }
-        const { blob, seed } = res
-        if (seed) {
-          setSeed(parseInt(seed, 10))
-        }
-        const newRender = new Image()
-        await loadImage(newRender, blob)
-
-        if (useLastLineGroup === true) {
-          const prevRenders = renders.slice(0, -1)
-          const newRenders = [...prevRenders, newRender]
-          // setRenders(newRenders)
-          updateEditorState({ renders: newRenders })
-        } else {
-          const newRenders = [...renders, newRender]
-          updateEditorState({ renders: newRenders })
-        }
-
-        draw(newRender, [])
-        // Only append new LineGroup after inpainting success
-        // setLineGroups(newLineGroups)
-        updateEditorState({ lineGroups: newLineGroups })
-
-        // clear redo stack
-        resetRedoState()
-      } catch (e: any) {
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: e.message ? e.message : e.toString(),
-        })
-        // drawOnCurrentRender([])
-      }
-      setIsInpainting(false)
-      setPrevInteractiveSegMask(maskImage)
-      setTmpInteractiveSegMask(null)
-      setInteractiveSegMask(null)
-    },
-    [
-      renders,
-      lineGroups,
-      curLineGroup,
-      maskCanvas,
-      settings,
-      cropperRect,
-      // drawOnCurrentRender,
-      hadDrawSomething,
-      drawLinesOnMask,
-    ]
-  )
-
-  useEffect(() => {
-    emitter.on(EVENT_PROMPT, () => {
-      if (hadDrawSomething() || interactiveSegMask) {
-        runInpainting(false, undefined, interactiveSegMask)
-      } else if (lastLineGroup.length !== 0) {
-        // 使用上一次手绘的 mask 生成
-        runInpainting(true, undefined, prevInteractiveSegMask)
-      } else if (prevInteractiveSegMask) {
-        // 使用上一次 IS 的 mask 生成
-        runInpainting(false, undefined, prevInteractiveSegMask)
-      } else if (isPix2Pix) {
-        runInpainting(false, undefined, null)
-      } else {
-        toast({
-          variant: "destructive",
-          description: "Please draw mask on picture.",
-        })
-      }
-      emitter.emit(DREAM_BUTTON_MOUSE_LEAVE)
-    })
-
-    return () => {
-      emitter.off(EVENT_PROMPT)
-    }
   }, [
-    hadDrawSomething,
-    runInpainting,
-    interactiveSegMask,
-    prevInteractiveSegMask,
+    renders,
+    extraMasks,
+    original,
+    isOriginalLoaded,
+    interactiveSegState,
+    context,
+    curLineGroup,
+    imageHeight,
+    imageWidth,
   ])
-
-  useEffect(() => {
-    emitter.on(DREAM_BUTTON_MOUSE_ENTER, () => {
-      // 当前 canvas 上没有手绘 mask 或者 interactiveSegMask 时，显示上一次的 mask
-      if (!hadDrawSomething() && !interactiveSegMask) {
-        if (prevInteractiveSegMask) {
-          setDreamButtonHoverSegMask(prevInteractiveSegMask)
-        }
-        let lineGroup2Show: LineGroup = []
-        if (redoLineGroups.length !== 0) {
-          lineGroup2Show = redoLineGroups[redoLineGroups.length - 1]
-        } else if (lineGroups.length !== 0) {
-          lineGroup2Show = lineGroups[lineGroups.length - 1]
-        }
-        console.log(
-          `[DREAM_BUTTON_MOUSE_ENTER], prevInteractiveSegMask: ${prevInteractiveSegMask} lineGroup2Show: ${lineGroup2Show.length}`
-        )
-        if (lineGroup2Show) {
-          setDreamButtonHoverLineGroup(lineGroup2Show)
-        }
-      }
-    })
-    return () => {
-      emitter.off(DREAM_BUTTON_MOUSE_ENTER)
-    }
-  }, [
-    hadDrawSomething,
-    interactiveSegMask,
-    prevInteractiveSegMask,
-    // drawOnCurrentRender,
-    lineGroups,
-    redoLineGroups,
-  ])
-
-  useEffect(() => {
-    emitter.on(DREAM_BUTTON_MOUSE_LEAVE, () => {
-      // 当前 canvas 上没有手绘 mask 或者 interactiveSegMask 时，显示上一次的 mask
-      if (!hadDrawSomething() && !interactiveSegMask) {
-        setDreamButtonHoverSegMask(null)
-        setDreamButtonHoverLineGroup([])
-        // drawOnCurrentRender([])
-      }
-    })
-    return () => {
-      emitter.off(DREAM_BUTTON_MOUSE_LEAVE)
-    }
-  }, [hadDrawSomething, interactiveSegMask])
-
-  useEffect(() => {
-    emitter.on(EVENT_CUSTOM_MASK, (data: any) => {
-      // TODO: not work with paint by example
-      runInpainting(false, data.mask)
-    })
-
-    return () => {
-      emitter.off(EVENT_CUSTOM_MASK)
-    }
-  }, [runInpainting])
-
-  useEffect(() => {
-    emitter.on(EVENT_PAINT_BY_EXAMPLE, (data: any) => {
-      if (hadDrawSomething() || interactiveSegMask) {
-        runInpainting(false, undefined, interactiveSegMask, data.image)
-      } else if (lastLineGroup.length !== 0) {
-        // 使用上一次手绘的 mask 生成
-        runInpainting(true, undefined, prevInteractiveSegMask, data.image)
-      } else if (prevInteractiveSegMask) {
-        // 使用上一次 IS 的 mask 生成
-        runInpainting(false, undefined, prevInteractiveSegMask, data.image)
-      } else {
-        toast({
-          variant: "destructive",
-          description: "Please draw mask on picture.",
-        })
-      }
-    })
-
-    return () => {
-      emitter.off(EVENT_PAINT_BY_EXAMPLE)
-    }
-  }, [runInpainting])
-
-  useEffect(() => {
-    emitter.on(RERUN_LAST_MASK, () => {
-      if (lastLineGroup.length !== 0) {
-        // 使用上一次手绘的 mask 生成
-        runInpainting(true, undefined, prevInteractiveSegMask)
-      } else if (prevInteractiveSegMask) {
-        // 使用上一次 IS 的 mask 生成
-        runInpainting(false, undefined, prevInteractiveSegMask)
-      } else {
-        toast({
-          variant: "destructive",
-          description: "No mask to reuse",
-        })
-      }
-    })
-    return () => {
-      emitter.off(RERUN_LAST_MASK)
-    }
-  }, [runInpainting])
 
   const getCurrentRender = useCallback(async () => {
     let targetFile = file
@@ -574,126 +218,6 @@ export default function Editor(props: EditorProps) {
     }
     return targetFile
   }, [file, renders])
-
-  useEffect(() => {
-    emitter.on(PluginName.InteractiveSeg, () => {
-      // setIsInteractiveSeg(true)
-      if (interactiveSegMask !== null) {
-        setShowInteractiveSegModal(true)
-      }
-    })
-    return () => {
-      emitter.off(PluginName.InteractiveSeg)
-    }
-  })
-
-  const runRenderablePlugin = useCallback(
-    async (name: string, data?: any) => {
-      if (isProcessing) {
-        return
-      }
-      try {
-        // TODO 要不要加 undoCurrentLine？？
-        const start = new Date()
-        setIsPluginRunning(true)
-        const targetFile = await getCurrentRender()
-        const res = await runPlugin(name, targetFile, data?.upscale)
-        if (!res) {
-          throw new Error("Something went wrong on server side.")
-        }
-        const { blob } = res
-        const newRender = new Image()
-        await loadImage(newRender, blob)
-        setImageSize(newRender.height, newRender.width)
-        const newRenders = [...renders, newRender]
-        // setRenders(newRenders)
-        updateEditorState({ renders: newRenders })
-        const newLineGroups = [...lineGroups, []]
-        updateEditorState({ lineGroups: newLineGroups })
-
-        const end = new Date()
-        const time = end.getTime() - start.getTime()
-
-        toast({
-          description: `Run ${name} successfully in ${time / 1000}s`,
-        })
-
-        const rW = windowSize.width / newRender.width
-        const rH = (windowSize.height - TOOLBAR_HEIGHT) / newRender.height
-        let s = 1.0
-        if (rW < 1 || rH < 1) {
-          s = Math.min(rW, rH)
-        }
-        setMinScale(s)
-        setScale(s)
-        viewportRef.current?.centerView(s, 1)
-      } catch (e: any) {
-        toast({
-          variant: "destructive",
-          description: e.message ? e.message : e.toString(),
-        })
-      } finally {
-        setIsPluginRunning(false)
-      }
-    },
-    [
-      renders,
-      // setRenders,
-      getCurrentRender,
-      setIsPluginRunning,
-      isProcessing,
-      setImageSize,
-      lineGroups,
-      viewportRef,
-      windowSize,
-      // setLineGroups,
-    ]
-  )
-
-  useEffect(() => {
-    emitter.on(PluginName.RemoveBG, () => {
-      runRenderablePlugin(PluginName.RemoveBG)
-    })
-    return () => {
-      emitter.off(PluginName.RemoveBG)
-    }
-  }, [runRenderablePlugin])
-
-  useEffect(() => {
-    emitter.on(PluginName.AnimeSeg, () => {
-      runRenderablePlugin(PluginName.AnimeSeg)
-    })
-    return () => {
-      emitter.off(PluginName.AnimeSeg)
-    }
-  }, [runRenderablePlugin])
-
-  useEffect(() => {
-    emitter.on(PluginName.GFPGAN, () => {
-      runRenderablePlugin(PluginName.GFPGAN)
-    })
-    return () => {
-      emitter.off(PluginName.GFPGAN)
-    }
-  }, [runRenderablePlugin])
-
-  useEffect(() => {
-    emitter.on(PluginName.RestoreFormer, () => {
-      runRenderablePlugin(PluginName.RestoreFormer)
-    })
-    return () => {
-      emitter.off(PluginName.RestoreFormer)
-    }
-  }, [runRenderablePlugin])
-
-  useEffect(() => {
-    emitter.on(PluginName.RealESRGAN, (data: any) => {
-      runRenderablePlugin(PluginName.RealESRGAN, data)
-    })
-    return () => {
-      emitter.off(PluginName.RealESRGAN)
-    }
-  }, [runRenderablePlugin])
 
   const hadRunInpainting = () => {
     return renders.length !== 0
@@ -736,14 +260,17 @@ export default function Editor(props: EditorProps) {
     setScale(s)
 
     console.log(
-      `[on file load] image size: ${width}x${height}, canvas size: ${context?.canvas.width}x${context?.canvas.height} scale: ${s}, initialCentered: ${initialCentered}`
+      `[on file load] image size: ${width}x${height}, scale: ${s}, initialCentered: ${initialCentered}`
     )
 
     if (context?.canvas) {
-      context.canvas.width = width
-      context.canvas.height = height
-      console.log("[on file load] set canvas size && drawOnCurrentRender")
-      // drawOnCurrentRender([])
+      console.log("[on file load] set canvas size")
+      if (width != context.canvas.width) {
+        context.canvas.width = width
+      }
+      if (height != context.canvas.height) {
+        context.canvas.height = height
+      }
     }
 
     if (!initialCentered) {
@@ -753,13 +280,11 @@ export default function Editor(props: EditorProps) {
       setInitialCentered(true)
     }
   }, [
-    context?.canvas,
     viewportRef,
     original,
     isOriginalLoaded,
     windowSize,
     initialCentered,
-    // drawOnCurrentRender,
     getCurrentWidthHeight,
   ])
 
@@ -807,17 +332,6 @@ export default function Editor(props: EditorProps) {
     }
   }, [windowSize, resetZoom])
 
-  useEffect(() => {
-    window.addEventListener("blur", () => {
-      setIsChangingBrushSizeByMouse(false)
-    })
-    return () => {
-      window.removeEventListener("blur", () => {
-        setIsChangingBrushSizeByMouse(false)
-      })
-    }
-  }, [])
-
   const handleEscPressed = () => {
     if (isProcessing) {
       return
@@ -845,15 +359,6 @@ export default function Editor(props: EditorProps) {
   }
 
   const onMouseDrag = (ev: SyntheticEvent) => {
-    // if (isChangingBrushSizeByMouse) {
-    //   const initX = changeBrushSizeByMouseInit.x
-    //   // move right: increase brush size
-    //   const newSize = changeBrushSizeByMouseInit.brushSize + (x - initX)
-    //   if (newSize <= MAX_BRUSH_SIZE && newSize >= MIN_BRUSH_SIZE) {
-    //     setBaseBrushSize(newSize)
-    //   }
-    //   return
-    // }
     if (interactiveSegState.isInteractiveSeg) {
       return
     }
@@ -868,26 +373,16 @@ export default function Editor(props: EditorProps) {
     }
 
     handleCanvasMouseMove(mouseXY(ev))
-    // const lineGroup = [...curLineGroup]
-    // lineGroup[lineGroup.length - 1].pts.push(mouseXY(ev))
-    // setCurLineGroup(lineGroup)
-    // drawOnCurrentRender(lineGroup)
   }
 
   const runInteractiveSeg = async (newClicks: number[][]) => {
-    if (!file) {
-      return
-    }
-
-    // setIsInteractiveSegRunning(true)
+    updateAppState({ isPluginRunning: true })
     const targetFile = await getCurrentRender()
-    const prevMask = null
     try {
       const res = await runPlugin(
         PluginName.InteractiveSeg,
         targetFile,
         undefined,
-        prevMask,
         newClicks
       )
       if (!res) {
@@ -896,7 +391,7 @@ export default function Editor(props: EditorProps) {
       const { blob } = res
       const img = new Image()
       img.onload = () => {
-        setTmpInteractiveSegMask(img)
+        updateInteractiveSegState({ tmpInteractiveSegMask: img })
       }
       img.src = blob
     } catch (e: any) {
@@ -905,7 +400,7 @@ export default function Editor(props: EditorProps) {
         description: e.message ? e.message : e.toString(),
       })
     }
-    // setIsInteractiveSegRunning(false)
+    updateAppState({ isPluginRunning: false })
   }
 
   const onPointerUp = (ev: SyntheticEvent) => {
@@ -933,7 +428,7 @@ export default function Editor(props: EditorProps) {
       return
     }
 
-    if (enableManualInpainting) {
+    if (runMannually) {
       setIsDraging(false)
     } else {
       runInpainting()
@@ -959,15 +454,13 @@ export default function Editor(props: EditorProps) {
   const onCanvasMouseUp = (ev: SyntheticEvent) => {
     if (interactiveSegState.isInteractiveSeg) {
       const xy = mouseXY(ev)
-      const isX = xy.x
-      const isY = xy.y
       const newClicks: number[][] = [...interactiveSegState.clicks]
       if (isRightClick(ev)) {
-        newClicks.push([isX, isY, 0, newClicks.length])
+        newClicks.push([xy.x, xy.y, 0, newClicks.length])
       } else {
-        newClicks.push([isX, isY, 1, newClicks.length])
+        newClicks.push([xy.x, xy.y, 1, newClicks.length])
       }
-      //   runInteractiveSeg(newClicks)
+      runInteractiveSeg(newClicks)
       updateInteractiveSegState({ clicks: newClicks })
     }
   }
@@ -979,13 +472,10 @@ export default function Editor(props: EditorProps) {
     if (interactiveSegState.isInteractiveSeg) {
       return
     }
-    if (isChangingBrushSizeByMouse) {
-      return
-    }
     if (isPanning) {
       return
     }
-    if (!original.src) {
+    if (!isOriginalLoaded) {
       return
     }
     const canvas = context?.canvas
@@ -1002,26 +492,17 @@ export default function Editor(props: EditorProps) {
       return
     }
 
-    if (
-      isDiffusionModels &&
-      settings.showCroper &&
-      isOutsideCroper(mouseXY(ev))
-    ) {
-      return
-    }
+    // if (
+    //   isDiffusionModels &&
+    //   settings.showCroper &&
+    //   isOutsideCroper(mouseXY(ev))
+    // ) {
+    //   // TODO: 去掉这个逻辑，在 cropper 层截断 click 点击？
+    //   return
+    // }
 
     setIsDraging(true)
-
-    // let lineGroup: LineGroup = []
-    // if (enableManualInpainting) {
-    //   lineGroup = [...curLineGroup]
-    // }
-    // lineGroup.push({ size: brushSize, pts: [mouseXY(ev)] })
-    // setCurLineGroup(lineGroup)
-
     handleCanvasMouseDown(mouseXY(ev))
-
-    // drawOnCurrentRender(lineGroup)
   }
 
   const handleUndo = (keyboardEvent: KeyboardEvent | SyntheticEvent) => {
@@ -1092,7 +573,7 @@ export default function Editor(props: EditorProps) {
       let maskFileName = file.name.replace(/(\.[\w\d_-]+)$/i, "_mask$1")
       maskFileName = maskFileName.replace(/\.[^/.]+$/, ".jpg")
 
-      drawLinesOnMask(lineGroups)
+      const maskCanvas = generateMask(imageWidth, imageHeight, lineGroups)
       // Create a link
       const aDownloadLink = document.createElement("a")
       // Add the name of the file to the link
@@ -1147,11 +628,11 @@ export default function Editor(props: EditorProps) {
   useHotkeys(
     "shift+r",
     () => {
-      if (enableManualInpainting && hadDrawSomething()) {
+      if (runMannually && hadDrawSomething()) {
         runInpainting()
       }
     },
-    [enableManualInpainting, runInpainting, hadDrawSomething]
+    [runMannually, runInpainting, hadDrawSomething]
   )
 
   useHotkeys(
@@ -1192,13 +673,11 @@ export default function Editor(props: EditorProps) {
     (ev) => {
       ev?.preventDefault()
       ev?.stopPropagation()
-      setIsChangingBrushSizeByMouse(true)
-      setChangeBrushSizeByMouseInit({ x, y, brushSize })
+      // TODO: mouse scroll increase/decrease brush size
     },
     (ev) => {
       ev?.preventDefault()
       ev?.stopPropagation()
-      setIsChangingBrushSizeByMouse(false)
     }
   )
 
@@ -1359,20 +838,24 @@ export default function Editor(props: EditorProps) {
             show={settings.showCroper}
           />
 
-          {/* {interactiveSegState.isInteractiveSeg ? <InteractiveSeg /> : <></>} */}
+          {interactiveSegState.isInteractiveSeg ? (
+            <InteractiveSegPoints />
+          ) : (
+            <></>
+          )}
         </TransformComponent>
       </TransformWrapper>
     )
   }
 
-  const onInteractiveAccept = () => {
-    setInteractiveSegMask(tmpInteractiveSegMask)
-    setTmpInteractiveSegMask(null)
+  // const onInteractiveAccept = () => {
+  //   setInteractiveSegMask(tmpInteractiveSegMask)
+  //   setTmpInteractiveSegMask(null)
 
-    if (!enableManualInpainting && tmpInteractiveSegMask) {
-      runInpainting(false, undefined, tmpInteractiveSegMask)
-    }
-  }
+  //   if (!enableManualInpainting && tmpInteractiveSegMask) {
+  //     runInpainting(false, undefined, tmpInteractiveSegMask)
+  //   }
+  // }
 
   return (
     <div
@@ -1388,16 +871,11 @@ export default function Editor(props: EditorProps) {
         !isPanning &&
         (interactiveSegState.isInteractiveSeg
           ? renderInteractiveSegCursor()
-          : renderBrush(
-              getBrushStyle(
-                isChangingBrushSizeByMouse ? changeBrushSizeByMouseInit.x : x,
-                isChangingBrushSizeByMouse ? changeBrushSizeByMouseInit.y : y
-              )
-            ))}
+          : renderBrush(getBrushStyle(x, y)))}
 
       {showRefBrush && renderBrush(getBrushStyle(windowCenterX, windowCenterY))}
 
-      <div className="fixed flex bottom-5 border px-4 py-2 rounded-[3rem] gap-8 items-center justify-center backdrop-filter backdrop-blur-md bg-background/50">
+      <div className="fixed flex bottom-5 border px-4 py-2 rounded-[3rem] gap-8 items-center justify-center backdrop-filter backdrop-blur-md bg-background/70">
         <Slider
           className="w-48"
           defaultValue={[50]}
@@ -1464,16 +942,17 @@ export default function Editor(props: EditorProps) {
             <Download />
           </IconButton>
 
-          {settings.enableManualInpainting ? (
+          {settings.enableManualInpainting &&
+          settings.model.model_type === "inpaint" ? (
             <IconButton
               tooltip="Run Inpainting"
               disabled={
                 isProcessing ||
-                (!hadDrawSomething() && interactiveSegMask === null)
+                (!hadDrawSomething() &&
+                  interactiveSegState.interactiveSegMask === null)
               }
               onClick={() => {
-                // ensured by disabled
-                runInpainting(false, undefined, interactiveSegMask)
+                runInpainting()
               }}
             >
               <Eraser />
