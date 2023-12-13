@@ -1,7 +1,8 @@
-import React, { FormEvent } from "react"
+import React, { FormEvent, useRef } from "react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { useStore } from "@/lib/states"
+import { useClickAway } from "react-use"
 
 const PromptInput = () => {
   const [isProcessing, prompt, updateSettings, runInpainting] = useStore(
@@ -12,6 +13,14 @@ const PromptInput = () => {
       state.runInpainting,
     ]
   )
+  const ref = useRef(null)
+
+  useClickAway<MouseEvent>(ref, () => {
+    if (ref?.current) {
+      const input = ref.current as HTMLInputElement
+      input.blur()
+    }
+  })
 
   const handleOnInput = (evt: FormEvent<HTMLInputElement>) => {
     evt.preventDefault()
@@ -43,6 +52,7 @@ const PromptInput = () => {
   return (
     <div className="flex gap-4 items-center">
       <Input
+        ref={ref}
         className="min-w-[500px]"
         value={prompt}
         onInput={handleOnInput}

@@ -17,7 +17,6 @@ import {
   generateMask,
   isMidClick,
   isRightClick,
-  loadImage,
   mouseXY,
   srcToFile,
 } from "@/lib/utils"
@@ -25,10 +24,10 @@ import { Eraser, Eye, Redo, Undo, Expand, Download } from "lucide-react"
 import { useImage } from "@/hooks/useImage"
 import { Slider } from "./ui/slider"
 import { PluginName } from "@/lib/types"
-import { useHotkeys } from "react-hotkeys-hook"
 import { useStore } from "@/lib/states"
 import Cropper from "./Cropper"
 import { InteractiveSegPoints } from "./InteractiveSeg"
+import useHotKey from "@/hooks/useHotkey"
 
 const TOOLBAR_HEIGHT = 200
 const MIN_BRUSH_SIZE = 10
@@ -44,7 +43,7 @@ export default function Editor(props: EditorProps) {
   const { toast } = useToast()
 
   const [
-    idForUpdateView,
+    disableShortCuts,
     windowSize,
     isInpainting,
     imageWidth,
@@ -76,7 +75,7 @@ export default function Editor(props: EditorProps) {
     runMannually,
     runInpainting,
   ] = useStore((state) => [
-    state.idForUpdateView,
+    state.disableShortCuts,
     state.windowSize,
     state.isInpainting,
     state.imageWidth,
@@ -346,7 +345,7 @@ export default function Editor(props: EditorProps) {
     }
   }
 
-  useHotkeys("Escape", handleEscPressed, [
+  useHotKey("Escape", handleEscPressed, [
     isDraging,
     isInpainting,
     resetZoom,
@@ -509,13 +508,13 @@ export default function Editor(props: EditorProps) {
     keyboardEvent.preventDefault()
     undo()
   }
-  useHotkeys("meta+z,ctrl+z", handleUndo)
+  useHotKey("meta+z,ctrl+z", handleUndo)
 
   const handleRedo = (keyboardEvent: KeyboardEvent | SyntheticEvent) => {
     keyboardEvent.preventDefault()
     redo()
   }
-  useHotkeys("shift+ctrl+z,shift+meta+z", handleRedo)
+  useHotKey("shift+ctrl+z,shift+meta+z", handleRedo)
 
   useKeyPressEvent(
     "Tab",
@@ -601,7 +600,7 @@ export default function Editor(props: EditorProps) {
     return undefined
   }, [showBrush, isPanning])
 
-  useHotkeys(
+  useHotKey(
     "[",
     () => {
       let newBrushSize = baseBrushSize
@@ -616,7 +615,7 @@ export default function Editor(props: EditorProps) {
     [baseBrushSize]
   )
 
-  useHotkeys(
+  useHotKey(
     "]",
     () => {
       setBaseBrushSize(baseBrushSize + 10)
@@ -625,7 +624,7 @@ export default function Editor(props: EditorProps) {
   )
 
   // Manual Inpainting Hotkey
-  useHotkeys(
+  useHotKey(
     "shift+r",
     () => {
       if (runMannually && hadDrawSomething()) {
@@ -635,7 +634,7 @@ export default function Editor(props: EditorProps) {
     [runMannually, runInpainting, hadDrawSomething]
   )
 
-  useHotkeys(
+  useHotKey(
     "ctrl+c, cmd+c",
     async () => {
       const hasPermission = await askWritePermission()
@@ -655,16 +654,20 @@ export default function Editor(props: EditorProps) {
   useKeyPressEvent(
     " ",
     (ev) => {
-      ev?.preventDefault()
-      ev?.stopPropagation()
-      setShowBrush(false)
-      setIsPanning(true)
+      if (!disableShortCuts) {
+        ev?.preventDefault()
+        ev?.stopPropagation()
+        setShowBrush(false)
+        setIsPanning(true)
+      }
     },
     (ev) => {
-      ev?.preventDefault()
-      ev?.stopPropagation()
-      setShowBrush(true)
-      setIsPanning(false)
+      if (!disableShortCuts) {
+        ev?.preventDefault()
+        ev?.stopPropagation()
+        setShowBrush(true)
+        setIsPanning(false)
+      }
     }
   )
 
@@ -738,7 +741,6 @@ export default function Editor(props: EditorProps) {
   const renderCanvas = () => {
     return (
       <TransformWrapper
-        // ref={viewportRef}
         ref={(r) => {
           if (r) {
             viewportRef.current = r
@@ -865,7 +867,6 @@ export default function Editor(props: EditorProps) {
       onMouseUp={onPointerUp}
     >
       {renderCanvas()}
-
       {showBrush &&
         !isInpainting &&
         !isPanning &&
@@ -875,7 +876,7 @@ export default function Editor(props: EditorProps) {
 
       {showRefBrush && renderBrush(getBrushStyle(windowCenterX, windowCenterY))}
 
-      <div className="fixed flex bottom-5 border px-4 py-2 rounded-[3rem] gap-8 items-center justify-center backdrop-filter backdrop-blur-md bg-background/70">
+      <div className=" overflow-hidden fixed flex bottom-5 border px-4 py-2 rounded-[3rem] gap-8 items-center justify-center backdrop-filter backdrop-blur-md bg-background/70">
         <Slider
           className="w-48"
           defaultValue={[50]}

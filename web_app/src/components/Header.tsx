@@ -1,6 +1,5 @@
 import { PlayIcon } from "@radix-ui/react-icons"
 import { useCallback, useState } from "react"
-import { useHotkeys } from "react-hotkeys-hook"
 import { IconButton, ImageUploadButton } from "@/components/ui/button"
 import Shortcuts from "@/components/Shortcuts"
 import emitter, {
@@ -19,6 +18,8 @@ import { getMediaFile } from "@/lib/api"
 import { useStore } from "@/lib/states"
 import SettingsDialog from "./Settings"
 import { cn } from "@/lib/utils"
+import useHotKey from "@/hooks/useHotkey"
+import Coffee from "./Coffee"
 
 const Header = () => {
   const [
@@ -57,7 +58,7 @@ const Header = () => {
     emitter.emit(DREAM_BUTTON_MOUSE_LEAVE)
   }
 
-  useHotkeys(
+  useHotKey(
     "r",
     () => {
       if (!isInpainting) {
@@ -163,7 +164,7 @@ const Header = () => {
       {model.need_prompt ? <PromptInput /> : <></>}
 
       <div className="flex gap-1">
-        {/* <CoffeeIcon /> */}
+        <Coffee />
         <Shortcuts />
         <SettingsDialog />
       </div>

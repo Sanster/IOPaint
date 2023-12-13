@@ -18,7 +18,13 @@ import {
   SortBy,
   SortOrder,
 } from "./types"
-import { DEFAULT_BRUSH_SIZE, MODEL_TYPE_INPAINT } from "./const"
+import {
+  DEFAULT_BRUSH_SIZE,
+  INSTRUCT_PIX2PIX,
+  MODEL_TYPE_INPAINT,
+  MODEL_TYPE_OTHER,
+  PAINT_BY_EXAMPLE,
+} from "./const"
 import { dataURItoBlob, generateMask, loadImage, srcToFile } from "./utils"
 import inpaint, { runPlugin } from "./api"
 import { toast, useToast } from "@/components/ui/use-toast"
@@ -84,6 +90,7 @@ export type Settings = {
   p2pGuidanceScale: number
 
   // ControlNet
+  enableControlNet: boolean
   controlnetConditioningScale: number
   controlnetMethod: string
 
@@ -122,8 +129,6 @@ type EditorState = {
 }
 
 type AppState = {
-  idForUpdateView: string
-
   file: File | null
   customMask: File | null
   imageHeight: number
@@ -132,6 +137,7 @@ type AppState = {
   isPluginRunning: boolean
   windowSize: Size
   editorState: EditorState
+  disableShortCuts: boolean
 
   interactiveSegState: InteractiveSegState
   fileManagerState: FileManagerState
@@ -188,14 +194,13 @@ type AppAction = {
 }
 
 const defaultValues: AppState = {
-  idForUpdateView: nanoid(),
-
   file: null,
   customMask: null,
   imageHeight: 0,
   imageWidth: 0,
   isInpainting: false,
   isPluginRunning: false,
+  disableShortCuts: false,
 
   windowSize: {
     height: 600,
@@ -254,6 +259,7 @@ const defaultValues: AppState = {
       is_single_file_diffusers: false,
       need_prompt: false,
     },
+    enableControlNet: false,
     showCroper: false,
     enableDownloadMask: false,
     enableManualInpainting: false,
@@ -311,7 +317,17 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
       },
 
       runInpainting: async () => {
-        const { file, imageWidth, imageHeight, settings, cropperState } = get()
+        const {
+          isInpainting,
+          file,
+          imageWidth,
+          imageHeight,
+          settings,
+          cropperState,
+        } = get()
+        if (isInpainting) {
+          return
+        }
 
         if (file === null) {
           return
@@ -656,13 +672,16 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
       },
 
       showPromptInput: (): boolean => {
-        const model_type = get().settings.model.model_type
-        return ["diffusers_sd", "diffusers_sd_inpaint"].includes(model_type)
+        const model = get().settings.model
+        return (
+          model.model_type !== MODEL_TYPE_INPAINT &&
+          model.name !== PAINT_BY_EXAMPLE
+        )
       },
 
       showSidePanel: (): boolean => {
-        const model_type = get().settings.model.model_type
-        return ["diffusers_sd", "diffusers_sd_inpaint"].includes(model_type)
+        const model = get().settings.model
+        return model.model_type !== MODEL_TYPE_INPAINT
       },
 
       setServerConfig: (newValue: ServerConfig) => {

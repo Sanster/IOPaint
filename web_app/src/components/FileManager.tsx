@@ -32,10 +32,10 @@ import {
 } from "./ui/select"
 import { ScrollArea } from "./ui/scroll-area"
 import { DialogTrigger } from "@radix-ui/react-dialog"
-import { useHotkeys } from "react-hotkeys-hook"
 import { useStore } from "@/lib/states"
 import { SortBy, SortOrder } from "@/lib/types"
 import { FolderClosed } from "lucide-react"
+import useHotKey from "@/hooks/useHotkey"
 
 interface Photo {
   src: string
@@ -79,7 +79,7 @@ export default function FileManager(props: Props) {
     state.updateFileManagerState,
   ])
 
-  useHotkeys("f", () => {
+  useHotKey("f", () => {
     toggleOpen()
   })
 

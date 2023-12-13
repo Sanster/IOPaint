@@ -52,8 +52,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(
+          buttonVariants({ variant, size, className }),
+          "outline-none cursor-default"
+        )}
         ref={ref}
+        tabIndex={-1}
         {...props}
       />
     )

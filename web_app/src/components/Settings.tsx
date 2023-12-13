@@ -1,7 +1,6 @@
 import { IconButton } from "@/components/ui/button"
 import { useToggle } from "@uidotdev/usehooks"
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog"
-import { useHotkeys } from "react-hotkeys-hook"
 import { Info, Settings } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -20,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Switch } from "./ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import { fetchModelInfos, switchModel } from "@/lib/api"
@@ -42,6 +41,7 @@ import {
   MODEL_TYPE_INPAINT,
   MODEL_TYPE_OTHER,
 } from "@/lib/const"
+import useHotKey from "@/hooks/useHotkey"
 
 const formSchema = z.object({
   enableFileManager: z.boolean(),
@@ -68,13 +68,19 @@ export function SettingsDialog() {
   const [open, toggleOpen] = useToggle(false)
   const [openModelSwitching, toggleOpenModelSwitching] = useToggle(false)
   const [tab, setTab] = useState(TAB_MODEL)
-  const [settings, updateSettings, fileManagerState, updateFileManagerState] =
-    useStore((state) => [
-      state.settings,
-      state.updateSettings,
-      state.fileManagerState,
-      state.updateFileManagerState,
-    ])
+  const [
+    updateAppState,
+    settings,
+    updateSettings,
+    fileManagerState,
+    updateFileManagerState,
+  ] = useStore((state) => [
+    state.updateAppState,
+    state.settings,
+    state.updateSettings,
+    state.fileManagerState,
+    state.updateFileManagerState,
+  ])
   const { toast } = useToast()
   const [model, setModel] = useState<ModelInfo>(settings.model)
 
@@ -110,6 +116,7 @@ export function SettingsDialog() {
     })
     if (model.name !== settings.model.name) {
       toggleOpenModelSwitching()
+      updateAppState({ disableShortCuts: true })
       switchModel(model.name)
         .then((res) => {
           if (res.ok) {
@@ -126,14 +133,16 @@ export function SettingsDialog() {
             variant: "destructive",
             title: `Switch to ${model.name} failed`,
           })
+          setModel(settings.model)
         })
         .finally(() => {
           toggleOpenModelSwitching()
+          updateAppState({ disableShortCuts: false })
         })
     }
   }
 
-  useHotkeys("s", () => {
+  useHotKey("s", () => {
     toggleOpen()
     onSubmit(form.getValues())
   })
@@ -183,6 +192,12 @@ export function SettingsDialog() {
     for (let info of modelInfos) {
       if (model.name === info.name) {
         defaultTab = info.model_type
+        if (defaultTab === MODEL_TYPE_DIFFUSERS_SDXL) {
+          defaultTab = MODEL_TYPE_DIFFUSERS_SD
+        }
+        if (defaultTab === MODEL_TYPE_DIFFUSERS_SDXL_INPAINT) {
+          defaultTab = MODEL_TYPE_DIFFUSERS_SD_INPAINT
+        }
         break
       }
     }
@@ -384,9 +399,12 @@ export function SettingsDialog() {
       <AlertDialog open={openModelSwitching}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogDescription>
-              TODO: 添加加载动画 Switching to {model.name}
-            </AlertDialogDescription>
+            {/* <AlertDialogDescription> */}
+            <div className="flex flex-col justify-center items-center gap-4">
+              <div>logo</div>
+              <div>Switching to {model.name}</div>
+            </div>
+            {/* </AlertDialogDescription> */}
           </AlertDialogHeader>
         </AlertDialogContent>
       </AlertDialog>
@@ -434,7 +452,7 @@ export function SettingsDialog() {
                   )} */}
 
                   <div className="absolute right-10 bottom-6">
-                    <Button onClick={() => toggleOpen()}>Ok</Button>
+                    <Button onClick={() => onOpenChange(false)}>Ok</Button>
                   </div>
                 </form>
               </div>

@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog"
-import { useHotkeys } from "react-hotkeys-hook"
+import useHotKey from "@/hooks/useHotkey"
 
 interface ShortcutProps {
   content: string
@@ -48,7 +48,7 @@ const CmdOrCtrl = () => {
 export function Shortcuts() {
   const [open, toggleOpen] = useToggle(false)
 
-  useHotkeys("h", () => {
+  useHotKey("h", () => {
     toggleOpen()
   })
 

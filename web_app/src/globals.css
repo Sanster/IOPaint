@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-html { font-family: "Inter", "system-ui"; }
+html { font-family: "Inter", "system-ui"; overflow: hidden; }
 
 @supports (font-variation-settings: normal) {
   html { font-family: "Inter var", "system-ui"; }

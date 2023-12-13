@@ -1,12 +1,23 @@
 import * as React from "react"
+import { FocusEvent } from "react"
 
 import { cn } from "@/lib/utils"
+import { useStore } from "@/lib/states"
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {
+    const updateAppState = useStore((state) => state.updateAppState)
+
+    const handleOnFocus = (evt: FocusEvent<any>) => {
+      updateAppState({ disableShortCuts: true })
+    }
+
+    const handleOnBlur = (evt: FocusEvent<any>) => {
+      updateAppState({ disableShortCuts: false })
+    }
     return (
       <input
         type={type}
@@ -16,6 +27,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         ref={ref}
         autoComplete="off"
+        tabIndex={-1}
+        onFocus={handleOnFocus}
+        onBlur={handleOnBlur}
         {...props}
       />
     )
