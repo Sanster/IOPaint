@@ -9,7 +9,7 @@ from lama_cleaner.schema import Config
 
 
 class PaintByExample(DiffusionInpaintModel):
-    name = "paint_by_example"
+    name = "Fantasy-Studio/Paint-by-Example"
     pad_mod = 8
     min_size = 512
 

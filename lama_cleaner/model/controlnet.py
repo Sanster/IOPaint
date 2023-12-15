@@ -75,6 +75,11 @@ class ControlNet(DiffusionInpaintModel):
             sd_controlnet_method, torch_dtype=torch_dtype
         )
         if model_info.is_single_file_diffusers:
+            if self.model_info.model_type == ModelType.DIFFUSERS_SD:
+                model_kwargs["num_in_channels"] = 4
+            else:
+                model_kwargs["num_in_channels"] = 9
+
             self.model = PipeClass.from_single_file(
                 model_info.path, controlnet=controlnet
             ).to(torch_dtype)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import hashlib
+import traceback
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
@@ -453,7 +454,8 @@ def switch_model():
     try:
         model.switch(new_name)
     except Exception as e:
-        error_message = str(e)
+        traceback.print_exc()
+        error_message = f"{type(e).__name__} - {str(e)}"
         logger.error(error_message)
         return f"Switch model failed: {error_message}", 500
     return f"ok, switch to {new_name}", 200

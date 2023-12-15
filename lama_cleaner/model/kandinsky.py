@@ -73,7 +73,7 @@ class Kandinsky(DiffusionInpaintModel):
 
 
 class Kandinsky22(Kandinsky):
-    name = "kandinsky2.2"
+    name = "kandinsky-community/kandinsky-2-2-decoder-inpaint"
     model_name = "kandinsky-community/kandinsky-2-2-decoder-inpaint"
 
     @staticmethod

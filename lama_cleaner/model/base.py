@@ -14,7 +14,7 @@ from lama_cleaner.helper import (
 )
 from lama_cleaner.model.helper.g_diffuser_bot import expand_image
 from lama_cleaner.model.utils import get_scheduler
-from lama_cleaner.schema import Config, HDStrategy, SDSampler
+from lama_cleaner.schema import Config, HDStrategy, SDSampler, ModelInfo
 
 
 class InpaintModel:
@@ -266,9 +266,8 @@ class InpaintModel:
 
 class DiffusionInpaintModel(InpaintModel):
     def __init__(self, device, **kwargs):
-        if kwargs.get("model_id_or_path"):
-            # 用于自定义 diffusers 模型
-            self.model_id_or_path = kwargs["model_id_or_path"]
+        self.model_info: ModelInfo = kwargs["model_info"]
+        self.model_id_or_path = self.model_info.path
         super().__init__(device, **kwargs)
 
     @torch.no_grad()
