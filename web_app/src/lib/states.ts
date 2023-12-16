@@ -2,7 +2,6 @@ import { persist } from "zustand/middleware"
 import { shallow } from "zustand/shallow"
 import { immer } from "zustand/middleware/immer"
 import { castDraft } from "immer"
-import { nanoid } from "nanoid"
 import { createWithEqualityFn } from "zustand/traditional"
 import {
   CV2Flag,
@@ -20,14 +19,13 @@ import {
 } from "./types"
 import {
   DEFAULT_BRUSH_SIZE,
-  INSTRUCT_PIX2PIX,
+  DEFAULT_NEGATIVE_PROMPT,
   MODEL_TYPE_INPAINT,
-  MODEL_TYPE_OTHER,
   PAINT_BY_EXAMPLE,
 } from "./const"
 import { dataURItoBlob, generateMask, loadImage, srcToFile } from "./utils"
 import inpaint, { runPlugin } from "./api"
-import { toast, useToast } from "@/components/ui/use-toast"
+import { toast } from "@/components/ui/use-toast"
 
 type FileManagerState = {
   sortBy: SortBy
@@ -78,19 +76,11 @@ export type Settings = {
   sdMatchHistograms: boolean
   sdScale: number
 
-  // Paint by Example
-  paintByExampleSteps: number
-  paintByExampleGuidanceScale: number
-  paintByExampleMaskBlur: number
-  paintByExampleMatchHistograms: boolean
-
-  // InstructPix2Pix
-  p2pSteps: number
+  // Pix2Pix
   p2pImageGuidanceScale: number
-  p2pGuidanceScale: number
 
   // ControlNet
-  enableControlNet: boolean
+  enableControlnet: boolean
   controlnetConditioningScale: number
   controlnetMethod: string
 
@@ -103,6 +93,8 @@ type ServerConfig = {
   plugins: string[]
   enableFileManager: boolean
   enableAutoSaving: boolean
+  enableControlnet: boolean
+  controlnetMethod: string
 }
 
 type InteractiveSegState = {
@@ -117,7 +109,6 @@ type EditorState = {
   baseBrushSize: number
   brushSizeScale: number
   renders: HTMLImageElement[]
-  paintByExampleImage: File | null
   lineGroups: LineGroup[]
   lastLineGroup: LineGroup
   curLineGroup: LineGroup
@@ -130,6 +121,7 @@ type EditorState = {
 
 type AppState = {
   file: File | null
+  paintByExampleFile: File | null
   customMask: File | null
   imageHeight: number
   imageWidth: number
@@ -195,6 +187,7 @@ type AppAction = {
 
 const defaultValues: AppState = {
   file: null,
+  paintByExampleFile: null,
   customMask: null,
   imageHeight: 0,
   imageWidth: 0,
@@ -210,7 +203,6 @@ const defaultValues: AppState = {
     baseBrushSize: DEFAULT_BRUSH_SIZE,
     brushSizeScale: 1,
     renders: [],
-    paintByExampleImage: null,
     extraMasks: [],
     lineGroups: [],
     lastLineGroup: [],
@@ -246,6 +238,8 @@ const defaultValues: AppState = {
     plugins: [],
     enableFileManager: false,
     enableAutoSaving: false,
+    enableControlnet: false,
+    controlnetMethod: "lllyasviel/control_v11p_sd15_canny",
   },
   settings: {
     model: {
@@ -259,7 +253,7 @@ const defaultValues: AppState = {
       is_single_file_diffusers: false,
       need_prompt: false,
     },
-    enableControlNet: false,
+    enableControlnet: false,
     showCroper: false,
     enableDownloadMask: false,
     enableManualInpainting: false,
@@ -270,7 +264,7 @@ const defaultValues: AppState = {
     cv2Radius: 5,
     cv2Flag: CV2Flag.INPAINT_NS,
     prompt: "",
-    negativePrompt: "",
+    negativePrompt: DEFAULT_NEGATIVE_PROMPT,
     seed: 42,
     seedFixed: false,
     sdMaskBlur: 5,
@@ -280,13 +274,7 @@ const defaultValues: AppState = {
     sdSampler: SDSampler.uni_pc,
     sdMatchHistograms: false,
     sdScale: 100,
-    paintByExampleSteps: 50,
-    paintByExampleGuidanceScale: 7.5,
-    paintByExampleMaskBlur: 5,
-    paintByExampleMatchHistograms: false,
-    p2pSteps: 50,
     p2pImageGuidanceScale: 1.5,
-    p2pGuidanceScale: 7.5,
     controlnetConditioningScale: 0.4,
     controlnetMethod: "lllyasviel/control_v11p_sd15_canny",
     enableLCMLora: false,
@@ -320,6 +308,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         const {
           isInpainting,
           file,
+          paintByExampleFile,
           imageWidth,
           imageHeight,
           settings,
@@ -332,13 +321,8 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         if (file === null) {
           return
         }
-        const {
-          lastLineGroup,
-          curLineGroup,
-          lineGroups,
-          renders,
-          paintByExampleImage,
-        } = get().editorState
+        const { lastLineGroup, curLineGroup, lineGroups, renders } =
+          get().editorState
 
         const { interactiveSegMask, prevInteractiveSegMask } =
           get().interactiveSegState
@@ -413,7 +397,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
             settings,
             cropperState,
             dataURItoBlob(maskCanvas.toDataURL()),
-            paintByExampleImage
+            paintByExampleFile
           )
 
           if (!res) {
@@ -687,6 +671,8 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
       setServerConfig: (newValue: ServerConfig) => {
         set((state) => {
           state.serverConfig = newValue
+          state.settings.enableControlnet = newValue.enableControlnet
+          state.settings.controlnetMethod = newValue.controlnetMethod
         })
       },
 
@@ -804,7 +790,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
     })),
     {
       name: "ZUSTAND_STATE", // name of the item in the storage (must be unique)
-      version: 0,
+      version: 1,
       partialize: (state) =>
         Object.fromEntries(
           Object.entries(state).filter(([key]) =>
@@ -815,9 +801,3 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
   ),
   shallow
 )
-
-// export const useStore = <U>(selector: (state: AppState & AppAction) => U) => {
-//   return createWithEqualityFn(selector, shallow)
-// }
-
-// export const useStore = createWithEqualityFn(useBaseStore, shallow)

@@ -65,7 +65,7 @@ Run Stable Diffusion text encoder model on CPU to save GPU memory.
 SD_CONTROLNET_HELP = """
 Run Stable Diffusion normal or inpainting model with ControlNet.
 """
-DEFAULT_SD_CONTROLNET_METHOD = "thibaud/controlnet-sd21-openpose-diffusers"
+DEFAULT_SD_CONTROLNET_METHOD = "lllyasviel/control_v11p_sd15_canny"
 SD_CONTROLNET_CHOICES = [
     "lllyasviel/control_v11p_sd15_canny",
     # "lllyasviel/control_v11p_sd15_seg",

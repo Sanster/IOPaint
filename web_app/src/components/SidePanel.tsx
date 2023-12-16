@@ -1,5 +1,5 @@
-import { FormEvent, useState } from "react"
-import { useToggle, useWindowSize } from "react-use"
+import { FormEvent } from "react"
+import { useToggle } from "react-use"
 import { useStore } from "@/lib/states"
 import { Switch } from "./ui/switch"
 import { Label } from "./ui/label"
@@ -16,38 +16,44 @@ import { Textarea } from "./ui/textarea"
 import { SDSampler } from "@/lib/types"
 import { Separator } from "./ui/separator"
 import { ScrollArea } from "./ui/scroll-area"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "./ui/sheet"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "./ui/button"
+import { Sheet, SheetContent, SheetHeader, SheetTrigger } from "./ui/sheet"
+import { ChevronLeft, ChevronRight, Upload } from "lucide-react"
+import { Button, ImageUploadButton } from "./ui/button"
 import useHotKey from "@/hooks/useHotkey"
 import { Slider } from "./ui/slider"
+import { useImage } from "@/hooks/useImage"
+import { INSTRUCT_PIX2PIX, PAINT_BY_EXAMPLE } from "@/lib/const"
 
 const RowContainer = ({ children }: { children: React.ReactNode }) => (
   <div className="flex justify-between items-center pr-2">{children}</div>
 )
 
 const SidePanel = () => {
-  const [settings, updateSettings, showSidePanel, runInpainting] = useStore(
-    (state) => [
-      state.settings,
-      state.updateSettings,
-      state.showSidePanel(),
-      state.runInpainting,
-    ]
-  )
+  const [
+    settings,
+    windowSize,
+    paintByExampleFile,
+    isProcessing,
+    updateSettings,
+    showSidePanel,
+    runInpainting,
+    updateAppState,
+  ] = useStore((state) => [
+    state.settings,
+    state.windowSize,
+    state.paintByExampleFile,
+    state.getIsProcessing(),
+    state.updateSettings,
+    state.showSidePanel(),
+    state.runInpainting,
+    state.updateAppState,
+  ])
+  const [exampleImage, isExampleImageLoaded] = useImage(paintByExampleFile)
   const [open, toggleOpen] = useToggle(false)
 
   useHotKey("c", () => {
     toggleOpen()
   })
-
-  const windowSize = useWindowSize()
 
   if (!showSidePanel) {
     return null
@@ -72,20 +78,47 @@ const SidePanel = () => {
             <Label htmlFor="controlnet">Controlnet</Label>
             <Switch
               id="controlnet"
-              checked={settings.enableControlNet}
+              checked={settings.enableControlnet}
               onCheckedChange={(value) => {
-                updateSettings({ enableControlNet: value })
+                updateSettings({ enableControlnet: value })
               }}
             />
           </div>
 
-          <div className="pl-1 pr-2">
+          <div className="flex flex-col gap-1">
+            <RowContainer>
+              <Slider
+                className="w-[180px]"
+                defaultValue={[100]}
+                min={1}
+                max={100}
+                step={1}
+                disabled={!settings.enableControlnet}
+                value={[Math.floor(settings.controlnetConditioningScale * 100)]}
+                onValueChange={(vals) =>
+                  updateSettings({ controlnetConditioningScale: vals[0] / 100 })
+                }
+              />
+              <NumberInput
+                id="controlnet-weight"
+                className="w-[60px] rounded-full"
+                disabled={!settings.enableControlnet}
+                numberValue={settings.controlnetConditioningScale}
+                allowFloat={false}
+                onNumberValueChange={(val) => {
+                  updateSettings({ controlnetConditioningScale: val })
+                }}
+              />
+            </RowContainer>
+          </div>
+
+          <div className="pr-2">
             <Select
               value={settings.controlnetMethod}
               onValueChange={(value) => {
                 updateSettings({ controlnetMethod: value })
               }}
-              disabled={!settings.enableControlNet}
+              disabled={!settings.enableControlnet}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select control method" />
@@ -102,26 +135,6 @@ const SidePanel = () => {
             </Select>
           </div>
         </div>
-
-        <RowContainer>
-          <Label
-            htmlFor="controlnet-weight"
-            disabled={!settings.enableControlNet}
-          >
-            weight
-          </Label>
-          <NumberInput
-            id="controlnet-weight"
-            className="w-14"
-            disabled={!settings.enableControlNet}
-            numberValue={settings.controlnetConditioningScale}
-            allowFloat
-            onNumberValueChange={(value) => {
-              updateSettings({ controlnetConditioningScale: value })
-            }}
-          />
-        </RowContainer>
-
         <Separator />
       </div>
     )
@@ -166,77 +179,186 @@ const SidePanel = () => {
             }}
           />
         </div>
-        <div className="flex gap-3">
-          <div className="flex flex-col gap-2 items-start">
-            <Label htmlFor="freeu-s1" disabled={!settings.enableFreeu}>
-              s1
-            </Label>
-            <NumberInput
-              id="freeu-s1"
-              className="w-14"
-              disabled={!settings.enableFreeu}
-              numberValue={settings.freeuConfig.s1}
-              allowFloat
-              onNumberValueChange={(value) => {
-                updateSettings({
-                  freeuConfig: { ...settings.freeuConfig, s1: value },
-                })
-              }}
-            />
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-center gap-6">
+            <div className="flex gap-2 items-center justify-center">
+              <Label htmlFor="freeu-s1" disabled={!settings.enableFreeu}>
+                s1
+              </Label>
+              <NumberInput
+                id="freeu-s1"
+                className="w-14"
+                disabled={!settings.enableFreeu}
+                numberValue={settings.freeuConfig.s1}
+                allowFloat
+                onNumberValueChange={(value) => {
+                  updateSettings({
+                    freeuConfig: { ...settings.freeuConfig, s1: value },
+                  })
+                }}
+              />
+            </div>
+            <div className="flex gap-2 items-center justify-center">
+              <Label htmlFor="freeu-s2" disabled={!settings.enableFreeu}>
+                s2
+              </Label>
+              <NumberInput
+                id="freeu-s2"
+                className="w-14"
+                disabled={!settings.enableFreeu}
+                numberValue={settings.freeuConfig.s2}
+                allowFloat
+                onNumberValueChange={(value) => {
+                  updateSettings({
+                    freeuConfig: { ...settings.freeuConfig, s2: value },
+                  })
+                }}
+              />
+            </div>
           </div>
-          <div className="flex flex-col gap-2 items-start">
-            <Label htmlFor="freeu-s2" disabled={!settings.enableFreeu}>
-              s2
-            </Label>
-            <NumberInput
-              id="freeu-s2"
-              className="w-14"
-              disabled={!settings.enableFreeu}
-              numberValue={settings.freeuConfig.s2}
-              allowFloat
-              onNumberValueChange={(value) => {
-                updateSettings({
-                  freeuConfig: { ...settings.freeuConfig, s2: value },
-                })
-              }}
-            />
-          </div>
-          <div className="flex flex-col gap-2 items-start">
-            <Label htmlFor="freeu-b1" disabled={!settings.enableFreeu}>
-              b1
-            </Label>
-            <NumberInput
-              id="freeu-b1"
-              className="w-14"
-              disabled={!settings.enableFreeu}
-              numberValue={settings.freeuConfig.b1}
-              allowFloat
-              onNumberValueChange={(value) => {
-                updateSettings({
-                  freeuConfig: { ...settings.freeuConfig, b1: value },
-                })
-              }}
-            />
-          </div>
-          <div className="flex flex-col gap-2 items-start">
-            <Label htmlFor="freeu-b2" disabled={!settings.enableFreeu}>
-              b2
-            </Label>
-            <NumberInput
-              id="freeu-b2"
-              className="w-14"
-              disabled={!settings.enableFreeu}
-              numberValue={settings.freeuConfig.b2}
-              allowFloat
-              onNumberValueChange={(value) => {
-                updateSettings({
-                  freeuConfig: { ...settings.freeuConfig, b2: value },
-                })
-              }}
-            />
+
+          <div className="flex justify-center gap-6">
+            <div className="flex gap-2 items-center justify-center">
+              <Label htmlFor="freeu-b1" disabled={!settings.enableFreeu}>
+                b1
+              </Label>
+              <NumberInput
+                id="freeu-b1"
+                className="w-14"
+                disabled={!settings.enableFreeu}
+                numberValue={settings.freeuConfig.b1}
+                allowFloat
+                onNumberValueChange={(value) => {
+                  updateSettings({
+                    freeuConfig: { ...settings.freeuConfig, b1: value },
+                  })
+                }}
+              />
+            </div>
+            <div className="flex gap-2 items-center justify-center">
+              <Label htmlFor="freeu-b2" disabled={!settings.enableFreeu}>
+                b2
+              </Label>
+              <NumberInput
+                id="freeu-b2"
+                className="w-14"
+                disabled={!settings.enableFreeu}
+                numberValue={settings.freeuConfig.b2}
+                allowFloat
+                onNumberValueChange={(value) => {
+                  updateSettings({
+                    freeuConfig: { ...settings.freeuConfig, b2: value },
+                  })
+                }}
+              />
+            </div>
           </div>
         </div>
         <Separator />
+      </div>
+    )
+  }
+
+  const renderNegativePrompt = () => {
+    if (!settings.model.need_prompt) {
+      return null
+    }
+
+    return (
+      <div className="flex flex-col gap-4">
+        <Label htmlFor="negative-prompt">Negative prompt</Label>
+        <div className="pl-2 pr-4">
+          <Textarea
+            rows={4}
+            onKeyUp={onKeyUp}
+            className="max-h-[8rem] overflow-y-auto mb-2"
+            placeholder=""
+            id="negative-prompt"
+            value={settings.negativePrompt}
+            onInput={(evt: FormEvent<HTMLTextAreaElement>) => {
+              evt.preventDefault()
+              evt.stopPropagation()
+              const target = evt.target as HTMLTextAreaElement
+              updateSettings({ negativePrompt: target.value })
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  const renderPaintByExample = () => {
+    if (settings.model.name !== PAINT_BY_EXAMPLE) {
+      return null
+    }
+
+    return (
+      <div>
+        <RowContainer>
+          <div>Example Image</div>
+          <ImageUploadButton
+            tooltip="Upload example image"
+            onFileUpload={(file) => {
+              updateAppState({ paintByExampleFile: file })
+            }}
+          >
+            <Upload />
+          </ImageUploadButton>
+        </RowContainer>
+        {isExampleImageLoaded ? (
+          <div className="flex justify-center items-center">
+            <img
+              src={exampleImage.src}
+              alt="example"
+              className="max-w-[200px] max-h-[200px] m-3"
+            />
+          </div>
+        ) : (
+          <></>
+        )}
+        <Button
+          variant="default"
+          className="w-full"
+          disabled={isProcessing || !isExampleImageLoaded}
+          onClick={() => {
+            runInpainting()
+          }}
+        >
+          Paint
+        </Button>
+      </div>
+    )
+  }
+
+  const renderP2PImageGuidanceScale = () => {
+    if (settings.model.name !== INSTRUCT_PIX2PIX) {
+      return null
+    }
+    return (
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="image-guidance-scale">Image guidance scale</Label>
+        <RowContainer>
+          <Slider
+            className="w-[180px]"
+            defaultValue={[150]}
+            min={100}
+            max={1000}
+            step={1}
+            value={[Math.floor(settings.p2pImageGuidanceScale * 100)]}
+            onValueChange={(vals) =>
+              updateSettings({ p2pImageGuidanceScale: vals[0] / 100 })
+            }
+          />
+          <NumberInput
+            id="image-guidance-scale"
+            className="w-[60px] rounded-full"
+            numberValue={settings.p2pImageGuidanceScale}
+            allowFloat
+            onNumberValueChange={(val) => {
+              updateSettings({ p2pImageGuidanceScale: val })
+            }}
+          />
+        </RowContainer>
       </div>
     )
   }
@@ -263,7 +385,7 @@ const SidePanel = () => {
         onOpenAutoFocus={(event) => event.preventDefault()}
         onPointerDownOutside={(event) => event.preventDefault()}
       >
-        <SheetHeader className="mb-4">
+        <SheetHeader>
           <RowContainer>
             <div className="overflow-hidden mr-8">
               {
@@ -287,7 +409,7 @@ const SidePanel = () => {
           style={{ height: windowSize.height - 160 }}
           className="pr-3"
         >
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4 mt-4">
             <RowContainer>
               <Label htmlFor="cropper">Cropper</Label>
               <Switch
@@ -299,50 +421,83 @@ const SidePanel = () => {
               />
             </RowContainer>
 
-            <RowContainer>
+            <div className="flex flex-col gap-1">
               <Label htmlFor="steps">Steps</Label>
-              <NumberInput
-                id="steps"
-                className="w-14"
-                numberValue={settings.sdSteps}
-                allowFloat={false}
-                onNumberValueChange={(value) => {
-                  updateSettings({ sdSteps: value })
-                }}
-              />
-            </RowContainer>
+              <RowContainer>
+                <Slider
+                  className="w-[180px]"
+                  defaultValue={[30]}
+                  min={1}
+                  max={100}
+                  step={1}
+                  value={[Math.floor(settings.sdSteps)]}
+                  onValueChange={(vals) => updateSettings({ sdSteps: vals[0] })}
+                />
+                <NumberInput
+                  id="steps"
+                  className="w-[60px] rounded-full"
+                  numberValue={settings.sdSteps}
+                  allowFloat={false}
+                  onNumberValueChange={(val) => {
+                    updateSettings({ sdSteps: val })
+                  }}
+                />
+              </RowContainer>
+            </div>
 
-            <RowContainer>
+            <div className="flex flex-col gap-1">
               <Label htmlFor="guidance-scale">Guidance scale</Label>
-              <NumberInput
-                id="guidance-scale"
-                className="w-14"
-                numberValue={settings.sdGuidanceScale}
-                allowFloat
-                onNumberValueChange={(value) => {
-                  updateSettings({ sdGuidanceScale: value })
-                }}
-              />
-            </RowContainer>
+              <RowContainer>
+                <Slider
+                  className="w-[180px]"
+                  defaultValue={[750]}
+                  min={100}
+                  max={1500}
+                  step={1}
+                  value={[Math.floor(settings.sdGuidanceScale * 100)]}
+                  onValueChange={(vals) =>
+                    updateSettings({ sdGuidanceScale: vals[0] / 100 })
+                  }
+                />
+                <NumberInput
+                  id="guidance-scale"
+                  className="w-[60px] rounded-full"
+                  numberValue={settings.sdGuidanceScale}
+                  allowFloat
+                  onNumberValueChange={(val) => {
+                    updateSettings({ sdGuidanceScale: val })
+                  }}
+                />
+              </RowContainer>
+            </div>
 
-            <RowContainer>
-              <div className="flex gap-2 items-center">
-                <Label htmlFor="strength">Strength</Label>
-                <div className="text-sm">({settings.sdStrength})</div>
-              </div>
-              <Slider
-                className="w-24"
-                defaultValue={[100]}
-                min={10}
-                max={100}
-                step={1}
-                tabIndex={-1}
-                value={[Math.floor(settings.sdStrength * 100)]}
-                onValueChange={(vals) =>
-                  updateSettings({ sdStrength: vals[0] / 100 })
-                }
-              />
-            </RowContainer>
+            {renderP2PImageGuidanceScale()}
+
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="strength">Strength</Label>
+              <RowContainer>
+                <Slider
+                  className="w-[180px]"
+                  defaultValue={[100]}
+                  min={10}
+                  max={100}
+                  step={1}
+                  value={[Math.floor(settings.sdStrength * 100)]}
+                  onValueChange={(vals) =>
+                    updateSettings({ sdStrength: vals[0] / 100 })
+                  }
+                />
+                <NumberInput
+                  id="strength"
+                  className="w-[60px] rounded-full"
+                  numberValue={settings.sdStrength}
+                  allowFloat
+                  onNumberValueChange={(val) => {
+                    updateSettings({ sdStrength: val })
+                  }}
+                />
+              </RowContainer>
+            </div>
 
             <RowContainer>
               <Label htmlFor="sampler">Sampler</Label>
@@ -383,7 +538,7 @@ const SidePanel = () => {
                   }}
                 />
                 <NumberInput
-                  title="Seed"
+                  id="seed"
                   className="w-[100px]"
                   disabled={!settings.seedFixed}
                   numberValue={settings.seed}
@@ -395,46 +550,39 @@ const SidePanel = () => {
               </div>
             </RowContainer>
 
-            <div className="flex flex-col gap-4">
-              <Label htmlFor="negative-prompt">Negative prompt</Label>
-              <div className="pl-2 pr-4">
-                <Textarea
-                  rows={4}
-                  onKeyUp={onKeyUp}
-                  className="max-h-[8rem] overflow-y-auto mb-2"
-                  placeholder=""
-                  id="negative-prompt"
-                  value={settings.negativePrompt}
-                  onInput={(evt: FormEvent<HTMLTextAreaElement>) => {
-                    evt.preventDefault()
-                    evt.stopPropagation()
-                    const target = evt.target as HTMLTextAreaElement
-                    updateSettings({ negativePrompt: target.value })
-                  }}
-                />
-              </div>
-            </div>
+            {renderNegativePrompt()}
 
             <Separator />
 
-            <div className="flex flex-col gap-4">
-              {renderConterNetSetting()}
-            </div>
+            {renderConterNetSetting()}
             {renderFreeu()}
             {renderLCMLora()}
 
-            <RowContainer>
+            <div className="flex flex-col gap-1">
               <Label htmlFor="mask-blur">Mask blur</Label>
-              <NumberInput
-                id="mask-blur"
-                className="w-14"
-                numberValue={settings.sdMaskBlur}
-                allowFloat={false}
-                onNumberValueChange={(value) => {
-                  updateSettings({ sdMaskBlur: value })
-                }}
-              />
-            </RowContainer>
+              <RowContainer>
+                <Slider
+                  className="w-[180px]"
+                  defaultValue={[5]}
+                  min={0}
+                  max={35}
+                  step={1}
+                  value={[Math.floor(settings.sdMaskBlur)]}
+                  onValueChange={(vals) =>
+                    updateSettings({ sdMaskBlur: vals[0] })
+                  }
+                />
+                <NumberInput
+                  id="mask-blur"
+                  className="w-[60px] rounded-full"
+                  numberValue={settings.sdMaskBlur}
+                  allowFloat={false}
+                  onNumberValueChange={(value) => {
+                    updateSettings({ sdMaskBlur: value })
+                  }}
+                />
+              </RowContainer>
+            </div>
 
             <RowContainer>
               <Label htmlFor="match-histograms">Match histograms</Label>
@@ -446,6 +594,10 @@ const SidePanel = () => {
                 }}
               />
             </RowContainer>
+
+            <Separator />
+
+            {renderPaintByExample()}
           </div>
         </ScrollArea>
       </SheetContent>

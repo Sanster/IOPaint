@@ -50,22 +50,12 @@ export default function Editor(props: EditorProps) {
     imageHeight,
     settings,
     enableAutoSaving,
-    cropperRect,
-    enableManualInpainting,
     setImageSize,
     setBaseBrushSize,
-    setIsInpainting,
-    setSeed,
     interactiveSegState,
     updateInteractiveSegState,
-    resetInteractiveSegState,
-    isPluginRunning,
-    setIsPluginRunning,
     handleCanvasMouseDown,
     handleCanvasMouseMove,
-    cleanCurLineGroup,
-    updateEditorState,
-    resetRedoState,
     undo,
     redo,
     undoDisabled,
@@ -82,22 +72,12 @@ export default function Editor(props: EditorProps) {
     state.imageHeight,
     state.settings,
     state.serverConfig.enableAutoSaving,
-    state.cropperState,
-    state.settings.enableManualInpainting,
     state.setImageSize,
     state.setBaseBrushSize,
-    state.setIsInpainting,
-    state.setSeed,
     state.interactiveSegState,
     state.updateInteractiveSegState,
-    state.resetInteractiveSegState,
-    state.isPluginRunning,
-    state.setIsPluginRunning,
     state.handleCanvasMouseDown,
     state.handleCanvasMouseMove,
-    state.cleanCurLineGroup,
-    state.updateEditorState,
-    state.resetRedoState,
     state.undo,
     state.redo,
     state.undoDisabled(),
@@ -112,9 +92,7 @@ export default function Editor(props: EditorProps) {
   const renders = useStore((state) => state.editorState.renders)
   const extraMasks = useStore((state) => state.editorState.extraMasks)
   const lineGroups = useStore((state) => state.editorState.lineGroups)
-  const lastLineGroup = useStore((state) => state.editorState.lastLineGroup)
   const curLineGroup = useStore((state) => state.editorState.curLineGroup)
-  const redoLineGroups = useStore((state) => state.editorState.redoLineGroups)
 
   // Local State
   const [showOriginal, setShowOriginal] = useState(false)
@@ -338,8 +316,6 @@ export default function Editor(props: EditorProps) {
 
     if (isDraging) {
       setIsDraging(false)
-      // setCurLineGroup([])
-      // drawOnCurrentRender([])
     } else {
       resetZoom()
     }
@@ -434,22 +410,6 @@ export default function Editor(props: EditorProps) {
     }
   }
 
-  const isOutsideCroper = (clickPnt: { x: number; y: number }) => {
-    if (clickPnt.x < cropperRect.x) {
-      return true
-    }
-    if (clickPnt.y < cropperRect.y) {
-      return true
-    }
-    if (clickPnt.x > cropperRect.x + cropperRect.width) {
-      return true
-    }
-    if (clickPnt.y > cropperRect.y + cropperRect.height) {
-      return true
-    }
-    return false
-  }
-
   const onCanvasMouseUp = (ev: SyntheticEvent) => {
     if (interactiveSegState.isInteractiveSeg) {
       const xy = mouseXY(ev)
@@ -490,15 +450,6 @@ export default function Editor(props: EditorProps) {
       setIsPanning(true)
       return
     }
-
-    // if (
-    //   isDiffusionModels &&
-    //   settings.showCroper &&
-    //   isOutsideCroper(mouseXY(ev))
-    // ) {
-    //   // TODO: 去掉这个逻辑，在 cropper 层截断 click 点击？
-    //   return
-    // }
 
     setIsDraging(true)
     handleCanvasMouseDown(mouseXY(ev))
@@ -849,15 +800,6 @@ export default function Editor(props: EditorProps) {
       </TransformWrapper>
     )
   }
-
-  // const onInteractiveAccept = () => {
-  //   setInteractiveSegMask(tmpInteractiveSegMask)
-  //   setTmpInteractiveSegMask(null)
-
-  //   if (!enableManualInpainting && tmpInteractiveSegMask) {
-  //     runInpainting(false, undefined, tmpInteractiveSegMask)
-  //   }
-  // }
 
   return (
     <div

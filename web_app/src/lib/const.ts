@@ -11,3 +11,5 @@ export const BRUSH_COLOR = "#ffcc00bb"
 export const PAINT_BY_EXAMPLE = "Fantasy-Studio/Paint-by-Example"
 export const INSTRUCT_PIX2PIX = "timbrooks/instruct-pix2pix"
 export const KANDINSKY_2_2 = "kandinsky-community/kandinsky-2-2-decoder-inpaint"
+export const DEFAULT_NEGATIVE_PROMPT =
+  "out of frame, lowres, error, cropped, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, out of frame, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, disfigured, gross proportions, malformed limbs, watermark, signature"

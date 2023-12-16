@@ -1,3 +1,4 @@
+import gc
 import math
 import random
 from typing import Any
@@ -913,6 +914,7 @@ def torch_gc():
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
         torch.cuda.ipc_collect()
+    gc.collect()
 
 
 def set_seed(seed: int):

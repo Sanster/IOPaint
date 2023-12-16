@@ -101,7 +101,6 @@ if __name__ == "__main__":
     model = ModelManager(
         name=args.name,
         device=device,
-        sd_run_local=True,
         disable_nsfw=True,
         sd_cpu_textencoder=True,
         hf_access_token="123"

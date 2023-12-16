@@ -51,20 +51,6 @@ export default async function inpaint(
   fd.append("cv2Radius", settings.cv2Radius.toString())
   fd.append("cv2Flag", settings.cv2Flag.toString())
 
-  fd.append("paintByExampleSteps", settings.paintByExampleSteps.toString())
-  fd.append(
-    "paintByExampleGuidanceScale",
-    settings.paintByExampleGuidanceScale.toString()
-  )
-  fd.append("paintByExampleSeed", settings.seed.toString())
-  fd.append(
-    "paintByExampleMaskBlur",
-    settings.paintByExampleMaskBlur.toString()
-  )
-  fd.append(
-    "paintByExampleMatchHistograms",
-    settings.paintByExampleMatchHistograms ? "true" : "false"
-  )
   // TODO: resize image's shortest_edge to 224 before pass to backend, save network time?
   // https://huggingface.co/docs/transformers/model_doc/clip#transformers.CLIPImageProcessor
   if (paintByExampleImage) {
@@ -72,9 +58,7 @@ export default async function inpaint(
   }
 
   // InstructPix2Pix
-  fd.append("p2pSteps", settings.p2pSteps.toString())
   fd.append("p2pImageGuidanceScale", settings.p2pImageGuidanceScale.toString())
-  fd.append("p2pGuidanceScale", settings.p2pGuidanceScale.toString())
 
   // ControlNet
   fd.append(
