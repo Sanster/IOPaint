@@ -231,7 +231,7 @@ export function SettingsDialog() {
                 Diffusion other
               </TabsTrigger>
             </TabsList>
-            <ScrollArea className="h-[240px] w-full mt-2">
+            <ScrollArea className="h-[240px] w-full mt-2 outline-none">
               <TabsContent value={MODEL_TYPE_INPAINT}>
                 {renderModelList([MODEL_TYPE_INPAINT])}
               </TabsContent>

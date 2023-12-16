@@ -49,7 +49,7 @@ const SidePanel = () => {
     state.updateAppState,
   ])
   const [exampleImage, isExampleImageLoaded] = useImage(paintByExampleFile)
-  const [open, toggleOpen] = useToggle(false)
+  const [open, toggleOpen] = useToggle(true)
 
   useHotKey("c", () => {
     toggleOpen()
@@ -363,6 +363,40 @@ const SidePanel = () => {
     )
   }
 
+  const renderStrength = () => {
+    if (!settings.model.support_strength) {
+      return null
+    }
+
+    return (
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="strength">Strength</Label>
+        <RowContainer>
+          <Slider
+            className="w-[180px]"
+            defaultValue={[100]}
+            min={10}
+            max={100}
+            step={1}
+            value={[Math.floor(settings.sdStrength * 100)]}
+            onValueChange={(vals) =>
+              updateSettings({ sdStrength: vals[0] / 100 })
+            }
+          />
+          <NumberInput
+            id="strength"
+            className="w-[60px] rounded-full"
+            numberValue={settings.sdStrength}
+            allowFloat
+            onNumberValueChange={(val) => {
+              updateSettings({ sdStrength: val })
+            }}
+          />
+        </RowContainer>
+      </div>
+    )
+  }
+
   return (
     <Sheet open={open} modal={false}>
       <SheetTrigger
@@ -381,7 +415,7 @@ const SidePanel = () => {
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-[300px] mt-[60px] outline-none pl-4 pr-1 backdrop-filter backdrop-blur-md bg-background/70"
+        className="w-[300px] mt-[60px] outline-none pl-4 pr-1"
         onOpenAutoFocus={(event) => event.preventDefault()}
         onPointerDownOutside={(event) => event.preventDefault()}
       >
@@ -472,32 +506,7 @@ const SidePanel = () => {
             </div>
 
             {renderP2PImageGuidanceScale()}
-
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="strength">Strength</Label>
-              <RowContainer>
-                <Slider
-                  className="w-[180px]"
-                  defaultValue={[100]}
-                  min={10}
-                  max={100}
-                  step={1}
-                  value={[Math.floor(settings.sdStrength * 100)]}
-                  onValueChange={(vals) =>
-                    updateSettings({ sdStrength: vals[0] / 100 })
-                  }
-                />
-                <NumberInput
-                  id="strength"
-                  className="w-[60px] rounded-full"
-                  numberValue={settings.sdStrength}
-                  allowFloat
-                  onNumberValueChange={(val) => {
-                    updateSettings({ sdStrength: val })
-                  }}
-                />
-              </RowContainer>
-            </div>
+            {renderStrength()}
 
             <RowContainer>
               <Label htmlFor="sampler">Sampler</Label>

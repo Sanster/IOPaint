@@ -247,6 +247,7 @@ const defaultValues: AppState = {
       path: "lama",
       model_type: "inpaint",
       support_controlnet: false,
+      support_strength: false,
       controlnets: [],
       support_freeu: false,
       support_lcm_lora: false,
@@ -410,24 +411,13 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           }
           const newRender = new Image()
           await loadImage(newRender, blob)
-          if (useLastLineGroup === true) {
-            const prevRenders = renders.slice(0, -1)
-            const newRenders = [...prevRenders, newRender]
-            get().updateEditorState({
-              renders: newRenders,
-              lineGroups: newLineGroups,
-              lastLineGroup: curLineGroup,
-              curLineGroup: [],
-            })
-          } else {
-            const newRenders = [...renders, newRender]
-            get().updateEditorState({
-              renders: newRenders,
-              lineGroups: newLineGroups,
-              lastLineGroup: curLineGroup,
-              curLineGroup: [],
-            })
-          }
+          const newRenders = [...renders, newRender]
+          get().updateEditorState({
+            renders: newRenders,
+            lineGroups: newLineGroups,
+            lastLineGroup: curLineGroup,
+            curLineGroup: [],
+          })
         } catch (e: any) {
           toast({
             variant: "destructive",

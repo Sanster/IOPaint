@@ -44,7 +44,12 @@ export default async function inpaint(
   fd.append("sdSteps", settings.sdSteps.toString())
   fd.append("sdGuidanceScale", settings.sdGuidanceScale.toString())
   fd.append("sdSampler", settings.sdSampler.toString())
-  fd.append("sdSeed", settings.seed.toString())
+  if (settings.seedFixed) {
+    fd.append("sdSeed", settings.seed.toString())
+  } else {
+    fd.append("sdSeed", "-1")
+  }
+
   fd.append("sdMatchHistograms", settings.sdMatchHistograms ? "true" : "false")
   fd.append("sdScale", (settings.sdScale / 100).toString())
 
@@ -61,6 +66,7 @@ export default async function inpaint(
   fd.append("p2pImageGuidanceScale", settings.p2pImageGuidanceScale.toString())
 
   // ControlNet
+  fd.append("controlnet_enabled", settings.enableControlnet.toString())
   fd.append(
     "controlnet_conditioning_scale",
     settings.controlnetConditioningScale.toString()

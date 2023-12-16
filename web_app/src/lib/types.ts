@@ -8,6 +8,7 @@ export interface ModelInfo {
     | "diffusers_sd_inpaint"
     | "diffusers_sdxl_inpaint"
     | "diffusers_other"
+  support_strength: boolean
   support_controlnet: boolean
   controlnets: string[]
   support_freeu: boolean

@@ -16,7 +16,7 @@ const Slider = React.forwardRef<
     tabIndex={-1}
     {...props}
   >
-    <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-primary/20 data-[disabled]:cursor-not-allowed">
+    <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-primary/20 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50">
       <SliderPrimitive.Range className="absolute h-full bg-primary data-[disabled]:cursor-not-allowed " />
     </SliderPrimitive.Track>
     <SliderPrimitive.Thumb
