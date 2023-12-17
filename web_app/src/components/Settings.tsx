@@ -74,12 +74,14 @@ export function SettingsDialog() {
     updateSettings,
     fileManagerState,
     updateFileManagerState,
+    setAppModel,
   ] = useStore((state) => [
     state.updateAppState,
     state.settings,
     state.updateSettings,
     state.fileManagerState,
     state.updateFileManagerState,
+    state.setModel,
   ])
   const { toast } = useToast()
   const [model, setModel] = useState<ModelInfo>(settings.model)
@@ -123,7 +125,7 @@ export function SettingsDialog() {
             toast({
               title: `Switch to ${model.name} success`,
             })
-            updateSettings({ model: model })
+            setAppModel(model)
           } else {
             throw new Error("Server error")
           }
@@ -142,10 +144,16 @@ export function SettingsDialog() {
     }
   }
 
-  useHotKey("s", () => {
-    toggleOpen()
-    onSubmit(form.getValues())
-  })
+  useHotKey(
+    "s",
+    () => {
+      toggleOpen()
+      if (open) {
+        onSubmit(form.getValues())
+      }
+    },
+    [open, form, model]
+  )
 
   function onOpenChange(value: boolean) {
     toggleOpen()

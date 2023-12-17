@@ -18,7 +18,6 @@ export default async function inpaint(
   mask: File | Blob,
   paintByExampleImage: File | null = null
 ) {
-  // 1080, 2000, Original
   const fd = new FormData()
   fd.append("image", imageFile)
   fd.append("mask", mask)
@@ -37,7 +36,7 @@ export default async function inpaint(
   fd.append("croperY", croperRect.y.toString())
   fd.append("croperHeight", croperRect.height.toString())
   fd.append("croperWidth", croperRect.width.toString())
-  fd.append("useCroper", settings.showCroper ? "true" : "false")
+  fd.append("useCroper", settings.showCropper ? "true" : "false")
 
   fd.append("sdMaskBlur", settings.sdMaskBlur.toString())
   fd.append("sdStrength", settings.sdStrength.toString())
@@ -52,6 +51,9 @@ export default async function inpaint(
 
   fd.append("sdMatchHistograms", settings.sdMatchHistograms ? "true" : "false")
   fd.append("sdScale", (settings.sdScale / 100).toString())
+  fd.append("enableFreeu", settings.enableFreeu.toString())
+  fd.append("freeuConfig", JSON.stringify(settings.freeuConfig))
+  fd.append("enableLCMLora", settings.enableLCMLora.toString())
 
   fd.append("cv2Radius", settings.cv2Radius.toString())
   fd.append("cv2Flag", settings.cv2Flag.toString())

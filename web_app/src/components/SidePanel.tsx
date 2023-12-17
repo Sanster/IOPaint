@@ -397,6 +397,27 @@ const SidePanel = () => {
     )
   }
 
+  const renderExpender = () => {
+    return (
+      <>
+        <RowContainer>
+          <Label htmlFor="Expender">Expender</Label>
+          <Switch
+            id="expender"
+            checked={settings.showExpender}
+            onCheckedChange={(value) => {
+              updateSettings({ showExpender: value })
+              if (value) {
+                updateSettings({ showCropper: false })
+              }
+            }}
+          />
+        </RowContainer>
+        <Separator />
+      </>
+    )
+  }
+
   return (
     <Sheet open={open} modal={false}>
       <SheetTrigger
@@ -448,12 +469,17 @@ const SidePanel = () => {
               <Label htmlFor="cropper">Cropper</Label>
               <Switch
                 id="cropper"
-                checked={settings.showCroper}
+                checked={settings.showCropper}
                 onCheckedChange={(value) => {
-                  updateSettings({ showCroper: value })
+                  updateSettings({ showCropper: value })
+                  if (value) {
+                    updateSettings({ showExpender: false })
+                  }
                 }}
               />
             </RowContainer>
+
+            {renderExpender()}
 
             <div className="flex flex-col gap-1">
               <Label htmlFor="steps">Steps</Label>

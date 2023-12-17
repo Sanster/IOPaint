@@ -5,14 +5,21 @@ import { useStore } from "@/lib/states"
 import { useClickAway } from "react-use"
 
 const PromptInput = () => {
-  const [isProcessing, prompt, updateSettings, runInpainting] = useStore(
-    (state) => [
-      state.getIsProcessing(),
-      state.settings.prompt,
-      state.updateSettings,
-      state.runInpainting,
-    ]
-  )
+  const [
+    isProcessing,
+    prompt,
+    updateSettings,
+    runInpainting,
+    showPrevMask,
+    hidePrevMask,
+  ] = useStore((state) => [
+    state.getIsProcessing(),
+    state.settings.prompt,
+    state.updateSettings,
+    state.runInpainting,
+    state.showPrevMask,
+    state.hidePrevMask,
+  ])
   const ref = useRef(null)
 
   useClickAway<MouseEvent>(ref, () => {
@@ -41,13 +48,13 @@ const PromptInput = () => {
     }
   }
 
-  // const onMouseEnter = () => {
-  //   emitter.emit(DREAM_BUTTON_MOUSE_ENTER)
-  // }
+  const onMouseEnter = () => {
+    showPrevMask()
+  }
 
-  // const onMouseLeave = () => {
-  //   emitter.emit(DREAM_BUTTON_MOUSE_LEAVE)
-  // }
+  const onMouseLeave = () => {
+    hidePrevMask()
+  }
 
   return (
     <div className="flex gap-4 items-center">
@@ -63,8 +70,8 @@ const PromptInput = () => {
         size="sm"
         onClick={handleRepaintClick}
         disabled={prompt.length === 0 || isProcessing}
-        // onMouseEnter={onMouseEnter}
-        // onMouseLeave={onMouseLeave}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
         Dream
       </Button>

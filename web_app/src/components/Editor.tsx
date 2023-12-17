@@ -28,6 +28,7 @@ import { useStore } from "@/lib/states"
 import Cropper from "./Cropper"
 import { InteractiveSegPoints } from "./InteractiveSeg"
 import useHotKey from "@/hooks/useHotkey"
+import Extender from "./Expender"
 
 const TOOLBAR_HEIGHT = 200
 const MIN_BRUSH_SIZE = 10
@@ -170,11 +171,7 @@ export default function Editor(props: EditorProps) {
         imageHeight
       )
     }
-    // if (dreamButtonHoverSegMask) {
-    //   context.drawImage(dreamButtonHoverSegMask, 0, 0, imageWidth, imageHeight)
-    // }
     drawLines(context, curLineGroup)
-    // drawLines(context, dreamButtonHoverLineGroup)
   }, [
     renders,
     extraMasks,
@@ -788,7 +785,16 @@ export default function Editor(props: EditorProps) {
             minHeight={Math.min(256, imageHeight)}
             minWidth={Math.min(256, imageWidth)}
             scale={getCurScale()}
-            show={settings.showCroper}
+            show={settings.showCropper}
+          />
+
+          <Extender
+            maxHeight={imageHeight}
+            maxWidth={imageWidth}
+            minHeight={Math.min(256, imageHeight)}
+            minWidth={Math.min(256, imageWidth)}
+            scale={getCurScale()}
+            show={settings.showExpender}
           />
 
           {interactiveSegState.isInteractiveSeg ? (

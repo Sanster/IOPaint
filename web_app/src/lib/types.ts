@@ -9,6 +9,7 @@ export interface ModelInfo {
     | "diffusers_sdxl_inpaint"
     | "diffusers_other"
   support_strength: boolean
+  support_outpainting: boolean
   support_controlnet: boolean
   controlnets: string[]
   support_freeu: boolean
@@ -66,6 +67,7 @@ export enum SDSampler {
   kEulerA = "k_euler_a",
   dpmPlusPlus = "dpm++",
   uni_pc = "uni_pc",
+  lcm = "lcm",
 }
 
 export interface FreeuConfig {

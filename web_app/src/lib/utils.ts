@@ -53,6 +53,24 @@ export function loadImage(image: HTMLImageElement, src: string) {
   })
 }
 
+export function canvasToImage(
+  canvas: HTMLCanvasElement
+): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+
+    image.addEventListener("load", () => {
+      resolve(image)
+    })
+
+    image.addEventListener("error", (error) => {
+      reject(error)
+    })
+
+    image.src = canvas.toDataURL()
+  })
+}
+
 export function srcToFile(src: string, fileName: string, mimeType: string) {
   return fetch(src)
     .then(function (res) {
@@ -164,7 +182,8 @@ export const generateMask = (
   imageWidth: number,
   imageHeight: number,
   lineGroups: LineGroup[],
-  maskImages: HTMLImageElement[] = []
+  maskImages: HTMLImageElement[] = [],
+  lineGroupsColor: string = "white"
 ): HTMLCanvasElement => {
   const maskCanvas = document.createElement("canvas")
   maskCanvas.width = imageWidth
@@ -179,7 +198,7 @@ export const generateMask = (
   })
 
   lineGroups.forEach((lineGroup) => {
-    drawLines(ctx, lineGroup, "white")
+    drawLines(ctx, lineGroup, lineGroupsColor)
   })
 
   return maskCanvas
