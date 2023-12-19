@@ -39,7 +39,7 @@ class SDXL(DiffusionInpaintModel):
             )
         else:
             vae = AutoencoderKL.from_pretrained(
-                "madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch.float16
+                "madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch_dtype
             )
             self.model = StableDiffusionXLInpaintPipeline.from_pretrained(
                 self.model_id_or_path,

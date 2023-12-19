@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import os
 import hashlib
 import traceback
@@ -103,7 +104,7 @@ logging.getLogger("werkzeug").addFilter(NoFlaskwebgui())
 
 app = Flask(__name__, static_folder=os.path.join(BUILD_DIR, "static"))
 app.config["JSON_AS_ASCII"] = False
-CORS(app, expose_headers=["Content-Disposition"])
+CORS(app, expose_headers=["Content-Disposition", "X-seed"])
 
 sio_logger = logging.getLogger("sio-logger")
 sio_logger.setLevel(logging.ERROR)
@@ -115,8 +116,6 @@ output_dir: str = None
 device = None
 input_image_path: str = None
 is_disable_model_switch: bool = False
-is_controlnet: bool = False
-controlnet_method: str = "control_v11p_sd15_canny"
 enable_file_manager: bool = False
 enable_auto_saving: bool = False
 is_desktop: bool = False
@@ -266,26 +265,21 @@ def process():
         sd_guidance_scale=form["sdGuidanceScale"],
         sd_sampler=form["sdSampler"],
         sd_seed=form["sdSeed"],
+        sd_freeu=form["enableFreeu"],
+        sd_freeu_config=json.loads(form["freeuConfig"]),
+        sd_lcm_lora=form["enableLCMLora"],
         sd_match_histograms=form["sdMatchHistograms"],
         cv2_flag=form["cv2Flag"],
         cv2_radius=form["cv2Radius"],
-        paint_by_example_steps=form["paintByExampleSteps"],
-        paint_by_example_guidance_scale=form["paintByExampleGuidanceScale"],
-        paint_by_example_mask_blur=form["paintByExampleMaskBlur"],
-        paint_by_example_seed=form["paintByExampleSeed"],
-        paint_by_example_match_histograms=form["paintByExampleMatchHistograms"],
         paint_by_example_example_image=paint_by_example_example_image,
-        p2p_steps=form["p2pSteps"],
         p2p_image_guidance_scale=form["p2pImageGuidanceScale"],
-        p2p_guidance_scale=form["p2pGuidanceScale"],
+        controlnet_enabled=form["controlnet_enabled"],
         controlnet_conditioning_scale=form["controlnet_conditioning_scale"],
         controlnet_method=form["controlnet_method"],
     )
 
     if config.sd_seed == -1:
-        config.sd_seed = random.randint(1, 999999999)
-    if config.paint_by_example_seed == -1:
-        config.paint_by_example_seed = random.randint(1, 999999999)
+        config.sd_seed = random.randint(1, 99999999)
 
     logger.info(f"Origin image shape: {original_shape}")
     image = resize_max_size(image, size_limit=size_limit, interpolation=interpolation)
@@ -424,6 +418,8 @@ def get_server_config():
         "plugins": list(plugins.keys()),
         "enableFileManager": enable_file_manager,
         "enableAutoSaving": enable_auto_saving,
+        "enableControlnet": model.sd_controlnet,
+        "controlnetMethod": model.sd_controlnet_method,
     }, 200
 
 
@@ -540,18 +536,12 @@ def main(args):
     global is_desktop
     global thumb
     global output_dir
-    global is_controlnet
-    global controlnet_method
     global image_quality
+    global enable_auto_saving
 
     build_plugins(args)
 
     image_quality = args.quality
-
-    if args.sd_controlnet and args.model in SD15_MODELS:
-        is_controlnet = True
-        controlnet_method = args.sd_controlnet_method
-
     output_dir = args.output_dir
     if output_dir:
         output_dir = os.path.abspath(output_dir)
@@ -609,9 +599,6 @@ def main(args):
         hf_access_token=args.hf_access_token,
         disable_nsfw=args.sd_disable_nsfw or args.disable_nsfw,
         sd_cpu_textencoder=args.sd_cpu_textencoder,
-        sd_run_local=args.sd_run_local,
-        sd_local_model_path=args.sd_local_model_path,
-        local_files_only=args.local_files_only,
         cpu_offload=args.cpu_offload,
         enable_xformers=args.sd_enable_xformers or args.enable_xformers,
         callback=diffuser_callback,

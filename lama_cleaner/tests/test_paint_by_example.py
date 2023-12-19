@@ -10,15 +10,19 @@ from lama_cleaner.schema import HDStrategy
 from lama_cleaner.tests.test_model import get_config, get_data
 
 current_dir = Path(__file__).parent.absolute().resolve()
-save_dir = current_dir / 'result'
+save_dir = current_dir / "result"
 save_dir.mkdir(exist_ok=True, parents=True)
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = "cuda" if torch.cuda.is_available() else "mps"
 device = torch.device(device)
+model_name = "Fantasy-Studio/Paint-by-Example"
 
 
 def assert_equal(
-    model, config, gt_name,
-    fx: float = 1, fy: float = 1,
+    model,
+    config,
+    gt_name,
+    fx: float = 1,
+    fy: float = 1,
     img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
     mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     example_p=current_dir / "bunny.jpeg",
@@ -27,7 +31,9 @@ def assert_equal(
 
     example_image = cv2.imread(str(example_p))
     example_image = cv2.cvtColor(example_image, cv2.COLOR_BGRA2RGB)
-    example_image = cv2.resize(example_image, None, fx=fx, fy=fy, interpolation=cv2.INTER_AREA)
+    example_image = cv2.resize(
+        example_image, None, fx=fx, fy=fy, interpolation=cv2.INTER_AREA
+    )
 
     print(f"Input image shape: {img.shape}, example_image: {example_image.shape}")
     config.paint_by_example_example_image = Image.fromarray(example_image)
@@ -35,14 +41,13 @@ def assert_equal(
     cv2.imwrite(str(save_dir / gt_name), res)
 
 
-@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
-def test_paint_by_example(strategy):
-    model = ModelManager(name="paint_by_example", device=device, disable_nsfw=True)
-    cfg = get_config(strategy, paint_by_example_steps=30)
+def test_paint_by_example():
+    model = ModelManager(name=model_name, device=device, disable_nsfw=True)
+    cfg = get_config(HDStrategy.ORIGINAL, sd_steps=30)
     assert_equal(
         model,
         cfg,
-        f"paint_by_example_{strategy.capitalize()}.png",
+        f"paint_by_example.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
         fy=0.9,
@@ -50,57 +55,31 @@ def test_paint_by_example(strategy):
     )
 
 
-@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
-def test_paint_by_example_disable_nsfw(strategy):
-    model = ModelManager(name="paint_by_example", device=device, disable_nsfw=False)
-    cfg = get_config(strategy, paint_by_example_steps=30)
+def test_paint_by_example_cpu_offload():
+    model = ModelManager(
+        name=model_name, device=device, cpu_offload=True, disable_nsfw=False
+    )
+    cfg = get_config(HDStrategy.ORIGINAL, sd_steps=30)
     assert_equal(
         model,
         cfg,
-        f"paint_by_example_{strategy.capitalize()}_disable_nsfw.png",
+        f"paint_by_example_cpu_offload.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
 
 
-@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
-def test_paint_by_example_sd_scale(strategy):
-    model = ModelManager(name="paint_by_example", device=device, disable_nsfw=True)
-    cfg = get_config(strategy, paint_by_example_steps=30, sd_scale=0.85)
+def test_paint_by_example_cpu_offload_cpu_device():
+    model = ModelManager(
+        name=model_name, device=torch.device("cpu"), cpu_offload=True, disable_nsfw=True
+    )
+    cfg = get_config(HDStrategy.ORIGINAL, sd_steps=1)
     assert_equal(
         model,
         cfg,
-        f"paint_by_example_{strategy.capitalize()}_sdscale.png",
+        f"paint_by_example_cpu_offload_cpu_device.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
         fy=0.9,
-        fx=1.3
-    )
-
-
-@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
-def test_paint_by_example_cpu_offload(strategy):
-    model = ModelManager(name="paint_by_example", device=device, cpu_offload=True, disable_nsfw=False)
-    cfg = get_config(strategy, paint_by_example_steps=30, sd_scale=0.85)
-    assert_equal(
-        model,
-        cfg,
-        f"paint_by_example_{strategy.capitalize()}_cpu_offload.png",
-        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
-        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
-    )
-
-
-@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
-def test_paint_by_example_cpu_offload_cpu_device(strategy):
-    model = ModelManager(name="paint_by_example", device=torch.device('cpu'), cpu_offload=True, disable_nsfw=True)
-    cfg = get_config(strategy, paint_by_example_steps=1, sd_scale=0.85)
-    assert_equal(
-        model,
-        cfg,
-        f"paint_by_example_{strategy.capitalize()}_cpu_offload_cpu_device.png",
-        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
-        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
-        fy=0.9,
-        fx=1.3
+        fx=1.3,
     )

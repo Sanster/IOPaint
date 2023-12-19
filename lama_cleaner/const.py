@@ -84,8 +84,13 @@ SD2_CONTROLNET_CHOICES = [
 DEFAULT_SDXL_CONTROLNET_METHOD = "diffusers/controlnet-canny-sdxl-1.0"
 SDXL_CONTROLNET_CHOICES = [
     "thibaud/controlnet-openpose-sdxl-1.0",
+    "destitech/controlnet-inpaint-dreamer-sdxl"
     "diffusers/controlnet-canny-sdxl-1.0",
+    "diffusers/controlnet-canny-sdxl-1.0-mid",
+    "diffusers/controlnet-canny-sdxl-1.0-small"
     "diffusers/controlnet-depth-sdxl-1.0",
+    "diffusers/controlnet-depth-sdxl-1.0-mid",
+    "diffusers/controlnet-depth-sdxl-1.0-small",
 ]
 
 SD_LOCAL_MODEL_HELP = """

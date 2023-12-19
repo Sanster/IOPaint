@@ -16,6 +16,7 @@ from diffusers import (
     EulerAncestralDiscreteScheduler,
     DPMSolverMultistepScheduler,
     UniPCMultistepScheduler,
+    LCMScheduler
 )
 
 from lama_cleaner.schema import SDSampler
@@ -939,5 +940,7 @@ def get_scheduler(sd_sampler, scheduler_config):
         return DPMSolverMultistepScheduler.from_config(scheduler_config)
     elif sd_sampler == SDSampler.uni_pc:
         return UniPCMultistepScheduler.from_config(scheduler_config)
+    elif sd_sampler == SDSampler.lcm:
+        return LCMScheduler.from_config(scheduler_config)
     else:
         raise ValueError(sd_sampler)

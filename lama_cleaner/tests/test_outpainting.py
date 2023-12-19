@@ -17,7 +17,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 device = torch.device(device)
 
 
-@pytest.mark.parametrize("name", ["sd1.5"])
+@pytest.mark.parametrize("name", ["runwayml/stable-diffusion-inpainting"])
 @pytest.mark.parametrize("sd_device", ["mps"])
 @pytest.mark.parametrize(
     "rect",
@@ -42,7 +42,6 @@ def test_outpainting(name, sd_device, rect):
         name=name,
         device=torch.device(sd_device),
         hf_access_token="",
-        sd_run_local=True,
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         callback=callback,
@@ -51,12 +50,11 @@ def test_outpainting(name, sd_device, rect):
         HDStrategy.ORIGINAL,
         prompt="a dog sitting on a bench in the park",
         sd_steps=50,
-        use_croper=True,
-        croper_is_outpainting=True,
-        croper_x=rect[0],
-        croper_y=rect[1],
-        croper_width=rect[2],
-        croper_height=rect[3],
+        use_extender=True,
+        extender_x=rect[0],
+        extender_y=rect[1],
+        extender_width=rect[2],
+        extender_height=rect[3],
         sd_guidance_scale=8.0,
         sd_sampler=SDSampler.dpm_plus_plus,
     )
@@ -64,13 +62,13 @@ def test_outpainting(name, sd_device, rect):
     assert_equal(
         model,
         cfg,
-        f"{name.replace('.', '_')}_outpainting_dpm++_{'_'.join(map(str, rect))}.png",
+        f"{name.replace('/', '--')}_outpainting_dpm++_{'_'.join(map(str, rect))}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
 
 
-@pytest.mark.parametrize("name", ["kandinsky2.2"])
+@pytest.mark.parametrize("name", ["kandinsky-community/kandinsky-2-2-decoder-inpaint"])
 @pytest.mark.parametrize("sd_device", ["mps"])
 @pytest.mark.parametrize(
     "rect",
@@ -86,10 +84,9 @@ def test_kandinsky_outpainting(name, sd_device, rect):
         return
 
     model = ModelManager(
-        name="sd1.5",
+        name=name,
         device=torch.device(sd_device),
         hf_access_token="",
-        sd_run_local=True,
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         callback=callback,
@@ -99,12 +96,11 @@ def test_kandinsky_outpainting(name, sd_device, rect):
         prompt="a cat",
         negative_prompt="lowres, text, error, cropped, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, out of frame, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck, username, watermark, signature",
         sd_steps=50,
-        use_croper=True,
-        croper_is_outpainting=True,
-        croper_x=rect[0],
-        croper_y=rect[1],
-        croper_width=rect[2],
-        croper_height=rect[3],
+        use_extender=True,
+        extender_x=rect[0],
+        extender_y=rect[1],
+        extender_width=rect[2],
+        extender_height=rect[3],
         sd_guidance_scale=7,
         sd_sampler=SDSampler.dpm_plus_plus,
     )
@@ -112,7 +108,7 @@ def test_kandinsky_outpainting(name, sd_device, rect):
     assert_equal(
         model,
         cfg,
-        f"{name.replace('.', '_')}_outpainting_dpm++_{'_'.join(map(str, rect))}.png",
+        f"{name.replace('/', '--')}_outpainting_dpm++_{'_'.join(map(str, rect))}.png",
         img_p=current_dir / "cat.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
         fx=1,

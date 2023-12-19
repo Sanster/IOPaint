@@ -234,16 +234,6 @@ def parse_args():
                     "torch.cuda.is_available() is False, please use --device cpu or check your pytorch installation"
                 )
 
-    if args.sd_local_model_path and args.model == "sd1.5":
-        if not os.path.exists(args.sd_local_model_path):
-            parser.error(
-                f"invalid --sd-local-model-path: {args.sd_local_model_path} not exists"
-            )
-        if not os.path.isfile(args.sd_local_model_path):
-            parser.error(
-                f"invalid --sd-local-model-path: {args.sd_local_model_path} is a directory"
-            )
-
     os.environ["U2NET_HOME"] = DEFAULT_MODEL_DIR
     if args.model_dir and args.model_dir is not None:
         if os.path.isfile(args.model_dir):
@@ -264,7 +254,7 @@ def parse_args():
         scanned_models = scan_models()
         if args.model not in [it.name for it in scanned_models]:
             parser.error(
-                f"invalid --model: {args.model} not exists. Available models: {AVAILABLE_MODELS} or {scanned_models}"
+                f"invalid --model: {args.model} not exists. Available models: {AVAILABLE_MODELS} or {[it.name for it in scanned_models]}"
             )
 
     if args.input and args.input is not None:

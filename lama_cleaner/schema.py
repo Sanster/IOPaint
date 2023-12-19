@@ -67,6 +67,28 @@ class ModelInfo(BaseModel):
 
     @computed_field
     @property
+    def support_strength(self) -> bool:
+        return self.model_type in [
+            ModelType.DIFFUSERS_SD,
+            ModelType.DIFFUSERS_SDXL,
+            ModelType.DIFFUSERS_SD_INPAINT,
+            ModelType.DIFFUSERS_SDXL_INPAINT,
+        ]
+
+    @computed_field
+    @property
+    def support_outpainting(self) -> bool:
+        return self.model_type in [
+            ModelType.DIFFUSERS_SD,
+            ModelType.DIFFUSERS_SDXL,
+            ModelType.DIFFUSERS_SD_INPAINT,
+            ModelType.DIFFUSERS_SDXL_INPAINT,
+        ] or self.name in [
+            "kandinsky-community/kandinsky-2-2-decoder-inpaint",
+        ]
+
+    @computed_field
+    @property
     def support_lcm_lora(self) -> bool:
         return self.model_type in [
             ModelType.DIFFUSERS_SD,
@@ -129,10 +151,10 @@ class SDSampler(str, Enum):
 
 
 class FREEUConfig(BaseModel):
-    s1: float = 1.0
-    s2: float = 1.0
-    b1: float = 1.0
-    b2: float = 1.0
+    s1: float = 0.9
+    s2: float = 0.2
+    b1: float = 1.2
+    b2: float = 1.4
 
 
 class Config(BaseModel):
@@ -140,18 +162,18 @@ class Config(BaseModel):
         arbitrary_types_allowed = True
 
     # Configs for ldm model
-    ldm_steps: int
+    ldm_steps: int = 20
     ldm_sampler: str = LDMSampler.plms
 
     # Configs for zits model
     zits_wireframe: bool = True
 
     # Configs for High Resolution Strategy(different way to preprocess image)
-    hd_strategy: str  # See HDStrategy Enum
-    hd_strategy_crop_margin: int
+    hd_strategy: str = HDStrategy.CROP  # See HDStrategy Enum
+    hd_strategy_crop_margin: int = 128
     # If the longer side of the image is larger than this value, use crop strategy
-    hd_strategy_crop_trigger_size: int
-    hd_strategy_resize_limit: int
+    hd_strategy_crop_trigger_size: int = 800
+    hd_strategy_resize_limit: int = 1280
 
     # Configs for Stable Diffusion 1.5
     prompt: str = ""
@@ -159,11 +181,15 @@ class Config(BaseModel):
     # Crop image to this size before doing sd inpainting
     # The value is always on the original image scale
     use_croper: bool = False
-    croper_is_outpainting: bool = False
     croper_x: int = None
     croper_y: int = None
     croper_height: int = None
     croper_width: int = None
+    use_extender: bool = False
+    extender_x: int = None
+    extender_y: int = None
+    extender_height: int = None
+    extender_width: int = None
 
     # Resize the image before doing sd inpainting, the area outside the mask will not lose quality.
     # Used by sd models and paint_by_example model
@@ -207,18 +233,12 @@ class Config(BaseModel):
     cv2_radius: int = 4
 
     # Paint by Example
-    paint_by_example_steps: int = 50
-    paint_by_example_guidance_scale: float = 7.5
-    paint_by_example_mask_blur: int = 0
-    paint_by_example_seed: int = 42
-    paint_by_example_match_histograms: bool = False
     paint_by_example_example_image: Optional[Image] = None
 
     # InstructPix2Pix
-    p2p_steps: int = 50
     p2p_image_guidance_scale: float = 1.5
-    p2p_guidance_scale: float = 7.5
 
     # ControlNet
+    controlnet_enabled: bool = False
     controlnet_conditioning_scale: float = 0.4
     controlnet_method: str = "control_v11p_sd15_canny"

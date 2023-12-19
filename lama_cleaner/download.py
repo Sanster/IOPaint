@@ -5,7 +5,7 @@ from typing import List
 from loguru import logger
 from pathlib import Path
 
-from lama_cleaner.const import DIFFUSERS_MODEL_FP16_REVERSION
+from lama_cleaner.const import DIFFUSERS_MODEL_FP16_REVERSION, DEFAULT_MODEL_DIR
 from lama_cleaner.schema import (
     ModelInfo,
     ModelType,
@@ -117,9 +117,7 @@ def scan_models() -> List[ModelInfo]:
 
     available_models = []
     available_models.extend(scan_inpaint_models())
-    available_models.extend(
-        scan_single_file_diffusion_models(os.environ["XDG_CACHE_HOME"])
-    )
+    available_models.extend(scan_single_file_diffusion_models(DEFAULT_MODEL_DIR))
 
     cache_dir = Path(DIFFUSERS_CACHE)
     diffusers_model_names = []

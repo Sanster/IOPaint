@@ -20,8 +20,6 @@ def test_load_model():
             hf_access_token="",
             disable_nsfw=False,
             sd_cpu_textencoder=True,
-            sd_run_local=True,
-            local_files_only=True,
             cpu_offload=True,
             enable_xformers=False,
         )
