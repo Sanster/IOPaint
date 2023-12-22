@@ -163,28 +163,10 @@ def parse_args():
         choices=RESTOREFORMER_AVAILABLE_DEVICES,
     )
     parser.add_argument(
-        "--enable-gif",
-        action="store_true",
-        help=GIF_HELP,
-    )
-    parser.add_argument(
         "--install-plugins-package",
         action="store_true",
     )
     #########
-
-    ### useless args ###
-    parser.add_argument("--sd-local-model-path", default=None, help=argparse.SUPPRESS)
-    parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--hf_access_token", default="", help=argparse.SUPPRESS)
-    parser.add_argument(
-        "--sd-disable-nsfw", action="store_true", help=argparse.SUPPRESS
-    )
-    parser.add_argument("--sd-run-local", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument(
-        "--sd-enable-xformers", action="store_true", help=argparse.SUPPRESS
-    )
-    ### end useless args ###
 
     args = parser.parse_args()
     # collect system info to help debug

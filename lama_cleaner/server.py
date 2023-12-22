@@ -33,7 +33,6 @@ from lama_cleaner.plugins import (
     InteractiveSeg,
     RemoveBG,
     RealESRGANUpscaler,
-    MakeGIF,
     GFPGANPlugin,
     RestoreFormerPlugin,
     AnimeSeg,
@@ -373,13 +372,6 @@ def run_plugin():
     logger.info(f"{name} process time: {(time.time() - start) * 1000}ms")
     torch_gc()
 
-    if name == MakeGIF.name:
-        return send_file(
-            io.BytesIO(bgr_res),
-            mimetype="image/gif",
-            as_attachment=True,
-            download_name=form["filename"],
-        )
     if name == InteractiveSeg.name:
         return make_response(
             send_file(
@@ -427,6 +419,7 @@ def get_server_config():
         "enableAutoSaving": enable_auto_saving,
         "enableControlnet": model.sd_controlnet,
         "controlnetMethod": model.sd_controlnet_method,
+        "disableModelSwitch": is_disable_model_switch,
     }, 200
 
 
@@ -528,11 +521,6 @@ def build_plugins(args):
             args.restoreformer_device,
             upscaler=plugins.get(RealESRGANUpscaler.name, None),
         )
-
-    if args.enable_gif:
-        logger.info(f"Initialize GIF plugin")
-        plugins[MakeGIF.name] = MakeGIF()
-
 
 def main(args):
     global model
