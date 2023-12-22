@@ -314,7 +314,7 @@ export function SettingsDialog() {
 
         <Separator />
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name="enableUploadMask"
           render={({ field }) => (
@@ -334,7 +334,7 @@ export function SettingsDialog() {
             </FormItem>
           )}
         />
-        <Separator />
+        <Separator /> */}
       </div>
     )
   }

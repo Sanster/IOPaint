@@ -5,6 +5,7 @@ import "inter-ui/inter.css"
 import App from "./App.tsx"
 import "./globals.css"
 import { ThemeProvider } from "next-themes"
+import { TooltipProvider } from "./components/ui/tooltip.tsx"
 
 const queryClient = new QueryClient()
 
@@ -12,7 +13,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" disableTransitionOnChange>
-        <App />
+        <TooltipProvider>
+          <App />
+        </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
   </React.StrictMode>

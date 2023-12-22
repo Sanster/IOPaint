@@ -1,4 +1,4 @@
-import { FormEvent } from "react"
+import { FormEvent, useState } from "react"
 import { useToggle } from "react-use"
 import { useStore } from "@/lib/states"
 import { Switch } from "./ui/switch"
@@ -17,16 +17,109 @@ import { SDSampler } from "@/lib/types"
 import { Separator } from "./ui/separator"
 import { ScrollArea } from "./ui/scroll-area"
 import { Sheet, SheetContent, SheetHeader, SheetTrigger } from "./ui/sheet"
-import { ChevronLeft, ChevronRight, Upload } from "lucide-react"
+import {
+  ArrowDownFromLine,
+  ArrowLeftFromLine,
+  ArrowRightFromLine,
+  ArrowUpFromLine,
+  ChevronLeft,
+  ChevronRight,
+  HelpCircle,
+  LucideIcon,
+  Maximize,
+  Move,
+  MoveHorizontal,
+  MoveVertical,
+  Upload,
+} from "lucide-react"
 import { Button, ImageUploadButton } from "./ui/button"
 import useHotKey from "@/hooks/useHotkey"
 import { Slider } from "./ui/slider"
 import { useImage } from "@/hooks/useImage"
-import { INSTRUCT_PIX2PIX, PAINT_BY_EXAMPLE } from "@/lib/const"
+import {
+  EXTENDER_ALL,
+  EXTENDER_BUILTIN_ALL,
+  EXTENDER_BUILTIN_X_LEFT,
+  EXTENDER_BUILTIN_X_RIGHT,
+  EXTENDER_BUILTIN_Y_BOTTOM,
+  EXTENDER_BUILTIN_Y_TOP,
+  EXTENDER_X,
+  EXTENDER_Y,
+  INSTRUCT_PIX2PIX,
+  PAINT_BY_EXAMPLE,
+} from "@/lib/const"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip"
 
 const RowContainer = ({ children }: { children: React.ReactNode }) => (
   <div className="flex justify-between items-center pr-2">{children}</div>
 )
+
+const ExtenderButton = ({
+  IconCls,
+  text,
+  onClick,
+}: {
+  IconCls: LucideIcon
+  text: string
+  onClick: () => void
+}) => {
+  const [showExtender] = useStore((state) => [state.settings.showExtender])
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      className="p-1"
+      disabled={!showExtender}
+      onClick={onClick}
+    >
+      <div className="flex items-center gap-1">
+        <IconCls size={15} strokeWidth={1} />
+        {text}
+      </div>
+    </Button>
+  )
+}
+
+const LabelTitle = ({
+  text,
+  toolTip,
+  url,
+  htmlFor,
+  disabled = false,
+}: {
+  text: string
+  toolTip?: string
+  url?: string
+  htmlFor?: string
+  disabled?: boolean
+}) => {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Label
+          htmlFor={htmlFor ? htmlFor : text.toLowerCase().replace(" ", "-")}
+          className="font-medium"
+          disabled={disabled}
+        >
+          {text}
+        </Label>
+      </TooltipTrigger>
+      <TooltipContent className="flex flex-col max-w-xs text-sm" side="left">
+        <p>{toolTip}</p>
+        {url ? (
+          <Button variant="link" className="justify-end">
+            <a href={url} target="_blank">
+              More info
+            </a>
+          </Button>
+        ) : (
+          <></>
+        )}
+      </TooltipContent>
+    </Tooltip>
+  )
+}
 
 const SidePanel = () => {
   const [
@@ -38,6 +131,8 @@ const SidePanel = () => {
     showSidePanel,
     runInpainting,
     updateAppState,
+    updateExtenderByBuiltIn,
+    updateExtenderDirection,
   ] = useStore((state) => [
     state.settings,
     state.windowSize,
@@ -47,6 +142,8 @@ const SidePanel = () => {
     state.showSidePanel(),
     state.runInpainting,
     state.updateAppState,
+    state.updateExtenderByBuiltIn,
+    state.updateExtenderDirection,
   ])
   const [exampleImage, isExampleImageLoaded] = useImage(paintByExampleFile)
   const [open, toggleOpen] = useToggle(true)
@@ -75,7 +172,7 @@ const SidePanel = () => {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center pr-2">
-            <Label htmlFor="controlnet">Controlnet</Label>
+            <LabelTitle text="Controlnet" />
             <Switch
               id="controlnet"
               checked={settings.enableControlnet}
@@ -148,7 +245,11 @@ const SidePanel = () => {
     return (
       <>
         <RowContainer>
-          <Label htmlFor="lcm-lora">LCM Lora</Label>
+          <LabelTitle
+            text="LCM Lora"
+            url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inference_with_lcm_lora"
+            toolTip="Enable quality image generation in typically 2-4 steps. Suggest disabling guidance_scale by setting it to 0. You can also try values between 1.0 and 2.0. When LCM Lora is enabled, LCMSampler will be used automatically."
+          />
           <Switch
             id="lcm-lora"
             checked={settings.enableLCMLora}
@@ -170,7 +271,7 @@ const SidePanel = () => {
     return (
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center pr-2">
-          <Label htmlFor="freeu">Freeu</Label>
+          <LabelTitle text="Freeu" />
           <Switch
             id="freeu"
             checked={settings.enableFreeu}
@@ -182,9 +283,11 @@ const SidePanel = () => {
         <div className="flex flex-col gap-4">
           <div className="flex justify-center gap-6">
             <div className="flex gap-2 items-center justify-center">
-              <Label htmlFor="freeu-s1" disabled={!settings.enableFreeu}>
-                s1
-              </Label>
+              <LabelTitle
+                htmlFor="freeu-s1"
+                text="s1"
+                disabled={!settings.enableFreeu}
+              />
               <NumberInput
                 id="freeu-s1"
                 className="w-14"
@@ -199,9 +302,11 @@ const SidePanel = () => {
               />
             </div>
             <div className="flex gap-2 items-center justify-center">
-              <Label htmlFor="freeu-s2" disabled={!settings.enableFreeu}>
-                s2
-              </Label>
+              <LabelTitle
+                htmlFor="freeu-s2"
+                text="s2"
+                disabled={!settings.enableFreeu}
+              />
               <NumberInput
                 id="freeu-s2"
                 className="w-14"
@@ -219,9 +324,11 @@ const SidePanel = () => {
 
           <div className="flex justify-center gap-6">
             <div className="flex gap-2 items-center justify-center">
-              <Label htmlFor="freeu-b1" disabled={!settings.enableFreeu}>
-                b1
-              </Label>
+              <LabelTitle
+                htmlFor="freeu-b1"
+                text="b1"
+                disabled={!settings.enableFreeu}
+              />
               <NumberInput
                 id="freeu-b1"
                 className="w-14"
@@ -236,9 +343,11 @@ const SidePanel = () => {
               />
             </div>
             <div className="flex gap-2 items-center justify-center">
-              <Label htmlFor="freeu-b2" disabled={!settings.enableFreeu}>
-                b2
-              </Label>
+              <LabelTitle
+                htmlFor="freeu-b2"
+                text="b2"
+                disabled={!settings.enableFreeu}
+              />
               <NumberInput
                 id="freeu-b2"
                 className="w-14"
@@ -266,7 +375,11 @@ const SidePanel = () => {
 
     return (
       <div className="flex flex-col gap-4">
-        <Label htmlFor="negative-prompt">Negative prompt</Label>
+        <LabelTitle
+          text="Negative prompt"
+          url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inpaint#negative-prompt"
+          toolTip="Negative prompt guides the model away from generating certain things in an image"
+        />
         <div className="pl-2 pr-4">
           <Textarea
             rows={4}
@@ -336,7 +449,10 @@ const SidePanel = () => {
     }
     return (
       <div className="flex flex-col gap-1">
-        <Label htmlFor="image-guidance-scale">Image guidance scale</Label>
+        <LabelTitle
+          htmlFor="image-guidance-scale"
+          text="Image guidance scale"
+        />
         <RowContainer>
           <Slider
             className="w-[180px]"
@@ -370,7 +486,11 @@ const SidePanel = () => {
 
     return (
       <div className="flex flex-col gap-1">
-        <Label htmlFor="strength">Strength</Label>
+        <LabelTitle
+          text="Strength"
+          url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inpaint#strength"
+          toolTip="Strength is a measure of how much noise is added to the base image, which influences how similar the output is to the base image. Higher value means more noise and more different from the base image"
+        />
         <RowContainer>
           <Slider
             className="w-[180px]"
@@ -397,22 +517,145 @@ const SidePanel = () => {
     )
   }
 
-  const renderExpender = () => {
+  const renderExtender = () => {
     return (
       <>
-        <RowContainer>
-          <Label htmlFor="Expender">Expender</Label>
-          <Switch
-            id="expender"
-            checked={settings.showExpender}
-            onCheckedChange={(value) => {
-              updateSettings({ showExpender: value })
-              if (value) {
-                updateSettings({ showCropper: false })
-              }
-            }}
-          />
-        </RowContainer>
+        <div className="flex flex-col gap-4">
+          <RowContainer>
+            <LabelTitle text="Extender" />
+            <Switch
+              id="extender"
+              checked={settings.showExtender}
+              onCheckedChange={(value) => {
+                updateSettings({ showExtender: value })
+                if (value) {
+                  updateSettings({ showCropper: false })
+                }
+              }}
+            />
+          </RowContainer>
+
+          <Tabs
+            defaultValue={settings.extenderDirection}
+            onValueChange={(value) => updateExtenderDirection(value)}
+            className="flex flex-col justify-center items-center"
+          >
+            <TabsList className="w-[140px] mb-2">
+              <TabsTrigger value={EXTENDER_X} disabled={!settings.showExtender}>
+                <MoveHorizontal size={20} strokeWidth={1} />
+              </TabsTrigger>
+              <TabsTrigger value={EXTENDER_Y} disabled={!settings.showExtender}>
+                <MoveVertical size={20} strokeWidth={1} />
+              </TabsTrigger>
+              <TabsTrigger
+                value={EXTENDER_ALL}
+                disabled={!settings.showExtender}
+              >
+                <Move size={20} strokeWidth={1} />
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent
+              value={EXTENDER_X}
+              className="flex gap-2 justify-center mt-0"
+            >
+              <ExtenderButton
+                IconCls={ArrowLeftFromLine}
+                text="1.5x"
+                onClick={() =>
+                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_X_LEFT, 1.5)
+                }
+              />
+              <ExtenderButton
+                IconCls={ArrowLeftFromLine}
+                text="2.0x"
+                onClick={() =>
+                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_X_LEFT, 2.0)
+                }
+              />
+              <ExtenderButton
+                IconCls={ArrowRightFromLine}
+                text="1.5x"
+                onClick={() =>
+                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_X_RIGHT, 1.5)
+                }
+              />
+              <ExtenderButton
+                IconCls={ArrowRightFromLine}
+                text="2.0x"
+                onClick={() =>
+                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_X_RIGHT, 2.0)
+                }
+              />
+            </TabsContent>
+            <TabsContent
+              value={EXTENDER_Y}
+              className="flex gap-2 justify-center mt-0"
+            >
+              <ExtenderButton
+                IconCls={ArrowUpFromLine}
+                text="1.5x"
+                onClick={() =>
+                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_Y_TOP, 1.5)
+                }
+              />
+              <ExtenderButton
+                IconCls={ArrowUpFromLine}
+                text="2.0x"
+                onClick={() =>
+                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_Y_TOP, 2.0)
+                }
+              />
+              <ExtenderButton
+                IconCls={ArrowDownFromLine}
+                text="1.5x"
+                onClick={() =>
+                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_Y_BOTTOM, 1.5)
+                }
+              />
+              <ExtenderButton
+                IconCls={ArrowDownFromLine}
+                text="2.0x"
+                onClick={() =>
+                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_Y_BOTTOM, 2.0)
+                }
+              />
+            </TabsContent>
+            <TabsContent
+              value={EXTENDER_ALL}
+              className="flex gap-2 justify-center mt-0"
+            >
+              <ExtenderButton
+                IconCls={Maximize}
+                text="1.25x"
+                onClick={() =>
+                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_ALL, 1.25)
+                }
+              />
+              <ExtenderButton
+                IconCls={Maximize}
+                text="1.5x"
+                onClick={() =>
+                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_ALL, 1.5)
+                }
+              />
+              <ExtenderButton
+                IconCls={Maximize}
+                text="1.75x"
+                onClick={() =>
+                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_ALL, 1.75)
+                }
+              />
+              <ExtenderButton
+                IconCls={Maximize}
+                text="2.0x"
+                onClick={() =>
+                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_ALL, 2.0)
+                }
+              />
+            </TabsContent>
+          </Tabs>
+        </div>
         <Separator />
       </>
     )
@@ -466,23 +709,23 @@ const SidePanel = () => {
         >
           <div className="flex flex-col gap-4 mt-4">
             <RowContainer>
-              <Label htmlFor="cropper">Cropper</Label>
+              <LabelTitle text="Cropper" />
               <Switch
                 id="cropper"
                 checked={settings.showCropper}
                 onCheckedChange={(value) => {
                   updateSettings({ showCropper: value })
                   if (value) {
-                    updateSettings({ showExpender: false })
+                    updateSettings({ showExtender: false })
                   }
                 }}
               />
             </RowContainer>
 
-            {renderExpender()}
+            {renderExtender()}
 
             <div className="flex flex-col gap-1">
-              <Label htmlFor="steps">Steps</Label>
+              <LabelTitle htmlFor="steps" text="Steps" />
               <RowContainer>
                 <Slider
                   className="w-[180px]"
@@ -506,12 +749,16 @@ const SidePanel = () => {
             </div>
 
             <div className="flex flex-col gap-1">
-              <Label htmlFor="guidance-scale">Guidance scale</Label>
+              <LabelTitle
+                text="Guidance scale"
+                url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inpaint#guidance-scale"
+                toolTip="Guidance scale affects how aligned the text prompt and generated image are. Higher value means the prompt and generated image are closely aligned, so the output is a stricter interpretation of the prompt"
+              />
               <RowContainer>
                 <Slider
                   className="w-[180px]"
                   defaultValue={[750]}
-                  min={100}
+                  min={0}
                   max={1500}
                   step={1}
                   value={[Math.floor(settings.sdGuidanceScale * 100)]}
@@ -535,7 +782,7 @@ const SidePanel = () => {
             {renderStrength()}
 
             <RowContainer>
-              <Label htmlFor="sampler">Sampler</Label>
+              <LabelTitle text="Sampler" />
               <Select
                 value={settings.sdSampler as string}
                 onValueChange={(value) => {
@@ -563,7 +810,11 @@ const SidePanel = () => {
 
             <RowContainer>
               {/* 每次会从服务器返回更新该值 */}
-              <Label htmlFor="seed">Seed</Label>
+              <LabelTitle
+                text="Seed"
+                toolTip="Using same parameters and a fixed seed can generate same result image."
+              />
+              {/* <Pin /> */}
               <div className="flex gap-2 justify-center items-center">
                 <Switch
                   id="seed"
@@ -594,7 +845,10 @@ const SidePanel = () => {
             {renderLCMLora()}
 
             <div className="flex flex-col gap-1">
-              <Label htmlFor="mask-blur">Mask blur</Label>
+              <LabelTitle
+                text="Mask blur"
+                toolTip="How much to blur the mask before processing, in pixels."
+              />
               <RowContainer>
                 <Slider
                   className="w-[180px]"
@@ -620,7 +874,11 @@ const SidePanel = () => {
             </div>
 
             <RowContainer>
-              <Label htmlFor="match-histograms">Match histograms</Label>
+              <LabelTitle
+                text="Match histograms"
+                toolTip="Match the inpainting result histogram to the source image histogram"
+                url="https://github.com/Sanster/lama-cleaner/pull/143#issuecomment-1325859307"
+              />
               <Switch
                 id="match-histograms"
                 checked={settings.sdMatchHistograms}

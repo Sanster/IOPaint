@@ -1,3 +1,4 @@
+import { EXTENDER_ALL, EXTENDER_X, EXTENDER_Y } from "@/lib/const"
 import { useStore } from "@/lib/states"
 import { cn } from "@/lib/utils"
 import React, { useEffect, useState } from "react"
@@ -18,8 +19,6 @@ interface EVData {
 }
 
 interface Props {
-  maxHeight: number
-  maxWidth: number
   scale: number
   minHeight: number
   minWidth: number
@@ -30,66 +29,44 @@ const clamp = (
   newPos: number,
   newLength: number,
   oldPos: number,
-  oldLength: number,
-  minLength: number,
-  maxLength: number
+  minLength: number
 ) => {
-  return [newPos, newLength]
-  if (newPos !== oldPos && newLength === oldLength) {
-    if (newPos < 0) {
-      return [0, oldLength]
+  if (newLength < minLength) {
+    if (newPos === oldPos) {
+      return [newPos, minLength]
     }
-    if (newPos + newLength > maxLength) {
-      return [maxLength - oldLength, oldLength]
-    }
-  } else {
-    if (newLength < minLength) {
-      if (newPos === oldPos) {
-        return [newPos, minLength]
-      }
-      return [newPos + newLength - minLength, minLength]
-    }
-    if (newPos < 0) {
-      return [0, newPos + newLength]
-    }
-    if (newPos + newLength > maxLength) {
-      return [newPos, maxLength - newPos]
-    }
+    return [newPos + newLength - minLength, minLength]
   }
 
   return [newPos, newLength]
 }
 
 const Extender = (props: Props) => {
-  const { minHeight, minWidth, maxHeight, maxWidth, scale, show } = props
+  const { minHeight, minWidth, scale, show } = props
 
   const [
-    imageWidth,
-    imageHeight,
     isInpainting,
+    imageHeight,
+    imageWdith,
     { x, y, width, height },
     setX,
     setY,
     setWidth,
     setHeight,
+    extenderDirection,
   ] = useStore((state) => [
-    state.imageWidth,
-    state.imageHeight,
     state.isInpainting,
+    state.imageHeight,
+    state.imageWidth,
     state.extenderState,
     state.setExtenderX,
     state.setExtenderY,
     state.setExtenderWidth,
     state.setExtenderHeight,
+    state.settings.extenderDirection,
   ])
 
   const [isResizing, setIsResizing] = useState(false)
-  const [isMoving, setIsMoving] = useState(false)
-
-  useEffect(() => {
-    setX(Math.round((maxWidth - 512) / 2))
-    setY(Math.round((maxHeight - 512) / 2))
-  }, [maxHeight, maxWidth, imageWidth, imageHeight])
 
   const [evData, setEVData] = useState<EVData>({
     initX: 0,
@@ -106,11 +83,11 @@ const Extender = (props: Props) => {
   }
 
   const clampLeftRight = (newX: number, newWidth: number) => {
-    return clamp(newX, newWidth, x, width, minWidth, maxWidth)
+    return clamp(newX, newWidth, x, minWidth)
   }
 
   const clampTopBottom = (newY: number, newHeight: number) => {
-    return clamp(newY, newHeight, y, height, minHeight, maxHeight)
+    return clamp(newY, newHeight, y, minHeight)
   }
 
   const onPointerMove = (e: PointerEvent) => {
@@ -126,14 +103,31 @@ const Extender = (props: Props) => {
     const moveTop = () => {
       const newHeight = evData.initHeight - offsetY
       const newY = evData.initY + offsetY
-      const [clampedY, clampedHeight] = clampTopBottom(newY, newHeight)
+      let clampedY = newY
+      let clampedHeight = newHeight
+      if (extenderDirection === EXTENDER_ALL) {
+        if (clampedY > 0) {
+          clampedY = 0
+          clampedHeight = evData.initHeight - Math.abs(evData.initY)
+        }
+      } else {
+        const clamped = clampTopBottom(newY, newHeight)
+        clampedY = clamped[0]
+        clampedHeight = clamped[1]
+      }
       setHeight(clampedHeight)
       setY(clampedY)
     }
 
     const moveBottom = () => {
       const newHeight = evData.initHeight + offsetY
-      const [clampedY, clampedHeight] = clampTopBottom(evData.initY, newHeight)
+      let [clampedY, clampedHeight] = clampTopBottom(evData.initY, newHeight)
+
+      if (extenderDirection === EXTENDER_ALL) {
+        if (clampedY + clampedHeight < imageHeight) {
+          clampedHeight = imageHeight
+        }
+      }
       setHeight(clampedHeight)
       setY(clampedY)
     }
@@ -141,14 +135,30 @@ const Extender = (props: Props) => {
     const moveLeft = () => {
       const newWidth = evData.initWidth - offsetX
       const newX = evData.initX + offsetX
-      const [clampedX, clampedWidth] = clampLeftRight(newX, newWidth)
+      let clampedX = newX
+      let clampedWidth = newWidth
+      if (extenderDirection === EXTENDER_ALL) {
+        if (clampedX > 0) {
+          clampedX = 0
+          clampedWidth = evData.initWidth - Math.abs(evData.initX)
+        }
+      } else {
+        const clamped = clampLeftRight(newX, newWidth)
+        clampedX = clamped[0]
+        clampedWidth = clamped[1]
+      }
       setWidth(clampedWidth)
       setX(clampedX)
     }
 
     const moveRight = () => {
       const newWidth = evData.initWidth + offsetX
-      const [clampedX, clampedWidth] = clampLeftRight(evData.initX, newWidth)
+      let [clampedX, clampedWidth] = clampLeftRight(evData.initX, newWidth)
+      if (extenderDirection === EXTENDER_ALL) {
+        if (clampedX + clampedWidth < imageWdith) {
+          clampedWidth = imageWdith
+        }
+      }
       setWidth(clampedWidth)
       setX(clampedX)
     }
@@ -196,31 +206,16 @@ const Extender = (props: Props) => {
           break
       }
     }
-
-    if (isMoving) {
-      const newX = evData.initX + offsetX
-      const newY = evData.initY + offsetY
-      const [clampedX, clampedWidth] = clampLeftRight(newX, evData.initWidth)
-      const [clampedY, clampedHeight] = clampTopBottom(newY, evData.initHeight)
-      setWidth(clampedWidth)
-      setHeight(clampedHeight)
-      setX(clampedX)
-      setY(clampedY)
-    }
   }
 
   const onPointerDone = (e: PointerEvent) => {
     if (isResizing) {
       setIsResizing(false)
     }
-
-    if (isMoving) {
-      setIsMoving(false)
-    }
   }
 
   useEffect(() => {
-    if (isResizing || isMoving) {
+    if (isResizing) {
       document.addEventListener("pointermove", onPointerMove, DOC_MOVE_OPTS)
       document.addEventListener("pointerup", onPointerDone, DOC_MOVE_OPTS)
       document.addEventListener("pointercancel", onPointerDone, DOC_MOVE_OPTS)
@@ -238,7 +233,7 @@ const Extender = (props: Props) => {
         )
       }
     }
-  }, [isResizing, isMoving, width, height, evData])
+  }, [isResizing, width, height, evData])
 
   const onCropPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const { ord } = (e.target as HTMLElement).dataset
@@ -300,36 +295,55 @@ const Extender = (props: Props) => {
         onPointerDown={onCropPointerDown}
         className="absolute top-0 h-full w-full"
       >
-        <div
-          className="absolute pointer-events-auto top-0 left-0 w-full cursor-ns-resize h-[12px] mt-[-6px]"
-          data-ord="top"
-        />
-        <div
-          className="absolute pointer-events-auto top-0 right-0 h-full cursor-ew-resize w-[12px] mr-[-6px]"
-          data-ord="right"
-        />
-        <div
-          className="absolute pointer-events-auto bottom-0 left-0 w-full cursor-ns-resize h-[12px] mb-[-6px]"
-          data-ord="bottom"
-        />
-        <div
-          className="absolute pointer-events-auto top-0 left-0 h-full cursor-ew-resize w-[12px] ml-[-6px]"
-          data-ord="left"
-        />
-        {createDragHandle("cursor-nw-resize", "top", "left")}
-        {createDragHandle("cursor-ne-resize", "top", "right")}
-        {createDragHandle("cursor-sw-resize", "bottom", "left")}
-        {createDragHandle("cursor-se-resize", "bottom", "right")}
-        {createDragHandle("cursor-ns-resize", "top", "")}
-        {createDragHandle("cursor-ns-resize", "bottom", "")}
-        {createDragHandle("cursor-ew-resize", "left", "")}
-        {createDragHandle("cursor-ew-resize", "right", "")}
+        {[EXTENDER_Y, EXTENDER_ALL].includes(extenderDirection) ? (
+          <>
+            <div
+              className="absolute pointer-events-auto top-0 left-0 w-full cursor-ns-resize h-[12px] mt-[-6px]"
+              data-ord="top"
+            />
+            <div
+              className="absolute pointer-events-auto bottom-0 left-0 w-full cursor-ns-resize h-[12px] mb-[-6px]"
+              data-ord="bottom"
+            />
+            {createDragHandle("cursor-ns-resize", "top", "")}
+            {createDragHandle("cursor-ns-resize", "bottom", "")}
+          </>
+        ) : (
+          <></>
+        )}
+
+        {[EXTENDER_X, EXTENDER_ALL].includes(extenderDirection) ? (
+          <>
+            <div
+              className="absolute pointer-events-auto top-0 right-0 h-full cursor-ew-resize w-[12px] mr-[-6px]"
+              data-ord="right"
+            />
+            <div
+              className="absolute pointer-events-auto top-0 left-0 h-full cursor-ew-resize w-[12px] ml-[-6px]"
+              data-ord="left"
+            />
+            {createDragHandle("cursor-ew-resize", "left", "")}
+            {createDragHandle("cursor-ew-resize", "right", "")}
+          </>
+        ) : (
+          <></>
+        )}
+
+        {extenderDirection === EXTENDER_ALL ? (
+          <>
+            {createDragHandle("cursor-nw-resize", "top", "left")}
+            {createDragHandle("cursor-ne-resize", "top", "right")}
+            {createDragHandle("cursor-sw-resize", "bottom", "left")}
+            {createDragHandle("cursor-se-resize", "bottom", "right")}
+          </>
+        ) : (
+          <></>
+        )}
       </div>
     )
   }
 
   const onInfoBarPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    setIsMoving(true)
     setEVData({
       initX: x,
       initY: y,
@@ -345,7 +359,7 @@ const Extender = (props: Props) => {
     return (
       <div
         className={twMerge(
-          "border absolute pointer-events-auto px-2 py-1 rounded-full hover:cursor-move bg-background",
+          "border absolute pointer-events-auto px-2 py-1 rounded-full bg-background",
           "origin-top-left top-0 left-0"
         )}
         style={{
@@ -362,7 +376,7 @@ const Extender = (props: Props) => {
   const createBorder = () => {
     return (
       <div
-        className="outline-dashed outline-primary"
+        className={cn("outline-dashed outline-primary")}
         style={{
           height,
           width,

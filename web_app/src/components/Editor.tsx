@@ -28,7 +28,7 @@ import { useStore } from "@/lib/states"
 import Cropper from "./Cropper"
 import { InteractiveSegPoints } from "./InteractiveSeg"
 import useHotKey from "@/hooks/useHotkey"
-import Extender from "./Expender"
+import Extender from "./Extender"
 
 const TOOLBAR_HEIGHT = 200
 const MIN_BRUSH_SIZE = 10
@@ -221,7 +221,9 @@ export default function Editor(props: EditorProps) {
     }
 
     const [width, height] = getCurrentWidthHeight()
-    setImageSize(width, height)
+    if (width !== imageWidth || height !== imageHeight) {
+      setImageSize(width, height)
+    }
 
     const rW = windowSize.width / width
     const rH = (windowSize.height - TOOLBAR_HEIGHT) / height
@@ -255,6 +257,8 @@ export default function Editor(props: EditorProps) {
     }
   }, [
     viewportRef,
+    imageHeight,
+    imageWidth,
     original,
     isOriginalLoaded,
     windowSize,
@@ -619,19 +623,6 @@ export default function Editor(props: EditorProps) {
     }
   )
 
-  useKeyPressEvent(
-    "Alt",
-    (ev) => {
-      ev?.preventDefault()
-      ev?.stopPropagation()
-      // TODO: mouse scroll increase/decrease brush size
-    },
-    (ev) => {
-      ev?.preventDefault()
-      ev?.stopPropagation()
-    }
-  )
-
   const getCurScale = (): number => {
     let s = minScale
     if (viewportRef.current?.instance?.transformState.scale !== undefined) {
@@ -782,19 +773,17 @@ export default function Editor(props: EditorProps) {
           <Cropper
             maxHeight={imageHeight}
             maxWidth={imageWidth}
-            minHeight={Math.min(256, imageHeight)}
-            minWidth={Math.min(256, imageWidth)}
+            minHeight={Math.min(512, imageHeight)}
+            minWidth={Math.min(512, imageWidth)}
             scale={getCurScale()}
             show={settings.showCropper}
           />
 
           <Extender
-            maxHeight={imageHeight}
-            maxWidth={imageWidth}
-            minHeight={Math.min(256, imageHeight)}
-            minWidth={Math.min(256, imageWidth)}
+            minHeight={Math.min(512, imageHeight)}
+            minWidth={Math.min(512, imageWidth)}
             scale={getCurScale()}
-            show={settings.showExpender}
+            show={settings.showExtender}
           />
 
           {interactiveSegState.isInteractiveSeg ? (

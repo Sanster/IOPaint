@@ -79,10 +79,6 @@ export default function FileManager(props: Props) {
     state.updateFileManagerState,
   ])
 
-  useHotKey("f", () => {
-    toggleOpen()
-  })
-
   const { toast } = useToast()
   const [scrollTop, setScrollTop] = useState(0)
   const [closeScrollTop, setCloseScrollTop] = useState(0)
@@ -91,6 +87,37 @@ export default function FileManager(props: Props) {
   const debouncedSearchText = useDebounce(fileManagerState.searchText, 300)
   const [tab, setTab] = useState(IMAGE_TAB)
   const [photos, setPhotos] = useState<Photo[]>([])
+  const [photoIndex, setPhotoIndex] = useState(0)
+
+  useHotKey("f", () => {
+    toggleOpen()
+  })
+
+  useHotKey(
+    "left",
+    () => {
+      let newIndex = photoIndex
+      if (photoIndex > 0) {
+        newIndex = photoIndex - 1
+      }
+      setPhotoIndex(newIndex)
+      onPhotoClick(tab, photos[newIndex].name)
+    },
+    [photoIndex, photos]
+  )
+
+  useHotKey(
+    "right",
+    () => {
+      let newIndex = photoIndex
+      if (photoIndex < photos.length - 1) {
+        newIndex = photoIndex + 1
+      }
+      setPhotoIndex(newIndex)
+      onPhotoClick(tab, photos[newIndex].name)
+    },
+    [photoIndex, photos]
+  )
 
   useEffect(() => {
     if (!open) {
@@ -165,6 +192,7 @@ export default function FileManager(props: Props) {
 
   const onClick = ({ index }: { index: number }) => {
     toggleOpen()
+    setPhotoIndex(index)
     onPhotoClick(tab, photos[index].name)
   }
 

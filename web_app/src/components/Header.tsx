@@ -2,12 +2,6 @@ import { PlayIcon } from "@radix-ui/react-icons"
 import { useCallback, useState } from "react"
 import { IconButton, ImageUploadButton } from "@/components/ui/button"
 import Shortcuts from "@/components/Shortcuts"
-import emitter, {
-  DREAM_BUTTON_MOUSE_ENTER,
-  DREAM_BUTTON_MOUSE_LEAVE,
-  EVENT_CUSTOM_MASK,
-  RERUN_LAST_MASK,
-} from "@/lib/event"
 import { useImage } from "@/hooks/useImage"
 
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
@@ -17,9 +11,9 @@ import FileManager from "./FileManager"
 import { getMediaFile } from "@/lib/api"
 import { useStore } from "@/lib/states"
 import SettingsDialog from "./Settings"
-import { cn } from "@/lib/utils"
-import useHotKey from "@/hooks/useHotkey"
+import { cn, fileToImage } from "@/lib/utils"
 import Coffee from "./Coffee"
+import { useToast } from "./ui/use-toast"
 
 const Header = () => {
   const [
@@ -27,47 +21,48 @@ const Header = () => {
     customMask,
     isInpainting,
     enableFileManager,
-    enableManualInpainting,
+    runMannually,
     enableUploadMask,
     model,
     setFile,
     setCustomFile,
+    runInpainting,
+    showPrevMask,
+    hidePrevMask,
+    imageHeight,
+    imageWidth,
   ] = useStore((state) => [
     state.file,
     state.customMask,
     state.isInpainting,
     state.serverConfig.enableFileManager,
-    state.settings.enableManualInpainting,
+    state.runMannually(),
     state.settings.enableUploadMask,
     state.settings.model,
     state.setFile,
     state.setCustomFile,
+    state.runInpainting,
+    state.showPrevMask,
+    state.hidePrevMask,
+    state.imageHeight,
+    state.imageWidth,
   ])
+
+  const { toast } = useToast()
   const [maskImage, maskImageLoaded] = useImage(customMask)
   const [openMaskPopover, setOpenMaskPopover] = useState(false)
 
-  const handleRerunLastMask = useCallback(() => {
-    emitter.emit(RERUN_LAST_MASK)
-  }, [])
+  const handleRerunLastMask = () => {
+    runInpainting()
+  }
 
   const onRerunMouseEnter = () => {
-    emitter.emit(DREAM_BUTTON_MOUSE_ENTER)
+    showPrevMask()
   }
 
   const onRerunMouseLeave = () => {
-    emitter.emit(DREAM_BUTTON_MOUSE_LEAVE)
+    hidePrevMask()
   }
-
-  useHotKey(
-    "r",
-    () => {
-      if (!isInpainting) {
-        handleRerunLastMask()
-      }
-    },
-    {},
-    [isInpainting, handleRerunLastMask]
-  )
 
   return (
     <header className="h-[60px] px-6 py-4 absolute top-[0] flex justify-between items-center w-full z-20 border-b backdrop-filter backdrop-blur-md bg-background/70">
@@ -103,10 +98,31 @@ const Header = () => {
           <ImageUploadButton
             disabled={isInpainting}
             tooltip="Upload custom mask"
-            onFileUpload={(file) => {
+            onFileUpload={async (file) => {
+              let newCustomMask: HTMLImageElement | null = null
+              try {
+                newCustomMask = await fileToImage(file)
+              } catch (e: any) {
+                toast({
+                  variant: "destructive",
+                  description: e.message ? e.message : e.toString(),
+                })
+                return
+              }
+              if (
+                newCustomMask.naturalHeight !== imageHeight ||
+                newCustomMask.naturalWidth !== imageWidth
+              ) {
+                toast({
+                  variant: "destructive",
+                  description: `The size of the mask must same as image: ${imageWidth}x${imageHeight}`,
+                })
+                return
+              }
+
               setCustomFile(file)
-              if (!enableManualInpainting) {
-                emitter.emit(EVENT_CUSTOM_MASK, { mask: file })
+              if (!runMannually) {
+                runInpainting()
               }
             }}
           >
@@ -125,7 +141,6 @@ const Header = () => {
                 }}
                 onClick={() => {
                   if (customMask) {
-                    emitter.emit(EVENT_CUSTOM_MASK, { mask: customMask })
                   }
                 }}
               >
@@ -149,7 +164,7 @@ const Header = () => {
         {file && !model.need_prompt ? (
           <IconButton
             disabled={isInpainting}
-            tooltip="Rerun last mask"
+            tooltip="Rerun previous mask"
             onClick={handleRerunLastMask}
             onMouseEnter={onRerunMouseEnter}
             onMouseLeave={onRerunMouseLeave}

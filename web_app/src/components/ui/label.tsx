@@ -20,7 +20,12 @@ const Label = React.forwardRef<
 >(({ className, disabled, ...props }, ref) => (
   <LabelPrimitive.Root
     ref={ref}
-    className={cn(labelVariants(), className, disabled ? "opacity-50" : "")}
+    className={cn(
+      labelVariants(),
+      className,
+      disabled ? "opacity-50" : "",
+      "select-none"
+    )}
     {...props}
   />
 ))

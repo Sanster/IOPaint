@@ -67,7 +67,7 @@ export enum SDSampler {
   kEulerA = "k_euler_a",
   dpmPlusPlus = "dpm++",
   uni_pc = "uni_pc",
-  lcm = "lcm",
+  // lcm = "lcm",
 }
 
 export interface FreeuConfig {

@@ -1,6 +1,6 @@
 import { ModelInfo, Rect } from "@/lib/types"
 import { Settings } from "@/lib/states"
-import { dataURItoBlob, srcToFile } from "@/lib/utils"
+import { srcToFile } from "@/lib/utils"
 import axios from "axios"
 
 export const API_ENDPOINT = import.meta.env.VITE_BACKEND
@@ -15,6 +15,7 @@ export default async function inpaint(
   imageFile: File,
   settings: Settings,
   croperRect: Rect,
+  extenderState: Rect,
   mask: File | Blob,
   paintByExampleImage: File | null = null
 ) {
@@ -32,11 +33,18 @@ export default async function inpaint(
 
   fd.append("prompt", settings.prompt)
   fd.append("negativePrompt", settings.negativePrompt)
+
+  fd.append("useCroper", settings.showCropper ? "true" : "false")
   fd.append("croperX", croperRect.x.toString())
   fd.append("croperY", croperRect.y.toString())
   fd.append("croperHeight", croperRect.height.toString())
   fd.append("croperWidth", croperRect.width.toString())
-  fd.append("useCroper", settings.showCropper ? "true" : "false")
+
+  fd.append("useExtender", settings.showExtender ? "true" : "false")
+  fd.append("extenderX", extenderState.x.toString())
+  fd.append("extenderY", extenderState.y.toString())
+  fd.append("extenderHeight", extenderState.height.toString())
+  fd.append("extenderWidth", extenderState.width.toString())
 
   fd.append("sdMaskBlur", settings.sdMaskBlur.toString())
   fd.append("sdStrength", settings.sdStrength.toString())
@@ -82,7 +90,7 @@ export default async function inpaint(
     })
     if (res.ok) {
       const blob = await res.blob()
-      const newSeed = res.headers.get("x-seed")
+      const newSeed = res.headers.get("X-seed")
       return { blob: URL.createObjectURL(blob), seed: newSeed }
     }
     const errMsg = await res.text()

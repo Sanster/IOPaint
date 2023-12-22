@@ -4,12 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 import { Input } from "./input"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./tooltip"
+import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip"
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
@@ -72,27 +67,23 @@ export interface IconButtonProps extends ButtonProps {
 const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
   ({ tooltip, children, ...rest }, ref) => {
     return (
-      <>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                {...rest}
-                ref={ref}
-                tabIndex={-1}
-                className="cursor-default bg-background"
-              >
-                <div className="icon-button-icon-wrapper">{children}</div>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{tooltip}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            {...rest}
+            ref={ref}
+            tabIndex={-1}
+            className="cursor-default bg-background"
+          >
+            <div className="icon-button-icon-wrapper">{children}</div>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{tooltip}</p>
+        </TooltipContent>
+      </Tooltip>
     )
   }
 )

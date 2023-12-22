@@ -21,6 +21,14 @@ import {
   BRUSH_COLOR,
   DEFAULT_BRUSH_SIZE,
   DEFAULT_NEGATIVE_PROMPT,
+  EXTENDER_ALL,
+  EXTENDER_BUILTIN_ALL,
+  EXTENDER_BUILTIN_X_LEFT,
+  EXTENDER_BUILTIN_X_RIGHT,
+  EXTENDER_BUILTIN_Y_BOTTOM,
+  EXTENDER_BUILTIN_Y_TOP,
+  EXTENDER_X,
+  EXTENDER_Y,
   MODEL_TYPE_INPAINT,
   PAINT_BY_EXAMPLE,
 } from "./const"
@@ -56,7 +64,8 @@ export type Settings = {
   enableManualInpainting: boolean
   enableUploadMask: boolean
   showCropper: boolean
-  showExpender: boolean
+  showExtender: boolean
+  extenderDirection: string
 
   // For LDM
   ldmSteps: number
@@ -168,6 +177,9 @@ type AppAction = {
   setExtenderY: (newValue: number) => void
   setExtenderWidth: (newValue: number) => void
   setExtenderHeight: (newValue: number) => void
+  updateExtenderDirection: (newValue: string) => void
+  resetExtender: (width: number, height: number) => void
+  updateExtenderByBuiltIn: (direction: string, scale: number) => void
 
   setServerConfig: (newValue: ServerConfig) => void
   setSeed: (newValue: number) => void
@@ -281,7 +293,8 @@ const defaultValues: AppState = {
     },
     enableControlnet: false,
     showCropper: false,
-    showExpender: false,
+    showExtender: false,
+    extenderDirection: EXTENDER_ALL,
     enableDownloadMask: false,
     enableManualInpainting: false,
     enableUploadMask: false,
@@ -362,7 +375,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         }
         return targetFile
       },
-
+      // todo: 传入 custom mask，单独逻辑
       runInpainting: async () => {
         const {
           isInpainting,
@@ -372,6 +385,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           imageHeight,
           settings,
           cropperState,
+          extenderState,
         } = get()
         if (isInpainting) {
           return
@@ -398,7 +412,11 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         // 2. 结果替换当前 render
         let maskLineGroup: LineGroup = []
         if (useLastLineGroup === true) {
-          if (lastLineGroup.length === 0 && maskImage === null) {
+          if (
+            lastLineGroup.length === 0 &&
+            maskImage === null &&
+            !settings.showExtender
+          ) {
             toast({
               variant: "destructive",
               description: "Please draw mask on picture",
@@ -407,7 +425,11 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           }
           maskLineGroup = lastLineGroup
         } else {
-          if (curLineGroup.length === 0 && maskImage === null) {
+          if (
+            curLineGroup.length === 0 &&
+            maskImage === null &&
+            !settings.showExtender
+          ) {
             toast({
               variant: "destructive",
               description: "Please draw mask on picture",
@@ -455,6 +477,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
             targetFile,
             settings,
             cropperState,
+            extenderState,
             dataURItoBlob(maskCanvas.toDataURL()),
             paintByExampleFile
           )
@@ -465,7 +488,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
 
           const { blob, seed } = res
           if (seed) {
-            set((state) => (state.settings.seed = parseInt(seed, 10)))
+            get().setSeed(parseInt(seed, 10))
           }
           const newRender = new Image()
           await loadImage(newRender, blob)
@@ -794,7 +817,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           state.isPluginRunning = newValue
         }),
 
-      setFile: (file: File) =>
+      setFile: (file: File) => {
         set((state) => {
           state.file = file
           state.interactiveSegState = castDraft(
@@ -802,7 +825,8 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           )
           state.editorState = castDraft(defaultValues.editorState)
           state.cropperState = defaultValues.cropperState
-        }),
+        })
+      },
 
       setCustomFile: (file: File) =>
         set((state) => {
@@ -822,6 +846,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           state.editorState.brushSizeScale =
             Math.max(Math.min(width, height), 512) / 512
         })
+        get().resetExtender(width, height)
       },
 
       setCropperX: (newValue: number) =>
@@ -864,6 +889,68 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           state.extenderState.height = newValue
         }),
 
+      updateExtenderDirection: (newValue: string) => {
+        console.log(
+          `updateExtenderDirection: ${JSON.stringify(get().extenderState)}`
+        )
+        set((state) => {
+          state.settings.extenderDirection = newValue
+          state.extenderState.x = 0
+          state.extenderState.y = 0
+          state.extenderState.width = state.imageWidth
+          state.extenderState.height = state.imageHeight
+        })
+      },
+
+      updateExtenderByBuiltIn: (direction: string, scale: number) => {
+        const newExtenderState = { ...defaultValues.extenderState }
+        let { x, y, width, height } = newExtenderState
+        const { imageWidth, imageHeight } = get()
+        width = imageWidth
+        height = imageHeight
+
+        switch (direction) {
+          case EXTENDER_BUILTIN_X_LEFT:
+            x = -Math.ceil(imageWidth * (scale - 1))
+            width = Math.ceil(imageWidth * scale)
+            break
+          case EXTENDER_BUILTIN_X_RIGHT:
+            width = Math.ceil(imageWidth * scale)
+            break
+          case EXTENDER_BUILTIN_Y_TOP:
+            y = -Math.ceil(imageHeight * (scale - 1))
+            height = Math.ceil(imageHeight * scale)
+            break
+          case EXTENDER_BUILTIN_Y_BOTTOM:
+            height = Math.ceil(imageHeight * scale)
+            break
+          case EXTENDER_BUILTIN_ALL:
+            x = -Math.ceil((imageWidth * (scale - 1)) / 2)
+            y = -Math.ceil((imageHeight * (scale - 1)) / 2)
+            width = Math.ceil(imageWidth * scale)
+            height = Math.ceil(imageHeight * scale)
+            break
+          default:
+            break
+        }
+
+        set((state) => {
+          state.extenderState.x = x
+          state.extenderState.y = y
+          state.extenderState.width = width
+          state.extenderState.height = height
+        })
+      },
+
+      resetExtender: (width: number, height: number) => {
+        set((state) => {
+          state.extenderState.x = 0
+          state.extenderState.y = 0
+          state.extenderState.width = width
+          state.extenderState.height = height
+        })
+      },
+
       setSeed: (newValue: number) =>
         set((state) => {
           state.settings.seed = newValue
@@ -871,7 +958,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
     })),
     {
       name: "ZUSTAND_STATE", // name of the item in the storage (must be unique)
-      version: 1,
+      version: 0,
       partialize: (state) =>
         Object.fromEntries(
           Object.entries(state).filter(([key]) =>

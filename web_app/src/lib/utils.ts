@@ -71,6 +71,26 @@ export function canvasToImage(
   })
 }
 
+export function fileToImage(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const image = new Image()
+      image.onload = () => {
+        resolve(image)
+      }
+      image.onerror = () => {
+        reject("无法加载图像。")
+      }
+      image.src = reader.result as string
+    }
+    reader.onerror = () => {
+      reject("无法读取文件。")
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
 export function srcToFile(src: string, fileName: string, mimeType: string) {
   return fetch(src)
     .then(function (res) {
