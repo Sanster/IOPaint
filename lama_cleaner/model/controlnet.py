@@ -2,7 +2,7 @@ import PIL.Image
 import cv2
 import numpy as np
 import torch
-from diffusers import ControlNetModel
+from diffusers import ControlNetModel, DiffusionPipeline
 from loguru import logger
 
 from lama_cleaner.const import DIFFUSERS_MODEL_FP16_REVERSION
@@ -69,6 +69,7 @@ class ControlNet(DiffusionInpaintModel):
 
         use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
         torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
+        self.torch_dtype = torch_dtype
 
         if model_info.model_type in [
             ModelType.DIFFUSERS_SD,
@@ -130,6 +131,13 @@ class ControlNet(DiffusionInpaintModel):
                 )
 
         self.callback = kwargs.pop("callback", None)
+
+    def switch_controlnet_method(self, new_method: str):
+        self.sd_controlnet_method = new_method
+        controlnet = ControlNetModel.from_pretrained(
+            new_method, torch_dtype=self.torch_dtype, resume_download=True
+        ).to(self.model.device)
+        self.model.controlnet = controlnet
 
     def _get_control_image(self, image, mask):
         if "canny" in self.sd_controlnet_method:

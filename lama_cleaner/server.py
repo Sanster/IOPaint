@@ -258,6 +258,13 @@ def process():
         croper_y=form["croperY"],
         croper_height=form["croperHeight"],
         croper_width=form["croperWidth"],
+
+        use_extender=form["useExtender"],
+        extender_x=form["extenderX"],
+        extender_y=form["extenderY"],
+        extender_height=form["extenderHeight"],
+        extender_width=form["extenderWidth"],
+
         sd_scale=form["sdScale"],
         sd_mask_blur=form["sdMaskBlur"],
         sd_strength=form["sdStrength"],

@@ -105,13 +105,18 @@ class ModelManager:
         if not self.available_models[self.name].support_controlnet:
             return
 
-        if self.sd_controlnet != config.controlnet_enabled or (
-            self.sd_controlnet and self.sd_controlnet_method != config.controlnet_method
+        if (
+            self.sd_controlnet
+            and config.controlnet_method
+            and self.sd_controlnet_method != config.controlnet_method
         ):
-            # 可能关闭/开启 controlnet
-            # 可能开启了 controlnet，切换 controlnet 的方法
-            old_sd_controlnet = self.sd_controlnet
             old_sd_controlnet_method = self.sd_controlnet_method
+            self.sd_controlnet_method = config.controlnet_method
+            self.model.switch_controlnet_method(config.controlnet_method)
+            logger.info(
+                f"Switch Controlnet method from {old_sd_controlnet_method} to {config.controlnet_method}"
+            )
+        elif self.sd_controlnet != config.controlnet_enabled:
             self.sd_controlnet = config.controlnet_enabled
             self.sd_controlnet_method = config.controlnet_method
 
@@ -120,10 +125,6 @@ class ModelManager:
             )
             if not config.controlnet_enabled:
                 logger.info(f"Disable controlnet")
-            elif old_sd_controlnet_method != config.controlnet_method:
-                logger.info(
-                    f"Switch Controlnet method from {old_sd_controlnet_method} to {config.controlnet_method}"
-                )
             else:
                 logger.info(f"Enable controlnet: {config.controlnet_method}")
 

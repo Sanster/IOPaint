@@ -17,6 +17,7 @@ save_dir = current_dir / "result"
 save_dir.mkdir(exist_ok=True, parents=True)
 device = "cuda" if torch.cuda.is_available() else "cpu"
 device = torch.device(device)
+model_name = "runwayml/stable-diffusion-inpainting"
 
 
 @pytest.mark.parametrize("sd_device", ["cuda", "mps"])
@@ -35,7 +36,7 @@ def test_runway_sd_1_5(
 
     sd_steps = 1 if sd_device == "cpu" else 30
     model = ModelManager(
-        name="sd1.5",
+        name=model_name,
         sd_controlnet=True,
         device=torch.device(sd_device),
         hf_access_token="",
@@ -83,7 +84,7 @@ def test_local_file_path(sd_device, sampler):
 
     sd_steps = 1 if sd_device == "cpu" else 30
     model = ModelManager(
-        name="sd1.5",
+        name=model_name,
         sd_controlnet=True,
         device=torch.device(sd_device),
         hf_access_token="",
@@ -121,7 +122,7 @@ def test_local_file_path_controlnet_native_inpainting(sd_device, sampler):
 
     sd_steps = 1 if sd_device == "cpu" else 30
     model = ModelManager(
-        name="sd1.5",
+        name=model_name,
         sd_controlnet=True,
         device=torch.device(sd_device),
         hf_access_token="",
@@ -162,7 +163,7 @@ def test_controlnet_switch(sd_device, sampler):
 
     sd_steps = 1 if sd_device == "cpu" else 30
     model = ModelManager(
-        name="sd1.5",
+        name=model_name,
         sd_controlnet=True,
         device=torch.device(sd_device),
         hf_access_token="",
