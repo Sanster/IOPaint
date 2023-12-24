@@ -65,6 +65,7 @@ export default function Editor(props: EditorProps) {
     updateAppState,
     runMannually,
     runInpainting,
+    isCropperExtenderResizing,
   ] = useStore((state) => [
     state.disableShortCuts,
     state.windowSize,
@@ -87,6 +88,7 @@ export default function Editor(props: EditorProps) {
     state.updateAppState,
     state.runMannually(),
     state.runInpainting,
+    state.isCropperExtenderResizing,
   ])
   const baseBrushSize = useStore((state) => state.editorState.baseBrushSize)
   const brushSize = useStore((state) => state.getBrushSize())
@@ -537,7 +539,7 @@ export default function Editor(props: EditorProps) {
   }
 
   const toggleShowBrush = (newState: boolean) => {
-    if (newState !== showBrush && !isPanning) {
+    if (newState !== showBrush && !isPanning && !isCropperExtenderResizing) {
       setShowBrush(newState)
     }
   }
@@ -693,7 +695,7 @@ export default function Editor(props: EditorProps) {
         limitToBounds={false}
         doubleClick={{ disabled: true }}
         initialScale={minScale}
-        minScale={minScale * 0.6}
+        minScale={minScale * 0.3}
         onPanning={(ref) => {
           if (!panned) {
             setPanned(true)

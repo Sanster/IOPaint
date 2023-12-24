@@ -24,7 +24,6 @@ def save_config(
     cpu_offload,
     disable_nsfw,
     sd_cpu_textencoder,
-    enable_xformers,
     local_files_only,
     model_dir,
     input,
@@ -102,9 +101,6 @@ def main(config_file: str):
 
                 with gr.Column():
                     gui = gr.Checkbox(init_config.gui, label=f"{GUI_HELP}")
-                    no_gui_auto_close = gr.Checkbox(
-                        init_config.no_gui_auto_close, label=f"{NO_GUI_AUTO_CLOSE_HELP}"
-                    )
 
                 with gr.Column():
                     model_dir = gr.Textbox(
@@ -193,13 +189,10 @@ def main(config_file: str):
                     init_config.cpu_offload, label=f"{CPU_OFFLOAD_HELP}"
                 )
                 sd_cpu_textencoder = gr.Checkbox(
-                    init_config.sd_cpu_textencoder, label=f"{SD_CPU_TEXTENCODER_HELP}"
+                    init_config.sd_cpu_textencoder, label=f"{CPU_TEXTENCODER_HELP}"
                 )
                 disable_nsfw = gr.Checkbox(
                     init_config.disable_nsfw, label=f"{DISABLE_NSFW_HELP}"
-                )
-                enable_xformers = gr.Checkbox(
-                    init_config.enable_xformers, label=f"{ENABLE_XFORMERS_HELP}"
                 )
                 local_files_only = gr.Checkbox(
                     init_config.local_files_only, label=f"{LOCAL_FILES_ONLY_HELP}"
@@ -221,7 +214,6 @@ def main(config_file: str):
                 cpu_offload,
                 disable_nsfw,
                 sd_cpu_textencoder,
-                enable_xformers,
                 local_files_only,
                 model_dir,
                 input,

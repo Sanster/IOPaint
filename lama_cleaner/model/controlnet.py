@@ -17,14 +17,6 @@ from lama_cleaner.model.helper.cpu_text_encoder import CPUTextEncoderWrapper
 from lama_cleaner.model.utils import get_scheduler
 from lama_cleaner.schema import Config, ModelInfo, ModelType
 
-# 为了兼容性
-controlnet_name_map = {
-    "control_v11p_sd15_canny": "lllyasviel/control_v11p_sd15_canny",
-    "control_v11p_sd15_openpose": "lllyasviel/control_v11p_sd15_openpose",
-    "control_v11p_sd15_inpaint": "lllyasviel/control_v11p_sd15_inpaint",
-    "control_v11f1p_sd15_depth": "lllyasviel/control_v11f1p_sd15_depth",
-}
-
 
 class ControlNet(DiffusionInpaintModel):
     name = "controlnet"
@@ -49,9 +41,6 @@ class ControlNet(DiffusionInpaintModel):
         fp16 = not kwargs.get("no_half", False)
         model_info: ModelInfo = kwargs["model_info"]
         sd_controlnet_method = kwargs["sd_controlnet_method"]
-        sd_controlnet_method = controlnet_name_map.get(
-            sd_controlnet_method, sd_controlnet_method
-        )
 
         self.model_info = model_info
         self.sd_controlnet_method = sd_controlnet_method
@@ -113,12 +102,6 @@ class ControlNet(DiffusionInpaintModel):
                 **model_kwargs,
             )
 
-        # https://huggingface.co/docs/diffusers/v0.7.0/en/api/pipelines/stable_diffusion#diffusers.StableDiffusionInpaintPipeline.enable_attention_slicing
-        self.model.enable_attention_slicing()
-        # https://huggingface.co/docs/diffusers/v0.7.0/en/optimization/fp16#memory-efficient-attention
-        if kwargs.get("enable_xformers", False):
-            self.model.enable_xformers_memory_efficient_attention()
-
         if kwargs.get("cpu_offload", False) and use_gpu:
             logger.info("Enable sequential cpu offload")
             self.model.enable_sequential_cpu_offload(gpu_id=0)
@@ -162,10 +145,6 @@ class ControlNet(DiffusionInpaintModel):
         scheduler = get_scheduler(config.sd_sampler, scheduler_config)
         self.model.scheduler = scheduler
 
-        if config.sd_mask_blur != 0:
-            k = 2 * config.sd_mask_blur + 1
-            mask = cv2.GaussianBlur(mask, (k, k), 0)[:, :, np.newaxis]
-
         img_h, img_w = image.shape[:2]
         control_image = self._get_control_image(image, mask)
         mask_image = PIL.Image.fromarray(mask[:, :, -1], mode="L")
@@ -190,8 +169,3 @@ class ControlNet(DiffusionInpaintModel):
         output = (output * 255).round().astype("uint8")
         output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
         return output
-
-    @staticmethod
-    def is_downloaded() -> bool:
-        # model will be downloaded when app start, and can't switch in frontend settings
-        return True

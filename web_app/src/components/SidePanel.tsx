@@ -105,18 +105,22 @@ const LabelTitle = ({
           {text}
         </Label>
       </TooltipTrigger>
-      <TooltipContent className="flex flex-col max-w-xs text-sm" side="left">
-        <p>{toolTip}</p>
-        {url ? (
-          <Button variant="link" className="justify-end">
-            <a href={url} target="_blank">
-              More info
-            </a>
-          </Button>
-        ) : (
-          <></>
-        )}
-      </TooltipContent>
+      {toolTip ? (
+        <TooltipContent className="flex flex-col max-w-xs text-sm" side="left">
+          <p>{toolTip}</p>
+          {url ? (
+            <Button variant="link" className="justify-end">
+              <a href={url} target="_blank">
+                More info
+              </a>
+            </Button>
+          ) : (
+            <></>
+          )}
+        </TooltipContent>
+      ) : (
+        <></>
+      )}
     </Tooltip>
   )
 }
@@ -172,7 +176,11 @@ const SidePanel = () => {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center pr-2">
-            <LabelTitle text="Controlnet" />
+            <LabelTitle
+              text="ControlNet"
+              toolTip="Using an additional conditioning image to control how an image is generated"
+              url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inpaint#controlnet"
+            />
             <Switch
               id="controlnet"
               checked={settings.enableControlnet}
@@ -271,7 +279,11 @@ const SidePanel = () => {
     return (
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center pr-2">
-          <LabelTitle text="Freeu" />
+          <LabelTitle
+            text="FreeU"
+            toolTip="FreeU is a technique for improving image quality. Different models may require different FreeU-specific hyperparameters, which can be viewed in the more info section."
+            url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/freeu"
+          />
           <Switch
             id="freeu"
             checked={settings.enableFreeu}
@@ -408,7 +420,10 @@ const SidePanel = () => {
     return (
       <div>
         <RowContainer>
-          <div>Example Image</div>
+          <LabelTitle
+            text="Example Image"
+            toolTip="An example image to guide image generation."
+          />
           <ImageUploadButton
             tooltip="Upload example image"
             onFileUpload={(file) => {
@@ -450,8 +465,9 @@ const SidePanel = () => {
     return (
       <div className="flex flex-col gap-1">
         <LabelTitle
-          htmlFor="image-guidance-scale"
           text="Image guidance scale"
+          toolTip="Push the generated image towards the inital image. Higher image guidance scale encourages generated images that are closely linked to the source image, usually at the expense of lower image quality."
+          url="https://huggingface.co/docs/diffusers/main/en/api/pipelines/pix2pix"
         />
         <RowContainer>
           <Slider
@@ -518,11 +534,17 @@ const SidePanel = () => {
   }
 
   const renderExtender = () => {
+    if (!settings.model.support_outpainting) {
+      return null
+    }
     return (
       <>
         <div className="flex flex-col gap-4">
           <RowContainer>
-            <LabelTitle text="Extender" />
+            <LabelTitle
+              text="Extender"
+              toolTip="Perform outpainting on images to expand it's content."
+            />
             <Switch
               id="extender"
               checked={settings.showExtender}
@@ -709,7 +731,10 @@ const SidePanel = () => {
         >
           <div className="flex flex-col gap-4 mt-4">
             <RowContainer>
-              <LabelTitle text="Cropper" />
+              <LabelTitle
+                text="Cropper"
+                toolTip="Inpainting on part of image, improve inference speed and reduce memory usage."
+              />
               <Switch
                 id="cropper"
                 checked={settings.showCropper}
@@ -725,7 +750,11 @@ const SidePanel = () => {
             {renderExtender()}
 
             <div className="flex flex-col gap-1">
-              <LabelTitle htmlFor="steps" text="Steps" />
+              <LabelTitle
+                htmlFor="steps"
+                text="Steps"
+                toolTip="The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference."
+              />
               <RowContainer>
                 <Slider
                   className="w-[180px]"

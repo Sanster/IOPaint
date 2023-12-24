@@ -55,7 +55,7 @@ def parse_args():
     parser.add_argument("--cpu-offload", action="store_true", help=CPU_OFFLOAD_HELP)
     parser.add_argument("--disable-nsfw", action="store_true", help=DISABLE_NSFW_HELP)
     parser.add_argument(
-        "--sd-cpu-textencoder", action="store_true", help=SD_CPU_TEXTENCODER_HELP
+        "--sd-cpu-textencoder", action="store_true", help=CPU_TEXTENCODER_HELP
     )
     parser.add_argument("--sd-controlnet", action="store_true", help=SD_CONTROLNET_HELP)
     parser.add_argument(
@@ -67,15 +67,9 @@ def parse_args():
         "--local-files-only", action="store_true", help=LOCAL_FILES_ONLY_HELP
     )
     parser.add_argument(
-        "--enable-xformers", action="store_true", help=ENABLE_XFORMERS_HELP
-    )
-    parser.add_argument(
         "--device", default=DEFAULT_DEVICE, type=str, choices=AVAILABLE_DEVICES
     )
     parser.add_argument("--gui", action="store_true", help=GUI_HELP)
-    parser.add_argument(
-        "--no-gui-auto-close", action="store_true", help=NO_GUI_AUTO_CLOSE_HELP
-    )
     parser.add_argument(
         "--gui-size",
         default=[1600, 1000],

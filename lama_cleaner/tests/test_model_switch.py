@@ -16,11 +16,9 @@ def test_model_switch():
         sd_controlnet=True,
         sd_controlnet_method="lllyasviel/control_v11p_sd15_canny",
         device=torch.device("mps"),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=True,
         cpu_offload=False,
-        enable_xformers=False,
         callback=None,
     )
 
@@ -34,11 +32,9 @@ def test_controlnet_switch_onoff(caplog):
         sd_controlnet=True,
         sd_controlnet_method="lllyasviel/control_v11p_sd15_canny",
         device=torch.device("mps"),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=True,
         cpu_offload=False,
-        enable_xformers=False,
         callback=None,
     )
 
@@ -61,11 +57,9 @@ def test_controlnet_switch_method(caplog):
         sd_controlnet=True,
         sd_controlnet_method=old_method,
         device=torch.device("mps"),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=True,
         cpu_offload=False,
-        enable_xformers=False,
         callback=None,
     )
 

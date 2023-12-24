@@ -1,8 +1,5 @@
-import os
-
 import PIL.Image
 import cv2
-import numpy as np
 import torch
 from loguru import logger
 
@@ -49,22 +46,11 @@ class SD(DiffusionInpaintModel):
             self.model = StableDiffusionInpaintPipeline.from_pretrained(
                 self.model_id_or_path,
                 revision="fp16"
-                if (
-                    self.model_id_or_path in DIFFUSERS_MODEL_FP16_REVERSION
-                    and use_gpu
-                    and fp16
-                )
+                if self.model_id_or_path in DIFFUSERS_MODEL_FP16_REVERSION
                 else "main",
                 torch_dtype=torch_dtype,
-                use_auth_token=kwargs["hf_access_token"],
                 **model_kwargs,
             )
-
-        # https://huggingface.co/docs/diffusers/v0.7.0/en/api/pipelines/stable_diffusion#diffusers.StableDiffusionInpaintPipeline.enable_attention_slicing
-        self.model.enable_attention_slicing()
-        # https://huggingface.co/docs/diffusers/v0.7.0/en/optimization/fp16#memory-efficient-attention
-        if kwargs.get("enable_xformers", False):
-            self.model.enable_xformers_memory_efficient_attention()
 
         if kwargs.get("cpu_offload", False) and use_gpu:
             # TODO: gpu_id
@@ -88,10 +74,6 @@ class SD(DiffusionInpaintModel):
         """
         self.set_scheduler(config)
 
-        if config.sd_mask_blur != 0:
-            k = 2 * config.sd_mask_blur + 1
-            mask = cv2.GaussianBlur(mask, (k, k), 0)[:, :, np.newaxis]
-
         img_h, img_w = image.shape[:2]
 
         output = self.model(
@@ -113,17 +95,6 @@ class SD(DiffusionInpaintModel):
         output = (output * 255).round().astype("uint8")
         output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
         return output
-
-    @staticmethod
-    def is_downloaded() -> bool:
-        # model will be downloaded when app start, and can't switch in frontend settings
-        return True
-
-    @classmethod
-    def download(cls):
-        from diffusers import StableDiffusionInpaintPipeline
-
-        StableDiffusionInpaintPipeline.from_pretrained(cls.model_id_or_path)
 
 
 class SD15(SD):

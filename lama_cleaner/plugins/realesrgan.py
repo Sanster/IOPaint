@@ -3,7 +3,7 @@ from enum import Enum
 import cv2
 from loguru import logger
 
-from lama_cleaner.const import RealESRGANModelName
+from lama_cleaner.const import RealESRGANModel
 from lama_cleaner.helper import download_model
 from lama_cleaner.plugins.base_plugin import BasePlugin
 
@@ -18,7 +18,7 @@ class RealESRGANUpscaler(BasePlugin):
         from realesrgan.archs.srvgg_arch import SRVGGNetCompact
 
         REAL_ESRGAN_MODELS = {
-            RealESRGANModelName.realesr_general_x4v3: {
+            RealESRGANModel.realesr_general_x4v3: {
                 "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth",
                 "scale": 4,
                 "model": lambda: SRVGGNetCompact(
@@ -31,7 +31,7 @@ class RealESRGANUpscaler(BasePlugin):
                 ),
                 "model_md5": "91a7644643c884ee00737db24e478156",
             },
-            RealESRGANModelName.RealESRGAN_x4plus: {
+            RealESRGANModel.RealESRGAN_x4plus: {
                 "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth",
                 "scale": 4,
                 "model": lambda: RRDBNet(
@@ -44,7 +44,7 @@ class RealESRGANUpscaler(BasePlugin):
                 ),
                 "model_md5": "99ec365d4afad750833258a1a24f44ca",
             },
-            RealESRGANModelName.RealESRGAN_x4plus_anime_6B: {
+            RealESRGANModel.RealESRGAN_x4plus_anime_6B: {
                 "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth",
                 "scale": 4,
                 "model": lambda: RRDBNet(

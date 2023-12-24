@@ -17,11 +17,9 @@ def test_load_model():
             name=m,
             device="cpu",
             no_half=False,
-            hf_access_token="",
             disable_nsfw=False,
             sd_cpu_textencoder=True,
             cpu_offload=True,
-            enable_xformers=False,
         )
 
 

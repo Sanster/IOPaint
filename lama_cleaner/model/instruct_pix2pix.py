@@ -31,29 +31,14 @@ class InstructPix2Pix(DiffusionInpaintModel):
         use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
         torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
         self.model = StableDiffusionInstructPix2PixPipeline.from_pretrained(
-            "timbrooks/instruct-pix2pix",
-            revision="fp16" if use_gpu and fp16 else "main",
-            torch_dtype=torch_dtype,
-            **model_kwargs
+            self.name, variant="fp16", torch_dtype=torch_dtype, **model_kwargs
         )
-
-        self.model.enable_attention_slicing()
-        if kwargs.get("enable_xformers", False):
-            self.model.enable_xformers_memory_efficient_attention()
 
         if kwargs.get("cpu_offload", False) and use_gpu:
             logger.info("Enable sequential cpu offload")
             self.model.enable_sequential_cpu_offload(gpu_id=0)
         else:
             self.model = self.model.to(device)
-
-    @staticmethod
-    def download():
-        from diffusers import StableDiffusionInstructPix2PixPipeline
-
-        StableDiffusionInstructPix2PixPipeline.from_pretrained(
-            "timbrooks/instruct-pix2pix", revision="fp16"
-        )
 
     def forward(self, image, mask, config: Config):
         """Input image and output image have same size
@@ -76,8 +61,3 @@ class InstructPix2Pix(DiffusionInpaintModel):
         output = (output * 255).round().astype("uint8")
         output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
         return output
-
-    @staticmethod
-    def is_downloaded() -> bool:
-        # model will be downloaded when app start, and can't switch in frontend settings
-        return True

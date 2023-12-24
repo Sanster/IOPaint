@@ -38,7 +38,6 @@ def test_runway_sd_1_5_all_samplers(
     model = ModelManager(
         name="runwayml/stable-diffusion-inpainting",
         device=torch.device(sd_device),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=False,
     )
@@ -69,7 +68,6 @@ def test_runway_sd_lcm_lora(sd_device, strategy, sampler):
     model = ModelManager(
         name="runwayml/stable-diffusion-inpainting",
         device=torch.device(sd_device),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=False,
     )
@@ -102,7 +100,6 @@ def test_runway_sd_freeu(sd_device, strategy, sampler):
     model = ModelManager(
         name="runwayml/stable-diffusion-inpainting",
         device=torch.device(sd_device),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=False,
     )
@@ -136,7 +133,6 @@ def test_runway_sd_sd_strength(sd_device, strategy, sampler):
     model = ModelManager(
         name="runwayml/stable-diffusion-inpainting",
         device=torch.device(sd_device),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=False,
     )
@@ -165,7 +161,6 @@ def test_runway_norm_sd_model(sd_device, strategy, sampler):
     model = ModelManager(
         name="runwayml/stable-diffusion-v1-5",
         device=torch.device(sd_device),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=False,
     )
@@ -192,7 +187,6 @@ def test_runway_sd_1_5_cpu_offload(sd_device, strategy, sampler):
     model = ModelManager(
         name="runwayml/stable-diffusion-inpainting",
         device=torch.device(sd_device),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         cpu_offload=True,
@@ -229,7 +223,6 @@ def test_local_file_path(sd_device, sampler, name):
     model = ModelManager(
         name=name,
         device=torch.device(sd_device),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         cpu_offload=False,

@@ -71,6 +71,8 @@ const Cropper = (props: Props) => {
     setY,
     setWidth,
     setHeight,
+    isResizing,
+    setIsResizing,
   ] = useStore((state) => [
     state.imageWidth,
     state.imageHeight,
@@ -80,9 +82,11 @@ const Cropper = (props: Props) => {
     state.setCropperY,
     state.setCropperWidth,
     state.setCropperHeight,
+    state.isCropperExtenderResizing,
+    state.setIsCropperExtenderResizing,
   ])
 
-  const [isResizing, setIsResizing] = useState(false)
+  // const [isResizing, setIsResizing] = useState(false)
   const [isMoving, setIsMoving] = useState(false)
 
   useEffect(() => {

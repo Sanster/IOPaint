@@ -24,7 +24,7 @@ class Kandinsky(DiffusionInpaintModel):
         }
 
         self.model = AutoPipelineForInpainting.from_pretrained(
-            self.model_name, **model_kwargs
+            self.model_id_or_path, **model_kwargs
         ).to(device)
 
         self.callback = kwargs.pop("callback", None)
@@ -40,9 +40,6 @@ class Kandinsky(DiffusionInpaintModel):
         self.model.scheduler = scheduler
 
         generator = torch.manual_seed(config.sd_seed)
-        if config.sd_mask_blur != 0:
-            k = 2 * config.sd_mask_blur + 1
-            mask = cv2.GaussianBlur(mask, (k, k), 0)[:, :, np.newaxis]
         mask = mask.astype(np.float32) / 255
         img_h, img_w = image.shape[:2]
 
@@ -66,20 +63,7 @@ class Kandinsky(DiffusionInpaintModel):
         output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
         return output
 
-    @staticmethod
-    def is_downloaded() -> bool:
-        # model will be downloaded when app start, and can't switch in frontend settings
-        return True
-
 
 class Kandinsky22(Kandinsky):
-    name = "kandinsky-community/kandinsky-2-2-decoder-inpaint"
-    model_name = "kandinsky-community/kandinsky-2-2-decoder-inpaint"
-
-    @staticmethod
-    def download():
-        from diffusers import AutoPipelineForInpainting
-
-        AutoPipelineForInpainting.from_pretrained(
-            "kandinsky-community/kandinsky-2-2-decoder-inpaint"
-        )
+    name = "kandinsky2.2"
+    model_id_or_path = "kandinsky-community/kandinsky-2-2-decoder-inpaint"

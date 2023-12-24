@@ -103,6 +103,5 @@ if __name__ == "__main__":
         device=device,
         disable_nsfw=True,
         sd_cpu_textencoder=True,
-        hf_access_token="123"
     )
     benchmark(model, args.times, args.empty_cache)

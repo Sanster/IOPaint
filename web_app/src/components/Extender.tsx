@@ -54,6 +54,8 @@ const Extender = (props: Props) => {
     setWidth,
     setHeight,
     extenderDirection,
+    isResizing,
+    setIsResizing,
   ] = useStore((state) => [
     state.isInpainting,
     state.imageHeight,
@@ -64,9 +66,9 @@ const Extender = (props: Props) => {
     state.setExtenderWidth,
     state.setExtenderHeight,
     state.settings.extenderDirection,
+    state.isCropperExtenderResizing,
+    state.setIsCropperExtenderResizing,
   ])
-
-  const [isResizing, setIsResizing] = useState(false)
 
   const [evData, setEVData] = useState<EVData>({
     initX: 0,
@@ -122,10 +124,9 @@ const Extender = (props: Props) => {
     const moveBottom = () => {
       const newHeight = evData.initHeight + offsetY
       let [clampedY, clampedHeight] = clampTopBottom(evData.initY, newHeight)
-
       if (extenderDirection === EXTENDER_ALL) {
-        if (clampedY + clampedHeight < imageHeight) {
-          clampedHeight = imageHeight
+        if (clampedHeight < Math.abs(clampedY) + imageHeight) {
+          clampedHeight = Math.abs(clampedY) + imageHeight
         }
       }
       setHeight(clampedHeight)
@@ -155,8 +156,8 @@ const Extender = (props: Props) => {
       const newWidth = evData.initWidth + offsetX
       let [clampedX, clampedWidth] = clampLeftRight(evData.initX, newWidth)
       if (extenderDirection === EXTENDER_ALL) {
-        if (clampedX + clampedWidth < imageWdith) {
-          clampedWidth = imageWdith
+        if (clampedWidth < Math.abs(clampedX) + imageWdith) {
+          clampedWidth = Math.abs(clampedX) + imageWdith
         }
       }
       setWidth(clampedWidth)

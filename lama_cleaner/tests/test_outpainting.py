@@ -41,7 +41,6 @@ def test_outpainting(name, sd_device, rect):
     model = ModelManager(
         name=name,
         device=torch.device(sd_device),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         callback=callback,
@@ -86,7 +85,6 @@ def test_kandinsky_outpainting(name, sd_device, rect):
     model = ModelManager(
         name=name,
         device=torch.device(sd_device),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         callback=callback,

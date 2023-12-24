@@ -31,10 +31,6 @@ class PaintByExample(DiffusionInpaintModel):
             "Fantasy-Studio/Paint-by-Example", torch_dtype=torch_dtype, **model_kwargs
         )
 
-        self.model.enable_attention_slicing()
-        if kwargs.get("enable_xformers", False):
-            self.model.enable_xformers_memory_efficient_attention()
-
         # TODO: gpu_id
         if kwargs.get("cpu_offload", False) and use_gpu:
             self.model.image_encoder = self.model.image_encoder.to(device)
@@ -68,8 +64,3 @@ class PaintByExample(DiffusionInpaintModel):
         output = (output * 255).round().astype("uint8")
         output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
         return output
-
-    @staticmethod
-    def is_downloaded() -> bool:
-        # model will be downloaded when app start, and can't switch in frontend settings
-        return True

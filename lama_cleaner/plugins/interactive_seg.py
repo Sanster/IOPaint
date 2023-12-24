@@ -22,7 +22,7 @@ SEGMENT_ANYTHING_MODELS = {
         "url": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth",
         "md5": "4b8939a88964f0f4ff5f5b2642c598a6",
     },
-    "vit_t": {
+    "mobile_sam": {
         "url": "https://github.com/Sanster/models/releases/download/MobileSAM/mobile_sam.pt",
         "md5": "f3c0d8cda613564d499310dab6c812cd",
     },

@@ -150,8 +150,11 @@ type AppState = {
 
   interactiveSegState: InteractiveSegState
   fileManagerState: FileManagerState
+
   cropperState: CropperState
   extenderState: CropperState
+  isCropperExtenderResizing: bool
+
   serverConfig: ServerConfig
 
   settings: Settings
@@ -177,6 +180,7 @@ type AppAction = {
   setExtenderY: (newValue: number) => void
   setExtenderWidth: (newValue: number) => void
   setExtenderHeight: (newValue: number) => void
+  setIsCropperExtenderResizing: (newValue: boolean) => void
   updateExtenderDirection: (newValue: string) => void
   resetExtender: (width: number, height: number) => void
   updateExtenderByBuiltIn: (direction: string, scale: number) => void
@@ -261,6 +265,7 @@ const defaultValues: AppState = {
     width: 512,
     height: 512,
   },
+  isCropperExtenderResizing: false,
 
   fileManagerState: {
     sortBy: SortBy.CTIME,
@@ -887,6 +892,11 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
       setExtenderHeight: (newValue: number) =>
         set((state) => {
           state.extenderState.height = newValue
+        }),
+
+      setIsCropperExtenderResizing: (newValue: boolean) =>
+        set((state) => {
+          state.isCropperExtenderResizing = newValue
         }),
 
       updateExtenderDirection: (newValue: string) => {

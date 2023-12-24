@@ -29,7 +29,6 @@ def test_sdxl(sd_device, strategy, sampler):
     model = ModelManager(
         name="diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
         device=torch.device(sd_device),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         callback=callback,
@@ -70,7 +69,6 @@ def test_sdxl_lcm_lora_and_freeu(sd_device, strategy, sampler):
     model = ModelManager(
         name="diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
         device=torch.device(sd_device),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         callback=callback,
@@ -131,7 +129,6 @@ def test_sdxl_outpainting(sd_device, rect):
     model = ModelManager(
         name="diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
         device=torch.device(sd_device),
-        hf_access_token="",
         disable_nsfw=True,
         sd_cpu_textencoder=False,
     )

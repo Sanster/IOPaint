@@ -41,7 +41,7 @@ class InpaintModel:
     @staticmethod
     @abc.abstractmethod
     def is_downloaded() -> bool:
-        ...
+        return False
 
     @abc.abstractmethod
     def forward(self, image, mask, config: Config):
@@ -67,6 +67,8 @@ class InpaintModel:
 
         logger.info(f"final forward pad size: {pad_image.shape}")
 
+        image, mask = self.forward_pre_process(image, mask, config)
+
         result = self.forward(pad_image, pad_mask, config)
         result = result[0:origin_height, 0:origin_width, :]
 
@@ -76,6 +78,9 @@ class InpaintModel:
             mask = mask[:, :, np.newaxis]
             result = result * (mask / 255) + image[:, :, ::-1] * (1 - (mask / 255))
         return result
+
+    def forward_pre_process(self, image, mask, config):
+        return image, mask
 
     def forward_post_process(self, result, image, mask, config):
         return result, image, mask
@@ -399,6 +404,13 @@ class DiffusionInpaintModel(InpaintModel):
             logger.info(f"LCM Lora enabled, use {sd_sampler} sampler")
         scheduler = get_scheduler(sd_sampler, scheduler_config)
         self.model.scheduler = scheduler
+
+    def forward_pre_process(self, image, mask, config):
+        if config.sd_mask_blur != 0:
+            k = 2 * config.sd_mask_blur + 1
+            mask = cv2.GaussianBlur(mask, (k, k), 0)[:, :, np.newaxis]
+
+        return image, mask
 
     def forward_post_process(self, result, image, mask, config):
         if config.sd_match_histograms:

@@ -45,15 +45,8 @@ class SDXL(DiffusionInpaintModel):
                 self.model_id_or_path,
                 revision="main",
                 torch_dtype=torch_dtype,
-                use_auth_token=kwargs["hf_access_token"],
                 vae=vae,
             )
-
-        # https://huggingface.co/docs/diffusers/v0.7.0/en/api/pipelines/stable_diffusion#diffusers.StableDiffusionInpaintPipeline.enable_attention_slicing
-        self.model.enable_attention_slicing()
-        # https://huggingface.co/docs/diffusers/v0.7.0/en/optimization/fp16#memory-efficient-attention
-        if kwargs.get("enable_xformers", False):
-            self.model.enable_xformers_memory_efficient_attention()
 
         if kwargs.get("cpu_offload", False) and use_gpu:
             logger.info("Enable sequential cpu offload")
@@ -65,14 +58,6 @@ class SDXL(DiffusionInpaintModel):
 
         self.callback = kwargs.pop("callback", None)
 
-    @staticmethod
-    def download():
-        from diffusers import AutoPipelineForInpainting
-
-        AutoPipelineForInpainting.from_pretrained(
-            "diffusers/stable-diffusion-xl-1.0-inpainting-0.1"
-        )
-
     def forward(self, image, mask, config: Config):
         """Input image and output image have same size
         image: [H, W, C] RGB
@@ -80,10 +65,6 @@ class SDXL(DiffusionInpaintModel):
         return: BGR IMAGE
         """
         self.set_scheduler(config)
-
-        if config.sd_mask_blur != 0:
-            k = 2 * config.sd_mask_blur + 1
-            mask = cv2.GaussianBlur(mask, (k, k), 0)[:, :, np.newaxis]
 
         img_h, img_w = image.shape[:2]
 
@@ -106,8 +87,3 @@ class SDXL(DiffusionInpaintModel):
         output = (output * 255).round().astype("uint8")
         output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
         return output
-
-    @staticmethod
-    def is_downloaded() -> bool:
-        # model will be downloaded when app start, and can't switch in frontend settings
-        return True
