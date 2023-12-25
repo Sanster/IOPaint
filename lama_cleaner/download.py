@@ -43,6 +43,7 @@ def folder_name_to_show_name(name: str) -> str:
 
 def scan_single_file_diffusion_models(cache_dir) -> List[ModelInfo]:
     cache_dir = Path(cache_dir)
+    # logger.info(f"Scanning single file sd/sdxl models in {cache_dir}")
     res = []
     for it in cache_dir.glob(f"*.*"):
         if it.suffix not in [".safetensors", ".ckpt"]:
@@ -68,9 +69,11 @@ def scan_single_file_diffusion_models(cache_dir) -> List[ModelInfo]:
     return res
 
 
-def scan_inpaint_models() -> List[ModelInfo]:
+def scan_inpaint_models(model_dir: Path) -> List[ModelInfo]:
     res = []
     from lama_cleaner.model import models
+
+    # logger.info(f"Scanning inpaint models in {model_dir}")
 
     for name, m in models.items():
         if m.is_erase_model and m.is_downloaded():
@@ -87,10 +90,12 @@ def scan_inpaint_models() -> List[ModelInfo]:
 def scan_models() -> List[ModelInfo]:
     from diffusers.utils import DIFFUSERS_CACHE
 
+    model_dir = os.getenv("XDG_CACHE_HOME", DEFAULT_MODEL_DIR)
     available_models = []
-    available_models.extend(scan_inpaint_models())
-    available_models.extend(scan_single_file_diffusion_models(DEFAULT_MODEL_DIR))
+    available_models.extend(scan_inpaint_models(model_dir))
+    available_models.extend(scan_single_file_diffusion_models(model_dir))
     cache_dir = Path(DIFFUSERS_CACHE)
+    # logger.info(f"Scanning diffusers models in {cache_dir}")
     diffusers_model_names = []
     for it in cache_dir.glob("**/*/model_index.json"):
         with open(it, "r", encoding="utf-8") as f:
