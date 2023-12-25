@@ -22,20 +22,11 @@ class ModelManager:
         self.sd_controlnet_method = ""
         self.model = self.init_model(name, device, **kwargs)
 
-    def _map_old_name(self, name: str) -> str:
-        for old_name, model_cls in models.items():
-            if name == old_name and hasattr(model_cls, "model_id_or_path"):
-                name = model_cls.model_id_or_path
-                break
-        return name
-
     @property
     def current_model(self) -> Dict:
-        name = self._map_old_name(self.name)
         return self.available_models[name].model_dump()
 
     def init_model(self, name: str, device, **kwargs):
-        name = self._map_old_name(name)
         logger.info(f"Loading model: {name}")
         if name not in self.available_models:
             raise NotImplementedError(f"Unsupported model: {name}")

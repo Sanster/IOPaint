@@ -3,7 +3,7 @@ import { nanoid } from "nanoid"
 
 import useInputImage from "@/hooks/useInputImage"
 import { keepGUIAlive } from "@/lib/utils"
-import { getServerConfig, isDesktop } from "@/lib/api"
+import { getServerConfig } from "@/lib/api"
 import Header from "@/components/Header"
 import Workspace from "@/components/Workspace"
 import FileSelect from "@/components/FileSelect"
@@ -40,21 +40,14 @@ function Home() {
     updateAppState({ windowSize })
   }, [windowSize])
 
-  // Keeping GUI Window Open
-  useEffect(() => {
-    const fetchData = async () => {
-      const isRunDesktop = await isDesktop().then((res) => res.text())
-      if (isRunDesktop === "True") {
-        keepGUIAlive()
-      }
-    }
-    fetchData()
-  }, [])
-
   useEffect(() => {
     const fetchServerConfig = async () => {
       const serverConfig = await getServerConfig().then((res) => res.json())
       setServerConfig(serverConfig)
+      if (serverConfig.isDesktop) {
+        // Keeping GUI Window Open
+        keepGUIAlive()
+      }
     }
     fetchServerConfig()
   }, [])

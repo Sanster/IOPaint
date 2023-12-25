@@ -1,9 +1,7 @@
-import { FormEvent, useState } from "react"
-import { useToggle } from "react-use"
+import { FormEvent } from "react"
 import { useStore } from "@/lib/states"
-import { Switch } from "./ui/switch"
-import { Label } from "./ui/label"
-import { NumberInput } from "./ui/input"
+import { Switch } from "../ui/switch"
+import { NumberInput } from "../ui/input"
 import {
   Select,
   SelectContent,
@@ -11,56 +9,28 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select"
-import { Textarea } from "./ui/textarea"
+} from "../ui/select"
+import { Textarea } from "../ui/textarea"
 import { SDSampler } from "@/lib/types"
-import { Separator } from "./ui/separator"
-import { ScrollArea } from "./ui/scroll-area"
-import { Sheet, SheetContent, SheetHeader, SheetTrigger } from "./ui/sheet"
-import {
-  ArrowDownFromLine,
-  ArrowLeftFromLine,
-  ArrowRightFromLine,
-  ArrowUpFromLine,
-  ChevronLeft,
-  ChevronRight,
-  HelpCircle,
-  LucideIcon,
-  Maximize,
-  Move,
-  MoveHorizontal,
-  MoveVertical,
-  Upload,
-} from "lucide-react"
-import { Button, ImageUploadButton } from "./ui/button"
-import useHotKey from "@/hooks/useHotkey"
-import { Slider } from "./ui/slider"
+import { Separator } from "../ui/separator"
+import { Move, MoveHorizontal, MoveVertical, Upload } from "lucide-react"
+import { Button, ImageUploadButton } from "../ui/button"
+import { Slider } from "../ui/slider"
 import { useImage } from "@/hooks/useImage"
 import {
   EXTENDER_ALL,
-  EXTENDER_BUILTIN_ALL,
-  EXTENDER_BUILTIN_X_LEFT,
-  EXTENDER_BUILTIN_X_RIGHT,
-  EXTENDER_BUILTIN_Y_BOTTOM,
-  EXTENDER_BUILTIN_Y_TOP,
   EXTENDER_X,
   EXTENDER_Y,
   INSTRUCT_PIX2PIX,
   PAINT_BY_EXAMPLE,
 } from "@/lib/const"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip"
-
-const RowContainer = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex justify-between items-center pr-2">{children}</div>
-)
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
+import { RowContainer, LabelTitle } from "./LabelTitle"
 
 const ExtenderButton = ({
-  IconCls,
   text,
   onClick,
 }: {
-  IconCls: LucideIcon
   text: string
   onClick: () => void
 }) => {
@@ -73,92 +43,32 @@ const ExtenderButton = ({
       disabled={!showExtender}
       onClick={onClick}
     >
-      <div className="flex items-center gap-1">
-        <IconCls size={15} strokeWidth={1} />
-        {text}
-      </div>
+      <div className="flex items-center gap-1">{text}</div>
     </Button>
   )
 }
 
-const LabelTitle = ({
-  text,
-  toolTip,
-  url,
-  htmlFor,
-  disabled = false,
-}: {
-  text: string
-  toolTip?: string
-  url?: string
-  htmlFor?: string
-  disabled?: boolean
-}) => {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Label
-          htmlFor={htmlFor ? htmlFor : text.toLowerCase().replace(" ", "-")}
-          className="font-medium"
-          disabled={disabled}
-        >
-          {text}
-        </Label>
-      </TooltipTrigger>
-      {toolTip ? (
-        <TooltipContent className="flex flex-col max-w-xs text-sm" side="left">
-          <p>{toolTip}</p>
-          {url ? (
-            <Button variant="link" className="justify-end">
-              <a href={url} target="_blank">
-                More info
-              </a>
-            </Button>
-          ) : (
-            <></>
-          )}
-        </TooltipContent>
-      ) : (
-        <></>
-      )}
-    </Tooltip>
-  )
-}
-
-const SidePanel = () => {
+const DiffusionOptions = () => {
   const [
     settings,
-    windowSize,
     paintByExampleFile,
     isProcessing,
     updateSettings,
-    showSidePanel,
     runInpainting,
     updateAppState,
     updateExtenderByBuiltIn,
     updateExtenderDirection,
   ] = useStore((state) => [
     state.settings,
-    state.windowSize,
     state.paintByExampleFile,
     state.getIsProcessing(),
     state.updateSettings,
-    state.showSidePanel(),
     state.runInpainting,
     state.updateAppState,
     state.updateExtenderByBuiltIn,
     state.updateExtenderDirection,
   ])
   const [exampleImage, isExampleImageLoaded] = useImage(paintByExampleFile)
-  const [open, toggleOpen] = useToggle(true)
-
-  useHotKey("c", () => {
-    toggleOpen()
-  })
-
-  if (!showSidePanel) {
-    return null
-  }
 
   const onKeyUp = (e: React.KeyboardEvent) => {
     // negativePrompt 回车触发 inpainting
@@ -582,32 +492,20 @@ const SidePanel = () => {
               className="flex gap-2 justify-center mt-0"
             >
               <ExtenderButton
-                IconCls={ArrowLeftFromLine}
+                text="1.25x"
+                onClick={() => updateExtenderByBuiltIn(EXTENDER_X, 1.25)}
+              />
+              <ExtenderButton
                 text="1.5x"
-                onClick={() =>
-                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_X_LEFT, 1.5)
-                }
+                onClick={() => updateExtenderByBuiltIn(EXTENDER_X, 1.5)}
               />
               <ExtenderButton
-                IconCls={ArrowLeftFromLine}
+                text="1.75x"
+                onClick={() => updateExtenderByBuiltIn(EXTENDER_X, 1.75)}
+              />
+              <ExtenderButton
                 text="2.0x"
-                onClick={() =>
-                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_X_LEFT, 2.0)
-                }
-              />
-              <ExtenderButton
-                IconCls={ArrowRightFromLine}
-                text="1.5x"
-                onClick={() =>
-                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_X_RIGHT, 1.5)
-                }
-              />
-              <ExtenderButton
-                IconCls={ArrowRightFromLine}
-                text="2.0x"
-                onClick={() =>
-                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_X_RIGHT, 2.0)
-                }
+                onClick={() => updateExtenderByBuiltIn(EXTENDER_X, 2.0)}
               />
             </TabsContent>
             <TabsContent
@@ -615,32 +513,20 @@ const SidePanel = () => {
               className="flex gap-2 justify-center mt-0"
             >
               <ExtenderButton
-                IconCls={ArrowUpFromLine}
+                text="1.25x"
+                onClick={() => updateExtenderByBuiltIn(EXTENDER_Y, 1.25)}
+              />
+              <ExtenderButton
                 text="1.5x"
-                onClick={() =>
-                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_Y_TOP, 1.5)
-                }
+                onClick={() => updateExtenderByBuiltIn(EXTENDER_Y, 1.5)}
               />
               <ExtenderButton
-                IconCls={ArrowUpFromLine}
+                text="1.75x"
+                onClick={() => updateExtenderByBuiltIn(EXTENDER_Y, 1.75)}
+              />
+              <ExtenderButton
                 text="2.0x"
-                onClick={() =>
-                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_Y_TOP, 2.0)
-                }
-              />
-              <ExtenderButton
-                IconCls={ArrowDownFromLine}
-                text="1.5x"
-                onClick={() =>
-                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_Y_BOTTOM, 1.5)
-                }
-              />
-              <ExtenderButton
-                IconCls={ArrowDownFromLine}
-                text="2.0x"
-                onClick={() =>
-                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_Y_BOTTOM, 2.0)
-                }
+                onClick={() => updateExtenderByBuiltIn(EXTENDER_Y, 2.0)}
               />
             </TabsContent>
             <TabsContent
@@ -648,32 +534,20 @@ const SidePanel = () => {
               className="flex gap-2 justify-center mt-0"
             >
               <ExtenderButton
-                IconCls={Maximize}
                 text="1.25x"
-                onClick={() =>
-                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_ALL, 1.25)
-                }
+                onClick={() => updateExtenderByBuiltIn(EXTENDER_ALL, 1.25)}
               />
               <ExtenderButton
-                IconCls={Maximize}
                 text="1.5x"
-                onClick={() =>
-                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_ALL, 1.5)
-                }
+                onClick={() => updateExtenderByBuiltIn(EXTENDER_ALL, 1.5)}
               />
               <ExtenderButton
-                IconCls={Maximize}
                 text="1.75x"
-                onClick={() =>
-                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_ALL, 1.75)
-                }
+                onClick={() => updateExtenderByBuiltIn(EXTENDER_ALL, 1.75)}
               />
               <ExtenderButton
-                IconCls={Maximize}
                 text="2.0x"
-                onClick={() =>
-                  updateExtenderByBuiltIn(EXTENDER_BUILTIN_ALL, 2.0)
-                }
+                onClick={() => updateExtenderByBuiltIn(EXTENDER_ALL, 2.0)}
               />
             </TabsContent>
           </Tabs>
@@ -684,247 +558,194 @@ const SidePanel = () => {
   }
 
   return (
-    <Sheet open={open} modal={false}>
-      <SheetTrigger
-        tabIndex={-1}
-        className="z-10 outline-none absolute top-[68px] right-6 rounded-lg border bg-background"
-      >
-        <Button
-          variant="ghost"
-          size="icon"
-          asChild
-          className="p-1.5"
-          onClick={toggleOpen}
+    <div className="flex flex-col gap-4 mt-4">
+      <RowContainer>
+        <LabelTitle
+          text="Cropper"
+          toolTip="Inpainting on part of image, improve inference speed and reduce memory usage."
+        />
+        <Switch
+          id="cropper"
+          checked={settings.showCropper}
+          onCheckedChange={(value) => {
+            updateSettings({ showCropper: value })
+            if (value) {
+              updateSettings({ showExtender: false })
+            }
+          }}
+        />
+      </RowContainer>
+
+      {renderExtender()}
+
+      <div className="flex flex-col gap-1">
+        <LabelTitle
+          htmlFor="steps"
+          text="Steps"
+          toolTip="The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference."
+        />
+        <RowContainer>
+          <Slider
+            className="w-[180px]"
+            defaultValue={[30]}
+            min={1}
+            max={100}
+            step={1}
+            value={[Math.floor(settings.sdSteps)]}
+            onValueChange={(vals) => updateSettings({ sdSteps: vals[0] })}
+          />
+          <NumberInput
+            id="steps"
+            className="w-[60px] rounded-full"
+            numberValue={settings.sdSteps}
+            allowFloat={false}
+            onNumberValueChange={(val) => {
+              updateSettings({ sdSteps: val })
+            }}
+          />
+        </RowContainer>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <LabelTitle
+          text="Guidance scale"
+          url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inpaint#guidance-scale"
+          toolTip="Guidance scale affects how aligned the text prompt and generated image are. Higher value means the prompt and generated image are closely aligned, so the output is a stricter interpretation of the prompt"
+        />
+        <RowContainer>
+          <Slider
+            className="w-[180px]"
+            defaultValue={[750]}
+            min={0}
+            max={1500}
+            step={1}
+            value={[Math.floor(settings.sdGuidanceScale * 100)]}
+            onValueChange={(vals) =>
+              updateSettings({ sdGuidanceScale: vals[0] / 100 })
+            }
+          />
+          <NumberInput
+            id="guidance-scale"
+            className="w-[60px] rounded-full"
+            numberValue={settings.sdGuidanceScale}
+            allowFloat
+            onNumberValueChange={(val) => {
+              updateSettings({ sdGuidanceScale: val })
+            }}
+          />
+        </RowContainer>
+      </div>
+
+      {renderP2PImageGuidanceScale()}
+      {renderStrength()}
+
+      <RowContainer>
+        <LabelTitle text="Sampler" />
+        <Select
+          value={settings.sdSampler as string}
+          onValueChange={(value) => {
+            const sampler = value as SDSampler
+            updateSettings({ sdSampler: sampler })
+          }}
         >
-          <ChevronLeft strokeWidth={1} />
-        </Button>
-      </SheetTrigger>
-      <SheetContent
-        side="right"
-        className="w-[300px] mt-[60px] outline-none pl-4 pr-1"
-        onOpenAutoFocus={(event) => event.preventDefault()}
-        onPointerDownOutside={(event) => event.preventDefault()}
-      >
-        <SheetHeader>
-          <RowContainer>
-            <div className="overflow-hidden mr-8">
-              {
-                settings.model.name.split("/")[
-                  settings.model.name.split("/").length - 1
-                ]
-              }
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="border h-6 w-6"
-              onClick={toggleOpen}
-            >
-              <ChevronRight strokeWidth={1} />
-            </Button>
-          </RowContainer>
-          <Separator />
-        </SheetHeader>
-        <ScrollArea
-          style={{ height: windowSize.height - 160 }}
-          className="pr-3"
-        >
-          <div className="flex flex-col gap-4 mt-4">
-            <RowContainer>
-              <LabelTitle
-                text="Cropper"
-                toolTip="Inpainting on part of image, improve inference speed and reduce memory usage."
-              />
-              <Switch
-                id="cropper"
-                checked={settings.showCropper}
-                onCheckedChange={(value) => {
-                  updateSettings({ showCropper: value })
-                  if (value) {
-                    updateSettings({ showExtender: false })
-                  }
-                }}
-              />
-            </RowContainer>
+          <SelectTrigger className="w-[100px]">
+            <SelectValue placeholder="Select sampler" />
+          </SelectTrigger>
+          <SelectContent align="end">
+            <SelectGroup>
+              {Object.values(SDSampler).map((sampler) => (
+                <SelectItem key={sampler as string} value={sampler as string}>
+                  {sampler as string}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </RowContainer>
 
-            {renderExtender()}
+      <RowContainer>
+        {/* 每次会从服务器返回更新该值 */}
+        <LabelTitle
+          text="Seed"
+          toolTip="Using same parameters and a fixed seed can generate same result image."
+        />
+        {/* <Pin /> */}
+        <div className="flex gap-2 justify-center items-center">
+          <Switch
+            id="seed"
+            checked={settings.seedFixed}
+            onCheckedChange={(value) => {
+              updateSettings({ seedFixed: value })
+            }}
+          />
+          <NumberInput
+            id="seed"
+            className="w-[100px]"
+            disabled={!settings.seedFixed}
+            numberValue={settings.seed}
+            allowFloat={false}
+            onNumberValueChange={(val) => {
+              updateSettings({ seed: val })
+            }}
+          />
+        </div>
+      </RowContainer>
 
-            <div className="flex flex-col gap-1">
-              <LabelTitle
-                htmlFor="steps"
-                text="Steps"
-                toolTip="The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference."
-              />
-              <RowContainer>
-                <Slider
-                  className="w-[180px]"
-                  defaultValue={[30]}
-                  min={1}
-                  max={100}
-                  step={1}
-                  value={[Math.floor(settings.sdSteps)]}
-                  onValueChange={(vals) => updateSettings({ sdSteps: vals[0] })}
-                />
-                <NumberInput
-                  id="steps"
-                  className="w-[60px] rounded-full"
-                  numberValue={settings.sdSteps}
-                  allowFloat={false}
-                  onNumberValueChange={(val) => {
-                    updateSettings({ sdSteps: val })
-                  }}
-                />
-              </RowContainer>
-            </div>
+      {renderNegativePrompt()}
 
-            <div className="flex flex-col gap-1">
-              <LabelTitle
-                text="Guidance scale"
-                url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inpaint#guidance-scale"
-                toolTip="Guidance scale affects how aligned the text prompt and generated image are. Higher value means the prompt and generated image are closely aligned, so the output is a stricter interpretation of the prompt"
-              />
-              <RowContainer>
-                <Slider
-                  className="w-[180px]"
-                  defaultValue={[750]}
-                  min={0}
-                  max={1500}
-                  step={1}
-                  value={[Math.floor(settings.sdGuidanceScale * 100)]}
-                  onValueChange={(vals) =>
-                    updateSettings({ sdGuidanceScale: vals[0] / 100 })
-                  }
-                />
-                <NumberInput
-                  id="guidance-scale"
-                  className="w-[60px] rounded-full"
-                  numberValue={settings.sdGuidanceScale}
-                  allowFloat
-                  onNumberValueChange={(val) => {
-                    updateSettings({ sdGuidanceScale: val })
-                  }}
-                />
-              </RowContainer>
-            </div>
+      <Separator />
 
-            {renderP2PImageGuidanceScale()}
-            {renderStrength()}
+      {renderConterNetSetting()}
+      {renderFreeu()}
+      {renderLCMLora()}
 
-            <RowContainer>
-              <LabelTitle text="Sampler" />
-              <Select
-                value={settings.sdSampler as string}
-                onValueChange={(value) => {
-                  const sampler = value as SDSampler
-                  updateSettings({ sdSampler: sampler })
-                }}
-              >
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue placeholder="Select sampler" />
-                </SelectTrigger>
-                <SelectContent align="end">
-                  <SelectGroup>
-                    {Object.values(SDSampler).map((sampler) => (
-                      <SelectItem
-                        key={sampler as string}
-                        value={sampler as string}
-                      >
-                        {sampler as string}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </RowContainer>
+      <div className="flex flex-col gap-1">
+        <LabelTitle
+          text="Mask blur"
+          toolTip="How much to blur the mask before processing, in pixels."
+        />
+        <RowContainer>
+          <Slider
+            className="w-[180px]"
+            defaultValue={[5]}
+            min={0}
+            max={35}
+            step={1}
+            value={[Math.floor(settings.sdMaskBlur)]}
+            onValueChange={(vals) => updateSettings({ sdMaskBlur: vals[0] })}
+          />
+          <NumberInput
+            id="mask-blur"
+            className="w-[60px] rounded-full"
+            numberValue={settings.sdMaskBlur}
+            allowFloat={false}
+            onNumberValueChange={(value) => {
+              updateSettings({ sdMaskBlur: value })
+            }}
+          />
+        </RowContainer>
+      </div>
 
-            <RowContainer>
-              {/* 每次会从服务器返回更新该值 */}
-              <LabelTitle
-                text="Seed"
-                toolTip="Using same parameters and a fixed seed can generate same result image."
-              />
-              {/* <Pin /> */}
-              <div className="flex gap-2 justify-center items-center">
-                <Switch
-                  id="seed"
-                  checked={settings.seedFixed}
-                  onCheckedChange={(value) => {
-                    updateSettings({ seedFixed: value })
-                  }}
-                />
-                <NumberInput
-                  id="seed"
-                  className="w-[100px]"
-                  disabled={!settings.seedFixed}
-                  numberValue={settings.seed}
-                  allowFloat={false}
-                  onNumberValueChange={(val) => {
-                    updateSettings({ seed: val })
-                  }}
-                />
-              </div>
-            </RowContainer>
+      <RowContainer>
+        <LabelTitle
+          text="Match histograms"
+          toolTip="Match the inpainting result histogram to the source image histogram"
+          url="https://github.com/Sanster/lama-cleaner/pull/143#issuecomment-1325859307"
+        />
+        <Switch
+          id="match-histograms"
+          checked={settings.sdMatchHistograms}
+          onCheckedChange={(value) => {
+            updateSettings({ sdMatchHistograms: value })
+          }}
+        />
+      </RowContainer>
 
-            {renderNegativePrompt()}
+      <Separator />
 
-            <Separator />
-
-            {renderConterNetSetting()}
-            {renderFreeu()}
-            {renderLCMLora()}
-
-            <div className="flex flex-col gap-1">
-              <LabelTitle
-                text="Mask blur"
-                toolTip="How much to blur the mask before processing, in pixels."
-              />
-              <RowContainer>
-                <Slider
-                  className="w-[180px]"
-                  defaultValue={[5]}
-                  min={0}
-                  max={35}
-                  step={1}
-                  value={[Math.floor(settings.sdMaskBlur)]}
-                  onValueChange={(vals) =>
-                    updateSettings({ sdMaskBlur: vals[0] })
-                  }
-                />
-                <NumberInput
-                  id="mask-blur"
-                  className="w-[60px] rounded-full"
-                  numberValue={settings.sdMaskBlur}
-                  allowFloat={false}
-                  onNumberValueChange={(value) => {
-                    updateSettings({ sdMaskBlur: value })
-                  }}
-                />
-              </RowContainer>
-            </div>
-
-            <RowContainer>
-              <LabelTitle
-                text="Match histograms"
-                toolTip="Match the inpainting result histogram to the source image histogram"
-                url="https://github.com/Sanster/lama-cleaner/pull/143#issuecomment-1325859307"
-              />
-              <Switch
-                id="match-histograms"
-                checked={settings.sdMatchHistograms}
-                onCheckedChange={(value) => {
-                  updateSettings({ sdMatchHistograms: value })
-                }}
-              />
-            </RowContainer>
-
-            <Separator />
-
-            {renderPaintByExample()}
-          </div>
-        </ScrollArea>
-      </SheetContent>
-    </Sheet>
+      {renderPaintByExample()}
+    </div>
   )
 }
 
-export default SidePanel
+export default DiffusionOptions

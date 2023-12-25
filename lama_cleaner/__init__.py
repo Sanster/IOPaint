@@ -6,8 +6,6 @@ import warnings
 
 warnings.simplefilter("ignore", UserWarning)
 
-from lama_cleaner.parse_args import parse_args
-
 
 def entry_point():
     # To make os.environ["XDG_CACHE_HOME"] = args.model_cache_dir works for diffusers

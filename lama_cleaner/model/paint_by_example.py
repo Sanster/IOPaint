@@ -38,12 +38,6 @@ class PaintByExample(DiffusionInpaintModel):
         else:
             self.model = self.model.to(device)
 
-    @staticmethod
-    def download():
-        from diffusers import DiffusionPipeline
-
-        DiffusionPipeline.from_pretrained("Fantasy-Studio/Paint-by-Example")
-
     def forward(self, image, mask, config: Config):
         """Input image and output image have same size
         image: [H, W, C] RGB

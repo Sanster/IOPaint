@@ -23,14 +23,6 @@ AVAILABLE_MODELS = [
     "fcf",
     "manga",
     "cv2",
-    "sd1.5",
-    "anything4",
-    "realisticVision1.4",
-    "sd2",
-    "sdxl",
-    "paint_by_example",
-    "instruct_pix2pix",
-    "kandinsky2.2",
 ]
 DIFFUSERS_MODEL_FP16_REVERSION = [
     "runwayml/stable-diffusion-inpainting",

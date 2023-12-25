@@ -41,27 +41,6 @@ def folder_name_to_show_name(name: str) -> str:
     return name.replace("models--", "").replace("--", "/")
 
 
-def scan_diffusers_models(
-    cache_dir, class_name: List[str], model_type: ModelType
-) -> List[ModelInfo]:
-    cache_dir = Path(cache_dir)
-    res = []
-    for it in cache_dir.glob("**/*/model_index.json"):
-        with open(it, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            if data["_class_name"] in class_name:
-                name = folder_name_to_show_name(it.parent.parent.parent.name)
-                if name not in res:
-                    res.append(
-                        ModelInfo(
-                            name=name,
-                            path=name,
-                            model_type=model_type,
-                        )
-                    )
-    return res
-
-
 def scan_single_file_diffusion_models(cache_dir) -> List[ModelInfo]:
     cache_dir = Path(cache_dir)
     res = []
@@ -111,7 +90,6 @@ def scan_models() -> List[ModelInfo]:
     available_models = []
     available_models.extend(scan_inpaint_models())
     available_models.extend(scan_single_file_diffusion_models(DEFAULT_MODEL_DIR))
-
     cache_dir = Path(DIFFUSERS_CACHE)
     diffusers_model_names = []
     for it in cache_dir.glob("**/*/model_index.json"):

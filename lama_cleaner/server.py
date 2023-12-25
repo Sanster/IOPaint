@@ -585,7 +585,7 @@ def start(
     port: int = Option(8080),
     model: str = Option(
         DEFAULT_MODEL,
-        help=f"Available models: [{', '.join(AVAILABLE_MODELS)}]. "
+        help=f"Available erase models: [{', '.join(AVAILABLE_MODELS)}]. "
         f"You can use download command to download other SD/SDXL normal/inpainting models on huggingface",
     ),
     model_dir: Path = Option(
@@ -644,13 +644,12 @@ def start(
         os.environ["TRANSFORMERS_OFFLINE"] = "1"
         os.environ["HF_HUB_OFFLINE"] = "1"
 
-    if model not in AVAILABLE_MODELS:
-        scanned_models = scan_models()
-        if model not in [it.name for it in scanned_models]:
-            logger.error(
-                f"invalid --model: {model} not exists. Available models: {AVAILABLE_MODELS} or {[it.name for it in scanned_models]}"
-            )
-            exit()
+    scanned_models = scan_models()
+    if model not in [it.name for it in scanned_models]:
+        logger.error(
+            f"invalid model: {model} not exists. Available models: {[it.name for it in scanned_models]}"
+        )
+        exit()
 
     global_config.image_quality = quality
     global_config.disable_model_switch = disable_model_switch

@@ -22,11 +22,6 @@ import {
   DEFAULT_BRUSH_SIZE,
   DEFAULT_NEGATIVE_PROMPT,
   EXTENDER_ALL,
-  EXTENDER_BUILTIN_ALL,
-  EXTENDER_BUILTIN_X_LEFT,
-  EXTENDER_BUILTIN_X_RIGHT,
-  EXTENDER_BUILTIN_Y_BOTTOM,
-  EXTENDER_BUILTIN_Y_TOP,
   EXTENDER_X,
   EXTENDER_Y,
   MODEL_TYPE_INPAINT,
@@ -112,6 +107,7 @@ type ServerConfig = {
   enableAutoSaving: boolean
   enableControlnet: boolean
   controlnetMethod: string
+  isDesktop: boolean
 }
 
 type InteractiveSegState = {
@@ -129,6 +125,7 @@ type EditorState = {
   lineGroups: LineGroup[]
   lastLineGroup: LineGroup
   curLineGroup: LineGroup
+  // 只用来显示
   extraMasks: HTMLImageElement[]
   // redo 相关
   redoRenders: HTMLImageElement[]
@@ -153,7 +150,7 @@ type AppState = {
 
   cropperState: CropperState
   extenderState: CropperState
-  isCropperExtenderResizing: bool
+  isCropperExtenderResizing: boolean
 
   serverConfig: ServerConfig
 
@@ -194,7 +191,6 @@ type AppAction = {
   resetInteractiveSegState: () => void
   handleInteractiveSegAccept: () => void
   showPromptInput: () => boolean
-  showSidePanel: () => boolean
 
   runInpainting: () => Promise<void>
   showPrevMask: () => Promise<void>
@@ -281,6 +277,7 @@ const defaultValues: AppState = {
     enableAutoSaving: false,
     enableControlnet: false,
     controlnetMethod: "lllyasviel/control_v11p_sd15_canny",
+    isDesktop: false,
   },
   settings: {
     model: {
@@ -334,6 +331,9 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
       ...defaultValues,
 
       showPrevMask: async () => {
+        if (get().settings.showExtender) {
+          return
+        }
         const { lastLineGroup, curLineGroup } = get().editorState
         const { prevInteractiveSegMask, interactiveSegMask } =
           get().interactiveSegState
@@ -380,7 +380,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         }
         return targetFile
       },
-      // todo: 传入 custom mask，单独逻辑
+
       runInpainting: async () => {
         const {
           isInpainting,
@@ -399,6 +399,14 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         if (file === null) {
           return
         }
+        if (
+          settings.showExtender &&
+          extenderState.height === imageHeight &&
+          extenderState.width === imageWidth
+        ) {
+          return
+        }
+
         const { lastLineGroup, curLineGroup, lineGroups, renders } =
           get().editorState
 
@@ -406,42 +414,33 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           get().interactiveSegState
 
         const useLastLineGroup =
-          curLineGroup.length === 0 && interactiveSegMask === null
-
-        const maskImage = useLastLineGroup
-          ? prevInteractiveSegMask
-          : interactiveSegMask
+          curLineGroup.length === 0 &&
+          interactiveSegMask === null &&
+          !settings.showExtender
 
         // useLastLineGroup 的影响
         // 1. 使用上一次的 mask
         // 2. 结果替换当前 render
+        let maskImage = null
         let maskLineGroup: LineGroup = []
         if (useLastLineGroup === true) {
-          if (
-            lastLineGroup.length === 0 &&
-            maskImage === null &&
-            !settings.showExtender
-          ) {
-            toast({
-              variant: "destructive",
-              description: "Please draw mask on picture",
-            })
-            return
-          }
           maskLineGroup = lastLineGroup
+          maskImage = prevInteractiveSegMask
         } else {
-          if (
-            curLineGroup.length === 0 &&
-            maskImage === null &&
-            !settings.showExtender
-          ) {
-            toast({
-              variant: "destructive",
-              description: "Please draw mask on picture",
-            })
-            return
-          }
           maskLineGroup = curLineGroup
+          maskImage = interactiveSegMask
+        }
+
+        if (
+          maskLineGroup.length === 0 &&
+          maskImage === null &&
+          !settings.showExtender
+        ) {
+          toast({
+            variant: "destructive",
+            description: "Please draw mask on picture",
+          })
+          return
         }
 
         const newLineGroups = [...lineGroups, maskLineGroup]
@@ -498,6 +497,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           const newRender = new Image()
           await loadImage(newRender, blob)
           const newRenders = [...renders, newRender]
+          get().setImageSize(newRender.width, newRender.height)
           get().updateEditorState({
             renders: newRenders,
             lineGroups: newLineGroups,
@@ -545,7 +545,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           const { blob } = res
           const newRender = new Image()
           await loadImage(newRender, blob)
-          get().setImageSize(newRender.height, newRender.width)
+          get().setImageSize(newRender.width, newRender.height)
           const newRenders = [...renders, newRender]
           const newLineGroups = [...lineGroups, []]
           get().updateEditorState({
@@ -739,11 +739,6 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         )
       },
 
-      showSidePanel: (): boolean => {
-        const model = get().settings.model
-        return model.model_type !== MODEL_TYPE_INPAINT
-      },
-
       setServerConfig: (newValue: ServerConfig) => {
         set((state) => {
           state.serverConfig = newValue
@@ -910,6 +905,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           state.extenderState.width = state.imageWidth
           state.extenderState.height = state.imageHeight
         })
+        get().updateExtenderByBuiltIn(newValue, 1.5)
       },
 
       updateExtenderByBuiltIn: (direction: string, scale: number) => {
@@ -920,21 +916,15 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         height = imageHeight
 
         switch (direction) {
-          case EXTENDER_BUILTIN_X_LEFT:
-            x = -Math.ceil(imageWidth * (scale - 1))
+          case EXTENDER_X:
+            x = -Math.ceil((imageWidth * (scale - 1)) / 2)
             width = Math.ceil(imageWidth * scale)
             break
-          case EXTENDER_BUILTIN_X_RIGHT:
-            width = Math.ceil(imageWidth * scale)
-            break
-          case EXTENDER_BUILTIN_Y_TOP:
-            y = -Math.ceil(imageHeight * (scale - 1))
+          case EXTENDER_Y:
+            y = -Math.ceil((imageHeight * (scale - 1)) / 2)
             height = Math.ceil(imageHeight * scale)
             break
-          case EXTENDER_BUILTIN_Y_BOTTOM:
-            height = Math.ceil(imageHeight * scale)
-            break
-          case EXTENDER_BUILTIN_ALL:
+          case EXTENDER_ALL:
             x = -Math.ceil((imageWidth * (scale - 1)) / 2)
             y = -Math.ceil((imageHeight * (scale - 1)) / 2)
             width = Math.ceil(imageWidth * scale)

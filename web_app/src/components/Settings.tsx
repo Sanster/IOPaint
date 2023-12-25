@@ -1,7 +1,7 @@
 import { IconButton } from "@/components/ui/button"
 import { useToggle } from "@uidotdev/usehooks"
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog"
-import { Info, Settings } from "lucide-react"
+import { HelpCircle, Settings } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Switch } from "./ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import { fetchModelInfos, switchModel } from "@/lib/api"
@@ -30,7 +30,6 @@ import { useToast } from "./ui/use-toast"
 import {
   AlertDialog,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogHeader,
 } from "./ui/alert-dialog"
 import {
@@ -85,6 +84,9 @@ export function SettingsDialog() {
   ])
   const { toast } = useToast()
   const [model, setModel] = useState<ModelInfo>(settings.model)
+  useEffect(() => {
+    setModel(settings.model)
+  }, [settings.model])
 
   const { data: modelInfos, status } = useQuery({
     queryKey: ["modelInfos"],
@@ -163,7 +165,6 @@ export function SettingsDialog() {
   }
 
   function onModelSelect(info: ModelInfo) {
-    console.log(info)
     setModel(info)
   }
 
@@ -211,35 +212,35 @@ export function SettingsDialog() {
     }
 
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 w-[510px]">
         <div className="flex flex-col gap-4 rounded-md">
-          <div>Current Model</div>
+          <div className="font-medium">Current Model</div>
           <div>{model.name}</div>
         </div>
 
         <Separator />
 
         <div className="space-y-4  rounded-md">
-          <div className="flex gap-4 items-center justify-start">
-            <div>Available models</div>
-            <IconButton tooltip="How to download new model" asChild>
-              <Info />
-            </IconButton>
+          <div className="flex gap-1 items-center justify-start">
+            <div className="font-medium">Available models</div>
+            {/* <IconButton tooltip="How to download new model" asChild>
+              <HelpCircle size={16} strokeWidth={1.5} className="opacity-50" />
+            </IconButton> */}
           </div>
           <Tabs defaultValue={defaultTab}>
             <TabsList>
-              <TabsTrigger value={MODEL_TYPE_INPAINT}>Inpaint</TabsTrigger>
+              <TabsTrigger value={MODEL_TYPE_INPAINT}>Erase</TabsTrigger>
               <TabsTrigger value={MODEL_TYPE_DIFFUSERS_SD}>
-                Diffusion
+                Stable Diffusion
               </TabsTrigger>
               <TabsTrigger value={MODEL_TYPE_DIFFUSERS_SD_INPAINT}>
-                Diffusion inpaint
+                Stable Diffusion Inpaint
               </TabsTrigger>
               <TabsTrigger value={MODEL_TYPE_OTHER}>
-                Diffusion other
+                Other Diffusion
               </TabsTrigger>
             </TabsList>
-            <ScrollArea className="h-[240px] w-full mt-2 outline-none">
+            <ScrollArea className="h-[240px] w-full mt-2 outline-none border rounded-lg">
               <TabsContent value={MODEL_TYPE_INPAINT}>
                 {renderModelList([MODEL_TYPE_INPAINT])}
               </TabsContent>
@@ -267,7 +268,7 @@ export function SettingsDialog() {
 
   function renderGeneralSettings() {
     return (
-      <div className="space-y-4 w-[400px]">
+      <div className="space-y-4 w-[510px]">
         <FormField
           control={form.control}
           name="enableManualInpainting"
@@ -276,7 +277,8 @@ export function SettingsDialog() {
               <div className="space-y-0.5">
                 <FormLabel>Enable manual inpainting</FormLabel>
                 <FormDescription>
-                  Click a button to trigger inpainting after draw mask.
+                  For erase model, click a button to trigger inpainting after
+                  draw mask.
                 </FormDescription>
               </div>
               <FormControl>
@@ -468,7 +470,7 @@ export function SettingsDialog() {
             </div>
             <Separator orientation="vertical" />
             <Form {...form}>
-              <div className="flex  w-full justify-center">
+              <div className="flex w-full justify-center">
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                   {tab === TAB_MODEL ? renderModelSettings() : <></>}
                   {tab === TAB_GENERAL ? renderGeneralSettings() : <></>}
