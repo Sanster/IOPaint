@@ -1,7 +1,7 @@
 import { IconButton } from "@/components/ui/button"
 import { useToggle } from "@uidotdev/usehooks"
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog"
-import { HelpCircle, Settings } from "lucide-react"
+import { Settings } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -179,12 +179,12 @@ export function SettingsDialog() {
           <div key={info.name} onClick={() => onModelSelect(info)}>
             <div
               className={cn([
-                info.name === model.name ? "bg-muted " : "hover:bg-muted",
+                info.name === model.name ? "bg-muted" : "hover:bg-muted",
                 "rounded-md px-2 py-1 my-1",
                 "cursor-default",
               ])}
             >
-              <div className="text-base max-w-sm">{info.name}</div>
+              <div className="text-base">{info.name}</div>
             </div>
             <Separator />
           </div>
@@ -223,13 +223,13 @@ export function SettingsDialog() {
         <div className="space-y-4  rounded-md">
           <div className="flex gap-1 items-center justify-start">
             <div className="font-medium">Available models</div>
-            {/* <IconButton tooltip="How to download new model" asChild>
-              <HelpCircle size={16} strokeWidth={1.5} className="opacity-50" />
+            {/* <IconButton tooltip="How to download new model">
+              <Info size={20} strokeWidth={2} className="opacity-50" />
             </IconButton> */}
           </div>
           <Tabs defaultValue={defaultTab}>
             <TabsList>
-              <TabsTrigger value={MODEL_TYPE_INPAINT}>Erase</TabsTrigger>
+              <TabsTrigger value={MODEL_TYPE_INPAINT}>Inpaint</TabsTrigger>
               <TabsTrigger value={MODEL_TYPE_DIFFUSERS_SD}>
                 Stable Diffusion
               </TabsTrigger>

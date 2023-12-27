@@ -5,7 +5,6 @@ import torch
 from diffusers import ControlNetModel, DiffusionPipeline
 from loguru import logger
 
-from lama_cleaner.const import DIFFUSERS_MODEL_FP16_REVERSION
 from lama_cleaner.model.base import DiffusionInpaintModel
 from lama_cleaner.model.helper.controlnet_preprocess import (
     make_canny_control_image,
@@ -14,8 +13,8 @@ from lama_cleaner.model.helper.controlnet_preprocess import (
     make_inpaint_control_image,
 )
 from lama_cleaner.model.helper.cpu_text_encoder import CPUTextEncoderWrapper
-from lama_cleaner.model.utils import get_scheduler
-from lama_cleaner.schema import Config, ModelInfo, ModelType
+from lama_cleaner.model.utils import get_scheduler, handle_from_pretrained_exceptions
+from lama_cleaner.schema import Config, ModelType
 
 
 class ControlNet(DiffusionInpaintModel):
@@ -39,11 +38,11 @@ class ControlNet(DiffusionInpaintModel):
 
     def init_model(self, device: torch.device, **kwargs):
         fp16 = not kwargs.get("no_half", False)
-        model_info: ModelInfo = kwargs["model_info"]
-        sd_controlnet_method = kwargs["sd_controlnet_method"]
+        model_info  = kwargs["model_info"]
+        controlnet_method = kwargs["controlnet_method"]
 
         self.model_info = model_info
-        self.sd_controlnet_method = sd_controlnet_method
+        self.controlnet_method = controlnet_method
 
         model_kwargs = {}
         if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
@@ -76,7 +75,8 @@ class ControlNet(DiffusionInpaintModel):
             )
 
         controlnet = ControlNetModel.from_pretrained(
-            sd_controlnet_method, torch_dtype=torch_dtype, resume_download=True
+            pretrained_model_name_or_path=controlnet_method,
+            resume_download=True,
         )
         if model_info.is_single_file_diffusers:
             if self.model_info.model_type == ModelType.DIFFUSERS_SD:
@@ -88,17 +88,12 @@ class ControlNet(DiffusionInpaintModel):
                 model_info.path, controlnet=controlnet, **model_kwargs
             ).to(torch_dtype)
         else:
-            self.model = PipeClass.from_pretrained(
-                model_info.path,
+            self.model = handle_from_pretrained_exceptions(
+                PipeClass.from_pretrained,
+                pretrained_model_name_or_path=model_info.path,
                 controlnet=controlnet,
-                revision="fp16"
-                if (
-                    model_info.path in DIFFUSERS_MODEL_FP16_REVERSION
-                    and use_gpu
-                    and fp16
-                )
-                else "main",
-                torch_dtype=torch_dtype,
+                variant="fp16",
+                dtype=torch_dtype,
                 **model_kwargs,
             )
 
@@ -116,23 +111,23 @@ class ControlNet(DiffusionInpaintModel):
         self.callback = kwargs.pop("callback", None)
 
     def switch_controlnet_method(self, new_method: str):
-        self.sd_controlnet_method = new_method
+        self.controlnet_method = new_method
         controlnet = ControlNetModel.from_pretrained(
             new_method, torch_dtype=self.torch_dtype, resume_download=True
         ).to(self.model.device)
         self.model.controlnet = controlnet
 
     def _get_control_image(self, image, mask):
-        if "canny" in self.sd_controlnet_method:
+        if "canny" in self.controlnet_method:
             control_image = make_canny_control_image(image)
-        elif "openpose" in self.sd_controlnet_method:
+        elif "openpose" in self.controlnet_method:
             control_image = make_openpose_control_image(image)
-        elif "depth" in self.sd_controlnet_method:
+        elif "depth" in self.controlnet_method:
             control_image = make_depth_control_image(image)
-        elif "inpaint" in self.sd_controlnet_method:
+        elif "inpaint" in self.controlnet_method:
             control_image = make_inpaint_control_image(image, mask)
         else:
-            raise NotImplementedError(f"{self.sd_controlnet_method} not implemented")
+            raise NotImplementedError(f"{self.controlnet_method} not implemented")
         return control_image
 
     def forward(self, image, mask, config: Config):

@@ -1,4 +1,4 @@
-import { ModelInfo, Rect } from "@/lib/types"
+import { ModelInfo, PowerPaintTask, Rect } from "@/lib/types"
 import { Settings } from "@/lib/states"
 import { srcToFile } from "@/lib/utils"
 import axios from "axios"
@@ -22,7 +22,6 @@ export default async function inpaint(
   const fd = new FormData()
   fd.append("image", imageFile)
   fd.append("mask", mask)
-
   fd.append("ldmSteps", settings.ldmSteps.toString())
   fd.append("ldmSampler", settings.ldmSampler.toString())
   fd.append("zitsWireframe", settings.zitsWireframe.toString())
@@ -51,6 +50,7 @@ export default async function inpaint(
   fd.append("sdSteps", settings.sdSteps.toString())
   fd.append("sdGuidanceScale", settings.sdGuidanceScale.toString())
   fd.append("sdSampler", settings.sdSampler.toString())
+
   if (settings.seedFixed) {
     fd.append("sdSeed", settings.seed.toString())
   } else {
@@ -76,12 +76,19 @@ export default async function inpaint(
   fd.append("p2pImageGuidanceScale", settings.p2pImageGuidanceScale.toString())
 
   // ControlNet
-  fd.append("controlnet_enabled", settings.enableControlnet.toString())
+  fd.append("enable_controlnet", settings.enableControlnet.toString())
   fd.append(
     "controlnet_conditioning_scale",
     settings.controlnetConditioningScale.toString()
   )
   fd.append("controlnet_method", settings.controlnetMethod.toString())
+
+  // PowerPaint
+  if (settings.showExtender) {
+    fd.append("powerpaintTask", PowerPaintTask.outpainting)
+  } else {
+    fd.append("powerpaintTask", settings.powerpaintTask)
+  }
 
   try {
     const res = await fetch(`${API_ENDPOINT}/inpaint`, {

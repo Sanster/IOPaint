@@ -4,6 +4,11 @@ from enum import Enum
 from pydantic import BaseModel
 
 
+DIFFUSERS_SD_CLASS_NAME = "StableDiffusionPipeline"
+DIFFUSERS_SD_INPAINT_CLASS_NAME = "StableDiffusionInpaintPipeline"
+DIFFUSERS_SDXL_CLASS_NAME = "StableDiffusionXLPipeline"
+DIFFUSERS_SDXL_INPAINT_CLASS_NAME = "StableDiffusionXLInpaintPipeline"
+
 MPS_UNSUPPORT_MODELS = [
     "lama",
     "ldm",
@@ -15,22 +20,8 @@ MPS_UNSUPPORT_MODELS = [
 ]
 
 DEFAULT_MODEL = "lama"
-AVAILABLE_MODELS = [
-    "lama",
-    "ldm",
-    "zits",
-    "mat",
-    "fcf",
-    "manga",
-    "cv2",
-]
-DIFFUSERS_MODEL_FP16_REVERSION = [
-    "runwayml/stable-diffusion-inpainting",
-    "Sanster/anything-4.0-inpainting",
-    "Sanster/Realistic_Vision_V1.4-inpainting",
-    "stabilityai/stable-diffusion-2-inpainting",
-    "timbrooks/instruct-pix2pix",
-]
+AVAILABLE_MODELS = ["lama", "ldm", "zits", "mat", "fcf", "manga", "cv2", "migan"]
+
 
 AVAILABLE_DEVICES = ["cuda", "cpu", "mps"]
 DEFAULT_DEVICE = "cuda"

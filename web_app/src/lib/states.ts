@@ -5,6 +5,7 @@ import { castDraft } from "immer"
 import { createWithEqualityFn } from "zustand/traditional"
 import {
   CV2Flag,
+  ExtenderDirection,
   FreeuConfig,
   LDMSampler,
   Line,
@@ -12,6 +13,7 @@ import {
   ModelInfo,
   PluginParams,
   Point,
+  PowerPaintTask,
   SDSampler,
   Size,
   SortBy,
@@ -21,9 +23,6 @@ import {
   BRUSH_COLOR,
   DEFAULT_BRUSH_SIZE,
   DEFAULT_NEGATIVE_PROMPT,
-  EXTENDER_ALL,
-  EXTENDER_X,
-  EXTENDER_Y,
   MODEL_TYPE_INPAINT,
   PAINT_BY_EXAMPLE,
 } from "./const"
@@ -60,7 +59,7 @@ export type Settings = {
   enableUploadMask: boolean
   showCropper: boolean
   showExtender: boolean
-  extenderDirection: string
+  extenderDirection: ExtenderDirection
 
   // For LDM
   ldmSteps: number
@@ -99,6 +98,9 @@ export type Settings = {
   enableLCMLora: boolean
   enableFreeu: boolean
   freeuConfig: FreeuConfig
+
+  // PowerPaint
+  powerpaintTask: PowerPaintTask
 }
 
 type ServerConfig = {
@@ -178,9 +180,9 @@ type AppAction = {
   setExtenderWidth: (newValue: number) => void
   setExtenderHeight: (newValue: number) => void
   setIsCropperExtenderResizing: (newValue: boolean) => void
-  updateExtenderDirection: (newValue: string) => void
+  updateExtenderDirection: (newValue: ExtenderDirection) => void
   resetExtender: (width: number, height: number) => void
-  updateExtenderByBuiltIn: (direction: string, scale: number) => void
+  updateExtenderByBuiltIn: (direction: ExtenderDirection, scale: number) => void
 
   setServerConfig: (newValue: ServerConfig) => void
   setSeed: (newValue: number) => void
@@ -296,7 +298,7 @@ const defaultValues: AppState = {
     enableControlnet: false,
     showCropper: false,
     showExtender: false,
-    extenderDirection: EXTENDER_ALL,
+    extenderDirection: ExtenderDirection.xy,
     enableDownloadMask: false,
     enableManualInpainting: false,
     enableUploadMask: false,
@@ -309,7 +311,7 @@ const defaultValues: AppState = {
     negativePrompt: DEFAULT_NEGATIVE_PROMPT,
     seed: 42,
     seedFixed: false,
-    sdMaskBlur: 5,
+    sdMaskBlur: 35,
     sdStrength: 1.0,
     sdSteps: 50,
     sdGuidanceScale: 7.5,
@@ -322,6 +324,7 @@ const defaultValues: AppState = {
     enableLCMLora: false,
     enableFreeu: false,
     freeuConfig: { s1: 0.9, s2: 0.2, b1: 1.2, b2: 1.4 },
+    powerpaintTask: PowerPaintTask.text_guided,
   },
 }
 
@@ -894,7 +897,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           state.isCropperExtenderResizing = newValue
         }),
 
-      updateExtenderDirection: (newValue: string) => {
+      updateExtenderDirection: (newValue: ExtenderDirection) => {
         console.log(
           `updateExtenderDirection: ${JSON.stringify(get().extenderState)}`
         )
@@ -908,7 +911,10 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         get().updateExtenderByBuiltIn(newValue, 1.5)
       },
 
-      updateExtenderByBuiltIn: (direction: string, scale: number) => {
+      updateExtenderByBuiltIn: (
+        direction: ExtenderDirection,
+        scale: number
+      ) => {
         const newExtenderState = { ...defaultValues.extenderState }
         let { x, y, width, height } = newExtenderState
         const { imageWidth, imageHeight } = get()
@@ -916,15 +922,15 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         height = imageHeight
 
         switch (direction) {
-          case EXTENDER_X:
+          case ExtenderDirection.x:
             x = -Math.ceil((imageWidth * (scale - 1)) / 2)
             width = Math.ceil(imageWidth * scale)
             break
-          case EXTENDER_Y:
+          case ExtenderDirection.y:
             y = -Math.ceil((imageHeight * (scale - 1)) / 2)
             height = Math.ceil(imageHeight * scale)
             break
-          case EXTENDER_ALL:
+          case ExtenderDirection.xy:
             x = -Math.ceil((imageWidth * (scale - 1)) / 2)
             y = -Math.ceil((imageHeight * (scale - 1)) / 2)
             width = Math.ceil(imageWidth * scale)

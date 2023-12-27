@@ -24,7 +24,7 @@ class Kandinsky(DiffusionInpaintModel):
         }
 
         self.model = AutoPipelineForInpainting.from_pretrained(
-            self.model_id_or_path, **model_kwargs
+            self.name, **model_kwargs
         ).to(device)
 
         self.callback = kwargs.pop("callback", None)
@@ -66,4 +66,3 @@ class Kandinsky(DiffusionInpaintModel):
 
 class Kandinsky22(Kandinsky):
     name = "kandinsky-community/kandinsky-2-2-decoder-inpaint"
-    model_id_or_path = "kandinsky-community/kandinsky-2-2-decoder-inpaint"

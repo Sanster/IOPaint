@@ -1,5 +1,5 @@
-import { EXTENDER_ALL, EXTENDER_X, EXTENDER_Y } from "@/lib/const"
 import { useStore } from "@/lib/states"
+import { ExtenderDirection } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import React, { useEffect, useState } from "react"
 import { twMerge } from "tailwind-merge"
@@ -107,7 +107,7 @@ const Extender = (props: Props) => {
       const newY = evData.initY + offsetY
       let clampedY = newY
       let clampedHeight = newHeight
-      if (extenderDirection === EXTENDER_ALL) {
+      if (extenderDirection === ExtenderDirection.xy) {
         if (clampedY > 0) {
           clampedY = 0
           clampedHeight = evData.initHeight - Math.abs(evData.initY)
@@ -124,7 +124,7 @@ const Extender = (props: Props) => {
     const moveBottom = () => {
       const newHeight = evData.initHeight + offsetY
       let [clampedY, clampedHeight] = clampTopBottom(evData.initY, newHeight)
-      if (extenderDirection === EXTENDER_ALL) {
+      if (extenderDirection === ExtenderDirection.xy) {
         if (clampedHeight < Math.abs(clampedY) + imageHeight) {
           clampedHeight = Math.abs(clampedY) + imageHeight
         }
@@ -138,7 +138,7 @@ const Extender = (props: Props) => {
       const newX = evData.initX + offsetX
       let clampedX = newX
       let clampedWidth = newWidth
-      if (extenderDirection === EXTENDER_ALL) {
+      if (extenderDirection === ExtenderDirection.xy) {
         if (clampedX > 0) {
           clampedX = 0
           clampedWidth = evData.initWidth - Math.abs(evData.initX)
@@ -155,7 +155,7 @@ const Extender = (props: Props) => {
     const moveRight = () => {
       const newWidth = evData.initWidth + offsetX
       let [clampedX, clampedWidth] = clampLeftRight(evData.initX, newWidth)
-      if (extenderDirection === EXTENDER_ALL) {
+      if (extenderDirection === ExtenderDirection.xy) {
         if (clampedWidth < Math.abs(clampedX) + imageWdith) {
           clampedWidth = Math.abs(clampedX) + imageWdith
         }
@@ -296,7 +296,9 @@ const Extender = (props: Props) => {
         onPointerDown={onCropPointerDown}
         className="absolute top-0 h-full w-full"
       >
-        {[EXTENDER_Y, EXTENDER_ALL].includes(extenderDirection) ? (
+        {[ExtenderDirection.y, ExtenderDirection.xy].includes(
+          extenderDirection
+        ) ? (
           <>
             <div
               className="absolute pointer-events-auto top-0 left-0 w-full cursor-ns-resize h-[12px] mt-[-6px]"
@@ -313,7 +315,9 @@ const Extender = (props: Props) => {
           <></>
         )}
 
-        {[EXTENDER_X, EXTENDER_ALL].includes(extenderDirection) ? (
+        {[ExtenderDirection.x, ExtenderDirection.xy].includes(
+          extenderDirection
+        ) ? (
           <>
             <div
               className="absolute pointer-events-auto top-0 right-0 h-full cursor-ew-resize w-[12px] mr-[-6px]"
@@ -330,7 +334,7 @@ const Extender = (props: Props) => {
           <></>
         )}
 
-        {extenderDirection === EXTENDER_ALL ? (
+        {extenderDirection === ExtenderDirection.xy ? (
           <>
             {createDragHandle("cursor-nw-resize", "top", "left")}
             {createDragHandle("cursor-ne-resize", "top", "right")}

@@ -290,3 +290,7 @@ def only_keep_largest_contour(mask: np.ndarray) -> List[np.ndarray]:
         return cv2.drawContours(new_mask, contours, max_index, 255, -1)
     else:
         return mask
+
+
+def is_mac():
+    return sys.platform == "darwin"

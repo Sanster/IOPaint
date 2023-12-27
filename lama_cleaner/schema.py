@@ -1,19 +1,8 @@
-from typing import Optional, List
 from enum import Enum
+from typing import Optional
 
 from PIL.Image import Image
-from pydantic import BaseModel, computed_field
-
-from lama_cleaner.const import (
-    SDXL_CONTROLNET_CHOICES,
-    SD2_CONTROLNET_CHOICES,
-    SD_CONTROLNET_CHOICES,
-)
-
-DIFFUSERS_SD_CLASS_NAME = "StableDiffusionPipeline"
-DIFFUSERS_SD_INPAINT_CLASS_NAME = "StableDiffusionInpaintPipeline"
-DIFFUSERS_SDXL_CLASS_NAME = "StableDiffusionXLPipeline"
-DIFFUSERS_SDXL_INPAINT_CLASS_NAME = "StableDiffusionXLInpaintPipeline"
+from pydantic import BaseModel
 
 
 class ModelType(str, Enum):
@@ -23,103 +12,6 @@ class ModelType(str, Enum):
     DIFFUSERS_SDXL = "diffusers_sdxl"
     DIFFUSERS_SDXL_INPAINT = "diffusers_sdxl_inpaint"
     DIFFUSERS_OTHER = "diffusers_other"
-
-
-FREEU_DEFAULT_CONFIGS = {
-    ModelType.DIFFUSERS_SD: dict(s1=0.9, s2=0.2, b1=1.2, b2=1.4),
-    ModelType.DIFFUSERS_SDXL: dict(s1=0.6, s2=0.4, b1=1.1, b2=1.2),
-}
-
-
-class ModelInfo(BaseModel):
-    name: str
-    path: str
-    model_type: ModelType
-    is_single_file_diffusers: bool = False
-
-    @computed_field
-    @property
-    def need_prompt(self) -> bool:
-        return self.model_type in [
-            ModelType.DIFFUSERS_SD,
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SD_INPAINT,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ] or self.name in [
-            "timbrooks/instruct-pix2pix",
-            "kandinsky-community/kandinsky-2-2-decoder-inpaint",
-        ]
-
-    @computed_field
-    @property
-    def controlnets(self) -> List[str]:
-        if self.model_type in [
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ]:
-            return SDXL_CONTROLNET_CHOICES
-        if self.model_type in [ModelType.DIFFUSERS_SD, ModelType.DIFFUSERS_SD_INPAINT]:
-            if self.name in ["stabilityai/stable-diffusion-2-inpainting"]:
-                return SD2_CONTROLNET_CHOICES
-            else:
-                return SD_CONTROLNET_CHOICES
-        return []
-
-    @computed_field
-    @property
-    def support_strength(self) -> bool:
-        return self.model_type in [
-            ModelType.DIFFUSERS_SD,
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SD_INPAINT,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ]
-
-    @computed_field
-    @property
-    def support_outpainting(self) -> bool:
-        return self.model_type in [
-            ModelType.DIFFUSERS_SD,
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SD_INPAINT,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ] or self.name in [
-            "kandinsky-community/kandinsky-2-2-decoder-inpaint",
-        ]
-
-    @computed_field
-    @property
-    def support_lcm_lora(self) -> bool:
-        return self.model_type in [
-            ModelType.DIFFUSERS_SD,
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SD_INPAINT,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ]
-
-    @computed_field
-    @property
-    def support_controlnet(self) -> bool:
-        return self.model_type in [
-            ModelType.DIFFUSERS_SD,
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SD_INPAINT,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ]
-
-    @computed_field
-    @property
-    def support_freeu(self) -> bool:
-        return (
-            self.model_type
-            in [
-                ModelType.DIFFUSERS_SD,
-                ModelType.DIFFUSERS_SDXL,
-                ModelType.DIFFUSERS_SD_INPAINT,
-                ModelType.DIFFUSERS_SDXL_INPAINT,
-            ]
-            or "timbrooks/instruct-pix2pix" in self.name
-        )
 
 
 class HDStrategy(str, Enum):
@@ -155,6 +47,13 @@ class FREEUConfig(BaseModel):
     s2: float = 0.2
     b1: float = 1.2
     b2: float = 1.4
+
+
+class PowerPaintTask(str, Enum):
+    text_guided = "text-guided"
+    shape_guided = "shape-guided"
+    object_remove = "object-remove"
+    outpainting = "outpainting"
 
 
 class Config(BaseModel):
@@ -239,6 +138,11 @@ class Config(BaseModel):
     p2p_image_guidance_scale: float = 1.5
 
     # ControlNet
-    controlnet_enabled: bool = False
+    enable_controlnet: bool = False
     controlnet_conditioning_scale: float = 0.4
-    controlnet_method: str = "control_v11p_sd15_canny"
+    controlnet_method: str = "lllyasviel/control_v11p_sd15_canny"
+
+    # PowerPaint
+    powerpaint_task: PowerPaintTask = PowerPaintTask.text_guided
+    # control the fitting degree of the generated objects to the mask shape.
+    fitting_degree: float = 1.0

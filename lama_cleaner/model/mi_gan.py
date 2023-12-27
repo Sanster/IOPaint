@@ -16,7 +16,7 @@ from lama_cleaner.model.base import InpaintModel
 
 MIGAN_MODEL_URL = os.environ.get(
     "MIGAN_MODEL_URL",
-    "/Users/cwq/code/github/MI-GAN/exported_models/migan_places512/models/migan_traced.pt",
+    "https://github.com/Sanster/models/releases/download/migan/migan_traced.pt",
 )
 MIGAN_MODEL_MD5 = os.environ.get("MIGAN_MODEL_MD5", "76eb3b1a71c400ee3290524f7a11b89c")
 

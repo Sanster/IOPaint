@@ -36,9 +36,9 @@ const PromptInput = () => {
     updateSettings({ prompt: target.value })
   }
 
-  const handleRepaintClick = async () => {
-    if (prompt.length !== 0 && !isProcessing) {
-      await runInpainting()
+  const handleRepaintClick = () => {
+    if (!isProcessing) {
+      runInpainting()
     }
   }
 
@@ -69,7 +69,7 @@ const PromptInput = () => {
       <Button
         size="sm"
         onClick={handleRepaintClick}
-        disabled={prompt.length === 0 || isProcessing}
+        disabled={isProcessing}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >

@@ -93,3 +93,16 @@ export interface Size {
   width: number
   height: number
 }
+
+export enum ExtenderDirection {
+  x = "x",
+  y = "y",
+  xy = "xy",
+}
+
+export enum PowerPaintTask {
+  text_guided = "text-guided",
+  shape_guided = "shape-guided",
+  object_remove = "object-remove",
+  outpainting = "outpainting",
+}

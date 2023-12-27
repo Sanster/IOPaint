@@ -8,11 +8,12 @@ from diffusers import AutoencoderKL
 from loguru import logger
 
 from lama_cleaner.model.base import DiffusionInpaintModel
+from lama_cleaner.model.utils import handle_from_pretrained_exceptions
 from lama_cleaner.schema import Config, ModelType
 
 
 class SDXL(DiffusionInpaintModel):
-    name = "sdxl"
+    name = "diffusers/stable-diffusion-xl-1.0-inpainting-0.1"
     pad_mod = 8
     min_size = 512
     lcm_lora_id = "latent-consistency/lcm-lora-sdxl"
@@ -34,18 +35,19 @@ class SDXL(DiffusionInpaintModel):
         if os.path.isfile(self.model_id_or_path):
             self.model = StableDiffusionXLInpaintPipeline.from_single_file(
                 self.model_id_or_path,
-                torch_dtype=torch_dtype,
+                dtype=torch_dtype,
                 num_in_channels=num_in_channels,
             )
         else:
             vae = AutoencoderKL.from_pretrained(
                 "madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch_dtype
             )
-            self.model = StableDiffusionXLInpaintPipeline.from_pretrained(
-                self.model_id_or_path,
-                revision="main",
+            self.model = handle_from_pretrained_exceptions(
+                StableDiffusionXLInpaintPipeline.from_pretrained,
+                pretrained_model_name_or_path=self.model_id_or_path,
                 torch_dtype=torch_dtype,
                 vae=vae,
+                variant="fp16",
             )
 
         if kwargs.get("cpu_offload", False) and use_gpu:

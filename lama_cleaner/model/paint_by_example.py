@@ -28,7 +28,7 @@ class PaintByExample(DiffusionInpaintModel):
             )
 
         self.model = DiffusionPipeline.from_pretrained(
-            "Fantasy-Studio/Paint-by-Example", torch_dtype=torch_dtype, **model_kwargs
+            self.name, torch_dtype=torch_dtype, **model_kwargs
         )
 
         # TODO: gpu_id

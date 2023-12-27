@@ -11,21 +11,14 @@ import {
   SelectValue,
 } from "../ui/select"
 import { Textarea } from "../ui/textarea"
-import { SDSampler } from "@/lib/types"
+import { ExtenderDirection, PowerPaintTask, SDSampler } from "@/lib/types"
 import { Separator } from "../ui/separator"
-import { Move, MoveHorizontal, MoveVertical, Upload } from "lucide-react"
 import { Button, ImageUploadButton } from "../ui/button"
 import { Slider } from "../ui/slider"
 import { useImage } from "@/hooks/useImage"
-import {
-  EXTENDER_ALL,
-  EXTENDER_X,
-  EXTENDER_Y,
-  INSTRUCT_PIX2PIX,
-  PAINT_BY_EXAMPLE,
-} from "@/lib/const"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
+import { INSTRUCT_PIX2PIX, PAINT_BY_EXAMPLE, POWERPAINT } from "@/lib/const"
 import { RowContainer, LabelTitle } from "./LabelTitle"
+import { Upload } from "lucide-react"
 
 const ExtenderButton = ({
   text,
@@ -38,8 +31,7 @@ const ExtenderButton = ({
   return (
     <Button
       variant="outline"
-      size="sm"
-      className="p-1"
+      className="p-1 h-7"
       disabled={!showExtender}
       onClick={onClick}
     >
@@ -129,6 +121,7 @@ const DiffusionOptions = () => {
 
           <div className="pr-2">
             <Select
+              defaultValue={settings.controlnetMethod}
               value={settings.controlnetMethod}
               onValueChange={(value) => {
                 updateSettings({ controlnetMethod: value })
@@ -467,93 +460,101 @@ const DiffusionOptions = () => {
             />
           </RowContainer>
 
-          <Tabs
-            defaultValue={settings.extenderDirection}
-            onValueChange={(value) => updateExtenderDirection(value)}
-            className="flex flex-col justify-center items-center"
-          >
-            <TabsList className="w-[140px] mb-2">
-              <TabsTrigger value={EXTENDER_X} disabled={!settings.showExtender}>
-                <MoveHorizontal size={20} strokeWidth={1} />
-              </TabsTrigger>
-              <TabsTrigger value={EXTENDER_Y} disabled={!settings.showExtender}>
-                <MoveVertical size={20} strokeWidth={1} />
-              </TabsTrigger>
-              <TabsTrigger
-                value={EXTENDER_ALL}
+          <RowContainer>
+            <Select
+              defaultValue={settings.extenderDirection}
+              value={settings.extenderDirection}
+              onValueChange={(value) => {
+                updateExtenderDirection(value as ExtenderDirection)
+              }}
+            >
+              <SelectTrigger
+                className="w-[65px] h-7"
                 disabled={!settings.showExtender}
               >
-                <Move size={20} strokeWidth={1} />
-              </TabsTrigger>
-            </TabsList>
+                <SelectValue placeholder="Select axis" />
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectGroup>
+                  {Object.values(ExtenderDirection).map((v) => (
+                    <SelectItem key={v} value={v}>
+                      {v}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
 
-            <TabsContent
-              value={EXTENDER_X}
-              className="flex gap-2 justify-center mt-0"
-            >
+            <div className="flex gap-1 justify-center mt-0">
               <ExtenderButton
                 text="1.25x"
-                onClick={() => updateExtenderByBuiltIn(EXTENDER_X, 1.25)}
+                onClick={() =>
+                  updateExtenderByBuiltIn(settings.extenderDirection, 1.25)
+                }
               />
               <ExtenderButton
                 text="1.5x"
-                onClick={() => updateExtenderByBuiltIn(EXTENDER_X, 1.5)}
+                onClick={() =>
+                  updateExtenderByBuiltIn(settings.extenderDirection, 1.5)
+                }
               />
               <ExtenderButton
                 text="1.75x"
-                onClick={() => updateExtenderByBuiltIn(EXTENDER_X, 1.75)}
+                onClick={() =>
+                  updateExtenderByBuiltIn(settings.extenderDirection, 1.75)
+                }
               />
               <ExtenderButton
                 text="2.0x"
-                onClick={() => updateExtenderByBuiltIn(EXTENDER_X, 2.0)}
+                onClick={() =>
+                  updateExtenderByBuiltIn(settings.extenderDirection, 2.0)
+                }
               />
-            </TabsContent>
-            <TabsContent
-              value={EXTENDER_Y}
-              className="flex gap-2 justify-center mt-0"
-            >
-              <ExtenderButton
-                text="1.25x"
-                onClick={() => updateExtenderByBuiltIn(EXTENDER_Y, 1.25)}
-              />
-              <ExtenderButton
-                text="1.5x"
-                onClick={() => updateExtenderByBuiltIn(EXTENDER_Y, 1.5)}
-              />
-              <ExtenderButton
-                text="1.75x"
-                onClick={() => updateExtenderByBuiltIn(EXTENDER_Y, 1.75)}
-              />
-              <ExtenderButton
-                text="2.0x"
-                onClick={() => updateExtenderByBuiltIn(EXTENDER_Y, 2.0)}
-              />
-            </TabsContent>
-            <TabsContent
-              value={EXTENDER_ALL}
-              className="flex gap-2 justify-center mt-0"
-            >
-              <ExtenderButton
-                text="1.25x"
-                onClick={() => updateExtenderByBuiltIn(EXTENDER_ALL, 1.25)}
-              />
-              <ExtenderButton
-                text="1.5x"
-                onClick={() => updateExtenderByBuiltIn(EXTENDER_ALL, 1.5)}
-              />
-              <ExtenderButton
-                text="1.75x"
-                onClick={() => updateExtenderByBuiltIn(EXTENDER_ALL, 1.75)}
-              />
-              <ExtenderButton
-                text="2.0x"
-                onClick={() => updateExtenderByBuiltIn(EXTENDER_ALL, 2.0)}
-              />
-            </TabsContent>
-          </Tabs>
+            </div>
+          </RowContainer>
         </div>
         <Separator />
       </>
+    )
+  }
+
+  const renderPowerPaintTaskType = () => {
+    if (settings.model.name !== POWERPAINT) {
+      return null
+    }
+
+    return (
+      <RowContainer>
+        <LabelTitle
+          text="Task"
+          toolTip="When using extender, image-outpainting task will be auto used. For object-removal and image-outpainting, it is recommended to set the guidance_scale at 10 or above."
+        />
+        <Select
+          defaultValue={settings.powerpaintTask}
+          value={settings.powerpaintTask}
+          onValueChange={(value: PowerPaintTask) => {
+            updateSettings({ powerpaintTask: value })
+          }}
+          disabled={settings.showExtender}
+        >
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Select task" />
+          </SelectTrigger>
+          <SelectContent align="end">
+            <SelectGroup>
+              {[
+                PowerPaintTask.text_guided,
+                PowerPaintTask.object_remove,
+                PowerPaintTask.shape_guided,
+              ].map((task) => (
+                <SelectItem key={task} value={task}>
+                  {task}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </RowContainer>
     )
   }
 
@@ -577,6 +578,7 @@ const DiffusionOptions = () => {
       </RowContainer>
 
       {renderExtender()}
+      {renderPowerPaintTaskType()}
 
       <div className="flex flex-col gap-1">
         <LabelTitle
@@ -642,20 +644,20 @@ const DiffusionOptions = () => {
       <RowContainer>
         <LabelTitle text="Sampler" />
         <Select
-          value={settings.sdSampler as string}
-          onValueChange={(value) => {
-            const sampler = value as SDSampler
-            updateSettings({ sdSampler: sampler })
+          defaultValue={settings.sdSampler}
+          value={settings.sdSampler}
+          onValueChange={(value: SDSampler) => {
+            updateSettings({ sdSampler: value })
           }}
         >
-          <SelectTrigger className="w-[100px]">
+          <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="Select sampler" />
           </SelectTrigger>
           <SelectContent align="end">
             <SelectGroup>
               {Object.values(SDSampler).map((sampler) => (
-                <SelectItem key={sampler as string} value={sampler as string}>
-                  {sampler as string}
+                <SelectItem key={sampler} value={sampler}>
+                  {sampler}
                 </SelectItem>
               ))}
             </SelectGroup>
@@ -707,9 +709,9 @@ const DiffusionOptions = () => {
         <RowContainer>
           <Slider
             className="w-[180px]"
-            defaultValue={[5]}
+            defaultValue={[settings.sdMaskBlur]}
             min={0}
-            max={35}
+            max={96}
             step={1}
             value={[Math.floor(settings.sdMaskBlur)]}
             onValueChange={(vals) => updateSettings({ sdMaskBlur: vals[0] })}

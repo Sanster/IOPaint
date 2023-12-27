@@ -63,6 +63,7 @@ from lama_cleaner.helper import (
     numpy_to_bytes,
     resize_max_size,
     pil_to_bytes,
+    is_mac,
 )
 
 NUM_THREADS = str(multiprocessing.cpu_count())
@@ -285,9 +286,10 @@ def process():
         cv2_radius=form["cv2Radius"],
         paint_by_example_example_image=paint_by_example_example_image,
         p2p_image_guidance_scale=form["p2pImageGuidanceScale"],
-        controlnet_enabled=form["controlnet_enabled"],
+        enable_controlnet=form["enable_controlnet"],
         controlnet_conditioning_scale=form["controlnet_conditioning_scale"],
         controlnet_method=form["controlnet_method"],
+        powerpaint_task=form["powerpaintTask"],
     )
 
     if config.sd_seed == -1:
@@ -305,6 +307,8 @@ def process():
         if "CUDA out of memory. " in str(e):
             # NOTE: the string may change?
             return "CUDA out of memory", 500
+        elif "Invalid buffer size" in str(e) and is_mac():
+            return "Out of memory", 500
         else:
             logger.exception(e)
             return f"{str(e)}", 500
@@ -423,8 +427,8 @@ def get_server_config():
         "plugins": list(global_config.plugins.keys()),
         "enableFileManager": global_config.enable_file_manager,
         "enableAutoSaving": global_config.enable_auto_saving,
-        "enableControlnet": global_config.model_manager.sd_controlnet,
-        "controlnetMethod": global_config.model_manager.sd_controlnet_method,
+        "enableControlnet": global_config.model_manager.enable_controlnet,
+        "controlnetMethod": global_config.model_manager.controlnet_method,
         "disableModelSwitch": global_config.disable_model_switch,
         "isDesktop": global_config.is_desktop,
     }, 200

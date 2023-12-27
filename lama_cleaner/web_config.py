@@ -15,8 +15,8 @@ def save_config(
     port,
     model,
     sd_local_model_path,
-    sd_controlnet,
-    sd_controlnet_method,
+    enable_controlnet,
+    controlnet_method,
     device,
     gui,
     no_gui_auto_close,
@@ -176,13 +176,13 @@ def main(config_file: str):
                 sd_local_model_path = gr.Textbox(
                     init_config.sd_local_model_path, label=f"{SD_LOCAL_MODEL_HELP}"
                 )
-                sd_controlnet = gr.Checkbox(
-                    init_config.sd_controlnet, label=f"{SD_CONTROLNET_HELP}"
+                enable_controlnet = gr.Checkbox(
+                    init_config.enable_controlnet, label=f"{SD_CONTROLNET_HELP}"
                 )
-                sd_controlnet_method = gr.Radio(
+                controlnet_method = gr.Radio(
                     SD_CONTROLNET_CHOICES,
                     label="ControlNet method",
-                    value=init_config.sd_controlnet_method,
+                    value=init_config.controlnet_method,
                 )
                 no_half = gr.Checkbox(init_config.no_half, label=f"{NO_HALF_HELP}")
                 cpu_offload = gr.Checkbox(
@@ -205,8 +205,8 @@ def main(config_file: str):
                 port,
                 model,
                 sd_local_model_path,
-                sd_controlnet,
-                sd_controlnet_method,
+                enable_controlnet,
+                controlnet_method,
                 device,
                 gui,
                 no_gui_auto_close,

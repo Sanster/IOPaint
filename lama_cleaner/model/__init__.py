@@ -9,6 +9,7 @@ from .mat import MAT
 from .mi_gan import MIGAN
 from .opencv2 import OpenCV2
 from .paint_by_example import PaintByExample
+from .power_paint.power_paint import PowerPaint
 from .sd import SD15, SD2, Anything4, RealisticVision14, SD
 from .sdxl import SDXL
 from .zits import ZITS
@@ -30,4 +31,5 @@ models = {
     InstructPix2Pix.name: InstructPix2Pix,
     Kandinsky22.name: Kandinsky22,
     SDXL.name: SDXL,
+    PowerPaint.name: PowerPaint,
 }
