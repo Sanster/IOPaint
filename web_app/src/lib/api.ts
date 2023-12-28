@@ -81,7 +81,7 @@ export default async function inpaint(
     "controlnet_conditioning_scale",
     settings.controlnetConditioningScale.toString()
   )
-  fd.append("controlnet_method", settings.controlnetMethod.toString())
+  fd.append("controlnet_method", settings.controlnetMethod?.toString())
 
   // PowerPaint
   if (settings.showExtender) {
@@ -213,6 +213,7 @@ export async function downloadToOutput(
       method: "POST",
       body: fd,
     })
+    console.log(res.ok)
     if (!res.ok) {
       const errMsg = await res.text()
       throw new Error(errMsg)

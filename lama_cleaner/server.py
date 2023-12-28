@@ -148,9 +148,10 @@ def save_image():
     input = request.files
     filename = request.form["filename"]
     origin_image_bytes = input["image"].read()  # RGB
-    ext = get_image_ext(origin_image_bytes)
+    # ext = get_image_ext(origin_image_bytes)
+    ext = "png"
     image, alpha_channel, exif_infos = load_img(origin_image_bytes, return_exif=True)
-    save_path = str(global_config.output_dir / filename)
+    save_path = (global_config.output_dir / filename).with_suffix(f".{ext}")
 
     if alpha_channel is not None:
         if alpha_channel.shape[:2] != image.shape[:2]:
@@ -159,7 +160,7 @@ def save_image():
             )
         image = np.concatenate((image, alpha_channel[:, :, np.newaxis]), axis=-1)
 
-    pil_image = Image.fromarray(image)
+    pil_image = Image.fromarray(image).convert("RGBA")
 
     img_bytes = pil_to_bytes(
         pil_image,
@@ -167,8 +168,11 @@ def save_image():
         quality=global_config.image_quality,
         exif_infos=exif_infos,
     )
-    with open(save_path, "wb") as fw:
-        fw.write(img_bytes)
+    try:
+        with open(save_path, "wb") as fw:
+            fw.write(img_bytes)
+    except:
+        return f"Save image failed: {traceback.format_exc()}", 500
 
     return "ok", 200
 
@@ -551,6 +555,9 @@ def start(
     if output_dir:
         output_dir = output_dir.expanduser().absolute()
         logger.info(f"Image will auto save to output dir: {output_dir}")
+        if not output_dir.exists():
+            logger.info(f"Create output dir: {output_dir}")
+            output_dir.mkdir(parents=True)
         global_config.output_dir = output_dir
 
     global_config.model_manager = ModelManager(

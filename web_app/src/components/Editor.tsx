@@ -501,13 +501,17 @@ export default function Editor(props: EditorProps) {
     }
   )
 
-  function download() {
+  const download = async () => {
     if (file === undefined) {
       return
     }
     if (enableAutoSaving && renders.length > 0) {
       try {
-        downloadToOutput(renders[renders.length - 1], file.name, file.type)
+        await downloadToOutput(
+          renders[renders.length - 1],
+          file.name,
+          file.type
+        )
         toast({
           description: "Save image success",
         })
