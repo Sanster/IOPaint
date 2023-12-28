@@ -1,5 +1,7 @@
 import os
 
+from lama_cleaner.tests.utils import current_dir, check_device
+
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 from pathlib import Path
 
@@ -10,15 +12,9 @@ from lama_cleaner.model_manager import ModelManager
 from lama_cleaner.schema import HDStrategy, SDSampler
 from lama_cleaner.tests.test_model import get_config, assert_equal
 
-current_dir = Path(__file__).parent.absolute().resolve()
-save_dir = current_dir / "result"
-save_dir.mkdir(exist_ok=True, parents=True)
-device = "cuda" if torch.cuda.is_available() else "cpu"
-device = torch.device(device)
-
 
 @pytest.mark.parametrize("name", ["runwayml/stable-diffusion-inpainting"])
-@pytest.mark.parametrize("sd_device", ["mps"])
+@pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])
 @pytest.mark.parametrize(
     "rect",
     [
@@ -31,24 +27,22 @@ device = torch.device(device)
         [-100, -100, 512 + 200, 512 + 200],
     ],
 )
-def test_outpainting(name, sd_device, rect):
+def test_outpainting(name, device, rect):
+    sd_steps = check_device(device)
+
     def callback(i, t, latents):
         pass
 
-    if sd_device == "cuda" and not torch.cuda.is_available():
-        return
-
     model = ModelManager(
         name=name,
-        device=torch.device(sd_device),
+        device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         callback=callback,
     )
     cfg = get_config(
-        HDStrategy.ORIGINAL,
         prompt="a dog sitting on a bench in the park",
-        sd_steps=50,
+        sd_steps=sd_steps,
         use_extender=True,
         extender_x=rect[0],
         extender_y=rect[1],
@@ -61,39 +55,37 @@ def test_outpainting(name, sd_device, rect):
     assert_equal(
         model,
         cfg,
-        f"{name.replace('/', '--')}_outpainting_dpm++_{'_'.join(map(str, rect))}.png",
+        f"{name.replace('/', '--')}_outpainting_{'_'.join(map(str, rect))}_device_{device}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
 
 
 @pytest.mark.parametrize("name", ["kandinsky-community/kandinsky-2-2-decoder-inpaint"])
-@pytest.mark.parametrize("sd_device", ["mps"])
+@pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])
 @pytest.mark.parametrize(
     "rect",
     [
         [-128, -128, 768, 768],
     ],
 )
-def test_kandinsky_outpainting(name, sd_device, rect):
+def test_kandinsky_outpainting(name, device, rect):
+    sd_steps = check_device(device)
+
     def callback(i, t, latents):
         pass
 
-    if sd_device == "cuda" and not torch.cuda.is_available():
-        return
-
     model = ModelManager(
         name=name,
-        device=torch.device(sd_device),
+        device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         callback=callback,
     )
     cfg = get_config(
-        HDStrategy.ORIGINAL,
         prompt="a cat",
         negative_prompt="lowres, text, error, cropped, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, out of frame, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck, username, watermark, signature",
-        sd_steps=50,
+        sd_steps=sd_steps,
         use_extender=True,
         extender_x=rect[0],
         extender_y=rect[1],
@@ -106,9 +98,52 @@ def test_kandinsky_outpainting(name, sd_device, rect):
     assert_equal(
         model,
         cfg,
-        f"{name.replace('/', '--')}_outpainting_dpm++_{'_'.join(map(str, rect))}.png",
+        f"{name.replace('/', '--')}_outpainting_{'_'.join(map(str, rect))}_device_{device}.png",
         img_p=current_dir / "cat.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
         fx=1,
         fy=1,
+    )
+
+
+@pytest.mark.parametrize("name", ["Sanster/PowerPaint-V1-stable-diffusion-inpainting"])
+@pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])
+@pytest.mark.parametrize(
+    "rect",
+    [
+        [-100, -100, 512 + 200, 512 + 200],
+    ],
+)
+def test_powerpaint_outpainting(name, device, rect):
+    sd_steps = check_device(device)
+
+    def callback(i, t, latents):
+        pass
+
+    model = ModelManager(
+        name=name,
+        device=torch.device(device),
+        disable_nsfw=True,
+        sd_cpu_textencoder=False,
+        callback=callback,
+    )
+    cfg = get_config(
+        prompt="a dog sitting on a bench in the park",
+        sd_steps=sd_steps,
+        use_extender=True,
+        extender_x=rect[0],
+        extender_y=rect[1],
+        extender_width=rect[2],
+        extender_height=rect[3],
+        sd_guidance_scale=8.0,
+        sd_sampler=SDSampler.dpm_plus_plus,
+        powerpaint_task="outpainting",
+    )
+
+    assert_equal(
+        model,
+        cfg,
+        f"{name.replace('/', '--')}_outpainting_{'_'.join(map(str, rect))}_device_{device}.png",
+        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )

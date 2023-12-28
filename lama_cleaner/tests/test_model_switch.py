@@ -1,4 +1,3 @@
-import logging
 import os
 
 from lama_cleaner.schema import Config
@@ -13,8 +12,8 @@ from lama_cleaner.model_manager import ModelManager
 def test_model_switch():
     model = ModelManager(
         name="runwayml/stable-diffusion-inpainting",
-        sd_controlnet=True,
-        sd_controlnet_method="lllyasviel/control_v11p_sd15_canny",
+        enable_controlnet=True,
+        controlnet_method="lllyasviel/control_v11p_sd15_canny",
         device=torch.device("mps"),
         disable_nsfw=True,
         sd_cpu_textencoder=True,
@@ -29,8 +28,8 @@ def test_controlnet_switch_onoff(caplog):
     name = "runwayml/stable-diffusion-inpainting"
     model = ModelManager(
         name=name,
-        sd_controlnet=True,
-        sd_controlnet_method="lllyasviel/control_v11p_sd15_canny",
+        enable_controlnet=True,
+        controlnet_method="lllyasviel/control_v11p_sd15_canny",
         device=torch.device("mps"),
         disable_nsfw=True,
         sd_cpu_textencoder=True,
@@ -41,21 +40,21 @@ def test_controlnet_switch_onoff(caplog):
     model.switch_controlnet_method(
         Config(
             name=name,
-            controlnet_enabled=False,
+            enable_controlnet=False,
         )
     )
 
     assert "Disable controlnet" in caplog.text
 
 
-def test_controlnet_switch_method(caplog):
+def test_switch_controlnet_method(caplog):
     name = "runwayml/stable-diffusion-inpainting"
     old_method = "lllyasviel/control_v11p_sd15_canny"
     new_method = "lllyasviel/control_v11p_sd15_openpose"
     model = ModelManager(
         name=name,
-        sd_controlnet=True,
-        sd_controlnet_method=old_method,
+        enable_controlnet=True,
+        controlnet_method=old_method,
         device=torch.device("mps"),
         disable_nsfw=True,
         sd_cpu_textencoder=True,
@@ -66,7 +65,7 @@ def test_controlnet_switch_method(caplog):
     model.switch_controlnet_method(
         Config(
             name=name,
-            controlnet_enabled=True,
+            enable_controlnet=True,
             controlnet_method=new_method,
         )
     )

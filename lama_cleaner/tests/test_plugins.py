@@ -3,13 +3,12 @@ import os
 import time
 
 from lama_cleaner.plugins.anime_seg import AnimeSeg
+from lama_cleaner.tests.utils import check_device, current_dir, save_dir
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
-from pathlib import Path
 
 import cv2
 import pytest
-import torch.cuda
 
 from lama_cleaner.plugins import (
     RemoveBG,
@@ -19,9 +18,6 @@ from lama_cleaner.plugins import (
     InteractiveSeg,
 )
 
-current_dir = Path(__file__).parent.absolute().resolve()
-save_dir = current_dir / "result"
-save_dir.mkdir(exist_ok=True, parents=True)
 img_p = current_dir / "bunny.jpeg"
 img_bytes = open(img_p, "rb").read()
 bgr_img = cv2.imread(str(img_p))
@@ -50,11 +46,7 @@ def test_anime_seg():
 
 @pytest.mark.parametrize("device", ["cuda", "cpu", "mps"])
 def test_upscale(device):
-    if device == "cuda" and not torch.cuda.is_available():
-        return
-    if device == "mps" and not torch.backends.mps.is_available():
-        return
-
+    check_device(device)
     model = RealESRGANUpscaler("realesr-general-x4v3", device)
     res = model.forward(bgr_img, 2)
     _save(res, f"test_upscale_x2_{device}.png")
@@ -65,10 +57,7 @@ def test_upscale(device):
 
 @pytest.mark.parametrize("device", ["cuda", "cpu", "mps"])
 def test_gfpgan(device):
-    if device == "cuda" and not torch.cuda.is_available():
-        return
-    if device == "mps" and not torch.backends.mps.is_available():
-        return
+    check_device(device)
     model = GFPGANPlugin(device)
     res = model(rgb_img, None, None)
     _save(res, f"test_gfpgan_{device}.png")
@@ -76,10 +65,7 @@ def test_gfpgan(device):
 
 @pytest.mark.parametrize("device", ["cuda", "cpu", "mps"])
 def test_restoreformer(device):
-    if device == "cuda" and not torch.cuda.is_available():
-        return
-    if device == "mps" and not torch.backends.mps.is_available():
-        return
+    check_device(device)
     model = RestoreFormerPlugin(device)
     res = model(rgb_img, None, None)
     _save(res, f"test_restoreformer_{device}.png")
@@ -87,10 +73,7 @@ def test_restoreformer(device):
 
 @pytest.mark.parametrize("device", ["cuda", "cpu", "mps"])
 def test_segment_anything(device):
-    if device == "cuda" and not torch.cuda.is_available():
-        return
-    if device == "mps" and not torch.backends.mps.is_available():
-        return
+    check_device(device)
     img_md5 = hashlib.md5(img_bytes).hexdigest()
     model = InteractiveSeg("vit_l", device)
     new_mask = model.forward(rgb_img, [[448 // 2, 394 // 2, 1]], img_md5)

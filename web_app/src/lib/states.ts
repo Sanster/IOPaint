@@ -109,6 +109,7 @@ type ServerConfig = {
   enableAutoSaving: boolean
   enableControlnet: boolean
   controlnetMethod: string
+  disableModelSwitch: boolean
   isDesktop: boolean
 }
 
@@ -279,6 +280,7 @@ const defaultValues: AppState = {
     enableAutoSaving: false,
     enableControlnet: false,
     controlnetMethod: "lllyasviel/control_v11p_sd15_canny",
+    disableModelSwitch: false,
     isDesktop: false,
   },
   settings: {

@@ -6,7 +6,7 @@ from .realesrgan import RealESRGANUpscaler
 from .gfpgan_plugin import GFPGANPlugin
 from .restoreformer import RestoreFormerPlugin
 from .anime_seg import AnimeSeg
-from ..const import InteractiveSegModel, Device
+from ..const import InteractiveSegModel, Device, RealESRGANModel
 
 
 def build_plugins(
@@ -18,7 +18,7 @@ def build_plugins(
     enable_anime_seg: bool,
     enable_realesrgan: bool,
     realesrgan_device: Device,
-    realesrgan_model: str,
+    realesrgan_model: RealESRGANModel,
     enable_gfpgan: bool,
     gfpgan_device: Device,
     enable_restoreformer: bool,

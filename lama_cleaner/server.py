@@ -507,7 +507,7 @@ def start(
     enable_anime_seg: bool,
     enable_realesrgan: bool,
     realesrgan_device: Device,
-    realesrgan_model: str,
+    realesrgan_model: RealESRGANModel,
     enable_gfpgan: bool,
     gfpgan_device: Device,
     enable_restoreformer: bool,
@@ -525,6 +525,7 @@ def start(
                 output_dir, "lama_cleaner_thumbnails"
             )
             file_manager.output_dir = output_dir
+            global_config.file_manager = file_manager
         else:
             global_config.input_image_path = input
 

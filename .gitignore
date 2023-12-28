@@ -8,3 +8,4 @@ build
 dist/
 lama_cleaner.egg-info/
 venv/
+tmp/

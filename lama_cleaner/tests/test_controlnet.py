@@ -1,6 +1,7 @@
 import os
 
 from lama_cleaner.const import SD_CONTROLNET_CHOICES
+from lama_cleaner.tests.utils import current_dir, check_device, get_config, assert_equal
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 from pathlib import Path
@@ -10,178 +11,107 @@ import torch
 
 from lama_cleaner.model_manager import ModelManager
 from lama_cleaner.schema import HDStrategy, SDSampler
-from lama_cleaner.tests.test_model import get_config, assert_equal
 
-current_dir = Path(__file__).parent.absolute().resolve()
-save_dir = current_dir / "result"
-save_dir.mkdir(exist_ok=True, parents=True)
-device = "cuda" if torch.cuda.is_available() else "cpu"
-device = torch.device(device)
+
 model_name = "runwayml/stable-diffusion-inpainting"
 
 
-@pytest.mark.parametrize("sd_device", ["cuda", "mps"])
-@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
-@pytest.mark.parametrize("sampler", [SDSampler.uni_pc])
-@pytest.mark.parametrize("cpu_textencoder", [True])
-@pytest.mark.parametrize("disable_nsfw", [True])
-@pytest.mark.parametrize("sd_controlnet_method", SD_CONTROLNET_CHOICES)
-def test_runway_sd_1_5(
-    sd_device, strategy, sampler, cpu_textencoder, disable_nsfw, sd_controlnet_method
-):
-    if sd_device == "cuda" and not torch.cuda.is_available():
-        return
-    if device == "mps" and not torch.backends.mps.is_available():
-        return
+def convert_controlnet_method_name(name):
+    return name.replace("/", "--")
 
-    sd_steps = 1 if sd_device == "cpu" else 30
+
+@pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])
+@pytest.mark.parametrize("controlnet_method", [SD_CONTROLNET_CHOICES[0]])
+def test_runway_sd_1_5(device, controlnet_method):
+    sd_steps = check_device(device)
+
     model = ModelManager(
         name=model_name,
-        sd_controlnet=True,
-        device=torch.device(sd_device),
-        disable_nsfw=disable_nsfw,
-        sd_cpu_textencoder=cpu_textencoder,
-        sd_controlnet_method=sd_controlnet_method,
-    )
-
-    controlnet_conditioning_scale = {
-        "control_v11p_sd15_canny": 0.4,
-        "control_v11p_sd15_openpose": 0.4,
-        "control_v11p_sd15_inpaint": 1.0,
-        "control_v11f1p_sd15_depth": 1.0,
-    }[sd_controlnet_method]
-
-    cfg = get_config(
-        strategy,
-        prompt="a fox sitting on a bench",
-        sd_steps=sd_steps,
-        controlnet_conditioning_scale=controlnet_conditioning_scale,
-        controlnet_method=sd_controlnet_method,
-    )
-    cfg.sd_sampler = sampler
-
-    name = f"device_{sd_device}_{sampler}_cpu_textencoder_disable_nsfw"
-
-    assert_equal(
-        model,
-        cfg,
-        f"sd_controlnet_{sd_controlnet_method}_{name}.png",
-        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
-        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
-        fx=1.2,
-        fy=1.2,
-    )
-
-
-@pytest.mark.parametrize("sd_device", ["cuda", "mps"])
-@pytest.mark.parametrize("sampler", [SDSampler.uni_pc])
-def test_local_file_path(sd_device, sampler):
-    if sd_device == "cuda" and not torch.cuda.is_available():
-        return
-    if device == "mps" and not torch.backends.mps.is_available():
-        return
-
-    sd_steps = 1 if sd_device == "cpu" else 30
-    model = ModelManager(
-        name=model_name,
-        sd_controlnet=True,
-        device=torch.device(sd_device),
+        device=torch.device(device),
         disable_nsfw=True,
-        sd_cpu_textencoder=False,
-        cpu_offload=True,
-        sd_controlnet_method="control_v11p_sd15_canny",
+        sd_cpu_textencoder=True,
+        enable_controlnet=True,
+        controlnet_method=controlnet_method,
     )
+
     cfg = get_config(
-        HDStrategy.ORIGINAL,
         prompt="a fox sitting on a bench",
         sd_steps=sd_steps,
-        controlnet_method="control_v11p_sd15_canny",
+        enable_controlnet=True,
+        controlnet_conditioning_scale=0.5,
+        controlnet_method=controlnet_method,
     )
-    cfg.sd_sampler = sampler
-
-    name = f"device_{sd_device}_{sampler}"
+    name = f"device_{device}"
 
     assert_equal(
         model,
         cfg,
-        f"sd_controlnet_canny_local_model_{name}.png",
+        f"sd_controlnet_{convert_controlnet_method_name(controlnet_method)}_{name}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
 
 
-@pytest.mark.parametrize("sd_device", ["cuda", "mps"])
-@pytest.mark.parametrize("sampler", [SDSampler.uni_pc])
-def test_local_file_path_controlnet_native_inpainting(sd_device, sampler):
-    if sd_device == "cuda" and not torch.cuda.is_available():
-        return
-    if device == "mps" and not torch.backends.mps.is_available():
-        return
-
-    sd_steps = 1 if sd_device == "cpu" else 30
+@pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])
+def test_controlnet_switch(device):
+    sd_steps = check_device(device)
     model = ModelManager(
         name=model_name,
-        sd_controlnet=True,
-        device=torch.device(sd_device),
+        device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         cpu_offload=True,
-        sd_local_model_path="/Users/cwq/data/models/v1-5-pruned-emaonly.safetensors",
-        sd_controlnet_method="control_v11p_sd15_inpaint",
+        enable_controlnet=True,
+        controlnet_method="lllyasviel/control_v11p_sd15_canny",
     )
     cfg = get_config(
-        HDStrategy.ORIGINAL,
         prompt="a fox sitting on a bench",
         sd_steps=sd_steps,
-        controlnet_conditioning_scale=1.0,
-        sd_strength=1.0,
-        controlnet_method="control_v11p_sd15_inpaint",
+        enable_controlnet=True,
+        controlnet_method="lllyasviel/control_v11f1p_sd15_depth",
     )
-    cfg.sd_sampler = sampler
-
-    name = f"device_{sd_device}_{sampler}"
 
     assert_equal(
         model,
         cfg,
-        f"sd_controlnet_local_native_{name}.png",
+        f"controlnet_switch_canny_to_depth_device_{device}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
 
 
-@pytest.mark.parametrize("sd_device", ["cuda", "mps"])
-@pytest.mark.parametrize("sampler", [SDSampler.uni_pc])
-def test_controlnet_switch(sd_device, sampler):
-    if sd_device == "cuda" and not torch.cuda.is_available():
-        return
-    if device == "mps" and not torch.backends.mps.is_available():
-        return
+@pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])
+@pytest.mark.parametrize(
+    "local_file", ["sd-v1-5-inpainting.ckpt", "v1-5-pruned-emaonly.safetensors"]
+)
+def test_local_file_path(device, local_file):
+    sd_steps = check_device(device)
 
-    sd_steps = 1 if sd_device == "cpu" else 30
+    controlnet_kwargs = dict(
+        enable_controlnet=True,
+        controlnet_method=SD_CONTROLNET_CHOICES[0],
+    )
+
     model = ModelManager(
-        name=model_name,
-        sd_controlnet=True,
-        device=torch.device(sd_device),
+        name=local_file,
+        device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         cpu_offload=True,
-        sd_controlnet_method="control_v11p_sd15_canny",
+        **controlnet_kwargs,
     )
     cfg = get_config(
-        HDStrategy.ORIGINAL,
         prompt="a fox sitting on a bench",
         sd_steps=sd_steps,
-        controlnet_method="control_v11p_sd15_inpaint",
+        **controlnet_kwargs,
     )
-    cfg.sd_sampler = sampler
 
-    name = f"device_{sd_device}_{sampler}"
+    name = f"device_{device}"
 
     assert_equal(
         model,
         cfg,
-        f"sd_controlnet_switch_to_inpaint_local_model_{name}.png",
+        f"{controlnet_kwargs['controlnet_method']}_local_model_{name}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )

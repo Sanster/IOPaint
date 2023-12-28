@@ -1,7 +1,8 @@
 import os
 
+from lama_cleaner.tests.utils import check_device, current_dir
+
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
-from pathlib import Path
 
 import pytest
 import torch
@@ -10,31 +11,25 @@ from lama_cleaner.model_manager import ModelManager
 from lama_cleaner.schema import HDStrategy, SDSampler, FREEUConfig
 from lama_cleaner.tests.test_model import get_config, assert_equal
 
-current_dir = Path(__file__).parent.absolute().resolve()
-save_dir = current_dir / "result"
-save_dir.mkdir(exist_ok=True, parents=True)
 
-
-@pytest.mark.parametrize("sd_device", ["cuda", "mps"])
+@pytest.mark.parametrize("device", ["cuda", "mps"])
 @pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
 @pytest.mark.parametrize("sampler", [SDSampler.ddim])
-def test_sdxl(sd_device, strategy, sampler):
+def test_sdxl(device, strategy, sampler):
+    sd_steps = check_device(device)
+
     def callback(i, t, latents):
         pass
 
-    if sd_device == "cuda" and not torch.cuda.is_available():
-        return
-
-    sd_steps = 20
     model = ModelManager(
         name="diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
-        device=torch.device(sd_device),
+        device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         callback=callback,
     )
     cfg = get_config(
-        strategy,
+        strategy=strategy,
         prompt="face of a fox, sitting on a bench",
         sd_steps=sd_steps,
         sd_strength=1.0,
@@ -42,12 +37,10 @@ def test_sdxl(sd_device, strategy, sampler):
     )
     cfg.sd_sampler = sampler
 
-    name = f"device_{sd_device}_{sampler}"
-
     assert_equal(
         model,
         cfg,
-        f"sdxl_{name}.png",
+        f"sdxl_device_{device}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
         fx=2,
@@ -55,26 +48,24 @@ def test_sdxl(sd_device, strategy, sampler):
     )
 
 
-@pytest.mark.parametrize("sd_device", ["cuda", "mps"])
+@pytest.mark.parametrize("device", ["cuda", "mps"])
 @pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
 @pytest.mark.parametrize("sampler", [SDSampler.ddim])
-def test_sdxl_lcm_lora_and_freeu(sd_device, strategy, sampler):
+def test_sdxl_lcm_lora_and_freeu(device, strategy, sampler):
+    sd_steps = check_device(device)
+
     def callback(i, t, latents):
         pass
 
-    if sd_device == "cuda" and not torch.cuda.is_available():
-        return
-
-    sd_steps = 5
     model = ModelManager(
         name="diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
-        device=torch.device(sd_device),
+        device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
         callback=callback,
     )
     cfg = get_config(
-        strategy,
+        strategy=strategy,
         prompt="face of a fox, sitting on a bench",
         sd_steps=sd_steps,
         sd_strength=1.0,
@@ -83,7 +74,7 @@ def test_sdxl_lcm_lora_and_freeu(sd_device, strategy, sampler):
     )
     cfg.sd_sampler = sampler
 
-    name = f"device_{sd_device}_{sampler}"
+    name = f"device_{device}_{sampler}"
 
     assert_equal(
         model,
@@ -96,7 +87,7 @@ def test_sdxl_lcm_lora_and_freeu(sd_device, strategy, sampler):
     )
 
     cfg = get_config(
-        strategy,
+        strategy=strategy,
         prompt="face of a fox, sitting on a bench",
         sd_steps=sd_steps,
         sd_guidance_scale=7.5,
@@ -107,7 +98,7 @@ def test_sdxl_lcm_lora_and_freeu(sd_device, strategy, sampler):
     assert_equal(
         model,
         cfg,
-        f"sdxl_{name}_freeu.png",
+        f"sdxl_{name}_freeu_device_{device}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
         fx=2,
@@ -115,28 +106,27 @@ def test_sdxl_lcm_lora_and_freeu(sd_device, strategy, sampler):
     )
 
 
-@pytest.mark.parametrize("sd_device", ["mps"])
+@pytest.mark.parametrize("device", ["cuda", "mps"])
 @pytest.mark.parametrize(
     "rect",
     [
         [-128, -128, 1024, 1024],
     ],
 )
-def test_sdxl_outpainting(sd_device, rect):
-    if sd_device == "cuda" and not torch.cuda.is_available():
-        return
+def test_sdxl_outpainting(device, rect):
+    sd_steps = check_device(device)
 
     model = ModelManager(
         name="diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
-        device=torch.device(sd_device),
+        device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
     )
 
     cfg = get_config(
-        HDStrategy.ORIGINAL,
+        strategy=HDStrategy.ORIGINAL,
         prompt="a dog sitting on a bench in the park",
-        sd_steps=20,
+        sd_steps=sd_steps,
         use_extender=True,
         extender_x=rect[0],
         extender_y=rect[1],
@@ -150,7 +140,7 @@ def test_sdxl_outpainting(sd_device, rect):
     assert_equal(
         model,
         cfg,
-        f"sdxl_outpainting_dog_ddim_{'_'.join(map(str, rect))}.png",
+        f"sdxl_outpainting_dog_ddim_{'_'.join(map(str, rect))}_device_{device}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
         fx=1.5,

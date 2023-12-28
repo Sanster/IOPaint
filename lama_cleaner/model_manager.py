@@ -37,7 +37,7 @@ class ModelManager:
     def init_model(self, name: str, device, **kwargs):
         logger.info(f"Loading model: {name}")
         if name not in self.available_models:
-            raise NotImplementedError(f"Unsupported model: {name}")
+            raise NotImplementedError(f"Unsupported model: {name}. Available models: {self.available_models.keys()}")
 
         model_info = self.available_models[name]
         kwargs = {

@@ -72,7 +72,7 @@ def start(
     enable_anime_seg: bool = Option(False, help=ANIMESEG_HELP),
     enable_realesrgan: bool = Option(False),
     realesrgan_device: Device = Option(Device.cpu),
-    realesrgan_model: str = Option(RealESRGANModel.realesr_general_x4v3),
+    realesrgan_model: RealESRGANModel = Option(RealESRGANModel.realesr_general_x4v3),
     enable_gfpgan: bool = Option(False),
     gfpgan_device: Device = Option(Device.cpu),
     enable_restoreformer: bool = Option(False),

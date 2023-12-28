@@ -1,26 +1,24 @@
-from pathlib import Path
-
 import cv2
 import pytest
-import torch
 from PIL import Image
 
 from lama_cleaner.model_manager import ModelManager
 from lama_cleaner.schema import HDStrategy
-from lama_cleaner.tests.test_model import get_config, get_data
+from lama_cleaner.tests.utils import (
+    current_dir,
+    get_config,
+    get_data,
+    save_dir,
+    check_device,
+)
 
-current_dir = Path(__file__).parent.absolute().resolve()
-save_dir = current_dir / "result"
-save_dir.mkdir(exist_ok=True, parents=True)
-device = "cuda" if torch.cuda.is_available() else "mps"
-device = torch.device(device)
 model_name = "Fantasy-Studio/Paint-by-Example"
 
 
 def assert_equal(
     model,
     config,
-    gt_name,
+    save_name: str,
     fx: float = 1,
     fy: float = 1,
     img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
@@ -38,46 +36,18 @@ def assert_equal(
     print(f"Input image shape: {img.shape}, example_image: {example_image.shape}")
     config.paint_by_example_example_image = Image.fromarray(example_image)
     res = model(img, mask, config)
-    cv2.imwrite(str(save_dir / gt_name), res)
+    cv2.imwrite(str(save_dir / save_name), res)
 
 
-def test_paint_by_example():
+@pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])
+def test_paint_by_example(device):
+    sd_steps = check_device(device)
     model = ModelManager(name=model_name, device=device, disable_nsfw=True)
-    cfg = get_config(HDStrategy.ORIGINAL, sd_steps=30)
+    cfg = get_config(strategy=HDStrategy.ORIGINAL, sd_steps=sd_steps)
     assert_equal(
         model,
         cfg,
-        f"paint_by_example.png",
-        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
-        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
-        fy=0.9,
-        fx=1.3,
-    )
-
-
-def test_paint_by_example_cpu_offload():
-    model = ModelManager(
-        name=model_name, device=device, cpu_offload=True, disable_nsfw=False
-    )
-    cfg = get_config(HDStrategy.ORIGINAL, sd_steps=30)
-    assert_equal(
-        model,
-        cfg,
-        f"paint_by_example_cpu_offload.png",
-        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
-        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
-    )
-
-
-def test_paint_by_example_cpu_offload_cpu_device():
-    model = ModelManager(
-        name=model_name, device=torch.device("cpu"), cpu_offload=True, disable_nsfw=True
-    )
-    cfg = get_config(HDStrategy.ORIGINAL, sd_steps=1)
-    assert_equal(
-        model,
-        cfg,
-        f"paint_by_example_cpu_offload_cpu_device.png",
+        f"paint_by_example_device_{device}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
         fy=0.9,
