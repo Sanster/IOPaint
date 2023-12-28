@@ -20,7 +20,7 @@ const Header = () => {
     file,
     customMask,
     isInpainting,
-    enableFileManager,
+    serverConfig,
     runMannually,
     enableUploadMask,
     model,
@@ -35,7 +35,7 @@ const Header = () => {
     state.file,
     state.customMask,
     state.isInpainting,
-    state.serverConfig.enableFileManager,
+    state.serverConfig,
     state.runMannually(),
     state.settings.enableUploadMask,
     state.settings.model,
@@ -67,7 +67,7 @@ const Header = () => {
   return (
     <header className="h-[60px] px-6 py-4 absolute top-[0] flex justify-between items-center w-full z-20 border-b backdrop-filter backdrop-blur-md bg-background/70">
       <div className="flex items-center gap-1">
-        {enableFileManager ? (
+        {serverConfig.enableFileManager ? (
           <FileManager
             photoWidth={512}
             onPhotoClick={async (tab: string, filename: string) => {
@@ -181,7 +181,7 @@ const Header = () => {
       <div className="flex gap-1">
         <Coffee />
         <Shortcuts />
-        <SettingsDialog />
+        {serverConfig.disableModelSwitch ? <></> : <SettingsDialog />}
       </div>
     </header>
   )
