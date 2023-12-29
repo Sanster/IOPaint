@@ -1,5 +1,5 @@
 import { PlayIcon } from "@radix-ui/react-icons"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 import { IconButton, ImageUploadButton } from "@/components/ui/button"
 import Shortcuts from "@/components/Shortcuts"
 import { useImage } from "@/hooks/useImage"

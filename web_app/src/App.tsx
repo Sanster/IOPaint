@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 import { nanoid } from "nanoid"
 
 import useInputImage from "@/hooks/useInputImage"
@@ -56,7 +56,6 @@ function Home() {
     return nanoid()
   }, [file])
 
-  const [isDragging, setIsDragging] = useState(false)
   const dragCounter = useRef(0)
 
   const handleDrag = useCallback((event: any) => {
@@ -68,9 +67,6 @@ function Home() {
     event.preventDefault()
     event.stopPropagation()
     dragCounter.current += 1
-    if (event.dataTransfer.items && event.dataTransfer.items.length > 0) {
-      setIsDragging(true)
-    }
   }, [])
 
   const handleDragOut = useCallback((event: any) => {
@@ -78,13 +74,11 @@ function Home() {
     event.stopPropagation()
     dragCounter.current -= 1
     if (dragCounter.current > 0) return
-    setIsDragging(false)
   }, [])
 
   const handleDrop = useCallback((event: any) => {
     event.preventDefault()
     event.stopPropagation()
-    setIsDragging(false)
     if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
       if (event.dataTransfer.files.length > 1) {
         // setToastState({

@@ -59,7 +59,7 @@
   "devDependencies": {
     "@tanstack/eslint-plugin-query": "^5.8.4",
     "@types/axios": "^0.14.0",
-    "@types/flexsearch": "^0.7.3",
+    "@types/flexsearch": "^0.7.6",
     "@types/lodash": "^4.14.201",
     "@types/node": "^20.9.2",
     "@types/react": "^18.2.37",

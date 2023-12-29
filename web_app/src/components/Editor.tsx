@@ -703,7 +703,7 @@ export default function Editor(props: EditorProps) {
         doubleClick={{ disabled: true }}
         initialScale={minScale}
         minScale={minScale * 0.3}
-        onPanning={(ref) => {
+        onPanning={() => {
           if (!panned) {
             setPanned(true)
           }

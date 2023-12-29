@@ -119,11 +119,6 @@ const InteractiveSegPoints = () => {
 }
 
 const InteractiveSeg = () => {
-  const [interactiveSegState, updateInteractiveSegState] = useStore((state) => [
-    state.interactiveSegState,
-    state.updateInteractiveSegState,
-  ])
-
   return (
     <div>
       <InteractiveSegConfirmActions />

@@ -14,9 +14,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import { Switch } from "./ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { useEffect, useState } from "react"
@@ -44,14 +42,8 @@ import useHotKey from "@/hooks/useHotkey"
 
 const formSchema = z.object({
   enableFileManager: z.boolean(),
-  inputDirectory: z.string().refine(async (id) => {
-    // verify that ID exists in database
-    return true
-  }),
-  outputDirectory: z.string().refine(async (id) => {
-    // verify that ID exists in database
-    return true
-  }),
+  inputDirectory: z.string(),
+  outputDirectory: z.string(),
   enableDownloadMask: z.boolean(),
   enableManualInpainting: z.boolean(),
   enableUploadMask: z.boolean(),
@@ -59,7 +51,7 @@ const formSchema = z.object({
 
 const TAB_GENERAL = "General"
 const TAB_MODEL = "Model"
-const TAB_FILE_MANAGER = "File Manager"
+// const TAB_FILE_MANAGER = "File Manager"
 
 const TAB_NAMES = [TAB_MODEL, TAB_GENERAL]
 
@@ -341,68 +333,68 @@ export function SettingsDialog() {
     )
   }
 
-  function renderFileManagerSettings() {
-    return (
-      <div className="flex flex-col justify-between rounded-lg gap-4 w-[400px]">
-        <FormField
-          control={form.control}
-          name="enableFileManager"
-          render={({ field }) => (
-            <FormItem className="flex items-center justify-between gap-4">
-              <div className="space-y-0.5">
-                <FormLabel>Enable file manger</FormLabel>
-                <FormDescription className="max-w-sm">
-                  Browser images
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+  // function renderFileManagerSettings() {
+  //   return (
+  //     <div className="flex flex-col justify-between rounded-lg gap-4 w-[400px]">
+  //       <FormField
+  //         control={form.control}
+  //         name="enableFileManager"
+  //         render={({ field }) => (
+  //           <FormItem className="flex items-center justify-between gap-4">
+  //             <div className="space-y-0.5">
+  //               <FormLabel>Enable file manger</FormLabel>
+  //               <FormDescription className="max-w-sm">
+  //                 Browser images
+  //               </FormDescription>
+  //             </div>
+  //             <FormControl>
+  //               <Switch
+  //                 checked={field.value}
+  //                 onCheckedChange={field.onChange}
+  //               />
+  //             </FormControl>
+  //           </FormItem>
+  //         )}
+  //       />
 
-        <Separator />
+  //       <Separator />
 
-        <FormField
-          control={form.control}
-          name="inputDirectory"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Input directory</FormLabel>
-              <FormControl>
-                <Input placeholder="" {...field} />
-              </FormControl>
-              <FormDescription>
-                Browser images from this directory.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+  //       <FormField
+  //         control={form.control}
+  //         name="inputDirectory"
+  //         render={({ field }) => (
+  //           <FormItem>
+  //             <FormLabel>Input directory</FormLabel>
+  //             <FormControl>
+  //               <Input placeholder="" {...field} />
+  //             </FormControl>
+  //             <FormDescription>
+  //               Browser images from this directory.
+  //             </FormDescription>
+  //             <FormMessage />
+  //           </FormItem>
+  //         )}
+  //       />
 
-        <FormField
-          control={form.control}
-          name="outputDirectory"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Save directory</FormLabel>
-              <FormControl>
-                <Input placeholder="" {...field} />
-              </FormControl>
-              <FormDescription>
-                Result images will be saved to this directory.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-    )
-  }
+  //       <FormField
+  //         control={form.control}
+  //         name="outputDirectory"
+  //         render={({ field }) => (
+  //           <FormItem>
+  //             <FormLabel>Save directory</FormLabel>
+  //             <FormControl>
+  //               <Input placeholder="" {...field} />
+  //             </FormControl>
+  //             <FormDescription>
+  //               Result images will be saved to this directory.
+  //             </FormDescription>
+  //             <FormMessage />
+  //           </FormItem>
+  //         )}
+  //       />
+  //     </div>
+  //   )
+  // }
 
   return (
     <>

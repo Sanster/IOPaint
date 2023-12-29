@@ -1,5 +1,4 @@
 import * as React from "react"
-import { FocusEvent } from "react"
 
 import { cn } from "@/lib/utils"
 import { useStore } from "@/lib/states"
@@ -11,11 +10,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {
     const updateAppState = useStore((state) => state.updateAppState)
 
-    const handleOnFocus = (evt: FocusEvent<any>) => {
+    const handleOnFocus = () => {
       updateAppState({ disableShortCuts: true })
     }
 
-    const handleOnBlur = (evt: FocusEvent<any>) => {
+    const handleOnBlur = () => {
       updateAppState({ disableShortCuts: false })
     }
     return (

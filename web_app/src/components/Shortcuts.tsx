@@ -37,10 +37,6 @@ const isMac = function () {
   return /macintosh|mac os x/i.test(navigator.userAgent)
 }
 
-const isWindows = function () {
-  return /windows|win32/i.test(navigator.userAgent)
-}
-
 const CmdOrCtrl = () => {
   return isMac() ? "Cmd" : "Ctrl"
 }

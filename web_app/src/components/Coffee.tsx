@@ -1,12 +1,5 @@
 import { Coffee as CoffeeIcon } from "lucide-react"
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog"
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog"
 import { IconButton } from "./ui/button"
 import { DialogDescription } from "@radix-ui/react-dialog"
 import Kofi from "@/assets/kofi_button_black.png"

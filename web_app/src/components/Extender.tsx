@@ -209,7 +209,7 @@ const Extender = (props: Props) => {
     }
   }
 
-  const onPointerDone = (e: PointerEvent) => {
+  const onPointerDone = () => {
     if (isResizing) {
       setIsResizing(false)
     }
