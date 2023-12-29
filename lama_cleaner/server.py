@@ -150,7 +150,7 @@ def save_image():
     origin_image_bytes = input["image"].read()  # RGB
     # ext = get_image_ext(origin_image_bytes)
     ext = "png"
-    image, alpha_channel, exif_infos = load_img(origin_image_bytes, return_exif=True)
+    image, alpha_channel, infos = load_img(origin_image_bytes, return_info=True)
     save_path = (global_config.output_dir / filename).with_suffix(f".{ext}")
 
     if alpha_channel is not None:
@@ -166,7 +166,7 @@ def save_image():
         pil_image,
         ext,
         quality=global_config.image_quality,
-        exif_infos=exif_infos,
+        infos=infos,
     )
     try:
         with open(save_path, "wb") as fw:
@@ -230,7 +230,7 @@ def process():
     input = request.files
     # RGB
     origin_image_bytes = input["image"].read()
-    image, alpha_channel, exif_infos = load_img(origin_image_bytes, return_exif=True)
+    image, alpha_channel, exif_infos = load_img(origin_image_bytes, return_info=True)
 
     mask, _ = load_img(input["mask"].read(), gray=True)
     mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)[1]
@@ -337,7 +337,7 @@ def process():
             Image.fromarray(res_np_img),
             ext,
             quality=global_config.image_quality,
-            exif_infos=exif_infos,
+            infos=exif_infos,
         )
     )
 
@@ -363,8 +363,8 @@ def run_plugin():
         return "Plugin not found", 500
 
     origin_image_bytes = files["image"].read()  # RGB
-    rgb_np_img, alpha_channel, exif_infos = load_img(
-        origin_image_bytes, return_exif=True
+    rgb_np_img, alpha_channel, infos = load_img(
+        origin_image_bytes, return_info=True
     )
 
     start = time.time()
@@ -416,7 +416,7 @@ def run_plugin():
                     Image.fromarray(rgb_res),
                     ext,
                     quality=global_config.image_quality,
-                    exif_infos=exif_infos,
+                    infos=infos,
                 )
             ),
             mimetype=f"image/{ext}",
