@@ -1,3 +1,11 @@
+export interface Filename {
+  name: string
+  height: number
+  width: number
+  ctime: number
+  mtime: number
+}
+
 export interface ModelInfo {
   name: string
   path: string

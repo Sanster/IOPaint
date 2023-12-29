@@ -16,7 +16,7 @@ import {
 } from "@radix-ui/react-icons"
 import { useToggle } from "react-use"
 import { useDebounce } from "@uidotdev/usehooks"
-import FlexSearch from "flexsearch/dist/flexsearch.bundle.js"
+import Fuse from "fuse.js"
 import { useToast } from "@/components/ui/use-toast"
 import { API_ENDPOINT, getMedias } from "@/lib/api"
 import { IconButton } from "./ui/button"
@@ -33,7 +33,7 @@ import {
 import { ScrollArea } from "./ui/scroll-area"
 import { DialogTrigger } from "@radix-ui/react-dialog"
 import { useStore } from "@/lib/states"
-import { SortBy, SortOrder } from "@/lib/types"
+import { Filename, SortBy, SortOrder } from "@/lib/types"
 import { FolderClosed } from "lucide-react"
 import useHotKey from "@/hooks/useHotkey"
 
@@ -42,14 +42,6 @@ interface Photo {
   height: number
   width: number
   name: string
-}
-
-interface Filename {
-  name: string
-  height: number
-  width: number
-  ctime: number
-  mtime: number
 }
 
 const SORT_BY_NAME = "Name"
@@ -148,17 +140,12 @@ export default function FileManager(props: Props) {
         const filenames = await getMedias(tab)
         let filteredFilenames = filenames
         if (debouncedSearchText) {
-          const index = new FlexSearch.Index({
-            tokenize: "forward",
-            minlength: 1,
+          const fuse = new Fuse(filteredFilenames, {
+            keys: ["name"],
           })
-          filenames.forEach((filename: Filename, id: number) =>
-            index.add(id, filename.name)
-          )
-          const results: FlexSearch.IndexSearchResult =
-            index.search(debouncedSearchText)
-          filteredFilenames = results.map(
-            (id: FlexSearch.Id) => filenames[id as number]
+          const items = fuse.search(debouncedSearchText)
+          filteredFilenames = items.map(
+            (item) => filteredFilenames[item.refIndex]
           )
         }
 

@@ -1,4 +1,4 @@
-import { ModelInfo, PowerPaintTask, Rect } from "@/lib/types"
+import { Filename, ModelInfo, PowerPaintTask, Rect } from "@/lib/types"
 import { Settings } from "@/lib/states"
 import { srcToFile } from "@/lib/utils"
 import axios from "axios"
@@ -186,7 +186,7 @@ export async function getMediaFile(tab: string, filename: string) {
   throw new Error(errMsg)
 }
 
-export async function getMedias(tab: string) {
+export async function getMedias(tab: string): Promise<Filename[]> {
   const res = await fetch(`${API_ENDPOINT}/medias/${tab}`, {
     method: "GET",
   })
