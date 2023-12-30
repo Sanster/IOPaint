@@ -11,7 +11,7 @@ from lama_cleaner.helper import (
     download_model,
 )
 from lama_cleaner.model.base import InpaintModel
-from lama_cleaner.schema import Config
+from lama_cleaner.schema import InpaintRequest
 
 LAMA_MODEL_URL = os.environ.get(
     "LAMA_MODEL_URL",
@@ -36,7 +36,7 @@ class LaMa(InpaintModel):
     def is_downloaded() -> bool:
         return os.path.exists(get_cache_path_by_url(LAMA_MODEL_URL))
 
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: InpaintRequest):
         """Input image and output image have same size
         image: [H, W, C] RGB
         mask: [H, W]

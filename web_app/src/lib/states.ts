@@ -491,10 +491,6 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
             paintByExampleFile
           )
 
-          if (!res) {
-            throw new Error("Something went wrong on server side.")
-          }
-
           const { blob, seed } = res
           if (seed) {
             get().setSeed(parseInt(seed, 10))

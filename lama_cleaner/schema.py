@@ -1,8 +1,17 @@
+import random
 from enum import Enum
-from typing import Optional
+from pathlib import Path
+from typing import Optional, Literal, List
 
 from PIL.Image import Image
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator, field_validator
+
+from lama_cleaner.const import Device, InteractiveSegModel, RealESRGANModel
+
+
+class CV2Flag(str, Enum):
+    INPAINT_NS = "INPAINT_NS"
+    INPAINT_TELEA = "INPAINT_TELEA"
 
 
 class ModelType(str, Enum):
@@ -56,93 +65,215 @@ class PowerPaintTask(str, Enum):
     outpainting = "outpainting"
 
 
-class Config(BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
+class ApiConfig(BaseModel):
+    host: str
+    port: int
+    model: str
+    no_half: bool
+    cpu_offload: bool
+    disable_nsfw_checker: bool
+    cpu_textencoder: bool
+    device: Device
+    gui: bool
+    disable_model_switch: bool
+    input: Path
+    output_dir: Path
+    quality: int
+    enable_interactive_seg: bool
+    interactive_seg_model: InteractiveSegModel
+    interactive_seg_device: Device
+    enable_remove_bg: bool
+    enable_anime_seg: bool
+    enable_realesrgan: bool
+    realesrgan_device: Device
+    realesrgan_model: RealESRGANModel
+    enable_gfpgan: bool
+    gfpgan_device: Device
+    enable_restoreformer: bool
+    restoreformer_device: Device
 
-    # Configs for ldm model
-    ldm_steps: int = 20
-    ldm_sampler: str = LDMSampler.plms
 
-    # Configs for zits model
-    zits_wireframe: bool = True
+class InpaintRequest(BaseModel):
+    image: Optional[str] = Field(..., description="base64 encoded image")
+    mask: Optional[str] = Field(..., description="base64 encoded mask")
 
-    # Configs for High Resolution Strategy(different way to preprocess image)
-    hd_strategy: str = HDStrategy.CROP  # See HDStrategy Enum
-    hd_strategy_crop_margin: int = 128
-    # If the longer side of the image is larger than this value, use crop strategy
-    hd_strategy_crop_trigger_size: int = 800
-    hd_strategy_resize_limit: int = 1280
+    ldm_steps: int = Field(20, description="Steps for ldm model.")
+    ldm_sampler: str = Field(LDMSampler.plms, discription="Sampler for ldm model.")
+    zits_wireframe: bool = Field(True, description="Enable wireframe for zits model.")
 
-    # Configs for Stable Diffusion 1.5
-    prompt: str = ""
-    negative_prompt: str = ""
-    # Crop image to this size before doing sd inpainting
-    # The value is always on the original image scale
-    use_croper: bool = False
-    croper_x: int = None
-    croper_y: int = None
-    croper_height: int = None
-    croper_width: int = None
-    use_extender: bool = False
-    extender_x: int = None
-    extender_y: int = None
-    extender_height: int = None
-    extender_width: int = None
+    hd_strategy: str = Field(
+        HDStrategy.CROP,
+        description="Different way to preprocess image, only used by erase models(e.g. lama/mat)",
+    )
+    hd_strategy_crop_trigger_size: int = Field(
+        800,
+        description="Crop trigger size for hd_strategy=CROP, if the longer side of the image is larger than this value, use crop strategy",
+    )
+    hd_strategy_crop_margin: int = Field(
+        128, description="Crop margin for hd_strategy=CROP"
+    )
+    hd_strategy_resize_limit: int = Field(
+        1280, description="Resize limit for hd_strategy=RESIZE"
+    )
 
-    # Resize the image before doing sd inpainting, the area outside the mask will not lose quality.
-    # Used by sd models and paint_by_example model
-    sd_scale: float = 1.0
-    # Blur the edge of mask area. The higher the number the smoother blend with the original image
-    sd_mask_blur: int = 0
-    # Indicates extent to transform the reference `image`. Must be between 0 and 1. `image` is used as a
-    # starting point and more noise is added the higher the `strength`. The number of denoising steps depends
-    # on the amount of noise initially added. When `strength` is 1, added noise is maximum and the denoising
-    # process runs for the full number of iterations specified in `num_inference_steps`. A value of 1
-    # essentially ignores `image`.
-    sd_strength: float = 1.0
-    # The number of denoising steps. More denoising steps usually lead to a
-    # higher quality image at the expense of slower inference.
-    sd_steps: int = 50
-    # Higher guidance scale encourages to generate images that are closely linked
-    # to the text prompt, usually at the expense of lower image quality.
-    sd_guidance_scale: float = 7.5
-    sd_sampler: str = SDSampler.uni_pc
-    # -1 mean random seed
-    sd_seed: int = 42
-    sd_match_histograms: bool = False
+    prompt: str = Field("", description="Prompt for diffusion models.")
+    negative_prompt: str = Field(
+        "", description="Negative prompt for diffusion models."
+    )
+    use_croper: bool = Field(
+        False, description="Crop image before doing diffusion inpainting"
+    )
+    croper_x: int = Field(0, description="Crop x for croper")
+    croper_y: int = Field(0, description="Crop y for croper")
+    croper_height: int = Field(512, description="Crop height for croper")
+    croper_width: int = Field(512, description="Crop width for croper")
 
-    # out-painting
-    sd_outpainting_softness: float = 20.0
-    sd_outpainting_space: float = 20.0
+    use_extender: bool = Field(
+        False, description="Extend image before doing sd outpainting"
+    )
+    extender_x: int = Field(0, description="Extend x for extender")
+    extender_y: int = Field(0, description="Extend y for extender")
+    extender_height: int = Field(640, description="Extend height for extender")
+    extender_width: int = Field(640, description="Extend width for extender")
 
-    # freeu
-    sd_freeu: bool = False
+    sd_mask_blur: int = Field(
+        33,
+        description="Blur the edge of mask area. The higher the number the smoother blend with the original image",
+    )
+    sd_strength: float = Field(
+        1.0,
+        description="Strength is a measure of how much noise is added to the base image, which influences how similar the output is to the base image. Higher value means more noise and more different from the base image",
+    )
+    sd_steps: int = Field(
+        50,
+        description="The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference.",
+    )
+    sd_guidance_scale: float = Field(
+        7.5,
+        help="Higher guidance scale encourages to generate images that are closely linked to the text prompt, usually at the expense of lower image quality.",
+    )
+    sd_sampler: str = Field(
+        SDSampler.uni_pc, description="Sampler for diffusion model."
+    )
+    sd_seed: int = Field(
+        42,
+        description="Seed for diffusion model. -1 mean random seed",
+        validate_default=True,
+    )
+    sd_match_histograms: bool = Field(
+        False,
+        description="Match histograms between inpainting area and original image.",
+    )
+
+    sd_outpainting_softness: float = Field(20.0)
+    sd_outpainting_space: float = Field(20.0)
+
+    sd_freeu: bool = Field(
+        False,
+        description="Enable freeu mode. https://huggingface.co/docs/diffusers/main/en/using-diffusers/freeu",
+    )
     sd_freeu_config: FREEUConfig = FREEUConfig()
 
-    # lcm-lora
-    sd_lcm_lora: bool = False
+    sd_lcm_lora: bool = Field(
+        False,
+        description="Enable lcm-lora mode. https://huggingface.co/docs/diffusers/main/en/using-diffusers/inference_with_lcm#texttoimage",
+    )
 
-    # preserving the unmasked area at the expense of some more unnatural transitions between the masked and unmasked areas.
-    sd_prevent_unmasked_area: bool = True
+    sd_keep_unmasked_area: bool = Field(
+        True, description="Keep unmasked area unchanged"
+    )
 
-    # Configs for opencv inpainting
-    # opencv document https://docs.opencv.org/4.6.0/d7/d8b/group__photo__inpaint.html#gga8002a65f5a3328fbf15df81b842d3c3ca05e763003a805e6c11c673a9f4ba7d07
-    cv2_flag: str = "INPAINT_NS"
-    cv2_radius: int = 4
+    cv2_flag: CV2Flag = Field(
+        CV2Flag.INPAINT_NS,
+        description="Flag for opencv inpainting: https://docs.opencv.org/4.6.0/d7/d8b/group__photo__inpaint.html#gga8002a65f5a3328fbf15df81b842d3c3ca05e763003a805e6c11c673a9f4ba7d07",
+    )
+    cv2_radius: int = Field(
+        4,
+        description="Radius of a circular neighborhood of each point inpainted that is considered by the algorithm",
+    )
 
     # Paint by Example
-    paint_by_example_example_image: Optional[Image] = None
+    paint_by_example_example_image: Optional[str] = Field(
+        None, description="Base64 encoded example image for paint by example model"
+    )
 
     # InstructPix2Pix
-    p2p_image_guidance_scale: float = 1.5
+    p2p_image_guidance_scale: float = Field(1.5, description="Image guidance scale")
 
     # ControlNet
-    enable_controlnet: bool = False
-    controlnet_conditioning_scale: float = 0.4
-    controlnet_method: str = "lllyasviel/control_v11p_sd15_canny"
+    enable_controlnet: bool = Field(False, description="Enable controlnet")
+    controlnet_conditioning_scale: float = Field(0.4, description="Conditioning scale")
+    controlnet_method: str = Field(
+        "lllyasviel/control_v11p_sd15_canny", description="Controlnet method"
+    )
 
     # PowerPaint
-    powerpaint_task: PowerPaintTask = PowerPaintTask.text_guided
-    # control the fitting degree of the generated objects to the mask shape.
-    fitting_degree: float = 1.0
+    powerpaint_task: PowerPaintTask = Field(
+        PowerPaintTask.text_guided, description="PowerPaint task"
+    )
+    fitting_degree: float = Field(
+        1.0,
+        description="Control the fitting degree of the generated objects to the mask shape.",
+    )
+
+    @field_validator("sd_seed")
+    @classmethod
+    def sd_seed_validator(cls, v: int) -> int:
+        if v == -1:
+            return random.randint(1, 99999999)
+        return v
+
+
+class RunPluginRequest(BaseModel):
+    name: str
+    image: Optional[str] = Field(..., description="base64 encoded image")
+    clicks: List[List[int]] = Field(
+        [], description="Clicks for interactive seg, [[x,y,0/1], [x2,y2,0/1]]"
+    )
+    scale: float = Field(2.0, description="Scale for upscaling")
+
+
+MediaTab = Literal["input", "output"]
+
+
+class MediasRequest(BaseModel):
+    tab: MediaTab
+
+
+class MediasResponse(BaseModel):
+    name: str
+    height: int
+    width: int
+    ctime: float
+    mtime: float
+
+
+class MediaFileRequest(BaseModel):
+    tab: MediaTab
+    filename: str
+
+
+class MediaThumbnailFileRequest(BaseModel):
+    tab: MediaTab
+    filename: str
+    width: int = 0
+    height: int = 0
+
+
+class GenInfoResponse(BaseModel):
+    prompt: str = ""
+    negative_prompt: str = ""
+
+
+class ServerConfigResponse(BaseModel):
+    plugins: List[str]
+    enableFileManager: bool
+    enableAutoSaving: bool
+    enableControlnet: bool
+    controlnetMethod: Optional[str]
+    disableModelSwitch: bool
+    isDesktop: bool
+
+
+class SwitchModelRequest(BaseModel):
+    name: str

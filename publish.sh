@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-pushd ./lama_cleaner/app
-yarn run build
+pushd ./web_app
+npm run build
 popd
 
 rm -r -f dist

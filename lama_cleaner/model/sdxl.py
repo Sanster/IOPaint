@@ -9,7 +9,7 @@ from loguru import logger
 
 from lama_cleaner.model.base import DiffusionInpaintModel
 from lama_cleaner.model.utils import handle_from_pretrained_exceptions
-from lama_cleaner.schema import Config, ModelType
+from lama_cleaner.schema import InpaintRequest, ModelType
 
 
 class SDXL(DiffusionInpaintModel):
@@ -60,7 +60,7 @@ class SDXL(DiffusionInpaintModel):
 
         self.callback = kwargs.pop("callback", None)
 
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: InpaintRequest):
         """Input image and output image have same size
         image: [H, W, C] RGB
         mask: [H, W, 1] 255 means area to repaint

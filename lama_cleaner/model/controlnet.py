@@ -14,7 +14,7 @@ from lama_cleaner.model.helper.controlnet_preprocess import (
 )
 from lama_cleaner.model.helper.cpu_text_encoder import CPUTextEncoderWrapper
 from lama_cleaner.model.utils import get_scheduler, handle_from_pretrained_exceptions
-from lama_cleaner.schema import Config, ModelType
+from lama_cleaner.schema import InpaintRequest, ModelType
 
 
 class ControlNet(DiffusionInpaintModel):
@@ -130,7 +130,7 @@ class ControlNet(DiffusionInpaintModel):
             raise NotImplementedError(f"{self.controlnet_method} not implemented")
         return control_image
 
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: InpaintRequest):
         """Input image and output image have same size
         image: [H, W, C] RGB
         mask: [H, W, 1] 255 means area to repaint

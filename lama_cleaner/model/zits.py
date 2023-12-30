@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 
 from lama_cleaner.helper import get_cache_path_by_url, load_jit_model, download_model
-from lama_cleaner.schema import Config
+from lama_cleaner.schema import InpaintRequest
 import numpy as np
 
 from lama_cleaner.model.base import InpaintModel
@@ -343,7 +343,7 @@ class ZITS(InpaintModel):
         items["line"] = line_pred.detach()
 
     @torch.no_grad()
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: InpaintRequest):
         """Input images and output images have same size
         images: [H, W, C] RGB
         masks: [H, W]

@@ -3,7 +3,6 @@ import os
 import cv2
 import torch
 
-from lama_cleaner.const import Config
 from lama_cleaner.helper import (
     load_jit_model,
     download_model,
@@ -13,6 +12,7 @@ from lama_cleaner.helper import (
     norm_img,
 )
 from lama_cleaner.model.base import InpaintModel
+from lama_cleaner.schema import InpaintRequest
 
 MIGAN_MODEL_URL = os.environ.get(
     "MIGAN_MODEL_URL",
@@ -40,7 +40,7 @@ class MIGAN(InpaintModel):
         return os.path.exists(get_cache_path_by_url(MIGAN_MODEL_URL))
 
     @torch.no_grad()
-    def __call__(self, image, mask, config: Config):
+    def __call__(self, image, mask, config: InpaintRequest):
         """
         images: [H, W, C] RGB, not normalized
         masks: [H, W]
@@ -80,7 +80,7 @@ class MIGAN(InpaintModel):
 
         return inpaint_result
 
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: InpaintRequest):
         """Input images and output images have same size
         images: [H, W, C] RGB
         masks: [H, W] mask area == 255

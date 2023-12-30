@@ -5,7 +5,7 @@ import torch
 
 from lama_cleaner.model.base import DiffusionInpaintModel
 from lama_cleaner.model.utils import get_scheduler
-from lama_cleaner.schema import Config
+from lama_cleaner.schema import InpaintRequest
 
 
 class Kandinsky(DiffusionInpaintModel):
@@ -29,7 +29,7 @@ class Kandinsky(DiffusionInpaintModel):
 
         self.callback = kwargs.pop("callback", None)
 
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: InpaintRequest):
         """Input image and output image have same size
         image: [H, W, C] RGB
         mask: [H, W, 1] 255 means area to repaint

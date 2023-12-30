@@ -7,7 +7,7 @@ from loguru import logger
 from lama_cleaner.model.base import InpaintModel
 from lama_cleaner.model.ddim_sampler import DDIMSampler
 from lama_cleaner.model.plms_sampler import PLMSSampler
-from lama_cleaner.schema import Config, LDMSampler
+from lama_cleaner.schema import InpaintRequest, LDMSampler
 
 torch.manual_seed(42)
 import torch.nn as nn
@@ -277,7 +277,7 @@ class LDM(InpaintModel):
         return all([os.path.exists(it) for it in model_paths])
 
     @torch.cuda.amp.autocast()
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: InpaintRequest):
         """
         image: [H, W, C] RGB
         mask: [H, W, 1]

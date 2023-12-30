@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import typer
+from fastapi import FastAPI
 from loguru import logger
 from typer import Option
 
@@ -36,6 +37,17 @@ def list_model(
     scanned_models = scan_models()
     for it in scanned_models:
         print(it.name)
+
+
+@typer_app.command(help="Processing image with lama cleaner")
+def run(
+    input: Path = Option(..., help="Image file or folder containing images"),
+    output_dir: Path = Option(..., help="Output directory"),
+    config_path: Path = Option(..., help="Config file path"),
+    model_dir: Path = Option(DEFAULT_MODEL_DIR, help=MODEL_DIR_HELP, file_okay=False),
+):
+    setup_model_dir(model_dir)
+    pass
 
 
 @typer_app.command(help="Start lama cleaner server")
@@ -80,6 +92,16 @@ def start(
 ):
     dump_environment_info()
     device = check_device(device)
+    if input and not input.exists():
+        logger.error(f"invalid --input: {input} not exists")
+        exit()
+    if output_dir:
+        output_dir = output_dir.expanduser().absolute()
+        logger.info(f"Image will be saved to {output_dir}")
+        if not output_dir.exists():
+            logger.info(f"Create output directory {output_dir}")
+            output_dir.mkdir(parents=True)
+
     model_dir = model_dir.expanduser().absolute()
     setup_model_dir(model_dir)
 
@@ -92,32 +114,38 @@ def start(
         logger.info(f"{model} not found in {model_dir}, try to downloading")
         cli_download_model(model, model_dir)
 
-    from lama_cleaner.server import start
+    from lama_cleaner.api import Api
+    from lama_cleaner.schema import ApiConfig
 
-    start(
-        host=host,
-        port=port,
-        model=model,
-        no_half=no_half,
-        cpu_offload=cpu_offload,
-        disable_nsfw_checker=disable_nsfw_checker,
-        cpu_textencoder=cpu_textencoder,
-        device=device,
-        gui=gui,
-        disable_model_switch=disable_model_switch,
-        input=input,
-        output_dir=output_dir,
-        quality=quality,
-        enable_interactive_seg=enable_interactive_seg,
-        interactive_seg_model=interactive_seg_model,
-        interactive_seg_device=interactive_seg_device,
-        enable_remove_bg=enable_remove_bg,
-        enable_anime_seg=enable_anime_seg,
-        enable_realesrgan=enable_realesrgan,
-        realesrgan_device=realesrgan_device,
-        realesrgan_model=realesrgan_model,
-        enable_gfpgan=enable_gfpgan,
-        gfpgan_device=gfpgan_device,
-        enable_restoreformer=enable_restoreformer,
-        restoreformer_device=restoreformer_device,
+    app = FastAPI()
+    api = Api(
+        app,
+        ApiConfig(
+            host=host,
+            port=port,
+            model=model,
+            no_half=no_half,
+            cpu_offload=cpu_offload,
+            disable_nsfw_checker=disable_nsfw_checker,
+            cpu_textencoder=cpu_textencoder,
+            device=device,
+            gui=gui,
+            disable_model_switch=disable_model_switch,
+            input=input,
+            output_dir=output_dir,
+            quality=quality,
+            enable_interactive_seg=enable_interactive_seg,
+            interactive_seg_model=interactive_seg_model,
+            interactive_seg_device=interactive_seg_device,
+            enable_remove_bg=enable_remove_bg,
+            enable_anime_seg=enable_anime_seg,
+            enable_realesrgan=enable_realesrgan,
+            realesrgan_device=realesrgan_device,
+            realesrgan_model=realesrgan_model,
+            enable_gfpgan=enable_gfpgan,
+            gfpgan_device=gfpgan_device,
+            enable_restoreformer=enable_restoreformer,
+            restoreformer_device=restoreformer_device,
+        ),
     )
+    api.launch()

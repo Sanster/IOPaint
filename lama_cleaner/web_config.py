@@ -43,7 +43,7 @@ def save_config(
     restoreformer_device,
     enable_gif,
 ):
-    config = Config(**locals())
+    config = InpaintRequest(**locals())
     print(config)
     if config.input and not os.path.exists(config.input):
         return "[Error] Input file or directory does not exist"

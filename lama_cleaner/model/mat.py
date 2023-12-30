@@ -28,7 +28,7 @@ from lama_cleaner.model.utils import (
     normalize_2nd_moment,
     set_seed,
 )
-from lama_cleaner.schema import Config
+from lama_cleaner.schema import InpaintRequest
 
 
 class ModulatedConv2d(nn.Module):
@@ -1912,7 +1912,7 @@ class MAT(InpaintModel):
     def is_downloaded() -> bool:
         return os.path.exists(get_cache_path_by_url(MAT_MODEL_URL))
 
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: InpaintRequest):
         """Input images and output images have same size
         images: [H, W, C] RGB
         masks: [H, W] mask area == 255

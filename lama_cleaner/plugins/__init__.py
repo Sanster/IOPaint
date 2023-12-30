@@ -10,7 +10,6 @@ from ..const import InteractiveSegModel, Device, RealESRGANModel
 
 
 def build_plugins(
-    global_config,
     enable_interactive_seg: bool,
     interactive_seg_model: InteractiveSegModel,
     interactive_seg_device: Device,
@@ -25,25 +24,26 @@ def build_plugins(
     restoreformer_device: Device,
     no_half: bool,
 ):
+    plugins = {}
     if enable_interactive_seg:
         logger.info(f"Initialize {InteractiveSeg.name} plugin")
-        global_config.plugins[InteractiveSeg.name] = InteractiveSeg(
+        plugins[InteractiveSeg.name] = InteractiveSeg(
             interactive_seg_model, interactive_seg_device
         )
 
     if enable_remove_bg:
         logger.info(f"Initialize {RemoveBG.name} plugin")
-        global_config.plugins[RemoveBG.name] = RemoveBG()
+        plugins[RemoveBG.name] = RemoveBG()
 
     if enable_anime_seg:
         logger.info(f"Initialize {AnimeSeg.name} plugin")
-        global_config.plugins[AnimeSeg.name] = AnimeSeg()
+        plugins[AnimeSeg.name] = AnimeSeg()
 
     if enable_realesrgan:
         logger.info(
             f"Initialize {RealESRGANUpscaler.name} plugin: {realesrgan_model}, {realesrgan_device}"
         )
-        global_config.plugins[RealESRGANUpscaler.name] = RealESRGANUpscaler(
+        plugins[RealESRGANUpscaler.name] = RealESRGANUpscaler(
             realesrgan_model,
             realesrgan_device,
             no_half=no_half,
@@ -57,14 +57,15 @@ def build_plugins(
             logger.info(
                 f"GFPGAN no background upscaler, use --enable-realesrgan to enable it"
             )
-        global_config.plugins[GFPGANPlugin.name] = GFPGANPlugin(
+        plugins[GFPGANPlugin.name] = GFPGANPlugin(
             gfpgan_device,
-            upscaler=global_config.plugins.get(RealESRGANUpscaler.name, None),
+            upscaler=plugins.get(RealESRGANUpscaler.name, None),
         )
 
     if enable_restoreformer:
         logger.info(f"Initialize {RestoreFormerPlugin.name} plugin")
-        global_config.plugins[RestoreFormerPlugin.name] = RestoreFormerPlugin(
+        plugins[RestoreFormerPlugin.name] = RestoreFormerPlugin(
             restoreformer_device,
-            upscaler=global_config.plugins.get(RealESRGANUpscaler.name, None),
+            upscaler=plugins.get(RealESRGANUpscaler.name, None),
         )
+    return plugins

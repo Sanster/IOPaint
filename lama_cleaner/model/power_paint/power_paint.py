@@ -7,7 +7,7 @@ from loguru import logger
 from lama_cleaner.model.base import DiffusionInpaintModel
 from lama_cleaner.model.helper.cpu_text_encoder import CPUTextEncoderWrapper
 from lama_cleaner.model.utils import handle_from_pretrained_exceptions
-from lama_cleaner.schema import Config
+from lama_cleaner.schema import InpaintRequest
 from .powerpaint_tokenizer import add_task_to_prompt
 
 
@@ -58,7 +58,7 @@ class PowerPaint(DiffusionInpaintModel):
 
         self.callback = kwargs.pop("callback", None)
 
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: InpaintRequest):
         """Input image and output image have same size
         image: [H, W, C] RGB
         mask: [H, W, 1] 255 means area to repaint

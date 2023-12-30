@@ -10,7 +10,7 @@ import psutil
 import torch
 
 from lama_cleaner.model_manager import ModelManager
-from lama_cleaner.schema import Config, HDStrategy, SDSampler
+from lama_cleaner.schema import InpaintRequest, HDStrategy, SDSampler
 
 try:
     torch._C._jit_override_can_fuse_on_cpu(False)
@@ -36,7 +36,7 @@ def run_model(model, size):
     image = np.random.randint(0, 256, (size[0], size[1], 3)).astype(np.uint8)
     mask = np.random.randint(0, 255, size).astype(np.uint8)
 
-    config = Config(
+    config = InpaintRequest(
         ldm_steps=2,
         hd_strategy=HDStrategy.ORIGINAL,
         hd_strategy_crop_margin=128,
@@ -44,7 +44,7 @@ def run_model(model, size):
         hd_strategy_resize_limit=128,
         prompt="a fox is sitting on a bench",
         sd_steps=5,
-        sd_sampler=SDSampler.ddim
+        sd_sampler=SDSampler.ddim,
     )
     model(image, mask, config)
 
@@ -75,7 +75,9 @@ def benchmark(model, times: int, empty_cache: bool):
             # cpu_metrics.append(process.cpu_percent())
             time_metrics.append((time.time() - start) * 1000)
             memory_metrics.append(process.memory_info().rss / 1024 / 1024)
-            gpu_memory_metrics.append(nvidia_smi.nvmlDeviceGetMemoryInfo(handle).used / 1024 / 1024)
+            gpu_memory_metrics.append(
+                nvidia_smi.nvmlDeviceGetMemoryInfo(handle).used / 1024 / 1024
+            )
 
         print(f"size: {size}".center(80, "-"))
         # print(f"cpu: {format(cpu_metrics)}")

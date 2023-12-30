@@ -223,3 +223,17 @@ export const generateMask = (
 
   return maskCanvas
 }
+
+export const convertToBase64 = (fileOrBlob: File | Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const base64String = event.target?.result as string
+      resolve(base64String)
+    }
+    reader.onerror = (error) => {
+      reject(error)
+    }
+    reader.readAsDataURL(fileOrBlob)
+  })
+}

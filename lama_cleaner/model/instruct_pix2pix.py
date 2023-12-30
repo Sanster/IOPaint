@@ -4,7 +4,7 @@ import torch
 from loguru import logger
 
 from lama_cleaner.model.base import DiffusionInpaintModel
-from lama_cleaner.schema import Config
+from lama_cleaner.schema import InpaintRequest
 
 
 class InstructPix2Pix(DiffusionInpaintModel):
@@ -40,7 +40,7 @@ class InstructPix2Pix(DiffusionInpaintModel):
         else:
             self.model = self.model.to(device)
 
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: InpaintRequest):
         """Input image and output image have same size
         image: [H, W, C] RGB
         mask: [H, W, 1] 255 means area to repaint

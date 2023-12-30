@@ -1,11 +1,11 @@
 import { Filename, ModelInfo, PowerPaintTask, Rect } from "@/lib/types"
 import { Settings } from "@/lib/states"
-import { srcToFile } from "@/lib/utils"
-import axios from "axios"
+import { convertToBase64, srcToFile } from "@/lib/utils"
+import axios, { AxiosError } from "axios"
 
 export const API_ENDPOINT = import.meta.env.VITE_BACKEND
   ? import.meta.env.VITE_BACKEND
-  : ""
+  : "/api/v1"
 
 const api = axios.create({
   baseURL: API_ENDPOINT,
@@ -19,96 +19,75 @@ export default async function inpaint(
   mask: File | Blob,
   paintByExampleImage: File | null = null
 ) {
-  const fd = new FormData()
-  fd.append("image", imageFile)
-  fd.append("mask", mask)
-  fd.append("ldmSteps", settings.ldmSteps.toString())
-  fd.append("ldmSampler", settings.ldmSampler.toString())
-  fd.append("zitsWireframe", settings.zitsWireframe.toString())
-  fd.append("hdStrategy", "Crop")
-  fd.append("hdStrategyCropMargin", "128")
-  fd.append("hdStrategyCropTrigerSize", "640")
-  fd.append("hdStrategyResizeLimit", "2048")
-
-  fd.append("prompt", settings.prompt)
-  fd.append("negativePrompt", settings.negativePrompt)
-
-  fd.append("useCroper", settings.showCropper ? "true" : "false")
-  fd.append("croperX", croperRect.x.toString())
-  fd.append("croperY", croperRect.y.toString())
-  fd.append("croperHeight", croperRect.height.toString())
-  fd.append("croperWidth", croperRect.width.toString())
-
-  fd.append("useExtender", settings.showExtender ? "true" : "false")
-  fd.append("extenderX", extenderState.x.toString())
-  fd.append("extenderY", extenderState.y.toString())
-  fd.append("extenderHeight", extenderState.height.toString())
-  fd.append("extenderWidth", extenderState.width.toString())
-
-  fd.append("sdMaskBlur", settings.sdMaskBlur.toString())
-  fd.append("sdStrength", settings.sdStrength.toString())
-  fd.append("sdSteps", settings.sdSteps.toString())
-  fd.append("sdGuidanceScale", settings.sdGuidanceScale.toString())
-  fd.append("sdSampler", settings.sdSampler.toString())
-
-  if (settings.seedFixed) {
-    fd.append("sdSeed", settings.seed.toString())
-  } else {
-    fd.append("sdSeed", "-1")
-  }
-
-  fd.append("sdMatchHistograms", settings.sdMatchHistograms ? "true" : "false")
-  fd.append("sdScale", (settings.sdScale / 100).toString())
-  fd.append("enableFreeu", settings.enableFreeu.toString())
-  fd.append("freeuConfig", JSON.stringify(settings.freeuConfig))
-  fd.append("enableLCMLora", settings.enableLCMLora.toString())
-
-  fd.append("cv2Radius", settings.cv2Radius.toString())
-  fd.append("cv2Flag", settings.cv2Flag.toString())
-
-  // TODO: resize image's shortest_edge to 224 before pass to backend, save network time?
-  // https://huggingface.co/docs/transformers/model_doc/clip#transformers.CLIPImageProcessor
-  if (paintByExampleImage) {
-    fd.append("paintByExampleImage", paintByExampleImage)
-  }
-
-  // InstructPix2Pix
-  fd.append("p2pImageGuidanceScale", settings.p2pImageGuidanceScale.toString())
-
-  // ControlNet
-  fd.append("enable_controlnet", settings.enableControlnet.toString())
-  fd.append(
-    "controlnet_conditioning_scale",
-    settings.controlnetConditioningScale.toString()
-  )
-  fd.append("controlnet_method", settings.controlnetMethod?.toString())
-
-  // PowerPaint
-  if (settings.showExtender) {
-    fd.append("powerpaintTask", PowerPaintTask.outpainting)
-  } else {
-    fd.append("powerpaintTask", settings.powerpaintTask)
-  }
-
+  const imageBase64 = await convertToBase64(imageFile)
+  const maskBase64 = await convertToBase64(mask)
+  const exampleImageBase64 = paintByExampleImage
+    ? await convertToBase64(paintByExampleImage)
+    : null
   try {
     const res = await fetch(`${API_ENDPOINT}/inpaint`, {
       method: "POST",
-      body: fd,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        image: imageBase64,
+        mask: maskBase64,
+        ldm_steps: settings.ldmSteps,
+        ldm_sampler: settings.ldmSampler,
+        zits_wireframe: settings.zitsWireframe,
+        cv2_flag: settings.cv2Flag,
+        cv2_radius: settings.cv2Radius,
+        hd_strategy: "Crop",
+        hd_strategy_crop_triger_size: 640,
+        hd_strategy_crop_margin: 128,
+        hd_trategy_resize_imit: 2048,
+        prompt: settings.prompt,
+        negative_prompt: settings.negativePrompt,
+        use_croper: settings.showCropper,
+        croper_x: croperRect.x,
+        croper_y: croperRect.y,
+        croper_height: croperRect.height,
+        croper_width: croperRect.width,
+        use_extender: settings.showExtender,
+        extender_x: extenderState.x,
+        extender_y: extenderState.y,
+        extender_height: extenderState.height,
+        extender_width: extenderState.width,
+        sd_mask_blur: settings.sdMaskBlur,
+        sd_strength: settings.sdStrength,
+        sd_steps: settings.sdSteps,
+        sd_guidance_scale: settings.sdGuidanceScale,
+        sd_sampler: settings.sdSampler,
+        sd_seed: settings.seedFixed ? settings.seed : -1,
+        sd_match_histograms: settings.sdMatchHistograms,
+        sd_freeu: settings.enableFreeu,
+        sd_freeu_config: settings.freeuConfig,
+        sd_lcm_lora: settings.enableLCMLora,
+        paint_by_example_example_image: exampleImageBase64,
+        p2p_image_guidance_scale: settings.p2pImageGuidanceScale,
+        enable_controlnet: settings.enableControlnet,
+        controlnet_conditioning_scale: settings.controlnetConditioningScale,
+        controlnet_method: settings.controlnetMethod
+          ? settings.controlnetMethod
+          : "",
+        powerpaint_task: settings.showExtender
+          ? PowerPaintTask.outpainting
+          : settings.powerpaintTask,
+      }),
     })
-    if (res.ok) {
-      const blob = await res.blob()
-      const newSeed = res.headers.get("X-seed")
-      return { blob: URL.createObjectURL(blob), seed: newSeed }
+    const blob = await res.blob()
+    return {
+      blob: URL.createObjectURL(blob),
+      seed: res.headers.get("X-Seed"),
     }
-    const errMsg = await res.text()
-    throw new Error(errMsg)
-  } catch (error) {
-    throw new Error(`Something went wrong: ${error}`)
+  } catch (error: any) {
+    throw new Error(`Something went wrong: ${JSON.stringify(error.message)}`)
   }
 }
 
 export function getServerConfig() {
-  return fetch(`${API_ENDPOINT}/server_config`, {
+  return fetch(`${API_ENDPOINT}/server-config`, {
     method: "GET",
   })
 }

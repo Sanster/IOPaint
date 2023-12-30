@@ -9,7 +9,7 @@ from loguru import logger
 
 from lama_cleaner.helper import get_cache_path_by_url, load_jit_model, download_model
 from lama_cleaner.model.base import InpaintModel
-from lama_cleaner.schema import Config
+from lama_cleaner.schema import InpaintRequest
 
 
 MANGA_INPAINTOR_MODEL_URL = os.environ.get(
@@ -56,7 +56,7 @@ class Manga(InpaintModel):
         ]
         return all([os.path.exists(it) for it in model_paths])
 
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: InpaintRequest):
         """
         image: [H, W, C] RGB
         mask: [H, W, 1]

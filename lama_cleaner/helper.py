@@ -1,7 +1,9 @@
+import base64
+import imghdr
 import io
 import os
 import sys
-from typing import List, Optional
+from typing import List, Optional, Dict, Tuple
 
 from urllib.parse import urlparse
 import cv2
@@ -138,8 +140,8 @@ def numpy_to_bytes(image_numpy: np.ndarray, ext: str) -> bytes:
 def pil_to_bytes(pil_img, ext: str, quality: int = 95, infos={}) -> bytes:
     with io.BytesIO() as output:
         kwargs = {k: v for k, v in infos.items() if v is not None}
-        if ext == 'jpg':
-            ext = 'jpeg'
+        if ext == "jpg":
+            ext = "jpeg"
         if "png" == ext.lower() and "parameters" in kwargs:
             pnginfo_data = PngImagePlugin.PngInfo()
             pnginfo_data.add_text("parameters", kwargs["parameters"])
@@ -290,3 +292,61 @@ def only_keep_largest_contour(mask: np.ndarray) -> List[np.ndarray]:
 
 def is_mac():
     return sys.platform == "darwin"
+
+
+def get_image_ext(img_bytes):
+    w = imghdr.what("", img_bytes)
+    if w is None:
+        w = "jpeg"
+    return w
+
+
+def decode_base64_to_image(
+    encoding: str, gray=False
+) -> Tuple[np.array, Optional[np.array], Dict]:
+    if encoding.startswith("data:image/"):
+        encoding = encoding.split(";")[1].split(",")[1]
+    image = Image.open(io.BytesIO(base64.b64decode(encoding)))
+
+    alpha_channel = None
+    infos = image.info
+    try:
+        image = ImageOps.exif_transpose(image)
+    except:
+        pass
+
+    if gray:
+        image = image.convert("L")
+        np_img = np.array(image)
+    else:
+        if image.mode == "RGBA":
+            np_img = np.array(image)
+            alpha_channel = np_img[:, :, -1]
+            np_img = cv2.cvtColor(np_img, cv2.COLOR_RGBA2RGB)
+        else:
+            image = image.convert("RGB")
+            np_img = np.array(image)
+
+    return np_img, alpha_channel, infos
+
+
+def encode_pil_to_base64(image: Image, quality: int, infos: Dict) -> bytes:
+    img_bytes = pil_to_bytes(
+        image,
+        "png",
+        quality=quality,
+        infos=infos,
+    )
+    return base64.b64encode(img_bytes)
+
+
+def concat_alpha_channel(rgb_np_img, alpha_channel) -> np.ndarray:
+    if alpha_channel is not None:
+        if alpha_channel.shape[:2] != rgb_np_img.shape[:2]:
+            alpha_channel = cv2.resize(
+                alpha_channel, dsize=(rgb_np_img.shape[1], rgb_np_img.shape[0])
+            )
+        rgb_np_img = np.concatenate(
+            (rgb_np_img, alpha_channel[:, :, np.newaxis]), axis=-1
+        )
+    return rgb_np_img

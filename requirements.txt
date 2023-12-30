@@ -1,8 +1,8 @@
 torch>=2.0.0
 typer
 opencv-python
-flask==2.2.3
-flask-socketio
+fastapi==0.108.0
+python-multipart
 simple-websocket
 flask_cors
 flaskwebgui==0.3.5

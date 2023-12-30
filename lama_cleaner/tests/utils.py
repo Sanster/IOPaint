@@ -3,7 +3,7 @@ import cv2
 import pytest
 import torch
 
-from lama_cleaner.schema import LDMSampler, HDStrategy, Config, SDSampler
+from lama_cleaner.schema import LDMSampler, HDStrategy, InpaintRequest, SDSampler
 
 current_dir = Path(__file__).parent.absolute().resolve()
 save_dir = current_dir / "result"
@@ -72,4 +72,4 @@ def get_config(**kwargs):
         hd_strategy_resize_limit=200,
     )
     data.update(**kwargs)
-    return Config(**data)
+    return InpaintRequest(**data)

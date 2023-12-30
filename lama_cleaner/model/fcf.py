@@ -6,7 +6,7 @@ import torch
 import numpy as np
 import torch.fft as fft
 
-from lama_cleaner.schema import Config
+from lama_cleaner.schema import InpaintRequest
 
 from lama_cleaner.helper import (
     load_model,
@@ -1665,7 +1665,7 @@ class FcF(InpaintModel):
         return os.path.exists(get_cache_path_by_url(FCF_MODEL_URL))
 
     @torch.no_grad()
-    def __call__(self, image, mask, config: Config):
+    def __call__(self, image, mask, config: InpaintRequest):
         """
         images: [H, W, C] RGB, not normalized
         masks: [H, W]
@@ -1705,7 +1705,7 @@ class FcF(InpaintModel):
 
         return inpaint_result
 
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: InpaintRequest):
         """Input images and output images have same size
         images: [H, W, C] RGB
         masks: [H, W] mask area == 255

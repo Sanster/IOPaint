@@ -1,6 +1,6 @@
 import os
 
-from lama_cleaner.schema import Config
+from lama_cleaner.schema import InpaintRequest
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
@@ -38,7 +38,7 @@ def test_controlnet_switch_onoff(caplog):
     )
 
     model.switch_controlnet_method(
-        Config(
+        InpaintRequest(
             name=name,
             enable_controlnet=False,
         )
@@ -63,7 +63,7 @@ def test_switch_controlnet_method(caplog):
     )
 
     model.switch_controlnet_method(
-        Config(
+        InpaintRequest(
             name=name,
             enable_controlnet=True,
             controlnet_method=new_method,
