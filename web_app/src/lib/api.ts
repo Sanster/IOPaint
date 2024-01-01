@@ -176,8 +176,7 @@ export async function downloadToOutput(
 ) {
   const file = await srcToFile(image.src, filename, mimeType)
   const fd = new FormData()
-  fd.append("image", file)
-  fd.append("filename", filename)
+  fd.append("file", file)
 
   try {
     const res = await fetch(`${API_ENDPOINT}/save_image`, {

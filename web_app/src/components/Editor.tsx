@@ -501,7 +501,7 @@ export default function Editor(props: EditorProps) {
     }
   )
 
-  const download = async () => {
+  const download = useCallback(async () => {
     if (file === undefined) {
       return
     }
@@ -543,7 +543,17 @@ export default function Editor(props: EditorProps) {
       // Get the code to click the download link
       aDownloadLink.click()
     }
-  }
+  }, [
+    file,
+    enableAutoSaving,
+    renders,
+    settings,
+    imageHeight,
+    imageWidth,
+    lineGroups,
+  ])
+
+  useHotKey("meta+s,ctrl+s", download)
 
   const toggleShowBrush = (newState: boolean) => {
     if (newState !== showBrush && !isPanning && !isCropperExtenderResizing) {

@@ -47,6 +47,7 @@ const formSchema = z.object({
   enableDownloadMask: z.boolean(),
   enableManualInpainting: z.boolean(),
   enableUploadMask: z.boolean(),
+  enableAutoExtractPrompt: z.boolean(),
 })
 
 const TAB_GENERAL = "General"
@@ -92,6 +93,7 @@ export function SettingsDialog() {
       enableDownloadMask: settings.enableDownloadMask,
       enableManualInpainting: settings.enableManualInpainting,
       enableUploadMask: settings.enableUploadMask,
+      enableAutoExtractPrompt: settings.enableAutoExtractPrompt,
       inputDirectory: fileManagerState.inputDirectory,
       outputDirectory: fileManagerState.outputDirectory,
     },
@@ -103,6 +105,7 @@ export function SettingsDialog() {
       enableDownloadMask: values.enableDownloadMask,
       enableManualInpainting: values.enableManualInpainting,
       enableUploadMask: values.enableUploadMask,
+      enableAutoExtractPrompt: values.enableAutoExtractPrompt,
     })
 
     // TODO: validate input/output Directory
@@ -307,6 +310,28 @@ export function SettingsDialog() {
         />
 
         <Separator />
+
+        <FormField
+          control={form.control}
+          name="enableAutoExtractPrompt"
+          render={({ field }) => (
+            <FormItem className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <FormLabel>Enable auto extract prompt</FormLabel>
+                <FormDescription>
+                  Automatically extract prompt/negativate prompt from the image
+                  meta.
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
 
         {/* <FormField
           control={form.control}
