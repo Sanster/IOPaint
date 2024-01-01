@@ -48,7 +48,7 @@ const SORT_BY_NAME = "Name"
 const SORT_BY_CREATED_TIME = "Created time"
 const SORT_BY_MODIFIED_TIME = "Modified time"
 
-const IMAGE_TAB = "image"
+const IMAGE_TAB = "input"
 const OUTPUT_TAB = "output"
 
 const SortByMap = {
@@ -158,7 +158,9 @@ export default function FileManager(props: Props) {
         const newPhotos = filteredFilenames.map((filename: Filename) => {
           const width = photoWidth
           const height = filename.height * (width / filename.width)
-          const src = `${API_ENDPOINT}/media_thumbnail/${tab}/${filename.name}?width=${width}&height=${height}`
+          const src = `${API_ENDPOINT}/media_thumbnail_file?tab=${tab}&filename=${encodeURIComponent(
+            filename.name
+          )}&width=${Math.ceil(width)}&height=${Math.ceil(height)}`
           return { src, height, width, name: filename.name }
         })
         setPhotos(newPhotos)

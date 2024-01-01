@@ -1,7 +1,7 @@
 import { Filename, ModelInfo, PowerPaintTask, Rect } from "@/lib/types"
 import { Settings } from "@/lib/states"
 import { convertToBase64, srcToFile } from "@/lib/utils"
-import axios, { AxiosError } from "axios"
+import axios from "axios"
 
 export const API_ENDPOINT = import.meta.env.VITE_BACKEND
   ? import.meta.env.VITE_BACKEND
@@ -93,12 +93,7 @@ export function getServerConfig() {
 }
 
 export function switchModel(name: string) {
-  const fd = new FormData()
-  fd.append("name", name)
-  return fetch(`${API_ENDPOINT}/model`, {
-    method: "POST",
-    body: fd,
-  })
+  return axios.post(`${API_ENDPOINT}/model`, { name })
 }
 
 export function currentModel() {
@@ -151,14 +146,18 @@ export async function runPlugin(
 
 export async function getMediaFile(tab: string, filename: string) {
   const res = await fetch(
-    `${API_ENDPOINT}/media/${tab}/${encodeURIComponent(filename)}`,
+    `${API_ENDPOINT}/media_file?tab=${tab}&filename=${encodeURIComponent(
+      filename
+    )}`,
     {
       method: "GET",
     }
   )
   if (res.ok) {
     const blob = await res.blob()
-    const file = new File([blob], filename)
+    const file = new File([blob], filename, {
+      type: res.headers.get("Content-Type") ?? "image/png",
+    })
     return file
   }
   const errMsg = await res.text()
@@ -166,15 +165,8 @@ export async function getMediaFile(tab: string, filename: string) {
 }
 
 export async function getMedias(tab: string): Promise<Filename[]> {
-  const res = await fetch(`${API_ENDPOINT}/medias/${tab}`, {
-    method: "GET",
-  })
-  if (res.ok) {
-    const filenames = await res.json()
-    return filenames
-  }
-  const errMsg = await res.text()
-  throw new Error(errMsg)
+  const res = await axios.get(`${API_ENDPOINT}/medias`, { params: { tab } })
+  return res.data
 }
 
 export async function downloadToOutput(
@@ -192,7 +184,6 @@ export async function downloadToOutput(
       method: "POST",
       body: fd,
     })
-    console.log(res.ok)
     if (!res.ok) {
       const errMsg = await res.text()
       throw new Error(errMsg)

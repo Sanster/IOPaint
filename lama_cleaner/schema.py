@@ -236,28 +236,12 @@ class RunPluginRequest(BaseModel):
 MediaTab = Literal["input", "output"]
 
 
-class MediasRequest(BaseModel):
-    tab: MediaTab
-
-
 class MediasResponse(BaseModel):
     name: str
     height: int
     width: int
     ctime: float
     mtime: float
-
-
-class MediaFileRequest(BaseModel):
-    tab: MediaTab
-    filename: str
-
-
-class MediaThumbnailFileRequest(BaseModel):
-    tab: MediaTab
-    filename: str
-    width: int = 0
-    height: int = 0
 
 
 class GenInfoResponse(BaseModel):

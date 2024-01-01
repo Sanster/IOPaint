@@ -7,13 +7,7 @@ from PIL import Image, ImageOps, PngImagePlugin
 from fastapi import FastAPI, UploadFile, HTTPException
 from starlette.responses import FileResponse
 
-from ..schema import (
-    MediasResponse,
-    MediasRequest,
-    MediaFileRequest,
-    MediaTab,
-    MediaThumbnailFileRequest,
-)
+from ..schema import MediasResponse, MediaTab
 
 LARGE_ENOUGH_NUMBER = 100
 PngImagePlugin.MAX_TEXT_CHUNK = LARGE_ENOUGH_NUMBER * (1024**2)
@@ -34,9 +28,9 @@ class FileManager:
 
         # fmt: off
         self.app.add_api_route("/api/v1/save_image", self.api_save_image, methods=["POST"])
-        self.app.add_api_route("/api/v1/medias", self.api_medias, methods=["POST"], response_model=List[MediasResponse])
-        self.app.add_api_route("/api/v1/media_file", self.api_media_file, methods=["POST"], response_model=None)
-        self.app.add_api_route("/api/v1/media_thumbnail_file", self.api_media_thumbnail_file, methods=["POST"], response_model=None)
+        self.app.add_api_route("/api/v1/medias", self.api_medias, methods=["GET"], response_model=List[MediasResponse])
+        self.app.add_api_route("/api/v1/media_file", self.api_media_file, methods=["GET"])
+        self.app.add_api_route("/api/v1/media_thumbnail_file", self.api_media_thumbnail_file, methods=["GET"])
         # fmt: on
 
     def api_save_image(self, file: UploadFile):
@@ -45,18 +39,21 @@ class FileManager:
         with open(self.output_dir / filename, "wb") as fw:
             fw.write(origin_image_bytes)
 
-    def api_medias(self, req: MediasRequest) -> List[MediasResponse]:
-        img_dir = self._get_dir(req.tab)
+    def api_medias(self, tab: MediaTab) -> List[MediasResponse]:
+        img_dir = self._get_dir(tab)
         return self._media_names(img_dir)
 
-    def api_media_file(self, req: MediaFileRequest) -> FileResponse:
-        file_path = self._get_file(req.tab, req.filename)
-        return FileResponse(file_path)
+    def api_media_file(self, tab: MediaTab, filename: str) -> FileResponse:
+        file_path = self._get_file(tab, filename)
+        return FileResponse(file_path, media_type="image/png")
 
-    def api_media_thumbnail_file(self, req: MediaThumbnailFileRequest) -> FileResponse:
-        img_dir = self._get_dir(req.tab)
+    # tab=${tab}?filename=${filename.name}?width=${width}&height=${height}
+    def api_media_thumbnail_file(
+        self, tab: MediaTab, filename: str, width: int, height: int
+    ) -> FileResponse:
+        img_dir = self._get_dir(tab)
         thumb_filename, (width, height) = self.get_thumbnail(
-            img_dir, req.filename, width=req.width, height=req.height
+            img_dir, filename, width=width, height=height
         )
         thumbnail_filepath = self.thumbnail_directory / thumb_filename
         return FileResponse(
@@ -65,6 +62,7 @@ class FileManager:
                 "X-Width": str(width),
                 "X-Height": str(height),
             },
+            media_type="image/jpeg",
         )
 
     def _get_dir(self, tab: MediaTab) -> Path:

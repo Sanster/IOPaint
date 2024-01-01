@@ -115,19 +115,15 @@ export function SettingsDialog() {
       updateAppState({ disableShortCuts: true })
       switchModel(model.name)
         .then((res) => {
-          if (res.ok) {
-            toast({
-              title: `Switch to ${model.name} success`,
-            })
-            setAppModel(model)
-          } else {
-            throw new Error("Server error")
-          }
+          toast({
+            title: `Switch to ${model.name} success`,
+          })
+          setAppModel(model)
         })
-        .catch(() => {
+        .catch((error: any) => {
           toast({
             variant: "destructive",
-            title: `Switch to ${model.name} failed`,
+            title: `Switch to ${model.name} failed: ${error}`,
           })
           setModel(settings.model)
         })
@@ -168,17 +164,21 @@ export function SettingsDialog() {
       .filter((info) => model_types.includes(info.model_type))
       .map((info: ModelInfo) => {
         return (
-          <div key={info.name} onClick={() => onModelSelect(info)}>
+          <div
+            key={info.name}
+            onClick={() => onModelSelect(info)}
+            className="px-2"
+          >
             <div
               className={cn([
                 info.name === model.name ? "bg-muted" : "hover:bg-muted",
-                "rounded-md px-2 py-1 my-1",
+                "rounded-md px-2 py-2",
                 "cursor-default",
               ])}
             >
               <div className="text-base">{info.name}</div>
             </div>
-            <Separator />
+            <Separator className="my-1" />
           </div>
         )
       })

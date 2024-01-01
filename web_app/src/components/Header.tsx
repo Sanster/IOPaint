@@ -71,8 +71,16 @@ const Header = () => {
           <FileManager
             photoWidth={512}
             onPhotoClick={async (tab: string, filename: string) => {
-              const newFile = await getMediaFile(tab, filename)
-              setFile(newFile)
+              try {
+                const newFile = await getMediaFile(tab, filename)
+                setFile(newFile)
+              } catch (e: any) {
+                toast({
+                  variant: "destructive",
+                  description: e.message ? e.message : e.toString(),
+                })
+                return
+              }
             }}
           />
         ) : (
