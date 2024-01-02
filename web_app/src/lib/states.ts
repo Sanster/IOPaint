@@ -15,6 +15,7 @@ import {
   Point,
   PowerPaintTask,
   SDSampler,
+  ServerConfig,
   Size,
   SortBy,
   SortOrder,
@@ -33,7 +34,7 @@ import {
   loadImage,
   srcToFile,
 } from "./utils"
-import inpaint, { runPlugin } from "./api"
+import inpaint, { getGenInfo, runPlugin } from "./api"
 import { toast } from "@/components/ui/use-toast"
 
 type FileManagerState = {
@@ -57,6 +58,7 @@ export type Settings = {
   enableDownloadMask: boolean
   enableManualInpainting: boolean
   enableUploadMask: boolean
+  enableAutoExtractPrompt: boolean
   showCropper: boolean
   showExtender: boolean
   extenderDirection: ExtenderDirection
@@ -101,16 +103,6 @@ export type Settings = {
 
   // PowerPaint
   powerpaintTask: PowerPaintTask
-}
-
-type ServerConfig = {
-  plugins: string[]
-  enableFileManager: boolean
-  enableAutoSaving: boolean
-  enableControlnet: boolean
-  controlnetMethod: string
-  disableModelSwitch: boolean
-  isDesktop: boolean
 }
 
 type InteractiveSegState = {
@@ -162,7 +154,7 @@ type AppState = {
 
 type AppAction = {
   updateAppState: (newState: Partial<AppState>) => void
-  setFile: (file: File) => void
+  setFile: (file: File) => Promise<void>
   setCustomFile: (file: File) => void
   setIsInpainting: (newValue: boolean) => void
   setIsPluginRunning: (newValue: boolean) => void
@@ -304,6 +296,7 @@ const defaultValues: AppState = {
     enableDownloadMask: false,
     enableManualInpainting: false,
     enableUploadMask: false,
+    enableAutoExtractPrompt: true,
     ldmSteps: 30,
     ldmSampler: LDMSampler.ddim,
     zitsWireframe: true,
@@ -540,9 +533,6 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           const start = new Date()
           const targetFile = await get().getCurrentTargetFile()
           const res = await runPlugin(pluginName, targetFile, params.upscale)
-          if (!res) {
-            throw new Error("Something went wrong on server side.")
-          }
           const { blob } = res
           const newRender = new Image()
           await loadImage(newRender, blob)
@@ -818,7 +808,27 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           state.isPluginRunning = newValue
         }),
 
-      setFile: (file: File) => {
+      setFile: async (file: File) => {
+        if (get().settings.enableAutoExtractPrompt) {
+          try {
+            const res = await getGenInfo(file)
+            if (res.prompt) {
+              set((state) => {
+                state.settings.prompt = res.prompt
+              })
+            }
+            if (res.negative_prompt) {
+              set((state) => {
+                state.settings.negativePrompt = res.negative_prompt
+              })
+            }
+          } catch (e: any) {
+            toast({
+              variant: "destructive",
+              description: e.message ? e.message : e.toString(),
+            })
+          }
+        }
         set((state) => {
           state.file = file
           state.interactiveSegState = castDraft(

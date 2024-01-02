@@ -7,6 +7,7 @@ from PIL import Image
 
 from lama_cleaner.helper import load_model
 from lama_cleaner.plugins.base_plugin import BasePlugin
+from lama_cleaner.schema import RunPluginRequest
 
 
 class REBNCONV(nn.Module):
@@ -425,7 +426,7 @@ class AnimeSeg(BasePlugin):
             ANIME_SEG_MODELS["md5"],
         )
 
-    def __call__(self, rgb_np_img, files, form):
+    def __call__(self, rgb_np_img, req: RunPluginRequest):
         return self.forward(rgb_np_img)
 
     @torch.no_grad()

@@ -3,6 +3,7 @@ from loguru import logger
 
 from lama_cleaner.helper import download_model
 from lama_cleaner.plugins.base_plugin import BasePlugin
+from lama_cleaner.schema import RunPluginRequest
 
 
 class RestoreFormerPlugin(BasePlugin):
@@ -31,7 +32,7 @@ class RestoreFormerPlugin(BasePlugin):
             bg_upsampler=upscaler.model if upscaler is not None else None,
         )
 
-    def __call__(self, rgb_np_img, files, form):
+    def __call__(self, rgb_np_img, req: RunPluginRequest):
         weight = 0.5
         bgr_np_img = cv2.cvtColor(rgb_np_img, cv2.COLOR_RGB2BGR)
         logger.info(f"RestoreFormer input shape: {bgr_np_img.shape}")

@@ -69,6 +69,27 @@ const DiffusionOptions = () => {
     }
   }
 
+  const renderCropper = () => {
+    return (
+      <RowContainer>
+        <LabelTitle
+          text="Cropper"
+          toolTip="Inpainting on part of image, improve inference speed and reduce memory usage."
+        />
+        <Switch
+          id="cropper"
+          checked={settings.showCropper}
+          onCheckedChange={(value) => {
+            updateSettings({ showCropper: value })
+            if (value) {
+              updateSettings({ showExtender: false })
+            }
+          }}
+        />
+      </RowContainer>
+    )
+  }
+
   const renderConterNetSetting = () => {
     if (!settings.model.support_controlnet) {
       return null
@@ -558,28 +579,8 @@ const DiffusionOptions = () => {
     )
   }
 
-  return (
-    <div className="flex flex-col gap-4 mt-4">
-      <RowContainer>
-        <LabelTitle
-          text="Cropper"
-          toolTip="Inpainting on part of image, improve inference speed and reduce memory usage."
-        />
-        <Switch
-          id="cropper"
-          checked={settings.showCropper}
-          onCheckedChange={(value) => {
-            updateSettings({ showCropper: value })
-            if (value) {
-              updateSettings({ showExtender: false })
-            }
-          }}
-        />
-      </RowContainer>
-
-      {renderExtender()}
-      {renderPowerPaintTaskType()}
-
+  const renderSteps = () => {
+    return (
       <div className="flex flex-col gap-1">
         <LabelTitle
           htmlFor="steps"
@@ -607,7 +608,11 @@ const DiffusionOptions = () => {
           />
         </RowContainer>
       </div>
+    )
+  }
 
+  const renderGuidanceScale = () => {
+    return (
       <div className="flex flex-col gap-1">
         <LabelTitle
           text="Guidance scale"
@@ -637,10 +642,11 @@ const DiffusionOptions = () => {
           />
         </RowContainer>
       </div>
+    )
+  }
 
-      {renderP2PImageGuidanceScale()}
-      {renderStrength()}
-
+  const renderSampler = () => {
+    return (
       <RowContainer>
         <LabelTitle text="Sampler" />
         <Select
@@ -664,7 +670,11 @@ const DiffusionOptions = () => {
           </SelectContent>
         </Select>
       </RowContainer>
+    )
+  }
 
+  const renderSeed = () => {
+    return (
       <RowContainer>
         {/* 每次会从服务器返回更新该值 */}
         <LabelTitle
@@ -692,15 +702,11 @@ const DiffusionOptions = () => {
           />
         </div>
       </RowContainer>
+    )
+  }
 
-      {renderNegativePrompt()}
-
-      <Separator />
-
-      {renderConterNetSetting()}
-      {renderFreeu()}
-      {renderLCMLora()}
-
+  const renderMaskBlur = () => {
+    return (
       <div className="flex flex-col gap-1">
         <LabelTitle
           text="Mask blur"
@@ -727,24 +733,49 @@ const DiffusionOptions = () => {
           />
         </RowContainer>
       </div>
+    )
+  }
 
-      <RowContainer>
-        <LabelTitle
-          text="Match histograms"
-          toolTip="Match the inpainting result histogram to the source image histogram"
-          url="https://github.com/Sanster/lama-cleaner/pull/143#issuecomment-1325859307"
-        />
-        <Switch
-          id="match-histograms"
-          checked={settings.sdMatchHistograms}
-          onCheckedChange={(value) => {
-            updateSettings({ sdMatchHistograms: value })
-          }}
-        />
-      </RowContainer>
+  const renderMatchHistograms = () => {
+    return (
+      <>
+        <RowContainer>
+          <LabelTitle
+            text="Match histograms"
+            toolTip="Match the inpainting result histogram to the source image histogram"
+            url="https://github.com/Sanster/lama-cleaner/pull/143#issuecomment-1325859307"
+          />
+          <Switch
+            id="match-histograms"
+            checked={settings.sdMatchHistograms}
+            onCheckedChange={(value) => {
+              updateSettings({ sdMatchHistograms: value })
+            }}
+          />
+        </RowContainer>
+        <Separator />
+      </>
+    )
+  }
 
+  return (
+    <div className="flex flex-col gap-4 mt-4">
+      {renderCropper()}
+      {renderExtender()}
+      {renderPowerPaintTaskType()}
+      {renderSteps()}
+      {renderGuidanceScale()}
+      {renderP2PImageGuidanceScale()}
+      {renderStrength()}
+      {renderSampler()}
+      {renderSeed()}
+      {renderNegativePrompt()}
       <Separator />
-
+      {renderConterNetSetting()}
+      {renderLCMLora()}
+      {renderMaskBlur()}
+      {renderMatchHistograms()}
+      {renderFreeu()}
       {renderPaintByExample()}
     </div>
   )

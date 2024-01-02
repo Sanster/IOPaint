@@ -14,11 +14,11 @@ const Workspace = () => {
   ])
 
   useEffect(() => {
-    currentModel()
-      .then((res) => res.json())
-      .then((model) => {
-        updateSettings({ model })
-      })
+    const fetchCurrentModel = async () => {
+      const model = await currentModel()
+      updateSettings({ model })
+    }
+    fetchCurrentModel()
   }, [])
 
   return (

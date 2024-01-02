@@ -363,9 +363,6 @@ export default function Editor(props: EditorProps) {
         undefined,
         newClicks
       )
-      if (!res) {
-        throw new Error("Something went wrong on server side.")
-      }
       const { blob } = res
       const img = new Image()
       img.onload = () => {

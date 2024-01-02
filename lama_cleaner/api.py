@@ -210,26 +210,26 @@ class Api:
         )
 
     def api_run_plugin(self, req: RunPluginRequest):
+        ext = "png"
         if req.name not in self.plugins:
             raise HTTPException(status_code=404, detail="Plugin not found")
-        image, alpha_channel, infos = decode_base64_to_image(req.image)
-        bgr_res = self.plugins[req.name].run(image, req)
+        rgb_np_img, alpha_channel, infos = decode_base64_to_image(req.image)
+        bgr_np_img = self.plugins[req.name](rgb_np_img, req)
         torch_gc()
         if req.name == InteractiveSeg.name:
             return Response(
-                content=numpy_to_bytes(bgr_res, "png"),
-                media_type="image/png",
+                content=numpy_to_bytes(bgr_np_img, ext),
+                media_type=f"image/{ext}",
             )
-        ext = "png"
-        if req.name in [RemoveBG.name, AnimeSeg.name]:
-            rgb_res = bgr_res
+        if bgr_np_img.shape[2] == 4:
+            rgba_np_img = bgr_np_img
         else:
-            rgb_res = cv2.cvtColor(bgr_res, cv2.COLOR_BGR2RGB)
-            rgb_res = concat_alpha_channel(rgb_res, alpha_channel)
+            rgba_np_img = cv2.cvtColor(bgr_np_img, cv2.COLOR_BGR2RGB)
+            rgba_np_img = concat_alpha_channel(rgba_np_img, alpha_channel)
 
         return Response(
             content=pil_to_bytes(
-                Image.fromarray(rgb_res),
+                Image.fromarray(rgba_np_img),
                 ext=ext,
                 quality=self.config.quality,
                 infos=infos,

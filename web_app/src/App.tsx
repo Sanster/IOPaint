@@ -42,7 +42,7 @@ function Home() {
 
   useEffect(() => {
     const fetchServerConfig = async () => {
-      const serverConfig = await getServerConfig().then((res) => res.json())
+      const serverConfig = await getServerConfig()
       setServerConfig(serverConfig)
       if (serverConfig.isDesktop) {
         // Keeping GUI Window Open

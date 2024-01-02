@@ -1,4 +1,6 @@
+import hashlib
 import json
+from typing import List
 
 import cv2
 import numpy as np
@@ -7,6 +9,7 @@ from loguru import logger
 from lama_cleaner.helper import download_model
 from lama_cleaner.plugins.base_plugin import BasePlugin
 from lama_cleaner.plugins.segment_anything import SamPredictor, sam_model_registry
+from lama_cleaner.schema import RunPluginRequest
 
 # 从小到大
 SEGMENT_ANYTHING_MODELS = {
@@ -44,11 +47,11 @@ class InteractiveSeg(BasePlugin):
         )
         self.prev_img_md5 = None
 
-    def __call__(self, rgb_np_img, files, form):
-        clicks = json.loads(form["clicks"])
-        return self.forward(rgb_np_img, clicks, form["img_md5"])
+    def __call__(self, rgb_np_img, req: RunPluginRequest):
+        img_md5 = hashlib.md5(req.image.encode("utf-8")).hexdigest()
+        return self.forward(rgb_np_img, req.clicks, img_md5)
 
-    def forward(self, rgb_np_img, clicks, img_md5):
+    def forward(self, rgb_np_img, clicks: List[List], img_md5: str):
         input_point = []
         input_label = []
         for click in clicks:

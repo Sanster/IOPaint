@@ -6,6 +6,21 @@ export interface Filename {
   mtime: number
 }
 
+export interface ServerConfig {
+  plugins: string[]
+  enableFileManager: boolean
+  enableAutoSaving: boolean
+  enableControlnet: boolean
+  controlnetMethod: string
+  disableModelSwitch: boolean
+  isDesktop: boolean
+}
+
+export interface GenInfo {
+  prompt: string
+  negative_prompt: string
+}
+
 export interface ModelInfo {
   name: string
   path: string

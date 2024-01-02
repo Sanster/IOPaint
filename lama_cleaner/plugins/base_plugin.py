@@ -1,4 +1,7 @@
 from loguru import logger
+import numpy as np
+
+from lama_cleaner.schema import RunPluginRequest
 
 
 class BasePlugin:
@@ -8,7 +11,8 @@ class BasePlugin:
             logger.error(err_msg)
             exit(-1)
 
-    def __call__(self, rgb_np_img, files, form):
+    def __call__(self, rgb_np_img, req: RunPluginRequest) -> np.array:
+        # return RGBA np image or BGR np image
         ...
 
     def check_dep(self):

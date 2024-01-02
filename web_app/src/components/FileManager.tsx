@@ -78,6 +78,7 @@ export default function FileManager(props: Props) {
   const ref = useRef(null)
   const debouncedSearchText = useDebounce(fileManagerState.searchText, 300)
   const [tab, setTab] = useState(IMAGE_TAB)
+  const [filenames, setFilenames] = useState<Filename[]>([])
   const [photos, setPhotos] = useState<Photo[]>([])
   const [photoIndex, setPhotoIndex] = useState(0)
 
@@ -132,12 +133,27 @@ export default function FileManager(props: Props) {
   )
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const filenames = await getMedias(tab)
+        setFilenames(filenames)
+      } catch (e: any) {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: e.message ? e.message : e.toString(),
+        })
+      }
+    }
+    fetchData()
+  }, [tab])
+
+  useEffect(() => {
     if (!open) {
       return
     }
     const fetchData = async () => {
       try {
-        const filenames = await getMedias(tab)
         let filteredFilenames = filenames
         if (debouncedSearchText) {
           const fuse = new Fuse(filteredFilenames, {
@@ -173,7 +189,7 @@ export default function FileManager(props: Props) {
       }
     }
     fetchData()
-  }, [tab, debouncedSearchText, fileManagerState, photoWidth, open])
+  }, [filenames, debouncedSearchText, fileManagerState, photoWidth, open])
 
   const onScroll = (event: SyntheticEvent) => {
     setScrollTop(event.currentTarget.scrollTop)

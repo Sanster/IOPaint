@@ -99,7 +99,7 @@ export function SettingsDialog() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values. ✅ This will be type-safe and validated.
     updateSettings({
       enableDownloadMask: values.enableDownloadMask,
@@ -116,24 +116,22 @@ export function SettingsDialog() {
     if (model.name !== settings.model.name) {
       toggleOpenModelSwitching()
       updateAppState({ disableShortCuts: true })
-      switchModel(model.name)
-        .then((res) => {
-          toast({
-            title: `Switch to ${model.name} success`,
-          })
-          setAppModel(model)
+      try {
+        const newModel = await switchModel(model.name)
+        toast({
+          title: `Switch to ${newModel.name} success`,
         })
-        .catch((error: any) => {
-          toast({
-            variant: "destructive",
-            title: `Switch to ${model.name} failed: ${error}`,
-          })
-          setModel(settings.model)
+        setAppModel(model)
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: `Switch to ${model.name} failed: ${error}`,
         })
-        .finally(() => {
-          toggleOpenModelSwitching()
-          updateAppState({ disableShortCuts: false })
-        })
+        setModel(settings.model)
+      } finally {
+        toggleOpenModelSwitching()
+        updateAppState({ disableShortCuts: false })
+      }
     }
   }
 

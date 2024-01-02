@@ -136,6 +136,12 @@ class InpaintRequest(BaseModel):
     extender_height: int = Field(640, description="Extend height for extender")
     extender_width: int = Field(640, description="Extend width for extender")
 
+    sd_scale: float = Field(
+        1.0,
+        description="Resize the image before doing sd inpainting, the area outside the mask will not lose quality.",
+        gt=0.0,
+        le=1.0,
+    )
     sd_mask_blur: int = Field(
         33,
         description="Blur the edge of mask area. The higher the number the smoother blend with the original image",
@@ -143,6 +149,7 @@ class InpaintRequest(BaseModel):
     sd_strength: float = Field(
         1.0,
         description="Strength is a measure of how much noise is added to the base image, which influences how similar the output is to the base image. Higher value means more noise and more different from the base image",
+        le=1.0,
     )
     sd_steps: int = Field(
         50,
@@ -202,7 +209,9 @@ class InpaintRequest(BaseModel):
 
     # ControlNet
     enable_controlnet: bool = Field(False, description="Enable controlnet")
-    controlnet_conditioning_scale: float = Field(0.4, description="Conditioning scale")
+    controlnet_conditioning_scale: float = Field(
+        0.4, description="Conditioning scale", gt=0.0, le=1.0
+    )
     controlnet_method: str = Field(
         "lllyasviel/control_v11p_sd15_canny", description="Controlnet method"
     )
@@ -214,6 +223,8 @@ class InpaintRequest(BaseModel):
     fitting_degree: float = Field(
         1.0,
         description="Control the fitting degree of the generated objects to the mask shape.",
+        gt=0.0,
+        le=1.0,
     )
 
     @field_validator("sd_seed")
@@ -226,7 +237,7 @@ class InpaintRequest(BaseModel):
 
 class RunPluginRequest(BaseModel):
     name: str
-    image: Optional[str] = Field(..., description="base64 encoded image")
+    image: str = Field(..., description="base64 encoded image")
     clicks: List[List[int]] = Field(
         [], description="Clicks for interactive seg, [[x,y,0/1], [x2,y2,0/1]]"
     )

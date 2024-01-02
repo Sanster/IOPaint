@@ -4,6 +4,7 @@ import numpy as np
 from torch.hub import get_dir
 
 from lama_cleaner.plugins.base_plugin import BasePlugin
+from lama_cleaner.schema import RunPluginRequest
 
 
 class RemoveBG(BasePlugin):
@@ -19,7 +20,7 @@ class RemoveBG(BasePlugin):
 
         self.session = new_session(model_name="u2net")
 
-    def __call__(self, rgb_np_img, files, form):
+    def __call__(self, rgb_np_img, req: RunPluginRequest):
         bgr_np_img = cv2.cvtColor(rgb_np_img, cv2.COLOR_RGB2BGR)
         return self.forward(bgr_np_img)
 

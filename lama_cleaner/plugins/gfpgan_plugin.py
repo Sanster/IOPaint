@@ -3,6 +3,7 @@ from loguru import logger
 
 from lama_cleaner.helper import download_model
 from lama_cleaner.plugins.base_plugin import BasePlugin
+from lama_cleaner.schema import RunPluginRequest
 
 
 class GFPGANPlugin(BasePlugin):
@@ -36,7 +37,7 @@ class GFPGANPlugin(BasePlugin):
             self.face_enhancer.face_helper.face_det.to(device)
         )
 
-    def __call__(self, rgb_np_img, files, form):
+    def __call__(self, rgb_np_img, req: RunPluginRequest):
         weight = 0.5
         bgr_np_img = cv2.cvtColor(rgb_np_img, cv2.COLOR_RGB2BGR)
         logger.info(f"GFPGAN input shape: {bgr_np_img.shape}")
