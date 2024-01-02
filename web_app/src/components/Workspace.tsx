@@ -6,6 +6,7 @@ import ImageSize from "./ImageSize"
 import Plugins from "./Plugins"
 import { InteractiveSeg } from "./InteractiveSeg"
 import SidePanel from "./SidePanel"
+import DiffusionProgress from "./DiffusionProgress"
 
 const Workspace = () => {
   const [file, updateSettings] = useStore((state) => [
@@ -28,6 +29,7 @@ const Workspace = () => {
         <ImageSize />
       </div>
       <InteractiveSeg />
+      <DiffusionProgress />
       <SidePanel />
       {file ? <Editor file={file} /> : <></>}
     </>

@@ -977,7 +977,6 @@ def handle_from_pretrained_exceptions(func, **kwargs):
     try:
         return func(**kwargs)
     except ValueError as e:
-        # 处理异常的逻辑
         if "You are trying to load the model files of the `variant=fp16`" in str(e):
             logger.info("variant=fp16 not found, try revision=fp16")
             return func(**{**kwargs, "variant": None, "revision": "fp16"})

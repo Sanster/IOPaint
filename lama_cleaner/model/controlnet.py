@@ -38,7 +38,7 @@ class ControlNet(DiffusionInpaintModel):
 
     def init_model(self, device: torch.device, **kwargs):
         fp16 = not kwargs.get("no_half", False)
-        model_info  = kwargs["model_info"]
+        model_info = kwargs["model_info"]
         controlnet_method = kwargs["controlnet_method"]
 
         self.model_info = model_info
@@ -154,7 +154,7 @@ class ControlNet(DiffusionInpaintModel):
             num_inference_steps=config.sd_steps,
             guidance_scale=config.sd_guidance_scale,
             output_type="np",
-            callback=self.callback,
+            callback_on_step_end=self.callback,
             height=img_h,
             width=img_w,
             generator=torch.manual_seed(config.sd_seed),

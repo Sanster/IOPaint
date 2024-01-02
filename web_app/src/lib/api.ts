@@ -11,7 +11,7 @@ import { convertToBase64, srcToFile } from "@/lib/utils"
 import axios from "axios"
 
 export const API_ENDPOINT = import.meta.env.VITE_BACKEND
-  ? import.meta.env.VITE_BACKEND
+  ? import.meta.env.VITE_BACKEND + "/api/v1"
   : "/api/v1"
 
 const api = axios.create({

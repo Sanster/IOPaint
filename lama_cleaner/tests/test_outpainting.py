@@ -30,15 +30,11 @@ from lama_cleaner.tests.test_model import get_config, assert_equal
 def test_outpainting(name, device, rect):
     sd_steps = check_device(device)
 
-    def callback(i, t, latents):
-        pass
-
     model = ModelManager(
         name=name,
         device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
-        callback=callback,
     )
     cfg = get_config(
         prompt="a dog sitting on a bench in the park",
@@ -72,15 +68,11 @@ def test_outpainting(name, device, rect):
 def test_kandinsky_outpainting(name, device, rect):
     sd_steps = check_device(device)
 
-    def callback(i, t, latents):
-        pass
-
     model = ModelManager(
         name=name,
         device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
-        callback=callback,
     )
     cfg = get_config(
         prompt="a cat",
@@ -117,15 +109,11 @@ def test_kandinsky_outpainting(name, device, rect):
 def test_powerpaint_outpainting(name, device, rect):
     sd_steps = check_device(device)
 
-    def callback(i, t, latents):
-        pass
-
     model = ModelManager(
         name=name,
         device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
-        callback=callback,
     )
     cfg = get_config(
         prompt="a dog sitting on a bench in the park",

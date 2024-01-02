@@ -83,11 +83,10 @@ class SD(DiffusionInpaintModel):
             strength=config.sd_strength,
             guidance_scale=config.sd_guidance_scale,
             output_type="np",
-            callback=self.callback,
+            callback_on_step_end=self.callback,
             height=img_h,
             width=img_w,
             generator=torch.manual_seed(config.sd_seed),
-            callback_steps=1,
         ).images[0]
 
         output = (output * 255).round().astype("uint8")

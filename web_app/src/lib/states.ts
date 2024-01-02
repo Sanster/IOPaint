@@ -312,7 +312,7 @@ const defaultValues: AppState = {
     sdGuidanceScale: 7.5,
     sdSampler: "DPM++ 2M",
     sdMatchHistograms: false,
-    sdScale: 100,
+    sdScale: 1.0,
     p2pImageGuidanceScale: 1.5,
     controlnetConditioningScale: 0.4,
     controlnetMethod: "lllyasviel/control_v11p_sd15_canny",

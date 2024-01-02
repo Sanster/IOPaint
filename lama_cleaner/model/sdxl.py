@@ -2,7 +2,6 @@ import os
 
 import PIL.Image
 import cv2
-import numpy as np
 import torch
 from diffusers import AutoencoderKL
 from loguru import logger
@@ -79,11 +78,10 @@ class SDXL(DiffusionInpaintModel):
             strength=0.999 if config.sd_strength == 1.0 else config.sd_strength,
             guidance_scale=config.sd_guidance_scale,
             output_type="np",
-            callback=self.callback,
+            callback_on_step_end=self.callback,
             height=img_h,
             width=img_w,
             generator=torch.manual_seed(config.sd_seed),
-            callback_steps=1,
         ).images[0]
 
         output = (output * 255).round().astype("uint8")

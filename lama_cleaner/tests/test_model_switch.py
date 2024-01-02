@@ -18,7 +18,6 @@ def test_model_switch():
         disable_nsfw=True,
         sd_cpu_textencoder=True,
         cpu_offload=False,
-        callback=None,
     )
 
     model.switch("lama")
@@ -34,7 +33,6 @@ def test_controlnet_switch_onoff(caplog):
         disable_nsfw=True,
         sd_cpu_textencoder=True,
         cpu_offload=False,
-        callback=None,
     )
 
     model.switch_controlnet_method(
@@ -59,7 +57,6 @@ def test_switch_controlnet_method(caplog):
         disable_nsfw=True,
         sd_cpu_textencoder=True,
         cpu_offload=False,
-        callback=None,
     )
 
     model.switch_controlnet_method(

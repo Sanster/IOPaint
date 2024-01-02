@@ -52,9 +52,8 @@ class Kandinsky(DiffusionInpaintModel):
             num_inference_steps=config.sd_steps,
             guidance_scale=config.sd_guidance_scale,
             output_type="np",
-            callback=self.callback,
+            callback_on_step_end=self.callback,
             generator=generator,
-            callback_steps=1,
         ).images[0]
 
         output = (output * 255).round().astype("uint8")

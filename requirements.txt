@@ -5,8 +5,7 @@ transformers==4.34.1
 safetensors
 controlnet-aux==0.0.3
 fastapi==0.108.0
-python-multipart
-simple-websocket
+python-socketio==5.7.2
 flaskwebgui==0.3.5
 typer
 pydantic

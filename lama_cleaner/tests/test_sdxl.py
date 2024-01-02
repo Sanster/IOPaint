@@ -18,15 +18,11 @@ from lama_cleaner.tests.test_model import get_config, assert_equal
 def test_sdxl(device, strategy, sampler):
     sd_steps = check_device(device)
 
-    def callback(i, t, latents):
-        pass
-
     model = ModelManager(
         name="diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
         device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
-        callback=callback,
     )
     cfg = get_config(
         strategy=strategy,
@@ -54,15 +50,11 @@ def test_sdxl(device, strategy, sampler):
 def test_sdxl_lcm_lora_and_freeu(device, strategy, sampler):
     sd_steps = check_device(device)
 
-    def callback(i, t, latents):
-        pass
-
     model = ModelManager(
         name="diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
         device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
-        callback=callback,
     )
     cfg = get_config(
         strategy=strategy,
