@@ -194,3 +194,8 @@ export async function getGenInfo(file: File): Promise<GenInfo> {
   const res = await api.post(`/gen-info`, fd)
   return res.data
 }
+
+export async function getSamplers(): Promise<string[]> {
+  const res = await api.post("/samplers")
+  return res.data
+}

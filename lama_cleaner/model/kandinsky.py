@@ -35,9 +35,7 @@ class Kandinsky(DiffusionInpaintModel):
         mask: [H, W, 1] 255 means area to repaint
         return: BGR IMAGE
         """
-        scheduler_config = self.model.scheduler.config
-        scheduler = get_scheduler(config.sd_sampler, scheduler_config)
-        self.model.scheduler = scheduler
+        self.set_scheduler(config)
 
         generator = torch.manual_seed(config.sd_seed)
         mask = mask.astype(np.float32) / 255

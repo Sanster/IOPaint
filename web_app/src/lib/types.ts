@@ -14,6 +14,7 @@ export interface ServerConfig {
   controlnetMethod: string
   disableModelSwitch: boolean
   isDesktop: boolean
+  samplers: string[]
 }
 
 export interface GenInfo {
@@ -80,17 +81,6 @@ export interface Rect {
   y: number
   width: number
   height: number
-}
-
-export enum SDSampler {
-  ddim = "ddim",
-  pndm = "pndm",
-  klms = "k_lms",
-  kEuler = "k_euler",
-  kEulerA = "k_euler_a",
-  dpmPlusPlus = "dpm++",
-  uni_pc = "uni_pc",
-  // lcm = "lcm",
 }
 
 export interface FreeuConfig {

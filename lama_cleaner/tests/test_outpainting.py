@@ -49,7 +49,7 @@ def test_outpainting(name, device, rect):
         extender_width=rect[2],
         extender_height=rect[3],
         sd_guidance_scale=8.0,
-        sd_sampler=SDSampler.dpm_plus_plus,
+        sd_sampler=SDSampler.dpm_plus_plus_2m,
     )
 
     assert_equal(
@@ -92,7 +92,7 @@ def test_kandinsky_outpainting(name, device, rect):
         extender_width=rect[2],
         extender_height=rect[3],
         sd_guidance_scale=7,
-        sd_sampler=SDSampler.dpm_plus_plus,
+        sd_sampler=SDSampler.dpm_plus_plus_2m,
     )
 
     assert_equal(
@@ -136,7 +136,7 @@ def test_powerpaint_outpainting(name, device, rect):
         extender_width=rect[2],
         extender_height=rect[3],
         sd_guidance_scale=8.0,
-        sd_sampler=SDSampler.dpm_plus_plus,
+        sd_sampler=SDSampler.dpm_plus_plus_2m,
         powerpaint_task="outpainting",
     )
 

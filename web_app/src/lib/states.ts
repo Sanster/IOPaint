@@ -14,7 +14,6 @@ import {
   PluginParams,
   Point,
   PowerPaintTask,
-  SDSampler,
   ServerConfig,
   Size,
   SortBy,
@@ -85,7 +84,7 @@ export type Settings = {
   sdStrength: number
   sdSteps: number
   sdGuidanceScale: number
-  sdSampler: SDSampler
+  sdSampler: string
   sdMatchHistograms: boolean
   sdScale: number
 
@@ -274,6 +273,7 @@ const defaultValues: AppState = {
     controlnetMethod: "lllyasviel/control_v11p_sd15_canny",
     disableModelSwitch: false,
     isDesktop: false,
+    samplers: ["DPM++ 2M"],
   },
   settings: {
     model: {
@@ -310,7 +310,7 @@ const defaultValues: AppState = {
     sdStrength: 1.0,
     sdSteps: 50,
     sdGuidanceScale: 7.5,
-    sdSampler: SDSampler.uni_pc,
+    sdSampler: "DPM++ 2M",
     sdMatchHistograms: false,
     sdScale: 100,
     p2pImageGuidanceScale: 1.5,

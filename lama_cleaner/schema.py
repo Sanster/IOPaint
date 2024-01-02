@@ -40,15 +40,26 @@ class LDMSampler(str, Enum):
 
 
 class SDSampler(str, Enum):
-    ddim = "ddim"
-    pndm = "pndm"
-    k_lms = "k_lms"
-    k_euler = "k_euler"
-    k_euler_a = "k_euler_a"
-    dpm_plus_plus = "dpm++"
-    uni_pc = "uni_pc"
+    dpm_plus_plus_2m = "DPM++ 2M"
+    dpm_plus_plus_2m_karras = "DPM++ 2M Karras"
+    dpm_plus_plus_2m_sde = "DPM++ 2M SDE"
+    dpm_plus_plus_2m_sde_karras = "DPM++ 2M SDE Karras"
+    dpm_plus_plus_sde = "DPM++ SDE"
+    dpm_plus_plus_sde_karras = "DPM++ SDE Karras"
+    dpm2 = "DPM2"
+    dpm2_karras = "DPM2 Karras"
+    dpm2_a = "DPM2 a"
+    dpm2_a_karras = "DPM2 a Karras"
+    euler = "Euler"
+    euler_a = "Euler a"
+    heun = "Heun"
+    lms = "LMS"
+    lms_karras = "LMS Karras"
 
-    lcm = "lcm"
+    ddim = "DDIM"
+    pndm = "PNDM"
+    uni_pc = "UniPC"
+    lcm = "LCM"
 
 
 class FREEUConfig(BaseModel):
@@ -143,7 +154,7 @@ class InpaintRequest(BaseModel):
         le=1.0,
     )
     sd_mask_blur: int = Field(
-        33,
+        11,
         description="Blur the edge of mask area. The higher the number the smoother blend with the original image",
     )
     sd_strength: float = Field(
@@ -268,6 +279,7 @@ class ServerConfigResponse(BaseModel):
     controlnetMethod: Optional[str]
     disableModelSwitch: bool
     isDesktop: bool
+    samplers: List[str]
 
 
 class SwitchModelRequest(BaseModel):

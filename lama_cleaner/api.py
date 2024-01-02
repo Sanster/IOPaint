@@ -37,6 +37,7 @@ from lama_cleaner.schema import (
     SwitchModelRequest,
     InpaintRequest,
     RunPluginRequest,
+    SDSampler,
 )
 from lama_cleaner.file_manager import FileManager
 
@@ -129,6 +130,7 @@ class Api:
         self.add_api_route("/api/v1/inputimage", self.api_input_image, methods=["GET"])
         self.add_api_route("/api/v1/inpaint", self.api_inpaint, methods=["POST"])
         self.add_api_route("/api/v1/run_plugin", self.api_run_plugin, methods=["POST"])
+        self.add_api_route("/api/v1/samplers", self.api_samplers, methods=["GET"])
         self.app.mount("/", StaticFiles(directory=WEB_APP_DIR, html=True), name="assets")
         # fmt: on
 
@@ -156,6 +158,7 @@ class Api:
             controlnetMethod=self.model_manager.controlnet_method,
             disableModelSwitch=self.config.disable_model_switch,
             isDesktop=self.config.gui,
+            samplers=self.api_samplers(),
         )
 
     def api_input_image(self) -> FileResponse:
@@ -236,6 +239,9 @@ class Api:
             ),
             media_type=f"image/{ext}",
         )
+
+    def api_samplers(self) -> List[str]:
+        return [member.value for member in SDSampler.__members__.values()]
 
     def launch(self):
         self.app.include_router(self.router)

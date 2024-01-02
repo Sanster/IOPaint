@@ -2,6 +2,7 @@ import json
 import os
 from typing import List
 
+from huggingface_hub.constants import HF_HUB_CACHE
 from loguru import logger
 from pathlib import Path
 
@@ -101,13 +102,11 @@ def scan_inpaint_models(model_dir: Path) -> List[ModelInfo]:
 
 
 def scan_models() -> List[ModelInfo]:
-    from diffusers.utils import DIFFUSERS_CACHE
-
     model_dir = os.getenv("XDG_CACHE_HOME", DEFAULT_MODEL_DIR)
     available_models = []
     available_models.extend(scan_inpaint_models(model_dir))
     available_models.extend(scan_single_file_diffusion_models(model_dir))
-    cache_dir = Path(DIFFUSERS_CACHE)
+    cache_dir = Path(HF_HUB_CACHE)
     # logger.info(f"Scanning diffusers models in {cache_dir}")
     diffusers_model_names = []
     for it in cache_dir.glob("**/*/model_index.json"):

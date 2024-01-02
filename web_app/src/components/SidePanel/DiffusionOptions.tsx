@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "../ui/select"
 import { Textarea } from "../ui/textarea"
-import { ExtenderDirection, PowerPaintTask, SDSampler } from "@/lib/types"
+import { ExtenderDirection, PowerPaintTask } from "@/lib/types"
 import { Separator } from "../ui/separator"
 import { Button, ImageUploadButton } from "../ui/button"
 import { Slider } from "../ui/slider"
@@ -42,6 +42,7 @@ const ExtenderButton = ({
 
 const DiffusionOptions = () => {
   const [
+    samplers,
     settings,
     paintByExampleFile,
     isProcessing,
@@ -51,6 +52,7 @@ const DiffusionOptions = () => {
     updateExtenderByBuiltIn,
     updateExtenderDirection,
   ] = useStore((state) => [
+    state.serverConfig.samplers,
     state.settings,
     state.paintByExampleFile,
     state.getIsProcessing(),
@@ -652,16 +654,16 @@ const DiffusionOptions = () => {
         <Select
           defaultValue={settings.sdSampler}
           value={settings.sdSampler}
-          onValueChange={(value: SDSampler) => {
+          onValueChange={(value) => {
             updateSettings({ sdSampler: value })
           }}
         >
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select sampler" />
           </SelectTrigger>
           <SelectContent align="end">
             <SelectGroup>
-              {Object.values(SDSampler).map((sampler) => (
+              {samplers.map((sampler) => (
                 <SelectItem key={sampler} value={sampler}>
                   {sampler}
                 </SelectItem>

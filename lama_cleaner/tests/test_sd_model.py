@@ -1,5 +1,7 @@
 import os
 
+from loguru import logger
+
 from lama_cleaner.tests.utils import check_device, get_config, assert_equal
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
@@ -17,21 +19,7 @@ save_dir.mkdir(exist_ok=True, parents=True)
 
 
 @pytest.mark.parametrize("device", ["cuda", "mps"])
-@pytest.mark.parametrize(
-    "sampler",
-    [
-        SDSampler.ddim,
-        SDSampler.pndm,
-        SDSampler.k_lms,
-        SDSampler.k_euler,
-        SDSampler.k_euler_a,
-        SDSampler.lcm,
-    ],
-)
-def test_runway_sd_1_5_all_samplers(
-    device,
-    sampler,
-):
+def test_runway_sd_1_5_all_samplers(device):
     sd_steps = check_device(device)
     model = ModelManager(
         name="runwayml/stable-diffusion-inpainting",
@@ -39,22 +27,37 @@ def test_runway_sd_1_5_all_samplers(
         disable_nsfw=True,
         sd_cpu_textencoder=False,
     )
-    cfg = get_config(
-        strategy=HDStrategy.ORIGINAL,
-        prompt="a fox sitting on a bench",
-        sd_steps=sd_steps,
-    )
-    cfg.sd_sampler = sampler
 
-    name = f"device_{device}_{sampler}"
+    all_samplers = [member.value for member in SDSampler.__members__.values()]
+    print(all_samplers)
+    for sampler in all_samplers:
+        print(f"Testing sampler {sampler}")
+        if (
+            sampler
+            in [SDSampler.dpm2_karras, SDSampler.dpm2_a_karras, SDSampler.lms_karras]
+            and device == "mps"
+        ):
+            # diffusers 0.25.0 still has bug on these sampler on mps, wait main branch released to fix it
+            logger.warning(
+                "skip dpm2_karras on mps, diffusers does not support it on mps. TypeError: Cannot convert a MPS Tensor to float64 dtype as the MPS framework doesn't support float64. Please use float32 instead."
+            )
+            continue
+        cfg = get_config(
+            strategy=HDStrategy.ORIGINAL,
+            prompt="a fox sitting on a bench",
+            sd_steps=sd_steps,
+            sd_sampler=sampler,
+        )
 
-    assert_equal(
-        model,
-        cfg,
-        f"runway_sd_{name}.png",
-        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
-        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
-    )
+        name = f"device_{device}_{sampler}"
+
+        assert_equal(
+            model,
+            cfg,
+            f"runway_sd_{name}.png",
+            img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+            mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
+        )
 
 
 @pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])
@@ -171,7 +174,7 @@ def test_runway_norm_sd_model(device, strategy, sampler):
 
 @pytest.mark.parametrize("device", ["cuda"])
 @pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
-@pytest.mark.parametrize("sampler", [SDSampler.k_euler_a])
+@pytest.mark.parametrize("sampler", [SDSampler.dpm_plus_plus_2m])
 def test_runway_sd_1_5_cpu_offload(device, strategy, sampler):
     sd_steps = check_device(device)
     model = ModelManager(
