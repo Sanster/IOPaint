@@ -272,7 +272,7 @@ export default function Editor(props: EditorProps) {
     console.log("[useEffect] centerView")
     // render 改变尺寸以后，undo/redo 重新 center
     viewportRef?.current?.centerView(minScale, 1)
-  }, [context?.canvas.height, context?.canvas.width, viewportRef, minScale])
+  }, [imageHeight, imageWidth, viewportRef, minScale])
 
   // Zoom reset
   const resetZoom = useCallback(() => {
@@ -358,6 +358,7 @@ export default function Editor(props: EditorProps) {
     const targetFile = await getCurrentRender()
     try {
       const res = await runPlugin(
+        true,
         PluginName.InteractiveSeg,
         targetFile,
         undefined,

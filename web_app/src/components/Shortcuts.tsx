@@ -64,11 +64,6 @@ export function Shortcuts() {
             <ShortCut content="Decrease Brush Size" keys={["["]} />
             <ShortCut content="Increase Brush Size" keys={["]"]} />
             <ShortCut content="View Original Image" keys={["Hold Tab"]} />
-            <ShortCut
-              content="Multi-Stroke Drawing"
-              keys={[`Hold ${CmdOrCtrl()}`]}
-            />
-            <ShortCut content="Cancel Drawing" keys={["Esc"]} />
 
             <ShortCut content="Undo" keys={[CmdOrCtrl(), "Z"]} />
             <ShortCut content="Redo" keys={[CmdOrCtrl(), "Shift", "Z"]} />

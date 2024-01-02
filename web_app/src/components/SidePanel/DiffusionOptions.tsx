@@ -658,13 +658,13 @@ const DiffusionOptions = () => {
             updateSettings({ sdSampler: value })
           }}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[175px] text-xs">
             <SelectValue placeholder="Select sampler" />
           </SelectTrigger>
           <SelectContent align="end">
             <SelectGroup>
               {samplers.map((sampler) => (
-                <SelectItem key={sampler} value={sampler}>
+                <SelectItem key={sampler} value={sampler} className="text-xs">
                   {sampler}
                 </SelectItem>
               ))}

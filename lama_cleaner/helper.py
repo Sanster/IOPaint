@@ -350,3 +350,23 @@ def concat_alpha_channel(rgb_np_img, alpha_channel) -> np.ndarray:
             (rgb_np_img, alpha_channel[:, :, np.newaxis]), axis=-1
         )
     return rgb_np_img
+
+
+def gen_frontend_mask(bgr_or_gray_mask):
+    if len(bgr_or_gray_mask.shape) == 3 and bgr_or_gray_mask.shape[2] != 1:
+        bgr_or_gray_mask = cv2.cvtColor(bgr_or_gray_mask, cv2.COLOR_BGR2GRAY)
+
+    # fronted brush color "ffcc00bb"
+    # TODO: how to set kernel size?
+    kernel_size = 9
+    bgr_or_gray_mask = cv2.dilate(
+        bgr_or_gray_mask,
+        np.ones((kernel_size, kernel_size), np.uint8),
+        iterations=1,
+    )
+    res_mask = np.zeros(
+        (bgr_or_gray_mask.shape[0], bgr_or_gray_mask.shape[1], 4), dtype=np.uint8
+    )
+    res_mask[bgr_or_gray_mask > 128] = [255, 203, 0, int(255 * 0.73)]
+    res_mask = cv2.cvtColor(res_mask, cv2.COLOR_BGRA2RGBA)
+    return res_mask

@@ -16,6 +16,7 @@ import {
   Smile,
 } from "lucide-react"
 import { useStore } from "@/lib/states"
+import { PluginInfo } from "@/lib/types"
 
 export enum PluginName {
   RemoveBG = "RemoveBG",
@@ -26,6 +27,7 @@ export enum PluginName {
   InteractiveSeg = "InteractiveSeg",
 }
 
+// TODO: get plugin config from server and using form-render??
 const pluginMap = {
   [PluginName.RemoveBG]: {
     IconClass: Slice,
@@ -37,7 +39,7 @@ const pluginMap = {
   },
   [PluginName.RealESRGAN]: {
     IconClass: Fullscreen,
-    showName: "RealESRGAN 4x",
+    showName: "RealESRGAN",
   },
   [PluginName.GFPGAN]: {
     IconClass: Smile,
@@ -67,11 +69,11 @@ const Plugins = () => {
     return null
   }
 
-  const onPluginClick = (pluginName: string) => {
+  const onPluginClick = (genMask: boolean, pluginName: string) => {
     if (pluginName === PluginName.InteractiveSeg) {
       updateInteractiveSegState({ isInteractiveSeg: true })
     } else {
-      runRenderablePlugin(pluginName)
+      runRenderablePlugin(genMask, pluginName)
     }
   }
 
@@ -87,14 +89,14 @@ const Plugins = () => {
         <DropdownMenuSubContent>
           <DropdownMenuItem
             onClick={() =>
-              runRenderablePlugin(PluginName.RealESRGAN, { upscale: 2 })
+              runRenderablePlugin(false, PluginName.RealESRGAN, { upscale: 2 })
             }
           >
             upscale 2x
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() =>
-              runRenderablePlugin(PluginName.RealESRGAN, { upscale: 4 })
+              runRenderablePlugin(false, PluginName.RealESRGAN, { upscale: 4 })
             }
           >
             upscale 4x
@@ -104,16 +106,44 @@ const Plugins = () => {
     )
   }
 
+  const renderGenImageAndMaskPlugin = (plugin: PluginInfo) => {
+    const { IconClass, showName } = pluginMap[plugin.name as PluginName]
+    return (
+      <DropdownMenuSub key={plugin.name}>
+        <DropdownMenuSubTrigger disabled={disabled}>
+          <div className="flex gap-2 items-center">
+            <IconClass className="p-1" />
+            {showName}
+          </div>
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent>
+          <DropdownMenuItem onClick={() => onPluginClick(false, plugin.name)}>
+            Remove Background
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onPluginClick(true, plugin.name)}>
+            Generate Mask
+          </DropdownMenuItem>
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+    )
+  }
+
   const renderPlugins = () => {
-    return plugins.map((plugin: string) => {
-      const { IconClass, showName } = pluginMap[plugin as PluginName]
-      if (plugin === PluginName.RealESRGAN) {
+    return plugins.map((plugin: PluginInfo) => {
+      const { IconClass, showName } = pluginMap[plugin.name as PluginName]
+      if (plugin.name === PluginName.RealESRGAN) {
         return renderRealESRGANPlugin()
+      }
+      if (
+        plugin.name === PluginName.RemoveBG ||
+        plugin.name === PluginName.AnimeSeg
+      ) {
+        return renderGenImageAndMaskPlugin(plugin)
       }
       return (
         <DropdownMenuItem
-          key={plugin}
-          onClick={() => onPluginClick(plugin)}
+          key={plugin.name}
+          onClick={() => onPluginClick(false, plugin.name)}
           disabled={disabled}
         >
           <div className="flex gap-2 items-center">

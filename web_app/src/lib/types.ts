@@ -6,8 +6,14 @@ export interface Filename {
   mtime: number
 }
 
+export interface PluginInfo {
+  name: string
+  support_gen_image: boolean
+  support_gen_mask: boolean
+}
+
 export interface ServerConfig {
-  plugins: string[]
+  plugins: PluginInfo[]
   enableFileManager: boolean
   enableAutoSaving: boolean
   enableControlnet: boolean

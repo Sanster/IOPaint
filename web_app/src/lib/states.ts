@@ -156,7 +156,6 @@ type AppAction = {
   setFile: (file: File) => Promise<void>
   setCustomFile: (file: File) => void
   setIsInpainting: (newValue: boolean) => void
-  setIsPluginRunning: (newValue: boolean) => void
   getIsProcessing: () => boolean
   setBaseBrushSize: (newValue: number) => void
   getBrushSize: () => number
@@ -190,6 +189,7 @@ type AppAction = {
   showPrevMask: () => Promise<void>
   hidePrevMask: () => void
   runRenderablePlugin: (
+    genMask: boolean,
     pluginName: string,
     params?: PluginParams
   ) => Promise<void>
@@ -521,28 +521,43 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
       },
 
       runRenderablePlugin: async (
+        genMask: boolean,
         pluginName: string,
         params: PluginParams = { upscale: 1 }
       ) => {
         const { renders, lineGroups } = get().editorState
         set((state) => {
-          state.isInpainting = true
+          state.isPluginRunning = true
         })
 
         try {
           const start = new Date()
           const targetFile = await get().getCurrentTargetFile()
-          const res = await runPlugin(pluginName, targetFile, params.upscale)
+          const res = await runPlugin(
+            genMask,
+            pluginName,
+            targetFile,
+            params.upscale
+          )
           const { blob } = res
-          const newRender = new Image()
-          await loadImage(newRender, blob)
-          get().setImageSize(newRender.width, newRender.height)
-          const newRenders = [...renders, newRender]
-          const newLineGroups = [...lineGroups, []]
-          get().updateEditorState({
-            renders: newRenders,
-            lineGroups: newLineGroups,
-          })
+
+          if (!genMask) {
+            const newRender = new Image()
+            await loadImage(newRender, blob)
+            get().setImageSize(newRender.width, newRender.height)
+            const newRenders = [...renders, newRender]
+            const newLineGroups = [...lineGroups, []]
+            get().updateEditorState({
+              renders: newRenders,
+              lineGroups: newLineGroups,
+            })
+          } else {
+            const newMask = new Image()
+            await loadImage(newMask, blob)
+            get().updateInteractiveSegState({
+              interactiveSegMask: newMask,
+            })
+          }
           const end = new Date()
           const time = end.getTime() - start.getTime()
           toast({
@@ -555,7 +570,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           })
         }
         set((state) => {
-          state.isInpainting = false
+          state.isPluginRunning = false
         })
       },
 
@@ -801,11 +816,6 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
       setIsInpainting: (newValue: boolean) =>
         set((state) => {
           state.isInpainting = newValue
-        }),
-
-      setIsPluginRunning: (newValue: boolean) =>
-        set((state) => {
-          state.isPluginRunning = newValue
         }),
 
       setFile: async (file: File) => {

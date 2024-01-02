@@ -9,6 +9,8 @@ from lama_cleaner.schema import RunPluginRequest
 
 class RemoveBG(BasePlugin):
     name = "RemoveBG"
+    support_gen_mask = True
+    support_gen_image = True
 
     def __init__(self):
         super().__init__()
@@ -20,16 +22,23 @@ class RemoveBG(BasePlugin):
 
         self.session = new_session(model_name="u2net")
 
-    def __call__(self, rgb_np_img, req: RunPluginRequest):
-        bgr_np_img = cv2.cvtColor(rgb_np_img, cv2.COLOR_RGB2BGR)
-        return self.forward(bgr_np_img)
-
-    def forward(self, bgr_np_img) -> np.ndarray:
+    def gen_image(self, rgb_np_img, req: RunPluginRequest) -> np.ndarray:
         from rembg import remove
+
+        bgr_np_img = cv2.cvtColor(rgb_np_img, cv2.COLOR_RGB2BGR)
 
         # return BGRA image
         output = remove(bgr_np_img, session=self.session)
         return cv2.cvtColor(output, cv2.COLOR_BGRA2RGBA)
+
+    def gen_mask(self, rgb_np_img, req: RunPluginRequest) -> np.ndarray:
+        from rembg import remove
+
+        bgr_np_img = cv2.cvtColor(rgb_np_img, cv2.COLOR_RGB2BGR)
+
+        # return BGR image, 255 means foreground, 0 means background
+        output = remove(bgr_np_img, session=self.session, only_mask=True)
+        return output
 
     def check_dep(self):
         try:

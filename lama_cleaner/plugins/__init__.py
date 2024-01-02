@@ -1,11 +1,13 @@
+from typing import Dict
+
 from loguru import logger
 
-from .interactive_seg import InteractiveSeg
-from .remove_bg import RemoveBG
-from .realesrgan import RealESRGANUpscaler
-from .gfpgan_plugin import GFPGANPlugin
-from .restoreformer import RestoreFormerPlugin
 from .anime_seg import AnimeSeg
+from .gfpgan_plugin import GFPGANPlugin
+from .interactive_seg import InteractiveSeg
+from .realesrgan import RealESRGANUpscaler
+from .remove_bg import RemoveBG
+from .restoreformer import RestoreFormerPlugin
 from ..const import InteractiveSegModel, Device, RealESRGANModel
 
 
@@ -23,7 +25,7 @@ def build_plugins(
     enable_restoreformer: bool,
     restoreformer_device: Device,
     no_half: bool,
-):
+) -> Dict:
     plugins = {}
     if enable_interactive_seg:
         logger.info(f"Initialize {InteractiveSeg.name} plugin")

@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 from loguru import logger
 
 from lama_cleaner.helper import download_model
@@ -8,6 +9,7 @@ from lama_cleaner.schema import RunPluginRequest
 
 class RestoreFormerPlugin(BasePlugin):
     name = "RestoreFormer"
+    support_gen_image = True
 
     def __init__(self, device, upscaler=None):
         super().__init__()
@@ -32,7 +34,7 @@ class RestoreFormerPlugin(BasePlugin):
             bg_upsampler=upscaler.model if upscaler is not None else None,
         )
 
-    def __call__(self, rgb_np_img, req: RunPluginRequest):
+    def gen_image(self, rgb_np_img, req: RunPluginRequest) -> np.ndarray:
         weight = 0.5
         bgr_np_img = cv2.cvtColor(rgb_np_img, cv2.COLOR_RGB2BGR)
         logger.info(f"RestoreFormer input shape: {bgr_np_img.shape}")

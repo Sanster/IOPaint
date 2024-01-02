@@ -3,7 +3,7 @@ import os
 import time
 from PIL import Image
 
-from lama_cleaner.helper import encode_pil_to_base64
+from lama_cleaner.helper import encode_pil_to_base64, gen_frontend_mask
 from lama_cleaner.plugins.anime_seg import AnimeSeg
 from lama_cleaner.schema import RunPluginRequest
 from lama_cleaner.tests.utils import check_device, current_dir, save_dir
@@ -35,34 +35,48 @@ def _save(img, name):
 
 def test_remove_bg():
     model = RemoveBG()
-    rgba_np_img = model(
+    rgba_np_img = model.gen_image(
         rgb_img, RunPluginRequest(name=RemoveBG.name, image=rgb_img_base64)
     )
     res = cv2.cvtColor(rgba_np_img, cv2.COLOR_RGBA2BGRA)
     _save(res, "test_remove_bg.png")
+
+    bgr_np_img = model.gen_mask(
+        rgb_img, RunPluginRequest(name=RemoveBG.name, image=rgb_img_base64)
+    )
+
+    res_mask = gen_frontend_mask(bgr_np_img)
+    _save(res_mask, "test_remove_bg_frontend_mask.png")
+
+    assert len(bgr_np_img.shape) == 2
+    _save(bgr_np_img, "test_remove_bg_mask.jpeg")
 
 
 def test_anime_seg():
     model = AnimeSeg()
     img = cv2.imread(str(current_dir / "anime_test.png"))
     img_base64 = encode_pil_to_base64(Image.fromarray(img), 100, {})
-    res = model(img, RunPluginRequest(name=AnimeSeg.name, image=img_base64))
+    res = model.gen_image(img, RunPluginRequest(name=AnimeSeg.name, image=img_base64))
     assert len(res.shape) == 3
     assert res.shape[-1] == 4
     _save(res, "test_anime_seg.png")
+
+    res = model.gen_mask(img, RunPluginRequest(name=AnimeSeg.name, image=img_base64))
+    assert len(res.shape) == 2
+    _save(res, "test_anime_seg_mask.png")
 
 
 @pytest.mark.parametrize("device", ["cuda", "cpu", "mps"])
 def test_upscale(device):
     check_device(device)
     model = RealESRGANUpscaler("realesr-general-x4v3", device)
-    res = model(
+    res = model.gen_image(
         rgb_img,
         RunPluginRequest(name=RealESRGANUpscaler.name, image=rgb_img_base64, scale=2),
     )
     _save(res, f"test_upscale_x2_{device}.png")
 
-    res = model(
+    res = model.gen_image(
         rgb_img,
         RunPluginRequest(name=RealESRGANUpscaler.name, image=rgb_img_base64, scale=4),
     )
@@ -73,7 +87,9 @@ def test_upscale(device):
 def test_gfpgan(device):
     check_device(device)
     model = GFPGANPlugin(device)
-    res = model(rgb_img, RunPluginRequest(name=GFPGANPlugin.name, image=rgb_img_base64))
+    res = model.gen_image(
+        rgb_img, RunPluginRequest(name=GFPGANPlugin.name, image=rgb_img_base64)
+    )
     _save(res, f"test_gfpgan_{device}.png")
 
 
@@ -81,7 +97,7 @@ def test_gfpgan(device):
 def test_restoreformer(device):
     check_device(device)
     model = RestoreFormerPlugin(device)
-    res = model(
+    res = model.gen_image(
         rgb_img, RunPluginRequest(name=RestoreFormerPlugin.name, image=rgb_img_base64)
     )
     _save(res, f"test_restoreformer_{device}.png")
@@ -91,7 +107,7 @@ def test_restoreformer(device):
 def test_segment_anything(device):
     check_device(device)
     model = InteractiveSeg("vit_l", device)
-    new_mask = model(
+    new_mask = model.gen_mask(
         rgb_img,
         RunPluginRequest(
             name=InteractiveSeg.name,

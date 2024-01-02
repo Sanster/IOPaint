@@ -114,13 +114,15 @@ export function fetchModelInfos(): Promise<ModelInfo[]> {
 }
 
 export async function runPlugin(
+  genMask: boolean,
   name: string,
   imageFile: File,
   upscale?: number,
   clicks?: number[][]
 ) {
   const imageBase64 = await convertToBase64(imageFile)
-  const res = await fetch(`${API_ENDPOINT}/run_plugin`, {
+  const p = genMask ? "run_plugin_gen_mask" : "run_plugin_gen_image"
+  const res = await fetch(`${API_ENDPOINT}/${p}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

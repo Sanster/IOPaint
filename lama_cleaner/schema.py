@@ -3,10 +3,15 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, Literal, List
 
-from PIL.Image import Image
-from pydantic import BaseModel, Field, validator, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from lama_cleaner.const import Device, InteractiveSegModel, RealESRGANModel
+
+
+class PluginInfo(BaseModel):
+    name: str
+    support_gen_image: bool = False
+    support_gen_mask: bool = False
 
 
 class CV2Flag(str, Enum):
@@ -272,7 +277,7 @@ class GenInfoResponse(BaseModel):
 
 
 class ServerConfigResponse(BaseModel):
-    plugins: List[str]
+    plugins: List[PluginInfo]
     enableFileManager: bool
     enableAutoSaving: bool
     enableControlnet: bool
