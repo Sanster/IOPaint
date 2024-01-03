@@ -1,3 +1,4 @@
+import asyncio
 import os
 import threading
 import time
@@ -6,22 +7,21 @@ from pathlib import Path
 from typing import Optional, Dict, List
 
 import cv2
-import socketio
-import asyncio
-from socketio import AsyncServer
-import torch
 import numpy as np
-from loguru import logger
-from PIL import Image
-
+import socketio
+import torch
 import uvicorn
+from PIL import Image
 from fastapi import APIRouter, FastAPI, Request, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
+from loguru import logger
+from socketio import AsyncServer
 
+from lama_cleaner.file_manager import FileManager
 from lama_cleaner.helper import (
     load_img,
     decode_base64_to_image,
@@ -33,7 +33,7 @@ from lama_cleaner.helper import (
 from lama_cleaner.model.utils import torch_gc
 from lama_cleaner.model_info import ModelInfo
 from lama_cleaner.model_manager import ModelManager
-from lama_cleaner.plugins import build_plugins, InteractiveSeg, RemoveBG, AnimeSeg
+from lama_cleaner.plugins import build_plugins
 from lama_cleaner.plugins.base_plugin import BasePlugin
 from lama_cleaner.schema import (
     GenInfoResponse,
@@ -45,7 +45,6 @@ from lama_cleaner.schema import (
     SDSampler,
     PluginInfo,
 )
-from lama_cleaner.file_manager import FileManager
 
 CURRENT_DIR = Path(__file__).parent.absolute().resolve()
 WEB_APP_DIR = CURRENT_DIR / "web_app"
@@ -118,7 +117,7 @@ def api_middleware(app: FastAPI):
 global_sio: AsyncServer = None
 
 
-def diffuser_callback(pipe, step: int, timestep: int, callback_kwargs: Dict):
+def diffuser_callback(pipe, step: int, timestep: int, callback_kwargs: Dict = {}):
     # self: DiffusionPipeline, step: int, timestep: int, callback_kwargs: Dict
     # logger.info(f"diffusion callback: step={step}, timestep={timestep}")
 

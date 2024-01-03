@@ -604,7 +604,7 @@ export default function Editor(props: EditorProps) {
   )
 
   useHotKey(
-    "ctrl+c, cmd+c",
+    "ctrl+c,meta+c",
     async () => {
       const hasPermission = await askWritePermission()
       if (hasPermission && renders.length > 0) {

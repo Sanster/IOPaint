@@ -1193,7 +1193,7 @@ class StableDiffusionInpaintPipeline(
                 ):
                     progress_bar.update()
                     if callback is not None and i % callback_steps == 0:
-                        callback(i, t, latents)
+                        callback(self, i, t, {})
 
         if not output_type == "latent":
             condition_kwargs = {}

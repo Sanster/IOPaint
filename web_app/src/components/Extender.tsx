@@ -48,6 +48,7 @@ const Extender = (props: Props) => {
     isInpainting,
     imageHeight,
     imageWdith,
+    isSD,
     { x, y, width, height },
     setX,
     setY,
@@ -60,6 +61,7 @@ const Extender = (props: Props) => {
     state.isInpainting,
     state.imageHeight,
     state.imageWidth,
+    state.isSD(),
     state.extenderState,
     state.setExtenderX,
     state.setExtenderY,
@@ -391,7 +393,7 @@ const Extender = (props: Props) => {
     )
   }
 
-  if (show === false) {
+  if (show === false || !isSD) {
     return null
   }
 

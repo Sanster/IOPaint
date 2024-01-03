@@ -2,7 +2,6 @@ import * as React from "react"
 import io from "socket.io-client"
 import { Progress } from "./ui/progress"
 import { useStore } from "@/lib/states"
-import { MODEL_TYPE_INPAINT } from "@/lib/const"
 
 export const API_ENDPOINT = import.meta.env.VITE_BACKEND
   ? import.meta.env.VITE_BACKEND
@@ -10,16 +9,16 @@ export const API_ENDPOINT = import.meta.env.VITE_BACKEND
 const socket = io(API_ENDPOINT)
 
 const DiffusionProgress = () => {
-  const [settings, isInpainting] = useStore((state) => [
+  const [settings, isInpainting, isSD] = useStore((state) => [
     state.settings,
     state.isInpainting,
+    state.isSD(),
   ])
 
   const [isConnected, setIsConnected] = React.useState(false)
   const [step, setStep] = React.useState(0)
 
   const progress = Math.min(Math.round((step / settings.sdSteps) * 100), 100)
-  const isSD = settings.model.model_type !== MODEL_TYPE_INPAINT
 
   React.useEffect(() => {
     if (!isSD) {

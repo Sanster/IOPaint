@@ -66,6 +66,7 @@ const Cropper = (props: Props) => {
     imageWidth,
     imageHeight,
     isInpainting,
+    isSD,
     { x, y, width, height },
     setX,
     setY,
@@ -77,6 +78,7 @@ const Cropper = (props: Props) => {
     state.imageWidth,
     state.imageHeight,
     state.isInpainting,
+    state.isSD(),
     state.cropperState,
     state.setCropperX,
     state.setCropperY,
@@ -377,7 +379,7 @@ const Cropper = (props: Props) => {
     )
   }
 
-  if (show === false) {
+  if (show === false || !isSD) {
     return null
   }
 

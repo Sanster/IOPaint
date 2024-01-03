@@ -161,6 +161,8 @@ type AppAction = {
   getBrushSize: () => number
   setImageSize: (width: number, height: number) => void
 
+  isSD: () => boolean
+
   setCropperX: (newValue: number) => void
   setCropperY: (newValue: number) => void
   setCropperWidth: (newValue: number) => void
@@ -170,6 +172,7 @@ type AppAction = {
   setExtenderY: (newValue: number) => void
   setExtenderWidth: (newValue: number) => void
   setExtenderHeight: (newValue: number) => void
+
   setIsCropperExtenderResizing: (newValue: boolean) => void
   updateExtenderDirection: (newValue: ExtenderDirection) => void
   resetExtender: (width: number, height: number) => void
@@ -616,6 +619,10 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
 
       getIsProcessing: (): boolean => {
         return get().isInpainting || get().isPluginRunning
+      },
+
+      isSD: (): boolean => {
+        return get().settings.model.model_type !== MODEL_TYPE_INPAINT
       },
 
       // undo/redo
