@@ -73,7 +73,7 @@ class MIGAN(InpaintModel):
 
             crop_result.append((inpaint_result, crop_box))
 
-        inpaint_result = image[:, :, ::-1]
+        inpaint_result = image[:, :, ::-1].copy()
         for crop_image, crop_box in crop_result:
             x1, y1, x2, y2 = crop_box
             inpaint_result[y1:y2, x1:x2, :] = crop_image
