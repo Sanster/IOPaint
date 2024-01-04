@@ -309,11 +309,12 @@ def decode_base64_to_image(
     image = Image.open(io.BytesIO(base64.b64decode(encoding)))
 
     alpha_channel = None
-    infos = image.info
     try:
         image = ImageOps.exif_transpose(image)
     except:
         pass
+    # exif_transpose will remove exif rotate info，we must call image.info after exif_transpose
+    infos = image.info
 
     if gray:
         image = image.convert("L")
@@ -350,6 +351,29 @@ def concat_alpha_channel(rgb_np_img, alpha_channel) -> np.ndarray:
             (rgb_np_img, alpha_channel[:, :, np.newaxis]), axis=-1
         )
     return rgb_np_img
+
+
+def adjust_mask(mask: np.ndarray, kernel_size: int, operate):
+    # kernel_size = kernel_size*2+1
+    mask[mask >= 127] = 255
+    mask[mask < 127] = 0
+    # fronted brush color "ffcc00bb"
+    if operate == "expand":
+        mask = cv2.dilate(
+            mask,
+            np.ones((kernel_size, kernel_size), np.uint8),
+            iterations=1,
+        )
+    else:
+        mask = cv2.erode(
+            mask,
+            np.ones((kernel_size, kernel_size), np.uint8),
+            iterations=1,
+        )
+    res_mask = np.zeros((mask.shape[0], mask.shape[1], 4), dtype=np.uint8)
+    res_mask[mask > 128] = [255, 203, 0, int(255 * 0.73)]
+    res_mask = cv2.cvtColor(res_mask, cv2.COLOR_BGRA2RGBA)
+    return res_mask
 
 
 def gen_frontend_mask(bgr_or_gray_mask):

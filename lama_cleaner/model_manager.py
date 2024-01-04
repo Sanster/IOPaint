@@ -2,6 +2,7 @@ from typing import List, Dict
 
 import torch
 from loguru import logger
+import numpy as np
 
 from lama_cleaner.download import scan_models
 from lama_cleaner.helper import switch_mps_device
@@ -77,12 +78,12 @@ class ModelManager:
             config:
 
         Returns:
-
+            BGR image
         """
         self.switch_controlnet_method(config)
         self.enable_disable_freeu(config)
         self.enable_disable_lcm_lora(config)
-        return self.model(image, mask, config)
+        return self.model(image, mask, config).astype(np.uint8)
 
     def scan_models(self) -> List[ModelInfo]:
         available_models = scan_models()
