@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Dict
 
 import typer
 from fastapi import FastAPI
@@ -39,15 +40,36 @@ def list_model(
         print(it.name)
 
 
-@typer_app.command(help="Processing image with lama cleaner")
+@typer_app.command(help="Batch processing images")
 def run(
-    input: Path = Option(..., help="Image file or folder containing images"),
-    output_dir: Path = Option(..., help="Output directory"),
-    config_path: Path = Option(..., help="Config file path"),
+    model: str = Option("lama"),
+    device: Device = Option(Device.cpu),
+    image: Path = Option(..., help="Image folders or file path"),
+    mask: Path = Option(
+        ...,
+        help="Mask folders or file path. "
+        "If it is a directory, the mask images in the directory should have the same name as the original image."
+        "If it is a file, all images will use this mask."
+        "Mask will automatically resize to the same size as the original image.",
+    ),
+    output: Path = Option(..., help="Output directory or file path"),
+    config: Path = Option(
+        None, help="Config file path. You can use dump command to create a base config."
+    ),
+    concat: bool = Option(
+        False, help="Concat original image, mask and output images into one image"
+    ),
     model_dir: Path = Option(DEFAULT_MODEL_DIR, help=MODEL_DIR_HELP, file_okay=False),
 ):
     setup_model_dir(model_dir)
-    pass
+    scanned_models = scan_models()
+    if model not in [it.name for it in scanned_models]:
+        logger.info(f"{model} not found in {model_dir}, try to downloading")
+        cli_download_model(model, model_dir)
+
+    from lama_cleaner.batch_processing import batch_inpaint
+
+    batch_inpaint(model, device, image, mask, output, config, concat)
 
 
 @typer_app.command(help="Start lama cleaner server")

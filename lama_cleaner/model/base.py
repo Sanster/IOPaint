@@ -65,7 +65,7 @@ class InpaintModel:
             mask, mod=self.pad_mod, square=self.pad_to_square, min_size=self.min_size
         )
 
-        logger.info(f"final forward pad size: {pad_image.shape}")
+        # logger.info(f"final forward pad size: {pad_image.shape}")
 
         image, mask = self.forward_pre_process(image, mask, config)
 
@@ -93,7 +93,7 @@ class InpaintModel:
         return: BGR IMAGE
         """
         inpaint_result = None
-        logger.info(f"hd_strategy: {config.hd_strategy}")
+        # logger.info(f"hd_strategy: {config.hd_strategy}")
         if config.hd_strategy == HDStrategy.CROP:
             if max(image.shape) > config.hd_strategy_crop_trigger_size:
                 logger.info(f"Run crop strategy")
@@ -189,7 +189,7 @@ class InpaintModel:
         crop_img = image[t:b, l:r, :]
         crop_mask = mask[t:b, l:r]
 
-        logger.info(f"box size: ({box_h},{box_w}) crop size: {crop_img.shape}")
+        # logger.info(f"box size: ({box_h},{box_w}) crop size: {crop_img.shape}")
 
         return crop_img, crop_mask, [l, t, r, b]
 
