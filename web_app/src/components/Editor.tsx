@@ -11,6 +11,7 @@ import { downloadToOutput, runPlugin } from "@/lib/api"
 import { IconButton } from "@/components/ui/button"
 import {
   askWritePermission,
+  cn,
   copyCanvasImage,
   downloadImage,
   drawLines,
@@ -101,6 +102,7 @@ export default function Editor(props: EditorProps) {
   const [showOriginal, setShowOriginal] = useState(false)
   const [original, isOriginalLoaded] = useImage(file)
   const [context, setContext] = useState<CanvasRenderingContext2D>()
+  const [imageContext, setImageContext] = useState<CanvasRenderingContext2D>()
   const [{ x, y }, setCoords] = useState({ x: -1, y: -1 })
   const [showBrush, setShowBrush] = useState(false)
   const [showRefBrush, setShowRefBrush] = useState(false)
@@ -125,6 +127,35 @@ export default function Editor(props: EditorProps) {
 
   useEffect(() => {
     if (
+      !imageContext ||
+      !isOriginalLoaded ||
+      imageWidth === 0 ||
+      imageHeight === 0
+    ) {
+      return
+    }
+    const render = renders.length === 0 ? original : renders[renders.length - 1]
+    imageContext.canvas.width = imageWidth
+    imageContext.canvas.height = imageHeight
+
+    imageContext.clearRect(
+      0,
+      0,
+      imageContext.canvas.width,
+      imageContext.canvas.height
+    )
+    imageContext.drawImage(render, 0, 0, imageWidth, imageHeight)
+  }, [
+    renders,
+    original,
+    isOriginalLoaded,
+    imageContext,
+    imageHeight,
+    imageWidth,
+  ])
+
+  useEffect(() => {
+    if (
       !context ||
       !isOriginalLoaded ||
       imageWidth === 0 ||
@@ -132,19 +163,9 @@ export default function Editor(props: EditorProps) {
     ) {
       return
     }
-
-    const render = renders.length === 0 ? original : renders[renders.length - 1]
-
-    console.log(
-      `[draw] renders.length: ${renders.length} render size: ${render.width}x${render.height} image size: ${imageWidth}x${imageHeight} canvas size: ${context.canvas.width}x${context.canvas.height}`
-    )
-
     context.canvas.width = imageWidth
     context.canvas.height = imageHeight
-
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
-    context.drawImage(render, 0, 0, imageWidth, imageHeight)
-
     extraMasks.forEach((maskImage) => {
       context.drawImage(maskImage, 0, 0, imageWidth, imageHeight)
     })
@@ -175,9 +196,7 @@ export default function Editor(props: EditorProps) {
     }
     drawLines(context, curLineGroup)
   }, [
-    renders,
     extraMasks,
-    original,
     isOriginalLoaded,
     interactiveSegState,
     context,
@@ -728,9 +747,6 @@ export default function Editor(props: EditorProps) {
         }}
       >
         <TransformComponent
-          contentClass={
-            isProcessing ? "pointer-events-none animate-pulse duration-700" : ""
-          }
           contentStyle={{
             visibility: initialCentered ? "visible" : "hidden",
           }}
@@ -738,6 +754,26 @@ export default function Editor(props: EditorProps) {
           <div className="grid [grid-template-areas:'editor-content'] gap-y-4">
             <canvas
               className="[grid-area:editor-content]"
+              style={{
+                clipPath: `inset(0 ${sliderPos}% 0 0)`,
+                transition: `clip-path ${COMPARE_SLIDER_DURATION_MS}ms`,
+              }}
+              ref={(r) => {
+                if (r && !imageContext) {
+                  const ctx = r.getContext("2d")
+                  if (ctx) {
+                    setImageContext(ctx)
+                  }
+                }
+              }}
+            />
+            <canvas
+              className={cn(
+                "[grid-area:editor-content]",
+                isProcessing
+                  ? "pointer-events-none animate-pulse duration-600"
+                  : ""
+              )}
               style={{
                 cursor: getCursor(),
                 clipPath: `inset(0 ${sliderPos}% 0 0)`,
