@@ -337,6 +337,10 @@ export default function Editor(props: EditorProps) {
   }
 
   const onMouseDrag = (ev: SyntheticEvent) => {
+    if (isProcessing) {
+      return
+    }
+
     if (interactiveSegState.isInteractiveSeg) {
       return
     }
@@ -560,6 +564,9 @@ export default function Editor(props: EditorProps) {
   }
 
   const getCursor = useCallback(() => {
+    if (isProcessing) {
+      return "default"
+    }
     if (isPanning) {
       return "grab"
     }
@@ -567,7 +574,7 @@ export default function Editor(props: EditorProps) {
       return "none"
     }
     return undefined
-  }, [showBrush, isPanning])
+  }, [showBrush, isPanning, isProcessing])
 
   useHotKey(
     "[",
