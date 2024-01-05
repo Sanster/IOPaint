@@ -405,14 +405,11 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           cropperState,
           extenderState,
         } = get()
-        if (isInpainting) {
-          return
-        }
-
-        if (file === null) {
+        if (isInpainting || file === null) {
           return
         }
         if (
+          get().settings.model.support_outpainting &&
           settings.showExtender &&
           extenderState.height === imageHeight &&
           extenderState.width === imageWidth
