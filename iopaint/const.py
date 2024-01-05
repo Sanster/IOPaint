@@ -3,6 +3,10 @@ import os
 from enum import Enum
 from pydantic import BaseModel
 
+INSTRUCT_PIX2PIX_NAME = "timbrooks/instruct-pix2pix"
+KANDINSKY22_NAME = "kandinsky-community/kandinsky-2-2-decoder-inpaint"
+POWERPAINT_NAME = "Sanster/PowerPaint-V1-stable-diffusion-inpainting"
+
 
 DIFFUSERS_SD_CLASS_NAME = "StableDiffusionPipeline"
 DIFFUSERS_SD_INPAINT_CLASS_NAME = "StableDiffusionInpaintPipeline"

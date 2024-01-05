@@ -7,7 +7,7 @@ controlnet-aux==0.0.3
 fastapi==0.108.0
 python-socketio==5.7.2
 typer
-pydantic
+pydantic>=2.5.2
 rich
 loguru
 yacs

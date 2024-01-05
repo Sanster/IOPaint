@@ -3,8 +3,8 @@ import cv2
 import numpy as np
 import torch
 
+from iopaint.const import KANDINSKY22_NAME
 from iopaint.model.base import DiffusionInpaintModel
-from iopaint.model.utils import get_scheduler
 from iopaint.schema import InpaintRequest
 
 
@@ -62,4 +62,4 @@ class Kandinsky(DiffusionInpaintModel):
 
 
 class Kandinsky22(Kandinsky):
-    name = "kandinsky-community/kandinsky-2-2-decoder-inpaint"
+    name = KANDINSKY22_NAME

@@ -13,12 +13,12 @@ from iopaint.const import (
     DIFFUSERS_SDXL_CLASS_NAME,
     DIFFUSERS_SDXL_INPAINT_CLASS_NAME,
 )
-from iopaint.model.utils import handle_from_pretrained_exceptions
 from iopaint.model_info import ModelInfo, ModelType
 
 
 def cli_download_model(model: str):
     from iopaint.model import models
+    from iopaint.model.utils import handle_from_pretrained_exceptions
 
     if model in models and models[model].is_erase_model:
         logger.info(f"Downloading {model}...")

@@ -9,10 +9,11 @@ from iopaint.model.helper.cpu_text_encoder import CPUTextEncoderWrapper
 from iopaint.model.utils import handle_from_pretrained_exceptions
 from iopaint.schema import InpaintRequest
 from .powerpaint_tokenizer import add_task_to_prompt
+from ...const import POWERPAINT_NAME
 
 
 class PowerPaint(DiffusionInpaintModel):
-    name = "Sanster/PowerPaint-V1-stable-diffusion-inpainting"
+    name = POWERPAINT_NAME
     pad_mod = 8
     min_size = 512
     lcm_lora_id = "latent-consistency/lcm-lora-sdv1-5"

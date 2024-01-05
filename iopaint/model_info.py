@@ -6,8 +6,10 @@ from iopaint.const import (
     SDXL_CONTROLNET_CHOICES,
     SD2_CONTROLNET_CHOICES,
     SD_CONTROLNET_CHOICES,
+    INSTRUCT_PIX2PIX_NAME,
+    KANDINSKY22_NAME,
+    POWERPAINT_NAME,
 )
-from iopaint.model import InstructPix2Pix, Kandinsky22, PowerPaint, SD2
 from iopaint.schema import ModelType
 
 
@@ -26,9 +28,9 @@ class ModelInfo(BaseModel):
             ModelType.DIFFUSERS_SD_INPAINT,
             ModelType.DIFFUSERS_SDXL_INPAINT,
         ] or self.name in [
-            InstructPix2Pix.name,
-            Kandinsky22.name,
-            PowerPaint.name,
+            INSTRUCT_PIX2PIX_NAME,
+            KANDINSKY22_NAME,
+            POWERPAINT_NAME,
         ]
 
     @computed_field
@@ -40,11 +42,11 @@ class ModelInfo(BaseModel):
         ]:
             return SDXL_CONTROLNET_CHOICES
         if self.model_type in [ModelType.DIFFUSERS_SD, ModelType.DIFFUSERS_SD_INPAINT]:
-            if self.name in [SD2.name]:
+            if "sd2" in self.name.lower():
                 return SD2_CONTROLNET_CHOICES
             else:
                 return SD_CONTROLNET_CHOICES
-        if self.name == PowerPaint.name:
+        if self.name == POWERPAINT_NAME:
             return SD_CONTROLNET_CHOICES
         return []
 
@@ -66,7 +68,7 @@ class ModelInfo(BaseModel):
             ModelType.DIFFUSERS_SDXL,
             ModelType.DIFFUSERS_SD_INPAINT,
             ModelType.DIFFUSERS_SDXL_INPAINT,
-        ] or self.name in [Kandinsky22.name, PowerPaint.name]
+        ] or self.name in [KANDINSKY22_NAME, POWERPAINT_NAME]
 
     @computed_field
     @property
@@ -86,7 +88,7 @@ class ModelInfo(BaseModel):
             ModelType.DIFFUSERS_SDXL,
             ModelType.DIFFUSERS_SD_INPAINT,
             ModelType.DIFFUSERS_SDXL_INPAINT,
-        ] or self.name in [PowerPaint.name]
+        ] or self.name in [POWERPAINT_NAME]
 
     @computed_field
     @property
@@ -96,4 +98,4 @@ class ModelInfo(BaseModel):
             ModelType.DIFFUSERS_SDXL,
             ModelType.DIFFUSERS_SD_INPAINT,
             ModelType.DIFFUSERS_SDXL_INPAINT,
-        ] or self.name in [InstructPix2Pix.name]
+        ] or self.name in [INSTRUCT_PIX2PIX_NAME]

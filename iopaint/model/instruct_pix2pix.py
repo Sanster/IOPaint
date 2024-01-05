@@ -3,12 +3,13 @@ import cv2
 import torch
 from loguru import logger
 
+from iopaint.const import INSTRUCT_PIX2PIX_NAME
 from iopaint.model.base import DiffusionInpaintModel
 from iopaint.schema import InpaintRequest
 
 
 class InstructPix2Pix(DiffusionInpaintModel):
-    name = "timbrooks/instruct-pix2pix"
+    name = INSTRUCT_PIX2PIX_NAME
     pad_mod = 8
     min_size = 512
 
