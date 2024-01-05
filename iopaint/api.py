@@ -299,9 +299,7 @@ class Api:
 
     def api_adjust_mask(self, req: AdjustMaskRequest):
         mask, _, _ = decode_base64_to_image(req.mask, gray=True)
-        cv2.imwrite("tmp_adjust_mask_input.png", mask)
         mask = adjust_mask(mask, req.kernel_size, req.operate)
-        cv2.imwrite("tmp_adjust_mask.png", mask)
         return Response(content=numpy_to_bytes(mask, "png"), media_type="image/png")
 
     def launch(self):

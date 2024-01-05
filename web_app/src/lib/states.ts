@@ -488,6 +488,12 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           [maskLineGroup],
           maskImages
         )
+        if (useLastLineGroup) {
+          const temporaryMask = await canvasToImage(maskCanvas)
+          set((state) => {
+            state.editorState.temporaryMasks = castDraft([temporaryMask])
+          })
+        }
 
         try {
           const res = await inpaint(
@@ -525,6 +531,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         get().resetRedoState()
         set((state) => {
           state.isInpainting = false
+          state.editorState.temporaryMasks = []
         })
       },
 
