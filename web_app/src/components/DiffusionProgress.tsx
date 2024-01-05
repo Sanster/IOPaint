@@ -38,7 +38,7 @@ const DiffusionProgress = () => {
       }
     })
 
-    socket.on("diffusion_finish", (data) => {
+    socket.on("diffusion_finish", () => {
       setStep(0)
     })
 
