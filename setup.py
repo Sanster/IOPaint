@@ -1,7 +1,7 @@
 import setuptools
 from pathlib import Path
 
-web_files = Path("lama_cleaner/app/build/").glob("**/*")
+web_files = Path("iopaint/app/build/").glob("**/*")
 web_files = [str(it).replace("lama_cleaner/", "") for it in web_files]
 
 with open("README.md", "r", encoding="utf-8") as fh:
@@ -20,19 +20,19 @@ def load_requirements():
 
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#including-data-files
 setuptools.setup(
-    name="lama-cleaner",
-    version="1.2.4",
+    name="IOPaint",
+    version="1.0.0",
     author="PanicByte",
     author_email="cwq1913@gmail.com",
-    description="Image inpainting tool powered by SOTA AI Model",
+    description="Image inpainting, outpainting tool powered by SOTA AI Model",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Sanster/lama-cleaner",
     packages=setuptools.find_packages("./"),
-    package_data={"lama_cleaner": web_files},
+    package_data={"iopaint": web_files},
     install_requires=load_requirements(),
     python_requires=">=3.7",
-    entry_points={"console_scripts": ["lama-cleaner=lama_cleaner:entry_point"]},
+    entry_points={"console_scripts": ["iopaint=iopaint:entry_point"]},
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
