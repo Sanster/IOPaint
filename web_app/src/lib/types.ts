@@ -125,3 +125,5 @@ export enum PowerPaintTask {
   object_remove = "object-remove",
   outpainting = "outpainting",
 }
+
+export type AdjustMaskOperate = "expand" | "shrink"

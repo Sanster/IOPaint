@@ -358,16 +358,19 @@ def adjust_mask(mask: np.ndarray, kernel_size: int, operate):
     mask[mask >= 127] = 255
     mask[mask < 127] = 0
     # fronted brush color "ffcc00bb"
+    kernel = cv2.getStructuringElement(
+        cv2.MORPH_ELLIPSE, (2 * kernel_size + 1, 2 * kernel_size + 1)
+    )
     if operate == "expand":
         mask = cv2.dilate(
             mask,
-            np.ones((kernel_size, kernel_size), np.uint8),
+            kernel,
             iterations=1,
         )
     else:
         mask = cv2.erode(
             mask,
-            np.ones((kernel_size, kernel_size), np.uint8),
+            kernel,
             iterations=1,
         )
     res_mask = np.zeros((mask.shape[0], mask.shape[1], 4), dtype=np.uint8)

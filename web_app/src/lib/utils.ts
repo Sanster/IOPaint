@@ -53,6 +53,13 @@ export function loadImage(image: HTMLImageElement, src: string) {
   })
 }
 
+export async function blobToImage(blob: Blob) {
+  const dataURL = URL.createObjectURL(blob)
+  const newImage = new Image()
+  await loadImage(newImage, dataURL)
+  return newImage
+}
+
 export function canvasToImage(
   canvas: HTMLCanvasElement
 ): Promise<HTMLImageElement> {

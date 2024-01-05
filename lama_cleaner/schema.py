@@ -110,8 +110,8 @@ class ApiConfig(BaseModel):
 
 
 class InpaintRequest(BaseModel):
-    image: Optional[str] = Field(..., description="base64 encoded image")
-    mask: Optional[str] = Field(..., description="base64 encoded mask")
+    image: Optional[str] = Field(None, description="base64 encoded image")
+    mask: Optional[str] = Field(None, description="base64 encoded mask")
 
     ldm_steps: int = Field(20, description="Steps for ldm model.")
     ldm_sampler: str = Field(LDMSampler.plms, discription="Sampler for ldm model.")
@@ -289,3 +289,12 @@ class ServerConfigResponse(BaseModel):
 
 class SwitchModelRequest(BaseModel):
     name: str
+
+
+AdjustMaskOperate = Literal["expand", "shrink"]
+
+
+class AdjustMaskRequest(BaseModel):
+    mask: str = Field(..., description="base64 encoded mask. 255 means area to do inpaint")
+    operate: AdjustMaskOperate = Field(..., description="expand or shrink")
+    kernel_size: int = Field(5, description="Kernel size for expanding mask")

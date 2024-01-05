@@ -201,3 +201,28 @@ export async function getSamplers(): Promise<string[]> {
   const res = await api.post("/samplers")
   return res.data
 }
+
+export async function postAdjustMask(
+  mask: File | Blob,
+  operate: "expand" | "shrink",
+  kernel_size: number
+) {
+  const maskBase64 = await convertToBase64(mask)
+  const res = await fetch(`${API_ENDPOINT}/adjust_mask`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      mask: maskBase64,
+      operate: operate,
+      kernel_size: kernel_size,
+    }),
+  })
+  if (res.ok) {
+    const blob = await res.blob()
+    return blob
+  }
+  const errMsg = await res.json()
+  throw new Error(errMsg)
+}

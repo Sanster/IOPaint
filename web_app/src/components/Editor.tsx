@@ -95,6 +95,7 @@ export default function Editor(props: EditorProps) {
   const brushSize = useStore((state) => state.getBrushSize())
   const renders = useStore((state) => state.editorState.renders)
   const extraMasks = useStore((state) => state.editorState.extraMasks)
+  const temporaryMasks = useStore((state) => state.editorState.temporaryMasks)
   const lineGroups = useStore((state) => state.editorState.lineGroups)
   const curLineGroup = useStore((state) => state.editorState.curLineGroup)
 
@@ -166,6 +167,9 @@ export default function Editor(props: EditorProps) {
     context.canvas.width = imageWidth
     context.canvas.height = imageHeight
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
+    temporaryMasks.forEach((maskImage) => {
+      context.drawImage(maskImage, 0, 0, imageWidth, imageHeight)
+    })
     extraMasks.forEach((maskImage) => {
       context.drawImage(maskImage, 0, 0, imageWidth, imageHeight)
     })
@@ -182,20 +186,9 @@ export default function Editor(props: EditorProps) {
         imageHeight
       )
     }
-    if (
-      !interactiveSegState.isInteractiveSeg &&
-      interactiveSegState.interactiveSegMask
-    ) {
-      context.drawImage(
-        interactiveSegState.interactiveSegMask,
-        0,
-        0,
-        imageWidth,
-        imageHeight
-      )
-    }
     drawLines(context, curLineGroup)
   }, [
+    temporaryMasks,
     extraMasks,
     isOriginalLoaded,
     interactiveSegState,

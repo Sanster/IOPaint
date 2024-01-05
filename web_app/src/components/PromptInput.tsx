@@ -21,7 +21,6 @@ const PromptInput = () => {
     state.hidePrevMask,
   ])
   const ref = useRef(null)
-
   useClickAway<MouseEvent>(ref, () => {
     if (ref?.current) {
       const input = ref.current as HTMLInputElement

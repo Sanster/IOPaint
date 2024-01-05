@@ -31,8 +31,6 @@ def assert_equal(
     mask_p=current_dir / "mask.png",
 ):
     img, mask = get_data(fx=fx, fy=fy, img_p=img_p, mask_p=mask_p)
-    config.image = encode_pil_to_base64(Image.fromarray(img), 95, {})[0]
-    config.mask = encode_pil_to_base64(Image.fromarray(mask), 95, {})[0]
     print(f"Input image shape: {img.shape}")
     res = model(img, mask, config)
     ok = cv2.imwrite(

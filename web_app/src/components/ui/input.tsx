@@ -17,6 +17,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const handleOnBlur = () => {
       updateAppState({ disableShortCuts: false })
     }
+
     return (
       <input
         type={type}

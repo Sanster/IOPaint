@@ -52,9 +52,9 @@ const DiffusionProgress = () => {
 
   return (
     <div
-      className="fixed w-[220px] left-1/2 -translate-x-1/2 top-[68px] h-[32px] flex justify-center items-center gap-[18px] border-[1px] border-[solid] rounded-[14px] pl-[8px] pr-[8px]"
+      className="z-10 fixed bg-background w-[220px] left-1/2 -translate-x-1/2 top-[68px] h-[32px] flex justify-center items-center gap-[18px] border-[1px] border-[solid] rounded-[14px] pl-[8px] pr-[8px]"
       style={{
-        visibility: isInpainting && isConnected && isSD ? "visible" : "hidden",
+        visibility: isConnected && isInpainting && isSD ? "visible" : "hidden",
       }}
     >
       <Progress value={progress} />

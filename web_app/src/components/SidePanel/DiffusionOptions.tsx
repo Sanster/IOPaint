@@ -1,4 +1,4 @@
-import { FormEvent } from "react"
+import { FormEvent, useRef } from "react"
 import { useStore } from "@/lib/states"
 import { Switch } from "../ui/switch"
 import { NumberInput } from "../ui/input"
@@ -18,7 +18,8 @@ import { Slider } from "../ui/slider"
 import { useImage } from "@/hooks/useImage"
 import { INSTRUCT_PIX2PIX, PAINT_BY_EXAMPLE, POWERPAINT } from "@/lib/const"
 import { RowContainer, LabelTitle } from "./LabelTitle"
-import { Upload } from "lucide-react"
+import { Minus, Plus, Upload } from "lucide-react"
+import { useClickAway } from "react-use"
 
 const ExtenderButton = ({
   text,
@@ -31,7 +32,7 @@ const ExtenderButton = ({
   return (
     <Button
       variant="outline"
-      className="p-1 h-7"
+      className="p-1 h-8"
       disabled={!showExtender}
       onClick={onClick}
     >
@@ -51,6 +52,8 @@ const DiffusionOptions = () => {
     updateAppState,
     updateExtenderByBuiltIn,
     updateExtenderDirection,
+    adjustMask,
+    clearMask,
   ] = useStore((state) => [
     state.serverConfig.samplers,
     state.settings,
@@ -61,8 +64,17 @@ const DiffusionOptions = () => {
     state.updateAppState,
     state.updateExtenderByBuiltIn,
     state.updateExtenderDirection,
+    state.adjustMask,
+    state.clearMask,
   ])
   const [exampleImage, isExampleImageLoaded] = useImage(paintByExampleFile)
+  const negativePromptRef = useRef(null)
+  useClickAway<MouseEvent>(negativePromptRef, () => {
+    if (negativePromptRef?.current) {
+      const input = negativePromptRef.current as HTMLInputElement
+      input.blur()
+    }
+  })
 
   const onKeyUp = (e: React.KeyboardEvent) => {
     // negativePrompt 回车触发 inpainting
@@ -320,6 +332,7 @@ const DiffusionOptions = () => {
         />
         <div className="pl-2 pr-4">
           <Textarea
+            ref={negativePromptRef}
             rows={4}
             onKeyUp={onKeyUp}
             className="max-h-[8rem] overflow-y-auto mb-2"
@@ -550,7 +563,7 @@ const DiffusionOptions = () => {
       <RowContainer>
         <LabelTitle
           text="Task"
-          toolTip="When using extender, image-outpainting task will be auto used. For object-removal and image-outpainting, it is recommended to set the guidance_scale at 10 or above."
+          toolTip="PowerPaint task. When using extender, image-outpainting task will be auto used. For object-removal and image-outpainting, it is recommended to set the guidance_scale at 10 or above."
         />
         <Select
           defaultValue={settings.powerpaintTask}
@@ -760,10 +773,85 @@ const DiffusionOptions = () => {
     )
   }
 
+  const renderMaskAdjuster = () => {
+    return (
+      <>
+        <div className="flex flex-col gap-1">
+          <LabelTitle
+            htmlFor="adjustMaskKernelSize"
+            text="Adjust Mask"
+            toolTip="Expand or shrink mask. Using the slider to adjust the kernel size for dilation or erosion."
+          />
+          <RowContainer>
+            <Slider
+              className="w-[180px]"
+              defaultValue={[12]}
+              min={1}
+              max={100}
+              step={1}
+              value={[Math.floor(settings.adjustMaskKernelSize)]}
+              onValueChange={(vals) =>
+                updateSettings({ adjustMaskKernelSize: vals[0] })
+              }
+            />
+            <NumberInput
+              id="adjustMaskKernelSize"
+              className="w-[60px] rounded-full"
+              numberValue={settings.adjustMaskKernelSize}
+              allowFloat={false}
+              onNumberValueChange={(val) => {
+                updateSettings({ adjustMaskKernelSize: val })
+              }}
+            />
+          </RowContainer>
+
+          <RowContainer>
+            <div className="flex gap-1 justify-start">
+              <Button
+                variant="outline"
+                className="p-1 h-8"
+                onClick={() => adjustMask("expand")}
+                disabled={isProcessing}
+              >
+                <div className="flex items-center gap-1 select-none">
+                  <Plus size={16} />
+                  expand
+                </div>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="p-1 h-8"
+                onClick={() => adjustMask("shrink")}
+                disabled={isProcessing}
+              >
+                <div className="flex items-center gap-1 select-none">
+                  <Minus size={16} />
+                  Shrink
+                </div>
+              </Button>
+            </div>
+
+            <Button
+              variant="outline"
+              className="p-1 h-8 justify-self-end"
+              onClick={clearMask}
+              disabled={isProcessing}
+            >
+              <div className="flex items-center gap-1 select-none">Clear</div>
+            </Button>
+          </RowContainer>
+        </div>
+        <Separator />
+      </>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-4 mt-4">
       {renderCropper()}
       {renderExtender()}
+      {renderMaskAdjuster()}
       {renderPowerPaintTaskType()}
       {renderSteps()}
       {renderGuidanceScale()}
