@@ -1,8 +1,8 @@
 import setuptools
 from pathlib import Path
 
-web_files = Path("iopaint/app/build/").glob("**/*")
-web_files = [str(it).replace("lama_cleaner/", "") for it in web_files]
+web_files = Path("iopaint/web_app").glob("**/*")
+web_files = [str(it).replace("iopaint/", "") for it in web_files]
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -21,7 +21,7 @@ def load_requirements():
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#including-data-files
 setuptools.setup(
     name="IOPaint",
-    version="1.0.0",
+    version="1.0.0-beta.1",
     author="PanicByte",
     author_email="cwq1913@gmail.com",
     description="Image inpainting, outpainting tool powered by SOTA AI Model",

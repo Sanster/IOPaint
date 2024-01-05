@@ -7,7 +7,6 @@ from loguru import logger
 from typer import Option
 
 from iopaint.const import *
-from iopaint.download import cli_download_model, scan_models
 from iopaint.runtime import setup_model_dir, dump_environment_info, check_device
 
 typer_app = typer.Typer(pretty_exceptions_show_locals=False, add_completion=False)
@@ -25,16 +24,29 @@ def download(
     model: str = Option(
         ..., help="Model id on HuggingFace e.g: runwayml/stable-diffusion-inpainting"
     ),
-    model_dir: Path = Option(DEFAULT_MODEL_DIR, help=MODEL_DIR_HELP, file_okay=False),
+    model_dir: Path = Option(
+        DEFAULT_MODEL_DIR,
+        help=MODEL_DIR_HELP,
+        file_okay=False,
+        callback=setup_model_dir,
+    ),
 ):
-    cli_download_model(model, model_dir)
+    from iopaint.download import cli_download_model
+
+    cli_download_model(model)
 
 
 @typer_app.command(name="list", help="List downloaded models")
 def list_model(
-    model_dir: Path = Option(DEFAULT_MODEL_DIR, help=MODEL_DIR_HELP, file_okay=False),
+    model_dir: Path = Option(
+        DEFAULT_MODEL_DIR,
+        help=MODEL_DIR_HELP,
+        file_okay=False,
+        callback=setup_model_dir,
+    ),
 ):
-    setup_model_dir(model_dir)
+    from iopaint.download import scan_models
+
     scanned_models = scan_models()
     for it in scanned_models:
         print(it.name)
@@ -59,13 +71,19 @@ def run(
     concat: bool = Option(
         False, help="Concat original image, mask and output images into one image"
     ),
-    model_dir: Path = Option(DEFAULT_MODEL_DIR, help=MODEL_DIR_HELP, file_okay=False),
+    model_dir: Path = Option(
+        DEFAULT_MODEL_DIR,
+        help=MODEL_DIR_HELP,
+        file_okay=False,
+        callback=setup_model_dir,
+    ),
 ):
-    setup_model_dir(model_dir)
+    from iopaint.download import cli_download_model, scan_models
+
     scanned_models = scan_models()
     if model not in [it.name for it in scanned_models]:
         logger.info(f"{model} not found in {model_dir}, try to downloading")
-        cli_download_model(model, model_dir)
+        cli_download_model(model)
 
     from iopaint.batch_processing import batch_inpaint
 
@@ -82,7 +100,11 @@ def start(
         f"You can use download command to download other SD/SDXL normal/inpainting models on huggingface",
     ),
     model_dir: Path = Option(
-        DEFAULT_MODEL_DIR, help=MODEL_DIR_HELP, dir_okay=True, file_okay=False
+        DEFAULT_MODEL_DIR,
+        help=MODEL_DIR_HELP,
+        dir_okay=True,
+        file_okay=False,
+        callback=setup_model_dir,
     ),
     no_half: bool = Option(False, help=NO_HALF_HELP),
     cpu_offload: bool = Option(False, help=CPU_OFFLOAD_HELP),
@@ -125,16 +147,17 @@ def start(
             output_dir.mkdir(parents=True)
 
     model_dir = model_dir.expanduser().absolute()
-    setup_model_dir(model_dir)
 
     if local_files_only:
         os.environ["TRANSFORMERS_OFFLINE"] = "1"
         os.environ["HF_HUB_OFFLINE"] = "1"
 
+    from iopaint.download import cli_download_model, scan_models
+
     scanned_models = scan_models()
     if model not in [it.name for it in scanned_models]:
         logger.info(f"{model} not found in {model_dir}, try to downloading")
-        cli_download_model(model, model_dir)
+        cli_download_model(model)
 
     from iopaint.api import Api
     from iopaint.schema import ApiConfig

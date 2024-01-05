@@ -84,3 +84,4 @@ def setup_model_dir(model_dir: Path):
     if not model_dir.exists():
         logger.info(f"Create model directory: {model_dir}")
         model_dir.mkdir(exist_ok=True, parents=True)
+    return model_dir

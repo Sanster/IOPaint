@@ -48,6 +48,7 @@ def batch_inpaint(
             f"invalid --output: when image is a directory, output should be a directory"
         )
         exit(-1)
+    output.mkdir(parents=True, exist_ok=True)
 
     image_paths = glob_images(image)
     mask_paths = glob_images(mask)

@@ -15,11 +15,9 @@ from iopaint.const import (
 )
 from iopaint.model.utils import handle_from_pretrained_exceptions
 from iopaint.model_info import ModelInfo, ModelType
-from iopaint.runtime import setup_model_dir
 
 
-def cli_download_model(model: str, model_dir: Path):
-    setup_model_dir(model_dir)
+def cli_download_model(model: str):
     from iopaint.model import models
 
     if model in models and models[model].is_erase_model:
