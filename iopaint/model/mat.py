@@ -14,8 +14,9 @@ from iopaint.helper import (
     norm_img,
     download_model,
 )
-from iopaint.model.base import InpaintModel
-from iopaint.model.utils import (
+from iopaint.schema import InpaintRequest
+from .base import InpaintModel
+from .utils import (
     setup_filter,
     Conv2dLayer,
     FullyConnectedLayer,
@@ -28,7 +29,6 @@ from iopaint.model.utils import (
     normalize_2nd_moment,
     set_seed,
 )
-from iopaint.schema import InpaintRequest
 
 
 class ModulatedConv2d(nn.Module):

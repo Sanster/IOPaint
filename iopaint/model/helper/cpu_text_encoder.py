@@ -1,5 +1,5 @@
 import torch
-from iopaint.model.utils import torch_gc
+from ..utils import torch_gc
 
 
 class CPUTextEncoderWrapper(torch.nn.Module):

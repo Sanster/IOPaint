@@ -1,20 +1,19 @@
 import PIL.Image
 import cv2
-import numpy as np
 import torch
-from diffusers import ControlNetModel, DiffusionPipeline
+from diffusers import ControlNetModel
 from loguru import logger
+from iopaint.schema import InpaintRequest, ModelType
 
-from iopaint.model.base import DiffusionInpaintModel
-from iopaint.model.helper.controlnet_preprocess import (
+from .base import DiffusionInpaintModel
+from .helper.controlnet_preprocess import (
     make_canny_control_image,
     make_openpose_control_image,
     make_depth_control_image,
     make_inpaint_control_image,
 )
-from iopaint.model.helper.cpu_text_encoder import CPUTextEncoderWrapper
-from iopaint.model.utils import get_scheduler, handle_from_pretrained_exceptions
-from iopaint.schema import InpaintRequest, ModelType
+from .helper.cpu_text_encoder import CPUTextEncoderWrapper
+from .utils import get_scheduler, handle_from_pretrained_exceptions
 
 
 class ControlNet(DiffusionInpaintModel):

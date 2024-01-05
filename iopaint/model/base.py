@@ -12,9 +12,9 @@ from iopaint.helper import (
     pad_img_to_modulo,
     switch_mps_device,
 )
-from iopaint.model.helper.g_diffuser_bot import expand_image
-from iopaint.model.utils import get_scheduler
 from iopaint.schema import InpaintRequest, HDStrategy, SDSampler
+from .helper.g_diffuser_bot import expand_image
+from .utils import get_scheduler
 
 
 class InpaintModel:

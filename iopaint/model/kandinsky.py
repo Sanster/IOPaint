@@ -4,7 +4,7 @@ import numpy as np
 import torch
 
 from iopaint.const import KANDINSKY22_NAME
-from iopaint.model.base import DiffusionInpaintModel
+from .base import DiffusionInpaintModel
 from iopaint.schema import InpaintRequest
 
 

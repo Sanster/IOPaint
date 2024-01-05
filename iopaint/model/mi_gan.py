@@ -11,7 +11,7 @@ from iopaint.helper import (
     resize_max_size,
     norm_img,
 )
-from iopaint.model.base import InpaintModel
+from .base import InpaintModel
 from iopaint.schema import InpaintRequest
 
 MIGAN_MODEL_URL = os.environ.get(

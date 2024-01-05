@@ -6,9 +6,10 @@ import torch
 from diffusers import AutoencoderKL
 from loguru import logger
 
-from iopaint.model.base import DiffusionInpaintModel
-from iopaint.model.utils import handle_from_pretrained_exceptions
 from iopaint.schema import InpaintRequest, ModelType
+
+from .base import DiffusionInpaintModel
+from .utils import handle_from_pretrained_exceptions
 
 
 class SDXL(DiffusionInpaintModel):

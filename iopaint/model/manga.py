@@ -8,7 +8,7 @@ import time
 from loguru import logger
 
 from iopaint.helper import get_cache_path_by_url, load_jit_model, download_model
-from iopaint.model.base import InpaintModel
+from .base import InpaintModel
 from iopaint.schema import InpaintRequest
 
 

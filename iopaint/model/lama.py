@@ -10,8 +10,8 @@ from iopaint.helper import (
     load_jit_model,
     download_model,
 )
-from iopaint.model.base import InpaintModel
 from iopaint.schema import InpaintRequest
+from .base import InpaintModel
 
 LAMA_MODEL_URL = os.environ.get(
     "LAMA_MODEL_URL",

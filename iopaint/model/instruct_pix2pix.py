@@ -4,7 +4,7 @@ import torch
 from loguru import logger
 
 from iopaint.const import INSTRUCT_PIX2PIX_NAME
-from iopaint.model.base import DiffusionInpaintModel
+from .base import DiffusionInpaintModel
 from iopaint.schema import InpaintRequest
 
 

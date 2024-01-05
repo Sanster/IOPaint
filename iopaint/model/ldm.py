@@ -4,9 +4,9 @@ import numpy as np
 import torch
 from loguru import logger
 
-from iopaint.model.base import InpaintModel
-from iopaint.model.ddim_sampler import DDIMSampler
-from iopaint.model.plms_sampler import PLMSSampler
+from .base import InpaintModel
+from .ddim_sampler import DDIMSampler
+from .plms_sampler import PLMSSampler
 from iopaint.schema import InpaintRequest, LDMSampler
 
 torch.manual_seed(42)
@@ -17,7 +17,7 @@ from iopaint.helper import (
     get_cache_path_by_url,
     load_jit_model,
 )
-from iopaint.model.utils import (
+from .utils import (
     make_beta_schedule,
     timestep_embedding,
 )

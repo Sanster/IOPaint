@@ -92,8 +92,8 @@ class ApiConfig(BaseModel):
     device: Device
     gui: bool
     disable_model_switch: bool
-    input: Path
-    output_dir: Path
+    input: Optional[Path]
+    output_dir: Optional[Path]
     quality: int
     enable_interactive_seg: bool
     interactive_seg_model: InteractiveSegModel

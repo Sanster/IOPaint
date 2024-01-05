@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from tqdm import tqdm
 
-from iopaint.model.utils import make_ddim_timesteps, make_ddim_sampling_parameters, noise_like
+from .utils import make_ddim_timesteps, make_ddim_sampling_parameters, noise_like
 
 from loguru import logger
 

@@ -4,9 +4,9 @@ import cv2
 import torch
 from loguru import logger
 
-from iopaint.model.base import DiffusionInpaintModel
-from iopaint.model.helper.cpu_text_encoder import CPUTextEncoderWrapper
-from iopaint.model.utils import handle_from_pretrained_exceptions
+from ..base import DiffusionInpaintModel
+from ..helper.cpu_text_encoder import CPUTextEncoderWrapper
+from ..utils import handle_from_pretrained_exceptions
 from iopaint.schema import InpaintRequest
 from .powerpaint_tokenizer import add_task_to_prompt
 from ...const import POWERPAINT_NAME

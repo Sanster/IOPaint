@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import typer
 from fastapi import FastAPI
@@ -114,8 +114,8 @@ def start(
     device: Device = Option(Device.cpu),
     gui: bool = Option(False, help=GUI_HELP),
     disable_model_switch: bool = Option(False),
-    input: Path = Option(None, help=INPUT_HELP),
-    output_dir: Path = Option(
+    input: Optional[Path] = Option(None, help=INPUT_HELP),
+    output_dir: Optional[Path] = Option(
         None, help=OUTPUT_DIR_HELP, dir_okay=True, file_okay=False
     ),
     quality: int = Option(95, help=QUALITY_HELP),

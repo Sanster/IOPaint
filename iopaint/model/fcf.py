@@ -16,11 +16,11 @@ from iopaint.helper import (
     resize_max_size,
     download_model,
 )
-from iopaint.model.base import InpaintModel
+from .base import InpaintModel
 from torch import conv2d, nn
 import torch.nn.functional as F
 
-from iopaint.model.utils import (
+from .utils import (
     setup_filter,
     _parse_scaling,
     _parse_padding,

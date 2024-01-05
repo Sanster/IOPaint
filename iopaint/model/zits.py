@@ -9,7 +9,7 @@ from iopaint.helper import get_cache_path_by_url, load_jit_model, download_model
 from iopaint.schema import InpaintRequest
 import numpy as np
 
-from iopaint.model.base import InpaintModel
+from .base import InpaintModel
 
 ZITS_INPAINT_MODEL_URL = os.environ.get(
     "ZITS_INPAINT_MODEL_URL",

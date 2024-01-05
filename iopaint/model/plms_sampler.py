@@ -1,7 +1,7 @@
 # From: https://github.com/CompVis/latent-diffusion/blob/main/ldm/models/diffusion/plms.py
 import torch
 import numpy as np
-from iopaint.model.utils import make_ddim_timesteps, make_ddim_sampling_parameters, noise_like
+from .utils import make_ddim_timesteps, make_ddim_sampling_parameters, noise_like
 from tqdm import tqdm
 
 

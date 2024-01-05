@@ -5,7 +5,7 @@ import torch
 from loguru import logger
 
 from iopaint.helper import decode_base64_to_image
-from iopaint.model.base import DiffusionInpaintModel
+from .base import DiffusionInpaintModel
 from iopaint.schema import InpaintRequest
 
 
