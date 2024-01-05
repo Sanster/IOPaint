@@ -401,11 +401,11 @@ export default function Editor(props: EditorProps) {
     }
     if (isMidClick(ev)) {
       setIsPanning(false)
+      return
     }
     if (interactiveSegState.isInteractiveSeg) {
       return
     }
-
     if (isPanning) {
       return
     }
@@ -938,9 +938,7 @@ export default function Editor(props: EditorProps) {
             <IconButton
               tooltip="Run Inpainting"
               disabled={
-                isProcessing ||
-                (!hadDrawSomething() &&
-                  interactiveSegState.interactiveSegMask === null)
+                isProcessing || (!hadDrawSomething() && extraMasks.length === 0)
               }
               onClick={() => {
                 runInpainting()
