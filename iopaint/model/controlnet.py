@@ -13,7 +13,7 @@ from .helper.controlnet_preprocess import (
     make_inpaint_control_image,
 )
 from .helper.cpu_text_encoder import CPUTextEncoderWrapper
-from .utils import get_scheduler, handle_from_pretrained_exceptions, get_torch_dtype
+from .utils import get_scheduler, handle_from_pretrained_exceptions, get_torch_dtype, enable_low_mem
 
 
 class ControlNet(DiffusionInpaintModel):
@@ -94,8 +94,7 @@ class ControlNet(DiffusionInpaintModel):
                 **model_kwargs,
             )
 
-        if torch.backends.mps.is_available():
-            self.model.enable_attention_slicing()
+        enable_low_mem(self.model, kwargs.get("low_mem", False))
 
         if kwargs.get("cpu_offload", False) and use_gpu:
             logger.info("Enable sequential cpu offload")

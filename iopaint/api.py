@@ -356,6 +356,7 @@ class Api:
             name=self.config.model,
             device=torch.device(self.config.device),
             no_half=self.config.no_half,
+            low_mem=self.config.low_mem,
             disable_nsfw=self.config.disable_nsfw_checker,
             sd_cpu_textencoder=self.config.cpu_textencoder,
             cpu_offload=self.config.cpu_offload,

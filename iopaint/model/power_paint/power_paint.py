@@ -6,7 +6,7 @@ from loguru import logger
 
 from ..base import DiffusionInpaintModel
 from ..helper.cpu_text_encoder import CPUTextEncoderWrapper
-from ..utils import handle_from_pretrained_exceptions, get_torch_dtype
+from ..utils import handle_from_pretrained_exceptions, get_torch_dtype, enable_low_mem
 from iopaint.schema import InpaintRequest
 from .powerpaint_tokenizer import add_task_to_prompt
 from ...const import POWERPAINT_NAME
@@ -42,6 +42,8 @@ class PowerPaint(DiffusionInpaintModel):
             **model_kwargs,
         )
         self.model.tokenizer = PowerPaintTokenizer(self.model.tokenizer)
+
+        enable_low_mem(self.model, kwargs.get("low_mem", False))
 
         if kwargs.get("cpu_offload", False) and use_gpu:
             logger.info("Enable sequential cpu offload")

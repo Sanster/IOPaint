@@ -114,6 +114,7 @@ def test_powerpaint_outpainting(name, device, rect):
         device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
+        low_mem=True
     )
     cfg = get_config(
         prompt="a dog sitting on a bench in the park",

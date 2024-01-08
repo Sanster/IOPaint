@@ -86,6 +86,7 @@ class ApiConfig(BaseModel):
     port: int
     model: str
     no_half: bool
+    low_mem: bool
     cpu_offload: bool
     disable_nsfw_checker: bool
     cpu_textencoder: bool
