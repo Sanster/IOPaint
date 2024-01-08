@@ -39,7 +39,7 @@ class ModelManager:
         logger.info(f"Loading model: {name}")
         if name not in self.available_models:
             raise NotImplementedError(
-                f"Unsupported model: {name}. Available models: {self.available_models.keys()}"
+                f"Unsupported model: {name}. Available models: {list(self.available_models.keys())}"
             )
 
         model_info = self.available_models[name]

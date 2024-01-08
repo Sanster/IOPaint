@@ -984,5 +984,13 @@ def handle_from_pretrained_exceptions(func, **kwargs):
         if "RevisionNotFoundError: 404 Client Error." in previous_traceback:
             logger.info("revision=fp16 not found, try revision=main")
             return func(**{**kwargs, "variant": None, "revision": "main"})
+        elif "Max retries exceeded" in previous_traceback:
+            logger.exception(
+                "Fetching model from HuggingFace failed. "
+                "If this is your first time downloading the model, you may need to set up proxy in terminal."
+                "If the model has already been downloaded, you can add --local-files-only when starting."
+            )
+            exit(-1)
+        raise e
     except Exception as e:
         raise e
