@@ -32,6 +32,9 @@ class PaintByExample(DiffusionInpaintModel):
             self.name, torch_dtype=torch_dtype, **model_kwargs
         )
 
+        if torch.backends.mps.is_available():
+            self.model.enable_attention_slicing()
+
         # TODO: gpu_id
         if kwargs.get("cpu_offload", False) and use_gpu:
             self.model.image_encoder = self.model.image_encoder.to(device)

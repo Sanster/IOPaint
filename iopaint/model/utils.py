@@ -24,7 +24,6 @@ from diffusers import (
     KDPM2AncestralDiscreteScheduler,
     HeunDiscreteScheduler,
 )
-from diffusers.configuration_utils import FrozenDict
 from loguru import logger
 
 from iopaint.schema import SDSampler

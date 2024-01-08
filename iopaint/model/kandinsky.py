@@ -26,6 +26,8 @@ class Kandinsky(DiffusionInpaintModel):
         self.model = AutoPipelineForInpainting.from_pretrained(
             self.name, **model_kwargs
         ).to(device)
+        if torch.backends.mps.is_available():
+            self.model.enable_attention_slicing()
 
         self.callback = kwargs.pop("callback", None)
 

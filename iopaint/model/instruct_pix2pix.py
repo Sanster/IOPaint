@@ -34,6 +34,8 @@ class InstructPix2Pix(DiffusionInpaintModel):
         self.model = StableDiffusionInstructPix2PixPipeline.from_pretrained(
             self.name, variant="fp16", torch_dtype=torch_dtype, **model_kwargs
         )
+        if torch.backends.mps.is_available():
+            self.model.enable_attention_slicing()
 
         if kwargs.get("cpu_offload", False) and use_gpu:
             logger.info("Enable sequential cpu offload")

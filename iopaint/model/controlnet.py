@@ -96,6 +96,9 @@ class ControlNet(DiffusionInpaintModel):
                 **model_kwargs,
             )
 
+        if torch.backends.mps.is_available():
+            self.model.enable_attention_slicing()
+
         if kwargs.get("cpu_offload", False) and use_gpu:
             logger.info("Enable sequential cpu offload")
             self.model.enable_sequential_cpu_offload(gpu_id=0)

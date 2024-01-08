@@ -29,7 +29,6 @@ class SD(DiffusionInpaintModel):
                     requires_safety_checker=False,
                 )
             )
-
         use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
         torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
 
@@ -50,6 +49,11 @@ class SD(DiffusionInpaintModel):
                 dtype=torch_dtype,
                 **model_kwargs,
             )
+
+        if torch.backends.mps.is_available():
+            # MPS: Recommended RAM < 64 GB https://huggingface.co/docs/diffusers/optimization/mps
+            # CUDA: Don't enable attention slicing if you're already using `scaled_dot_product_attention` (SDPA) from PyTorch 2.0 or xFormers. https://huggingface.co/docs/diffusers/v0.25.0/en/api/pipelines/stable_diffusion/image_variation#diffusers.StableDiffusionImageVariationPipeline.enable_attention_slicing
+            self.model.enable_attention_slicing()
 
         if kwargs.get("cpu_offload", False) and use_gpu:
             logger.info("Enable sequential cpu offload")
