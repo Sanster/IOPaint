@@ -21,7 +21,7 @@ def load_requirements():
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#including-data-files
 setuptools.setup(
     name="IOPaint",
-    version="1.0.0-beta.4",
+    version="1.0.0-beta.5",
     author="PanicByte",
     author_email="cwq1913@gmail.com",
     description="Image inpainting, outpainting tool powered by SOTA AI Model",
