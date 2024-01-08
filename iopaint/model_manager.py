@@ -166,8 +166,11 @@ class ModelManager:
 
     def enable_disable_lcm_lora(self, config: InpaintRequest):
         if self.available_models[self.name].support_lcm_lora:
+            # TODO: change this if load other lora is supported
+            lcm_lora_loaded = bool(self.model.model.get_list_adapters())
             if config.sd_lcm_lora:
-                if not self.model.model.get_list_adapters():
+                if not lcm_lora_loaded:
                     self.model.model.load_lora_weights(self.model.lcm_lora_id)
             else:
-                self.model.model.disable_lora()
+                if lcm_lora_loaded:
+                    self.model.model.disable_lora()
