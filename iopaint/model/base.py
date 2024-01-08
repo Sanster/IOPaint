@@ -211,6 +211,9 @@ class InpaintModel:
 
     def _match_histograms(self, source, reference, mask):
         transformed_channels = []
+        if len(mask.shape) == 3:
+            mask = mask[:, :, -1]
+
         for channel in range(source.shape[-1]):
             source_channel = source[:, :, channel]
             reference_channel = reference[:, :, channel]
