@@ -5,7 +5,7 @@ from loguru import logger
 
 from .base import DiffusionInpaintModel
 from .helper.cpu_text_encoder import CPUTextEncoderWrapper
-from .utils import handle_from_pretrained_exceptions
+from .utils import handle_from_pretrained_exceptions, get_torch_dtype
 from iopaint.schema import InpaintRequest, ModelType
 
 
@@ -17,7 +17,7 @@ class SD(DiffusionInpaintModel):
     def init_model(self, device: torch.device, **kwargs):
         from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
 
-        fp16 = not kwargs.get("no_half", False)
+        use_gpu, torch_dtype = get_torch_dtype(device, kwargs.get("no_half", False))
 
         model_kwargs = {}
         if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
@@ -29,8 +29,6 @@ class SD(DiffusionInpaintModel):
                     requires_safety_checker=False,
                 )
             )
-        use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
-        torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
 
         if self.model_info.is_single_file_diffusers:
             if self.model_info.model_type == ModelType.DIFFUSERS_SD:

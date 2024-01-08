@@ -6,6 +6,7 @@ import torch
 from iopaint.const import KANDINSKY22_NAME
 from .base import DiffusionInpaintModel
 from iopaint.schema import InpaintRequest
+from .utils import get_torch_dtype
 
 
 class Kandinsky(DiffusionInpaintModel):
@@ -15,9 +16,7 @@ class Kandinsky(DiffusionInpaintModel):
     def init_model(self, device: torch.device, **kwargs):
         from diffusers import AutoPipelineForInpainting
 
-        fp16 = not kwargs.get("no_half", False)
-        use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
-        torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
+        use_gpu, torch_dtype = get_torch_dtype(device, kwargs.get("no_half", False))
 
         model_kwargs = {
             "torch_dtype": torch_dtype,

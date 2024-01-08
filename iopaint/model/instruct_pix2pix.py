@@ -6,6 +6,7 @@ from loguru import logger
 from iopaint.const import INSTRUCT_PIX2PIX_NAME
 from .base import DiffusionInpaintModel
 from iopaint.schema import InpaintRequest
+from .utils import get_torch_dtype
 
 
 class InstructPix2Pix(DiffusionInpaintModel):
@@ -16,7 +17,7 @@ class InstructPix2Pix(DiffusionInpaintModel):
     def init_model(self, device: torch.device, **kwargs):
         from diffusers import StableDiffusionInstructPix2PixPipeline
 
-        fp16 = not kwargs.get("no_half", False)
+        use_gpu, torch_dtype = get_torch_dtype(device, kwargs.get("no_half", False))
 
         model_kwargs = {}
         if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
@@ -29,8 +30,6 @@ class InstructPix2Pix(DiffusionInpaintModel):
                 )
             )
 
-        use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
-        torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
         self.model = StableDiffusionInstructPix2PixPipeline.from_pretrained(
             self.name, variant="fp16", torch_dtype=torch_dtype, **model_kwargs
         )

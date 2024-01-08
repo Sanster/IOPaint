@@ -6,7 +6,7 @@ from loguru import logger
 
 from ..base import DiffusionInpaintModel
 from ..helper.cpu_text_encoder import CPUTextEncoderWrapper
-from ..utils import handle_from_pretrained_exceptions
+from ..utils import handle_from_pretrained_exceptions, get_torch_dtype
 from iopaint.schema import InpaintRequest
 from .powerpaint_tokenizer import add_task_to_prompt
 from ...const import POWERPAINT_NAME
@@ -22,7 +22,7 @@ class PowerPaint(DiffusionInpaintModel):
         from .pipeline_powerpaint import StableDiffusionInpaintPipeline
         from .powerpaint_tokenizer import PowerPaintTokenizer
 
-        fp16 = not kwargs.get("no_half", False)
+        use_gpu, torch_dtype = get_torch_dtype(device, kwargs.get("no_half", False))
         model_kwargs = {}
         if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
             logger.info("Disable Stable Diffusion Model NSFW checker")
@@ -33,9 +33,6 @@ class PowerPaint(DiffusionInpaintModel):
                     requires_safety_checker=False,
                 )
             )
-
-        use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
-        torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
 
         self.model = handle_from_pretrained_exceptions(
             StableDiffusionInpaintPipeline.from_pretrained,

@@ -13,7 +13,7 @@ from .helper.controlnet_preprocess import (
     make_inpaint_control_image,
 )
 from .helper.cpu_text_encoder import CPUTextEncoderWrapper
-from .utils import get_scheduler, handle_from_pretrained_exceptions
+from .utils import get_scheduler, handle_from_pretrained_exceptions, get_torch_dtype
 
 
 class ControlNet(DiffusionInpaintModel):
@@ -36,7 +36,6 @@ class ControlNet(DiffusionInpaintModel):
         raise NotImplementedError(f"Unsupported controlnet lcm model {self.model_info}")
 
     def init_model(self, device: torch.device, **kwargs):
-        fp16 = not kwargs.get("no_half", False)
         model_info = kwargs["model_info"]
         controlnet_method = kwargs["controlnet_method"]
 
@@ -54,8 +53,7 @@ class ControlNet(DiffusionInpaintModel):
                 )
             )
 
-        use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
-        torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
+        use_gpu, torch_dtype = get_torch_dtype(device, kwargs.get("no_half", False))
         self.torch_dtype = torch_dtype
 
         if model_info.model_type in [

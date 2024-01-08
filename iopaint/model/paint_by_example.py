@@ -7,6 +7,7 @@ from loguru import logger
 from iopaint.helper import decode_base64_to_image
 from .base import DiffusionInpaintModel
 from iopaint.schema import InpaintRequest
+from .utils import get_torch_dtype
 
 
 class PaintByExample(DiffusionInpaintModel):
@@ -17,9 +18,7 @@ class PaintByExample(DiffusionInpaintModel):
     def init_model(self, device: torch.device, **kwargs):
         from diffusers import DiffusionPipeline
 
-        fp16 = not kwargs.get("no_half", False)
-        use_gpu = device == torch.device("cuda") and torch.cuda.is_available()
-        torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
+        use_gpu, torch_dtype = get_torch_dtype(device, kwargs.get("no_half", False))
         model_kwargs = {}
 
         if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
