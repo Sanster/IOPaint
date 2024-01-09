@@ -69,6 +69,7 @@ class ModelManager:
 
         raise NotImplementedError(f"Unsupported model: {name}")
 
+    @torch.inference_mode()
     def __call__(self, image, mask, config: InpaintRequest):
         """
 

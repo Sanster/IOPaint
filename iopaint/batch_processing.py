@@ -1,9 +1,10 @@
 import json
-import cv2
 from pathlib import Path
 from typing import Dict, Optional
-from PIL import Image
 
+import cv2
+import psutil
+from PIL import Image
 from loguru import logger
 from rich.console import Console
 from rich.progress import (
@@ -14,10 +15,10 @@ from rich.progress import (
     TextColumn,
     BarColumn,
     TaskProgressColumn,
-    TimeRemainingColumn,
 )
 
 from iopaint.helper import pil_to_bytes
+from iopaint.model.utils import torch_gc
 from iopaint.model_manager import ModelManager
 from iopaint.schema import InpaintRequest
 
@@ -119,3 +120,8 @@ def batch_inpaint(
                 fw.write(img_bytes)
 
             progress.update(task, advance=1)
+            torch_gc()
+            # pid = psutil.Process().pid
+            # memory_info = psutil.Process(pid).memory_info()
+            # memory_in_mb = memory_info.rss / (1024 * 1024)
+            # print(f"原图大小：{img.shape},当前进程的内存占用：{memory_in_mb}MB")
