@@ -13,7 +13,12 @@ from .helper.controlnet_preprocess import (
     make_inpaint_control_image,
 )
 from .helper.cpu_text_encoder import CPUTextEncoderWrapper
-from .utils import get_scheduler, handle_from_pretrained_exceptions, get_torch_dtype, enable_low_mem
+from .utils import (
+    get_scheduler,
+    handle_from_pretrained_exceptions,
+    get_torch_dtype,
+    enable_low_mem,
+)
 
 
 class ControlNet(DiffusionInpaintModel):

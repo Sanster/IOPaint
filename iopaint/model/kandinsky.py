@@ -6,7 +6,7 @@ import torch
 from iopaint.const import KANDINSKY22_NAME
 from .base import DiffusionInpaintModel
 from iopaint.schema import InpaintRequest
-from .utils import get_torch_dtype
+from .utils import get_torch_dtype, enable_low_mem
 
 
 class Kandinsky(DiffusionInpaintModel):
@@ -25,8 +25,7 @@ class Kandinsky(DiffusionInpaintModel):
         self.model = AutoPipelineForInpainting.from_pretrained(
             self.name, **model_kwargs
         ).to(device)
-        if torch.backends.mps.is_available():
-            self.model.enable_attention_slicing()
+        enable_low_mem(self.model, kwargs.get("low_mem", False))
 
         self.callback = kwargs.pop("callback", None)
 

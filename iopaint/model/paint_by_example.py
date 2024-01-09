@@ -7,7 +7,7 @@ from loguru import logger
 from iopaint.helper import decode_base64_to_image
 from .base import DiffusionInpaintModel
 from iopaint.schema import InpaintRequest
-from .utils import get_torch_dtype
+from .utils import get_torch_dtype, enable_low_mem
 
 
 class PaintByExample(DiffusionInpaintModel):
@@ -30,9 +30,7 @@ class PaintByExample(DiffusionInpaintModel):
         self.model = DiffusionPipeline.from_pretrained(
             self.name, torch_dtype=torch_dtype, **model_kwargs
         )
-
-        if torch.backends.mps.is_available():
-            self.model.enable_attention_slicing()
+        enable_low_mem(self.model, kwargs.get("low_mem", False))
 
         # TODO: gpu_id
         if kwargs.get("cpu_offload", False) and use_gpu:

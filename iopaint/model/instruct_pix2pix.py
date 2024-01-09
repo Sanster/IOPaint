@@ -6,7 +6,7 @@ from loguru import logger
 from iopaint.const import INSTRUCT_PIX2PIX_NAME
 from .base import DiffusionInpaintModel
 from iopaint.schema import InpaintRequest
-from .utils import get_torch_dtype
+from .utils import get_torch_dtype, enable_low_mem
 
 
 class InstructPix2Pix(DiffusionInpaintModel):
@@ -33,8 +33,7 @@ class InstructPix2Pix(DiffusionInpaintModel):
         self.model = StableDiffusionInstructPix2PixPipeline.from_pretrained(
             self.name, variant="fp16", torch_dtype=torch_dtype, **model_kwargs
         )
-        if torch.backends.mps.is_available():
-            self.model.enable_attention_slicing()
+        enable_low_mem(self.model, kwargs.get("low_mem", False))
 
         if kwargs.get("cpu_offload", False) and use_gpu:
             logger.info("Enable sequential cpu offload")
