@@ -47,7 +47,7 @@ class ControlNet(DiffusionInpaintModel):
         self.model_info = model_info
         self.controlnet_method = controlnet_method
 
-        model_kwargs = {}
+        model_kwargs = {**kwargs.get("pipe_components", {})}
         if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(

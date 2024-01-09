@@ -19,7 +19,7 @@ class SD(DiffusionInpaintModel):
 
         use_gpu, torch_dtype = get_torch_dtype(device, kwargs.get("no_half", False))
 
-        model_kwargs = {}
+        model_kwargs = {**kwargs.get("pipe_components", {})}
         if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(

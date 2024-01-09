@@ -978,6 +978,7 @@ def handle_from_pretrained_exceptions(func, **kwargs):
         if "You are trying to load the model files of the `variant=fp16`" in str(e):
             logger.info("variant=fp16 not found, try revision=fp16")
             return func(**{**kwargs, "variant": None, "revision": "fp16"})
+        raise e
     except OSError as e:
         previous_traceback = traceback.format_exc()
         if "RevisionNotFoundError: 404 Client Error." in previous_traceback:

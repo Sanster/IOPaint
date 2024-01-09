@@ -141,8 +141,19 @@ class ModelManager:
             self.enable_controlnet = config.enable_controlnet
             self.controlnet_method = config.controlnet_method
 
+            pipe_components = {
+                "vae": self.model.model.vae,
+                "text_encoder": self.model.model.text_encoder,
+                "unet": self.model.model.unet,
+            }
+            if hasattr(self.model.model, "text_encoder_2"):
+                pipe_components["text_encoder_2"] = self.model.model.text_encoder_2
+
             self.model = self.init_model(
-                self.name, switch_mps_device(self.name, self.device), **self.kwargs
+                self.name,
+                switch_mps_device(self.name, self.device),
+                pipe_components=pipe_components,
+                **self.kwargs,
             )
             if not config.enable_controlnet:
                 logger.info(f"Disable controlnet")

@@ -36,15 +36,18 @@ class SDXL(DiffusionInpaintModel):
                 num_in_channels=num_in_channels,
             )
         else:
-            vae = AutoencoderKL.from_pretrained(
-                "madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch_dtype
-            )
+            model_kwargs = {**kwargs.get("pipe_components", {})}
+            if 'vae' not in model_kwargs:
+                vae = AutoencoderKL.from_pretrained(
+                    "madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch_dtype
+                )
+                model_kwargs['vae'] = vae
             self.model = handle_from_pretrained_exceptions(
                 StableDiffusionXLInpaintPipeline.from_pretrained,
                 pretrained_model_name_or_path=self.model_id_or_path,
                 torch_dtype=torch_dtype,
-                vae=vae,
                 variant="fp16",
+                **model_kwargs
             )
 
         enable_low_mem(self.model, kwargs.get("low_mem", False))
