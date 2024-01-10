@@ -29,7 +29,7 @@ def test_runway_sd_1_5(device, controlnet_method):
         name=model_name,
         device=torch.device(device),
         disable_nsfw=True,
-        sd_cpu_textencoder=True,
+        sd_cpu_textencoder=device == "cuda",
         enable_controlnet=True,
         controlnet_method=controlnet_method,
     )
@@ -111,7 +111,7 @@ def test_local_file_path(device, local_file):
     assert_equal(
         model,
         cfg,
-        f"{controlnet_kwargs['controlnet_method']}_local_model_{name}.png",
+        f"{convert_controlnet_method_name(controlnet_kwargs['controlnet_method'])}_local_model_{name}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
