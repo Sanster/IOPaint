@@ -4,6 +4,8 @@ import cv2
 from PIL import Image
 import numpy as np
 
+from iopaint.helper import pad_img_to_modulo
+
 
 def make_canny_control_image(image: np.ndarray) -> Image:
     canny_image = cv2.Canny(image, 100, 200)
@@ -22,10 +24,32 @@ def make_openpose_control_image(image: np.ndarray) -> Image:
     return control_image
 
 
+def resize_image(input_image, resolution):
+    H, W, C = input_image.shape
+    H = float(H)
+    W = float(W)
+    k = float(resolution) / min(H, W)
+    H *= k
+    W *= k
+    H = int(np.round(H / 64.0)) * 64
+    W = int(np.round(W / 64.0)) * 64
+    img = cv2.resize(
+        input_image,
+        (W, H),
+        interpolation=cv2.INTER_LANCZOS4 if k > 1 else cv2.INTER_AREA,
+    )
+    return img
+
+
 def make_depth_control_image(image: np.ndarray) -> Image:
     from controlnet_aux import MidasDetector
+
     midas = MidasDetector.from_pretrained("lllyasviel/Annotators")
-    depth_image = midas(image)
+
+    origin_height, origin_width = image.shape[:2]
+    pad_image = pad_img_to_modulo(image, mod=64, square=False, min_size=512)
+    depth_image = midas(pad_image)
+    depth_image = depth_image[0:origin_height, 0:origin_width]
     depth_image = depth_image[:, :, None]
     depth_image = np.concatenate([depth_image, depth_image, depth_image], axis=2)
     control_image = PIL.Image.fromarray(depth_image)
