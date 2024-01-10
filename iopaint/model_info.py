@@ -58,7 +58,7 @@ class ModelInfo(BaseModel):
             ModelType.DIFFUSERS_SDXL,
             ModelType.DIFFUSERS_SD_INPAINT,
             ModelType.DIFFUSERS_SDXL_INPAINT,
-        ]
+        ] or self.name in [POWERPAINT_NAME]
 
     @computed_field
     @property
