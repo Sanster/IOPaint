@@ -93,8 +93,9 @@ class ControlNet(DiffusionInpaintModel):
                 model_info.path,
                 controlnet=controlnet,
                 load_safety_checker=not disable_nsfw_checker,
+                torch_dtype=torch_dtype,
                 **model_kwargs,
-            ).to(torch_dtype)
+            )
         else:
             self.model = handle_from_pretrained_exceptions(
                 PipeClass.from_pretrained,

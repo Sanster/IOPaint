@@ -23,11 +23,9 @@ def make_openpose_control_image(image: np.ndarray) -> Image:
 
 
 def make_depth_control_image(image: np.ndarray) -> Image:
-    from transformers import pipeline
-
-    depth_estimator = pipeline("depth-estimation")
-    depth_image = depth_estimator(PIL.Image.fromarray(image))["depth"]
-    depth_image = np.array(depth_image)
+    from controlnet_aux import MidasDetector
+    midas = MidasDetector.from_pretrained("lllyasviel/Annotators")
+    depth_image = midas(image)
     depth_image = depth_image[:, :, None]
     depth_image = np.concatenate([depth_image, depth_image, depth_image], axis=2)
     control_image = PIL.Image.fromarray(depth_image)
