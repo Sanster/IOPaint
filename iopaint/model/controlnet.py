@@ -48,7 +48,10 @@ class ControlNet(DiffusionInpaintModel):
         self.controlnet_method = controlnet_method
 
         model_kwargs = {**kwargs.get("pipe_components", {})}
-        if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
+        disable_nsfw_checker = kwargs["disable_nsfw"] or kwargs.get(
+            "cpu_offload", False
+        )
+        if disable_nsfw_checker:
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(
                 dict(
@@ -87,7 +90,10 @@ class ControlNet(DiffusionInpaintModel):
                 model_kwargs["num_in_channels"] = 9
 
             self.model = PipeClass.from_single_file(
-                model_info.path, controlnet=controlnet, **model_kwargs
+                model_info.path,
+                controlnet=controlnet,
+                load_safety_checker=not disable_nsfw_checker,
+                **model_kwargs,
             ).to(torch_dtype)
         else:
             self.model = handle_from_pretrained_exceptions(
@@ -117,7 +123,7 @@ class ControlNet(DiffusionInpaintModel):
     def switch_controlnet_method(self, new_method: str):
         self.controlnet_method = new_method
         controlnet = ControlNetModel.from_pretrained(
-            new_method, torch_dtype=self.torch_dtype, resume_download=True
+            new_method, resume_download=True
         ).to(self.model.device)
         self.model.controlnet = controlnet
 

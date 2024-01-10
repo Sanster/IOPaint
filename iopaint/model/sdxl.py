@@ -35,6 +35,7 @@ class SDXL(DiffusionInpaintModel):
                 self.model_id_or_path,
                 dtype=torch_dtype,
                 num_in_channels=num_in_channels,
+                load_safety_checker=False
             )
         else:
             model_kwargs = {**kwargs.get("pipe_components", {})}

@@ -20,7 +20,8 @@ class SD(DiffusionInpaintModel):
         use_gpu, torch_dtype = get_torch_dtype(device, kwargs.get("no_half", False))
 
         model_kwargs = {**kwargs.get("pipe_components", {})}
-        if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
+        disable_nsfw_checker = kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False)
+        if disable_nsfw_checker:
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(
                 dict(
@@ -37,7 +38,10 @@ class SD(DiffusionInpaintModel):
                 model_kwargs["num_in_channels"] = 9
 
             self.model = StableDiffusionInpaintPipeline.from_single_file(
-                self.model_id_or_path, dtype=torch_dtype, **model_kwargs
+                self.model_id_or_path,
+                dtype=torch_dtype,
+                load_safety_checker=not disable_nsfw_checker,
+                **model_kwargs,
             )
         else:
             self.model = handle_from_pretrained_exceptions(
