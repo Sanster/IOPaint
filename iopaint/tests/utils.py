@@ -17,7 +17,7 @@ def check_device(device: str) -> int:
         pytest.skip("CUDA is not available, skip test on cuda")
     if device == "mps" and not torch.backends.mps.is_available():
         pytest.skip("mps is not available, skip test on mps")
-    steps = 1 if device == "cpu" else 20
+    steps = 2 if device == "cpu" else 20
     return steps
 
 

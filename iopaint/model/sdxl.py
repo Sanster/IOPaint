@@ -9,6 +9,7 @@ from loguru import logger
 from iopaint.schema import InpaintRequest, ModelType
 
 from .base import DiffusionInpaintModel
+from .helper.cpu_text_encoder import CPUTextEncoderWrapper
 from .utils import handle_from_pretrained_exceptions, get_torch_dtype, enable_low_mem
 
 
@@ -37,11 +38,11 @@ class SDXL(DiffusionInpaintModel):
             )
         else:
             model_kwargs = {**kwargs.get("pipe_components", {})}
-            if 'vae' not in model_kwargs:
+            if "vae" not in model_kwargs:
                 vae = AutoencoderKL.from_pretrained(
                     "madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch_dtype
                 )
-                model_kwargs['vae'] = vae
+                model_kwargs["vae"] = vae
             self.model = handle_from_pretrained_exceptions(
                 StableDiffusionXLInpaintPipeline.from_pretrained,
                 pretrained_model_name_or_path=self.model_id_or_path,
@@ -58,7 +59,13 @@ class SDXL(DiffusionInpaintModel):
         else:
             self.model = self.model.to(device)
             if kwargs["sd_cpu_textencoder"]:
-                logger.warning("Stable Diffusion XL not support run TextEncoder on CPU")
+                logger.info("Run Stable Diffusion TextEncoder on CPU")
+                self.model.text_encoder = CPUTextEncoderWrapper(
+                    self.model.text_encoder, torch_dtype
+                )
+                self.model.text_encoder_2 = CPUTextEncoderWrapper(
+                    self.model.text_encoder_2, torch_dtype
+                )
 
         self.callback = kwargs.pop("callback", None)
 

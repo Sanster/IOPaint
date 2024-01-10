@@ -147,6 +147,33 @@ def test_runway_sd_sd_strength(device, strategy, sampler):
     )
 
 
+@pytest.mark.parametrize("device", ["cuda", "cpu"])
+@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
+@pytest.mark.parametrize("sampler", [SDSampler.ddim])
+def test_runway_sd_cpu_textencoder(device, strategy, sampler):
+    sd_steps = check_device(device)
+    model = ModelManager(
+        name="runwayml/stable-diffusion-inpainting",
+        device=torch.device(device),
+        disable_nsfw=True,
+        sd_cpu_textencoder=True,
+    )
+    cfg = get_config(
+        strategy=strategy,
+        prompt="a fox sitting on a bench",
+        sd_steps=sd_steps,
+        sd_sampler=sampler,
+    )
+
+    assert_equal(
+        model,
+        cfg,
+        f"runway_sd_device_{device}_cpu_textencoder.png",
+        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
+    )
+
+
 @pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])
 @pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
 @pytest.mark.parametrize("sampler", [SDSampler.ddim])
