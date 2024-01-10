@@ -106,7 +106,9 @@ def start(
         file_okay=False,
         callback=setup_model_dir,
     ),
-    low_mem: bool = Option(False, help="Enable attention slicing and vae tiling to save memory."),
+    low_mem: bool = Option(
+        False, help="Enable attention slicing and vae tiling to save memory."
+    ),
     no_half: bool = Option(False, help=NO_HALF_HELP),
     cpu_offload: bool = Option(False, help=CPU_OFFLOAD_HELP),
     disable_nsfw_checker: bool = Option(False, help=DISABLE_NSFW_HELP),
@@ -174,7 +176,7 @@ def start(
             low_mem=low_mem,
             cpu_offload=cpu_offload,
             disable_nsfw_checker=disable_nsfw_checker,
-            cpu_textencoder=cpu_textencoder,
+            cpu_textencoder=cpu_textencoder if device == Device.cuda else False,
             device=device,
             gui=gui,
             disable_model_switch=disable_model_switch,
