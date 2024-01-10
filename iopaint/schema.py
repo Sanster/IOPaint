@@ -3,6 +3,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, Literal, List
 
+from loguru import logger
 from pydantic import BaseModel, Field, field_validator
 
 from iopaint.const import Device, InteractiveSegModel, RealESRGANModel
@@ -227,7 +228,7 @@ class InpaintRequest(BaseModel):
     # ControlNet
     enable_controlnet: bool = Field(False, description="Enable controlnet")
     controlnet_conditioning_scale: float = Field(
-        0.4, description="Conditioning scale", gt=0.0, le=1.0
+        0.4, description="Conditioning scale", ge=0.0, le=1.0
     )
     controlnet_method: str = Field(
         "lllyasviel/control_v11p_sd15_canny", description="Controlnet method"
@@ -249,6 +250,16 @@ class InpaintRequest(BaseModel):
     def sd_seed_validator(cls, v: int) -> int:
         if v == -1:
             return random.randint(1, 99999999)
+        return v
+
+    @field_validator("controlnet_conditioning_scale")
+    @classmethod
+    def validate_field(cls, v: float, values):
+        use_extender = values.data["use_extender"]
+        enable_controlnet = values.data["enable_controlnet"]
+        if use_extender and enable_controlnet:
+            logger.info(f"Extender is enabled, set controlnet_conditioning_scale=0")
+            return 0
         return v
 
 
@@ -296,6 +307,8 @@ AdjustMaskOperate = Literal["expand", "shrink"]
 
 
 class AdjustMaskRequest(BaseModel):
-    mask: str = Field(..., description="base64 encoded mask. 255 means area to do inpaint")
+    mask: str = Field(
+        ..., description="base64 encoded mask. 255 means area to do inpaint"
+    )
     operate: AdjustMaskOperate = Field(..., description="expand or shrink")
     kernel_size: int = Field(5, description="Kernel size for expanding mask")
