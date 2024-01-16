@@ -21,9 +21,6 @@ const DiffusionProgress = () => {
   const progress = Math.min(Math.round((step / settings.sdSteps) * 100), 100)
 
   React.useEffect(() => {
-    if (!isSD) {
-      return
-    }
     socket.on("connect", () => {
       setIsConnected(true)
     })
@@ -48,7 +45,7 @@ const DiffusionProgress = () => {
       socket.off("diffusion_progress")
       socket.off("diffusion_finish")
     }
-  }, [isSD])
+  }, [])
 
   return (
     <div
