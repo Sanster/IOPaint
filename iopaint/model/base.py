@@ -327,13 +327,6 @@ class DiffusionInpaintModel(InpaintModel):
         padding_r = max(0, cropper_r - image_r)
         padding_b = max(0, cropper_b - image_b)
 
-        zero_padding_count = [padding_l, padding_t, padding_r, padding_b].count(0)
-
-        if zero_padding_count not in [0, 3]:
-            logger.warning(
-                f"padding count({zero_padding_count}) not 0 or 3, may result in bad edge outpainting"
-            )
-
         expanded_image, mask_image = expand_image(
             cropped_image,
             left=padding_l,
