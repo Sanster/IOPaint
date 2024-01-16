@@ -10,7 +10,12 @@ from iopaint.schema import InpaintRequest, ModelType
 
 from .base import DiffusionInpaintModel
 from .helper.cpu_text_encoder import CPUTextEncoderWrapper
-from .utils import handle_from_pretrained_exceptions, get_torch_dtype, enable_low_mem
+from .utils import (
+    handle_from_pretrained_exceptions,
+    get_torch_dtype,
+    enable_low_mem,
+    is_local_files_only,
+)
 
 
 class SDXL(DiffusionInpaintModel):
@@ -35,10 +40,13 @@ class SDXL(DiffusionInpaintModel):
                 self.model_id_or_path,
                 dtype=torch_dtype,
                 num_in_channels=num_in_channels,
-                load_safety_checker=False
+                load_safety_checker=False,
             )
         else:
-            model_kwargs = {**kwargs.get("pipe_components", {})}
+            model_kwargs = {
+                **kwargs.get("pipe_components", {}),
+                "local_files_only": is_local_files_only(**kwargs),
+            }
             if "vae" not in model_kwargs:
                 vae = AutoencoderKL.from_pretrained(
                     "madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch_dtype

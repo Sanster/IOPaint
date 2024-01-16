@@ -18,6 +18,7 @@ from .utils import (
     handle_from_pretrained_exceptions,
     get_torch_dtype,
     enable_low_mem,
+    is_local_files_only,
 )
 
 
@@ -47,7 +48,12 @@ class ControlNet(DiffusionInpaintModel):
         self.model_info = model_info
         self.controlnet_method = controlnet_method
 
-        model_kwargs = {**kwargs.get("pipe_components", {})}
+        model_kwargs = {
+            **kwargs.get("pipe_components", {}),
+            "local_files_only": is_local_files_only(**kwargs),
+        }
+        self.local_files_only = model_kwargs["local_files_only"]
+
         disable_nsfw_checker = kwargs["disable_nsfw"] or kwargs.get(
             "cpu_offload", False
         )
@@ -82,6 +88,7 @@ class ControlNet(DiffusionInpaintModel):
         controlnet = ControlNetModel.from_pretrained(
             pretrained_model_name_or_path=controlnet_method,
             resume_download=True,
+            local_files_only=model_kwargs["local_files_only"],
         )
         if model_info.is_single_file_diffusers:
             if self.model_info.model_type == ModelType.DIFFUSERS_SD:
@@ -124,7 +131,7 @@ class ControlNet(DiffusionInpaintModel):
     def switch_controlnet_method(self, new_method: str):
         self.controlnet_method = new_method
         controlnet = ControlNetModel.from_pretrained(
-            new_method, resume_download=True
+            new_method, resume_download=True, local_files_only=self.local_files_only
         ).to(self.model.device)
         self.model.controlnet = controlnet
 

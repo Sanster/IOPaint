@@ -7,7 +7,7 @@ import numpy as np
 from iopaint.download import scan_models
 from iopaint.helper import switch_mps_device
 from iopaint.model import models, ControlNet, SD, SDXL
-from iopaint.model.utils import torch_gc
+from iopaint.model.utils import torch_gc, is_local_files_only
 from iopaint.model_info import ModelInfo, ModelType
 from iopaint.schema import InpaintRequest
 
@@ -182,7 +182,11 @@ class ModelManager:
             lcm_lora_loaded = bool(self.model.model.get_list_adapters())
             if config.sd_lcm_lora:
                 if not lcm_lora_loaded:
-                    self.model.model.load_lora_weights(self.model.lcm_lora_id, weight_name="pytorch_lora_weights.safetensors")
+                    self.model.model.load_lora_weights(
+                        self.model.lcm_lora_id,
+                        weight_name="pytorch_lora_weights.safetensors",
+                        local_files_only=is_local_files_only(),
+                    )
             else:
                 if lcm_lora_loaded:
                     self.model.model.disable_lora()

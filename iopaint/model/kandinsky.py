@@ -6,7 +6,7 @@ import torch
 from iopaint.const import KANDINSKY22_NAME
 from .base import DiffusionInpaintModel
 from iopaint.schema import InpaintRequest
-from .utils import get_torch_dtype, enable_low_mem
+from .utils import get_torch_dtype, enable_low_mem, is_local_files_only
 
 
 class Kandinsky(DiffusionInpaintModel):
@@ -20,8 +20,8 @@ class Kandinsky(DiffusionInpaintModel):
 
         model_kwargs = {
             "torch_dtype": torch_dtype,
+            "local_files_only": is_local_files_only(**kwargs),
         }
-
         self.model = AutoPipelineForInpainting.from_pretrained(
             self.name, **model_kwargs
         ).to(device)

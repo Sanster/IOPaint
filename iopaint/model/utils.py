@@ -971,6 +971,12 @@ def get_scheduler(sd_sampler, scheduler_config):
         raise ValueError(sd_sampler)
 
 
+def is_local_files_only(**kwargs) -> bool:
+    from huggingface_hub.constants import HF_HUB_OFFLINE
+
+    return HF_HUB_OFFLINE or kwargs.get("local_files_only", False)
+
+
 def handle_from_pretrained_exceptions(func, **kwargs):
     try:
         return func(**kwargs)

@@ -90,6 +90,7 @@ class ApiConfig(BaseModel):
     low_mem: bool
     cpu_offload: bool
     disable_nsfw_checker: bool
+    local_files_only: bool
     cpu_textencoder: bool
     device: Device
     gui: bool

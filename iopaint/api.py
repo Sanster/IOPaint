@@ -359,6 +359,7 @@ class Api:
             low_mem=self.config.low_mem,
             disable_nsfw=self.config.disable_nsfw_checker,
             sd_cpu_textencoder=self.config.cpu_textencoder,
+            local_files_only=self.config.local_files_only,
             cpu_offload=self.config.cpu_offload,
             callback=diffuser_callback,
         )

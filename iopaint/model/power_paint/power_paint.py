@@ -6,7 +6,12 @@ from loguru import logger
 
 from ..base import DiffusionInpaintModel
 from ..helper.cpu_text_encoder import CPUTextEncoderWrapper
-from ..utils import handle_from_pretrained_exceptions, get_torch_dtype, enable_low_mem
+from ..utils import (
+    handle_from_pretrained_exceptions,
+    get_torch_dtype,
+    enable_low_mem,
+    is_local_files_only,
+)
 from iopaint.schema import InpaintRequest
 from .powerpaint_tokenizer import add_task_to_prompt
 from ...const import POWERPAINT_NAME
@@ -23,7 +28,7 @@ class PowerPaint(DiffusionInpaintModel):
         from .powerpaint_tokenizer import PowerPaintTokenizer
 
         use_gpu, torch_dtype = get_torch_dtype(device, kwargs.get("no_half", False))
-        model_kwargs = {}
+        model_kwargs = {"local_files_only": is_local_files_only(**kwargs)}
         if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(

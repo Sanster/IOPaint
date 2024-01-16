@@ -7,7 +7,7 @@ from loguru import logger
 from iopaint.helper import decode_base64_to_image
 from .base import DiffusionInpaintModel
 from iopaint.schema import InpaintRequest
-from .utils import get_torch_dtype, enable_low_mem
+from .utils import get_torch_dtype, enable_low_mem, is_local_files_only
 
 
 class PaintByExample(DiffusionInpaintModel):
@@ -19,7 +19,9 @@ class PaintByExample(DiffusionInpaintModel):
         from diffusers import DiffusionPipeline
 
         use_gpu, torch_dtype = get_torch_dtype(device, kwargs.get("no_half", False))
-        model_kwargs = {}
+        model_kwargs = {
+            "local_files_only": is_local_files_only(**kwargs),
+        }
 
         if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
             logger.info("Disable Paint By Example Model NSFW checker")

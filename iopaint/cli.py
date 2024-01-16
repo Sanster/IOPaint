@@ -176,6 +176,7 @@ def start(
             low_mem=low_mem,
             cpu_offload=cpu_offload,
             disable_nsfw_checker=disable_nsfw_checker,
+            local_files_only=local_files_only,
             cpu_textencoder=cpu_textencoder if device == Device.cuda else False,
             device=device,
             gui=gui,

@@ -6,7 +6,7 @@ from loguru import logger
 from iopaint.const import INSTRUCT_PIX2PIX_NAME
 from .base import DiffusionInpaintModel
 from iopaint.schema import InpaintRequest
-from .utils import get_torch_dtype, enable_low_mem
+from .utils import get_torch_dtype, enable_low_mem, is_local_files_only
 
 
 class InstructPix2Pix(DiffusionInpaintModel):
@@ -19,7 +19,7 @@ class InstructPix2Pix(DiffusionInpaintModel):
 
         use_gpu, torch_dtype = get_torch_dtype(device, kwargs.get("no_half", False))
 
-        model_kwargs = {}
+        model_kwargs = {"local_files_only": is_local_files_only(**kwargs)}
         if kwargs["disable_nsfw"] or kwargs.get("cpu_offload", False):
             logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(
