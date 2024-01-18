@@ -72,7 +72,7 @@ const PromptInput = () => {
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
-        Dream
+        Paint
       </Button>
     </div>
   )

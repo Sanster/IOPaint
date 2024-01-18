@@ -192,7 +192,7 @@ const DiffusionOptions = () => {
       <>
         <RowContainer>
           <LabelTitle
-            text="LCM Lora"
+            text="LCM LoRA"
             url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inference_with_lcm_lora"
             toolTip="Enable quality image generation in typically 2-4 steps. Suggest disabling guidance_scale by setting it to 0. You can also try values between 1.0 and 2.0. When LCM Lora is enabled, LCMSampler will be used automatically."
           />
