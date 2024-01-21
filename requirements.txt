@@ -17,3 +17,6 @@ loguru
 yacs
 piexif==1.1.3
 omegaconf
+easydict
+
+Pillow==9.5.0 # for AnyText
