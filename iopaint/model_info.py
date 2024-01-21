@@ -9,6 +9,7 @@ from iopaint.const import (
     INSTRUCT_PIX2PIX_NAME,
     KANDINSKY22_NAME,
     POWERPAINT_NAME,
+    ANYTEXT_NAME,
 )
 from iopaint.schema import ModelType
 
@@ -31,6 +32,7 @@ class ModelInfo(BaseModel):
             INSTRUCT_PIX2PIX_NAME,
             KANDINSKY22_NAME,
             POWERPAINT_NAME,
+            ANYTEXT_NAME,
         ]
 
     @computed_field
@@ -58,7 +60,7 @@ class ModelInfo(BaseModel):
             ModelType.DIFFUSERS_SDXL,
             ModelType.DIFFUSERS_SD_INPAINT,
             ModelType.DIFFUSERS_SDXL_INPAINT,
-        ] or self.name in [POWERPAINT_NAME]
+        ] or self.name in [POWERPAINT_NAME, ANYTEXT_NAME]
 
     @computed_field
     @property

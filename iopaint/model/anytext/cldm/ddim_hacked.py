@@ -254,7 +254,7 @@ class DDIMSampler(object):
             )
             img, pred_x0 = outs
             if callback:
-                callback(i)
+                callback(None, i, None, None)
             if img_callback:
                 img_callback(pred_x0, i)
 

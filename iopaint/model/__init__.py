@@ -1,3 +1,4 @@
+from .anytext.anytext_model import AnyText
 from .controlnet import ControlNet
 from .fcf import FcF
 from .instruct_pix2pix import InstructPix2Pix
@@ -32,4 +33,5 @@ models = {
     Kandinsky22.name: Kandinsky22,
     SDXL.name: SDXL,
     PowerPaint.name: PowerPaint,
+    AnyText.name: AnyText,
 }

@@ -12,6 +12,7 @@ from iopaint.const import (
     DIFFUSERS_SD_INPAINT_CLASS_NAME,
     DIFFUSERS_SDXL_CLASS_NAME,
     DIFFUSERS_SDXL_INPAINT_CLASS_NAME,
+    ANYTEXT_NAME,
 )
 from iopaint.model_info import ModelInfo, ModelType
 
@@ -21,6 +22,10 @@ def cli_download_model(model: str):
     from iopaint.model.utils import handle_from_pretrained_exceptions
 
     if model in models and models[model].is_erase_model:
+        logger.info(f"Downloading {model}...")
+        models[model].download()
+        logger.info(f"Done.")
+    elif model == ANYTEXT_NAME:
         logger.info(f"Downloading {model}...")
         models[model].download()
         logger.info(f"Done.")
@@ -210,6 +215,7 @@ def scan_models() -> List[ModelInfo]:
                 "StableDiffusionInstructPix2PixPipeline",
                 "PaintByExamplePipeline",
                 "KandinskyV22InpaintPipeline",
+                "AnyText",
             ]:
                 model_type = ModelType.DIFFUSERS_OTHER
             else:

@@ -26,11 +26,11 @@ def load_state_dict(ckpt_path, location="cpu"):
 
 def create_model(config_path, device, cond_stage_path=None, use_fp16=False):
     config = OmegaConf.load(config_path)
-    if cond_stage_path:
-        config.model.params.cond_stage_config.params.version = (
-            cond_stage_path  # use pre-downloaded ckpts, in case blocked
-        )
-        config.model.params.cond_stage_config.params.device = device
+    # if cond_stage_path:
+    #     config.model.params.cond_stage_config.params.version = (
+    #         cond_stage_path  # use pre-downloaded ckpts, in case blocked
+    #     )
+    config.model.params.cond_stage_config.params.device = str(device)
     if use_fp16:
         config.model.params.use_fp16 = True
         config.model.params.control_stage_config.params.use_fp16 = True

@@ -16,7 +16,12 @@ import { Separator } from "../ui/separator"
 import { Button, ImageUploadButton } from "../ui/button"
 import { Slider } from "../ui/slider"
 import { useImage } from "@/hooks/useImage"
-import { INSTRUCT_PIX2PIX, PAINT_BY_EXAMPLE, POWERPAINT } from "@/lib/const"
+import {
+  ANYTEXT,
+  INSTRUCT_PIX2PIX,
+  PAINT_BY_EXAMPLE,
+  POWERPAINT,
+} from "@/lib/const"
 import { RowContainer, LabelTitle } from "./LabelTitle"
 import { Minus, Plus, Upload } from "lucide-react"
 import { useClickAway } from "react-use"
@@ -661,6 +666,10 @@ const DiffusionOptions = () => {
   }
 
   const renderSampler = () => {
+    if (settings.model.name === ANYTEXT) {
+      return null
+    }
+
     return (
       <RowContainer>
         <LabelTitle text="Sampler" />

@@ -95,5 +95,5 @@ model:
     cond_stage_config:
       target: iopaint.model.anytext.ldm.modules.encoders.modules.FrozenCLIPEmbedderT3
       params:
-        version: ./models/clip-vit-large-patch14
+        version: openai/clip-vit-large-patch14
         use_vision: false  # v6
