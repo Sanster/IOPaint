@@ -1,8 +1,11 @@
 import setuptools
 from pathlib import Path
 
-web_files = Path("iopaint/web_app").glob("**/*")
-web_files = [str(it).replace("iopaint/", "") for it in web_files]
+package_files = Path("iopaint/web_app").glob("**/*")
+package_files = [str(it).replace("iopaint/", "") for it in package_files]
+package_files += ["model/anytext/ocr_recog/ppocr_keys_v1.txt"]
+package_files += ["model/anytext/anytext_sd15.yaml"]
+
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -21,7 +24,7 @@ def load_requirements():
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#including-data-files
 setuptools.setup(
     name="IOPaint",
-    version="1.0.0-beta.8",
+    version="1.0.0-beta.9",
     author="PanicByte",
     author_email="cwq1913@gmail.com",
     description="Image inpainting, outpainting tool powered by SOTA AI Model",
@@ -29,7 +32,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Sanster/lama-cleaner",
     packages=setuptools.find_packages("./"),
-    package_data={"iopaint": web_files},
+    package_data={"iopaint": package_files},
     install_requires=load_requirements(),
     python_requires=">=3.7",
     entry_points={"console_scripts": ["iopaint=iopaint:entry_point"]},
