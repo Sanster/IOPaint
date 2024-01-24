@@ -15,7 +15,8 @@
 
 ## Quick Start
 
-IOPaint provides an easy-to-use webui for utilizing the latest AI models. The installation process for IOPaint is also simple, requiring just two commands:
+IOPaint provides a convenient webui for using the latest AI models to edit your images. 
+The installation process for IOPaint is also simple, requiring just two commands:
 
 ```bash
 # In order to use GPU, install cuda version of pytorch first.
@@ -38,16 +39,15 @@ iopaint run --model=lama --device=cpu \
 `--input` is the folder containing input images, `--mask` is the folder containing corresponding mask images. 
 When `--mask` is a path to a mask file, all images will be processed using this mask. 
 
-You can see more information about the models and plugins supported by IOPaint below.
+You can see more information about the available models and plugins supported by IOPaint below.
 
 ## Features
 
-- Completely free and open-source, fully self-hosted, support CPU & GPU & M1/2
+- Completely free and open-source, fully self-hosted, support CPU & GPU & Apple Silicon
 - Supports various AI models:
-  - Inpainting models: These models are usually used to remove people or objects from images.
-  - Stable Diffusion models: These models have stronger generation abilities, allowing them to generate new objects on images, or to expand existing images. 
-You can use any Stable Diffusion Inpainting(or normal) models from [Huggingface](https://huggingface.co/models?other=stable-diffusion) in IOPaint. 
-Some commonly used models are listed below:
+  - Erase models: These models are usually used to remove people or objects from images.
+  - Stable Diffusion models: You can use any Stable Diffusion Inpainting(or normal) models from [Huggingface](https://huggingface.co/models?other=stable-diffusion) in IOPaint. 
+Some popular used models include:
     - [runwayml/stable-diffusion-inpainting](https://huggingface.co/runwayml/stable-diffusion-inpainting)
     - [diffusers/stable-diffusion-xl-1.0-inpainting-0.1](https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1)
     - [andregn/Realistic_Vision_V3.0-inpainting](https://huggingface.co/andregn/Realistic_Vision_V3.0-inpainting)
@@ -55,11 +55,11 @@ Some commonly used models are listed below:
     - [Sanster/anything-4.0-inpainting](https://huggingface.co/Sanster/anything-4.0-inpainting)
     - [Sanster/PowerPaint-V1-stable-diffusion-inpainting](https://huggingface.co/Sanster/PowerPaint-V1-stable-diffusion-inpainting)
   - Other Diffusion models: 
-    - [Sanster/AnyText](https://huggingface.co/Sanster/AnyText): Generate text on images
+    - [Sanster/AnyText](https://huggingface.co/Sanster/AnyText)
     - [timbrooks/instruct-pix2pix](https://huggingface.co/timbrooks/instruct-pix2pix)
-    - [Fantasy-Studio/Paint-by-Example](https://huggingface.co/Fantasy-Studio/Paint-by-Example): Generate images from text
+    - [Fantasy-Studio/Paint-by-Example](https://huggingface.co/Fantasy-Studio/Paint-by-Example)
     - [kandinsky-community/kandinsky-2-2-decoder-inpaint](https://huggingface.co/kandinsky-community/kandinsky-2-2-decoder-inpaint) 
-- [Plugins](https://iopaint.com/plugins) for post-processing:
+- [Plugins](https://iopaint.com/plugins):
   - [Segment Anything](https://iopaint.com/plugins/interactive_seg): Accurate and fast interactive object segmentation
   - [RemoveBG](https://iopaint.com/plugins/rembg): Remove image background or generate masks for foreground objects
   - [Anime Segmentation](https://iopaint.com/plugins/anime_seg): Similar to RemoveBG, the model is specifically trained for anime images.
