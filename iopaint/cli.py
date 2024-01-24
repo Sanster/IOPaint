@@ -115,7 +115,6 @@ def start(
     cpu_textencoder: bool = Option(False, help=CPU_TEXTENCODER_HELP),
     local_files_only: bool = Option(False, help=LOCAL_FILES_ONLY_HELP),
     device: Device = Option(Device.cpu),
-    gui: bool = Option(False, help=GUI_HELP),
     disable_model_switch: bool = Option(False),
     input: Optional[Path] = Option(None, help=INPUT_HELP),
     output_dir: Optional[Path] = Option(
@@ -179,7 +178,7 @@ def start(
             local_files_only=local_files_only,
             cpu_textencoder=cpu_textencoder if device == Device.cuda else False,
             device=device,
-            gui=gui,
+            gui=False,
             disable_model_switch=disable_model_switch,
             input=input,
             output_dir=output_dir,
