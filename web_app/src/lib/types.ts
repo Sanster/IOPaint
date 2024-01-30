@@ -126,4 +126,4 @@ export enum PowerPaintTask {
   outpainting = "outpainting",
 }
 
-export type AdjustMaskOperate = "expand" | "shrink"
+export type AdjustMaskOperate = "expand" | "shrink" | "reverse"

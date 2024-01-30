@@ -354,25 +354,29 @@ def concat_alpha_channel(rgb_np_img, alpha_channel) -> np.ndarray:
 
 
 def adjust_mask(mask: np.ndarray, kernel_size: int, operate):
+    # fronted brush color "ffcc00bb"
     # kernel_size = kernel_size*2+1
     mask[mask >= 127] = 255
     mask[mask < 127] = 0
-    # fronted brush color "ffcc00bb"
-    kernel = cv2.getStructuringElement(
-        cv2.MORPH_ELLIPSE, (2 * kernel_size + 1, 2 * kernel_size + 1)
-    )
-    if operate == "expand":
-        mask = cv2.dilate(
-            mask,
-            kernel,
-            iterations=1,
-        )
+
+    if operate == "reverse":
+        mask = 255 - mask
     else:
-        mask = cv2.erode(
-            mask,
-            kernel,
-            iterations=1,
+        kernel = cv2.getStructuringElement(
+            cv2.MORPH_ELLIPSE, (2 * kernel_size + 1, 2 * kernel_size + 1)
         )
+        if operate == "expand":
+            mask = cv2.dilate(
+                mask,
+                kernel,
+                iterations=1,
+            )
+        else:
+            mask = cv2.erode(
+                mask,
+                kernel,
+                iterations=1,
+            )
     res_mask = np.zeros((mask.shape[0], mask.shape[1], 4), dtype=np.uint8)
     res_mask[mask > 128] = [255, 203, 0, int(255 * 0.73)]
     res_mask = cv2.cvtColor(res_mask, cv2.COLOR_BGRA2RGBA)

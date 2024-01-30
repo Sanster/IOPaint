@@ -13,3 +13,5 @@ def test_adjust_mask():
     cv2.imwrite(str(save_dir / "adjust_mask_expand.png"), res_mask)
     res_mask = adjust_mask(mask, 20, "shrink")
     cv2.imwrite(str(save_dir / "adjust_mask_shrink.png"), res_mask)
+    res_mask = adjust_mask(mask, 20, "reverse")
+    cv2.imwrite(str(save_dir / "adjust_mask_reverse.png"), res_mask)

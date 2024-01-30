@@ -304,12 +304,12 @@ class SwitchModelRequest(BaseModel):
     name: str
 
 
-AdjustMaskOperate = Literal["expand", "shrink"]
+AdjustMaskOperate = Literal["expand", "shrink", "reverse"]
 
 
 class AdjustMaskRequest(BaseModel):
     mask: str = Field(
         ..., description="base64 encoded mask. 255 means area to do inpaint"
     )
-    operate: AdjustMaskOperate = Field(..., description="expand or shrink")
+    operate: AdjustMaskOperate = Field(..., description="expand/shrink/reverse")
     kernel_size: int = Field(5, description="Kernel size for expanding mask")

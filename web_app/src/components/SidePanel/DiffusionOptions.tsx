@@ -839,6 +839,17 @@ const DiffusionOptions = () => {
                   Shrink
                 </div>
               </Button>
+
+              <Button
+                variant="outline"
+                className="p-1 h-8"
+                onClick={() => adjustMask("reverse")}
+                disabled={isProcessing}
+              >
+                <div className="flex items-center gap-1 select-none">
+                  Reverse
+                </div>
+              </Button>
             </div>
 
             <Button
