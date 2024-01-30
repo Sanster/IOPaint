@@ -5,6 +5,7 @@ from loguru import logger
 
 from .base import DiffusionInpaintModel
 from .helper.cpu_text_encoder import CPUTextEncoderWrapper
+from .original_sd_configs import get_config_files
 from .utils import (
     handle_from_pretrained_exceptions,
     get_torch_dtype,
@@ -51,6 +52,7 @@ class SD(DiffusionInpaintModel):
                 self.model_id_or_path,
                 dtype=torch_dtype,
                 load_safety_checker=not disable_nsfw_checker,
+                config_files=get_config_files(),
                 **model_kwargs,
             )
         else:

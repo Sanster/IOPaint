@@ -10,6 +10,7 @@ from iopaint.schema import InpaintRequest, ModelType
 
 from .base import DiffusionInpaintModel
 from .helper.cpu_text_encoder import CPUTextEncoderWrapper
+from .original_sd_configs import get_config_files
 from .utils import (
     handle_from_pretrained_exceptions,
     get_torch_dtype,
@@ -41,6 +42,7 @@ class SDXL(DiffusionInpaintModel):
                 dtype=torch_dtype,
                 num_in_channels=num_in_channels,
                 load_safety_checker=False,
+                config_files=get_config_files()
             )
         else:
             model_kwargs = {

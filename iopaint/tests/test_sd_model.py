@@ -232,9 +232,10 @@ def test_runway_sd_1_5_cpu_offload(device, strategy, sampler):
 @pytest.mark.parametrize(
     "name",
     [
-        "sd-v1-5-inpainting.ckpt",
         "sd-v1-5-inpainting.safetensors",
         "v1-5-pruned-emaonly.safetensors",
+        "sd_xl_base_1.0.safetensors",
+        "sd_xl_base_1.0_inpainting_0.1.safetensors",
     ],
 )
 def test_local_file_path(device, sampler, name):

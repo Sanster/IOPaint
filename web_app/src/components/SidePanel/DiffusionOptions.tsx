@@ -734,7 +734,7 @@ const DiffusionOptions = () => {
       <div className="flex flex-col gap-1">
         <LabelTitle
           text="Mask blur"
-          toolTip="How much to blur the mask before processing, in pixels."
+          toolTip="How much to blur the mask before processing, in pixels. Make the generated inpainting boundaries appear more natural."
         />
         <RowContainer>
           <Slider
