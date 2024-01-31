@@ -23,7 +23,7 @@ import {
   POWERPAINT,
 } from "@/lib/const"
 import { RowContainer, LabelTitle } from "./LabelTitle"
-import { Minus, Plus, Upload } from "lucide-react"
+import { Upload } from "lucide-react"
 import { useClickAway } from "react-use"
 
 const ExtenderButton = ({

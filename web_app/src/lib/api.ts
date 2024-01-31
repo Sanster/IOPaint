@@ -204,7 +204,7 @@ export async function getSamplers(): Promise<string[]> {
 
 export async function postAdjustMask(
   mask: File | Blob,
-  operate: "expand" | "shrink",
+  operate: "expand" | "shrink" | "reverse",
   kernel_size: number
 ) {
   const maskBase64 = await convertToBase64(mask)
