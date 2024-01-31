@@ -8,6 +8,7 @@ from typer import Option
 
 from iopaint.const import *
 from iopaint.runtime import setup_model_dir, dump_environment_info, check_device
+from iopaint.schema import InteractiveSegModel, Device, RealESRGANModel
 
 typer_app = typer.Typer(pretty_exceptions_show_locals=False, add_completion=False)
 
@@ -96,8 +97,8 @@ def start(
     port: int = Option(8080),
     model: str = Option(
         DEFAULT_MODEL,
-        help=f"Available erase models: [{', '.join(AVAILABLE_MODELS)}]. "
-        f"You can use download command to download other SD/SDXL normal/inpainting models on huggingface",
+        help=f"Erase models: [{', '.join(AVAILABLE_MODELS)}].\n"
+        f"Diffusion models: [{', '.join(DIFFUSION_MODELS)}] or any SD/SDXL normal/inpainting models on HuggingFace.",
     ),
     model_dir: Path = Option(
         DEFAULT_MODEL_DIR,
@@ -106,16 +107,13 @@ def start(
         file_okay=False,
         callback=setup_model_dir,
     ),
-    low_mem: bool = Option(
-        False, help="Enable attention slicing and vae tiling to save memory."
-    ),
+    low_mem: bool = Option(False, help=LOW_MEM_HELP),
     no_half: bool = Option(False, help=NO_HALF_HELP),
     cpu_offload: bool = Option(False, help=CPU_OFFLOAD_HELP),
     disable_nsfw_checker: bool = Option(False, help=DISABLE_NSFW_HELP),
     cpu_textencoder: bool = Option(False, help=CPU_TEXTENCODER_HELP),
     local_files_only: bool = Option(False, help=LOCAL_FILES_ONLY_HELP),
     device: Device = Option(Device.cpu),
-    disable_model_switch: bool = Option(False),
     input: Optional[Path] = Option(None, help=INPUT_HELP),
     output_dir: Optional[Path] = Option(
         None, help=OUTPUT_DIR_HELP, dir_okay=True, file_okay=False
@@ -178,8 +176,6 @@ def start(
             local_files_only=local_files_only,
             cpu_textencoder=cpu_textencoder if device == Device.cuda else False,
             device=device,
-            gui=False,
-            disable_model_switch=disable_model_switch,
             input=input,
             output_dir=output_dir,
             quality=quality,
@@ -198,3 +194,13 @@ def start(
         ),
     )
     api.launch()
+
+
+@typer_app.command(help="Start IOPaint web config page")
+def start_web_config(
+    config_file: Path = Option("config.json"),
+):
+    dump_environment_info()
+    from iopaint.web_config import main
+
+    main(config_file)

@@ -1,7 +1,8 @@
 import json
 import os
-from enum import Enum
-from pydantic import BaseModel
+from pathlib import Path
+
+from iopaint.schema import ApiConfig, Device, InteractiveSegModel, RealESRGANModel
 
 INSTRUCT_PIX2PIX_NAME = "timbrooks/instruct-pix2pix"
 KANDINSKY22_NAME = "kandinsky-community/kandinsky-2-2-decoder-inpaint"
@@ -26,10 +27,16 @@ MPS_UNSUPPORT_MODELS = [
 
 DEFAULT_MODEL = "lama"
 AVAILABLE_MODELS = ["lama", "ldm", "zits", "mat", "fcf", "manga", "cv2", "migan"]
-
-
-AVAILABLE_DEVICES = ["cuda", "cpu", "mps"]
-DEFAULT_DEVICE = "cuda"
+DIFFUSION_MODELS = [
+    "runwayml/stable-diffusion-inpainting",
+    "Uminosachi/realisticVisionV51_v51VAE-inpainting",
+    "redstonehero/dreamshaper-inpainting",
+    "Sanster/anything-4.0-inpainting",
+    "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
+    "Fantasy-Studio/Paint-by-Example",
+    POWERPAINT_NAME,
+    ANYTEXT_NAME,
+]
 
 NO_HALF_HELP = """
 Using full precision(fp32) model.
@@ -39,6 +46,8 @@ If your diffusion model generate result is always black or green, use this argum
 CPU_OFFLOAD_HELP = """
 Offloads diffusion model's weight to CPU RAM, significantly reducing vRAM usage.
 """
+
+LOW_MEM_HELP = "Enable attention slicing and vae tiling to save memory."
 
 DISABLE_NSFW_HELP = """
 Disable NSFW checker for diffusion model.
@@ -77,9 +86,10 @@ LOCAL_FILES_ONLY_HELP = """
 When loading diffusion models, using local files only, not connect to HuggingFace server.
 """
 
-DEFAULT_MODEL_DIR = os.getenv(
-    "XDG_CACHE_HOME", os.path.join(os.path.expanduser("~"), ".cache")
+DEFAULT_MODEL_DIR = os.path.abspath(
+    os.getenv("XDG_CACHE_HOME", os.path.join(os.path.expanduser("~"), ".cache"))
 )
+
 MODEL_DIR_HELP = f"""
 Model download directory (by setting XDG_CACHE_HOME environment variable), by default model download to {DEFAULT_MODEL_DIR}
 """
@@ -101,80 +111,40 @@ QUALITY_HELP = """
 Quality of image encoding, 0-100. Default is 95, higher quality will generate larger file size.
 """
 
-
-class Choices(str, Enum):
-    @classmethod
-    def values(cls):
-        return [member.value for member in cls]
-
-
-class RealESRGANModel(Choices):
-    realesr_general_x4v3 = "realesr-general-x4v3"
-    RealESRGAN_x4plus = "RealESRGAN_x4plus"
-    RealESRGAN_x4plus_anime_6B = "RealESRGAN_x4plus_anime_6B"
-
-
-class Device(Choices):
-    cpu = "cpu"
-    cuda = "cuda"
-    mps = "mps"
-
-
-class InteractiveSegModel(Choices):
-    vit_b = "vit_b"
-    vit_l = "vit_l"
-    vit_h = "vit_h"
-    mobile_sam = "mobile_sam"
-
-
 INTERACTIVE_SEG_HELP = "Enable interactive segmentation using Segment Anything."
-INTERACTIVE_SEG_MODEL_HELP = "Model size: vit_b < vit_l < vit_h. Bigger model size means better segmentation but slower speed."
+INTERACTIVE_SEG_MODEL_HELP = "Model size: mobile_sam < vit_b < vit_l < vit_h. Bigger model size means better segmentation but slower speed."
 REMOVE_BG_HELP = "Enable remove background. Always run on CPU"
 ANIMESEG_HELP = "Enable anime segmentation. Always run on CPU"
 REALESRGAN_HELP = "Enable realesrgan super resolution"
-GFPGAN_HELP = (
-    "Enable GFPGAN face restore. To enhance background, use with --enable-realesrgan"
-)
-RESTOREFORMER_HELP = "Enable RestoreFormer face restore. To enhance background, use with --enable-realesrgan"
+GFPGAN_HELP = "Enable GFPGAN face restore. To also enhance background, use with --enable-realesrgan"
+RESTOREFORMER_HELP = "Enable RestoreFormer face restore. To also enhance background, use with --enable-realesrgan"
 GIF_HELP = "Enable GIF plugin. Make GIF to compare original and cleaned image"
 
-
-class Config(BaseModel):
-    host: str = "127.0.0.1"
-    port: int = 8080
-    model: str = DEFAULT_MODEL
-    sd_local_model_path: str = None
-    device: str = DEFAULT_DEVICE
-    gui: bool = False
-    no_gui_auto_close: bool = False
-    no_half: bool = False
-    cpu_offload: bool = False
-    disable_nsfw: bool = False
-    sd_cpu_textencoder: bool = False
-    local_files_only: bool = False
-    model_dir: str = DEFAULT_MODEL_DIR
-    input: str = None
-    output_dir: str = None
-    # plugins
-    enable_interactive_seg: bool = False
-    interactive_seg_model: str = "vit_l"
-    interactive_seg_device: str = "cpu"
-    enable_remove_bg: bool = False
-    enable_anime_seg: bool = False
-    enable_realesrgan: bool = False
-    realesrgan_device: str = "cpu"
-    realesrgan_model: str = RealESRGANModel.realesr_general_x4v3.value
-    realesrgan_no_half: bool = False
-    enable_gfpgan: bool = False
-    gfpgan_device: str = "cpu"
-    enable_restoreformer: bool = False
-    restoreformer_device: str = "cpu"
-    enable_gif: bool = False
-
-
-def load_config(installer_config: str):
-    if os.path.exists(installer_config):
-        with open(installer_config, "r", encoding="utf-8") as f:
-            return Config(**json.load(f))
-    else:
-        return Config()
+default_configs = dict(
+    host="127.0.0.1",
+    port=8080,
+    model=DEFAULT_MODEL,
+    model_dir=DEFAULT_MODEL_DIR,
+    no_half=False,
+    low_mem=False,
+    cpu_offload=False,
+    disable_nsfw_checker=False,
+    local_files_only=False,
+    cpu_textencoder=False,
+    device=Device.cuda,
+    input=None,
+    output_dir=None,
+    quality=95,
+    enable_interactive_seg=False,
+    interactive_seg_model=InteractiveSegModel.vit_b,
+    interactive_seg_device=Device.cpu,
+    enable_remove_bg=False,
+    enable_anime_seg=False,
+    enable_realesrgan=False,
+    realesrgan_device=Device.cpu,
+    realesrgan_model=RealESRGANModel.realesr_general_x4v3,
+    enable_gfpgan=False,
+    gfpgan_device=Device.cpu,
+    enable_restoreformer=False,
+    restoreformer_device=Device.cpu,
+)

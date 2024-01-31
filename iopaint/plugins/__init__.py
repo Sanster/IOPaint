@@ -8,7 +8,7 @@ from .interactive_seg import InteractiveSeg
 from .realesrgan import RealESRGANUpscaler
 from .remove_bg import RemoveBG
 from .restoreformer import RestoreFormerPlugin
-from ..const import InteractiveSegModel, Device, RealESRGANModel
+from ..schema import InteractiveSegModel, Device, RealESRGANModel
 
 
 def build_plugins(

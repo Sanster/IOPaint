@@ -1,14 +1,11 @@
-from enum import Enum
-
 import cv2
 import numpy as np
 import torch
 from loguru import logger
 
-from iopaint.const import RealESRGANModel
 from iopaint.helper import download_model
 from iopaint.plugins.base_plugin import BasePlugin
-from iopaint.schema import RunPluginRequest
+from iopaint.schema import RunPluginRequest, RealESRGANModel
 
 
 class RealESRGANUpscaler(BasePlugin):

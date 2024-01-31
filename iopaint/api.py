@@ -201,8 +201,8 @@ class Api:
             enableAutoSaving=self.config.output_dir is not None,
             enableControlnet=self.model_manager.enable_controlnet,
             controlnetMethod=self.model_manager.controlnet_method,
-            disableModelSwitch=self.config.disable_model_switch,
-            isDesktop=self.config.gui,
+            disableModelSwitch=False,
+            isDesktop=False,
             samplers=self.api_samplers(),
         )
 
@@ -380,8 +380,6 @@ if __name__ == "__main__":
             disable_nsfw_checker=False,
             cpu_textencoder=False,
             device="cpu",
-            gui=False,
-            disable_model_switch=False,
             input="/Users/cwq/code/github/MI-GAN/examples/places2_512_object/images",
             output_dir="/Users/cwq/code/github/lama-cleaner/tmp",
             quality=100,

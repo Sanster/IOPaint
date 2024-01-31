@@ -1,3 +1,4 @@
+import json
 import random
 from enum import Enum
 from pathlib import Path
@@ -6,7 +7,30 @@ from typing import Optional, Literal, List
 from loguru import logger
 from pydantic import BaseModel, Field, field_validator
 
-from iopaint.const import Device, InteractiveSegModel, RealESRGANModel
+
+class Choices(str, Enum):
+    @classmethod
+    def values(cls):
+        return [member.value for member in cls]
+
+
+class RealESRGANModel(Choices):
+    realesr_general_x4v3 = "realesr-general-x4v3"
+    RealESRGAN_x4plus = "RealESRGAN_x4plus"
+    RealESRGAN_x4plus_anime_6B = "RealESRGAN_x4plus_anime_6B"
+
+
+class Device(Choices):
+    cpu = "cpu"
+    cuda = "cuda"
+    mps = "mps"
+
+
+class InteractiveSegModel(Choices):
+    vit_b = "vit_b"
+    vit_l = "vit_l"
+    vit_h = "vit_h"
+    mobile_sam = "mobile_sam"
 
 
 class PluginInfo(BaseModel):
@@ -93,8 +117,6 @@ class ApiConfig(BaseModel):
     local_files_only: bool
     cpu_textencoder: bool
     device: Device
-    gui: bool
-    disable_model_switch: bool
     input: Optional[Path]
     output_dir: Optional[Path]
     quality: int
