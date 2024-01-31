@@ -823,7 +823,7 @@ const DiffusionOptions = () => {
                 disabled={isProcessing}
               >
                 <div className="flex items-center gap-1 select-none">
-                  <Plus size={16} />
+                  {/* <Plus size={16} /> */}
                   expand
                 </div>
               </Button>
@@ -835,7 +835,7 @@ const DiffusionOptions = () => {
                 disabled={isProcessing}
               >
                 <div className="flex items-center gap-1 select-none">
-                  <Minus size={16} />
+                  {/* <Minus size={16} /> */}
                   Shrink
                 </div>
               </Button>
