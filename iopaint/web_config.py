@@ -60,7 +60,7 @@ def save_config(
     if str(config.output_dir) == ".":
         config.output_dir = None
 
-    print(config)
+    print(config.model_dump_json(indent=4))
     if config.input and not os.path.exists(config.input):
         return "[Error] Input file or directory does not exist"
 

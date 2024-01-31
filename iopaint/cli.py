@@ -5,6 +5,7 @@ import typer
 from fastapi import FastAPI
 from loguru import logger
 from typer import Option
+from typer_config import use_json_config
 
 from iopaint.const import *
 from iopaint.runtime import setup_model_dir, dump_environment_info, check_device
@@ -92,6 +93,7 @@ def run(
 
 
 @typer_app.command(help="Start IOPaint server")
+@use_json_config()
 def start(
     host: str = Option("127.0.0.1"),
     port: int = Option(8080),
@@ -163,36 +165,35 @@ def start(
     from iopaint.schema import ApiConfig
 
     app = FastAPI()
-    api = Api(
-        app,
-        ApiConfig(
-            host=host,
-            port=port,
-            model=model,
-            no_half=no_half,
-            low_mem=low_mem,
-            cpu_offload=cpu_offload,
-            disable_nsfw_checker=disable_nsfw_checker,
-            local_files_only=local_files_only,
-            cpu_textencoder=cpu_textencoder if device == Device.cuda else False,
-            device=device,
-            input=input,
-            output_dir=output_dir,
-            quality=quality,
-            enable_interactive_seg=enable_interactive_seg,
-            interactive_seg_model=interactive_seg_model,
-            interactive_seg_device=interactive_seg_device,
-            enable_remove_bg=enable_remove_bg,
-            enable_anime_seg=enable_anime_seg,
-            enable_realesrgan=enable_realesrgan,
-            realesrgan_device=realesrgan_device,
-            realesrgan_model=realesrgan_model,
-            enable_gfpgan=enable_gfpgan,
-            gfpgan_device=gfpgan_device,
-            enable_restoreformer=enable_restoreformer,
-            restoreformer_device=restoreformer_device,
-        ),
+    api_config = ApiConfig(
+        host=host,
+        port=port,
+        model=model,
+        no_half=no_half,
+        low_mem=low_mem,
+        cpu_offload=cpu_offload,
+        disable_nsfw_checker=disable_nsfw_checker,
+        local_files_only=local_files_only,
+        cpu_textencoder=cpu_textencoder if device == Device.cuda else False,
+        device=device,
+        input=input,
+        output_dir=output_dir,
+        quality=quality,
+        enable_interactive_seg=enable_interactive_seg,
+        interactive_seg_model=interactive_seg_model,
+        interactive_seg_device=interactive_seg_device,
+        enable_remove_bg=enable_remove_bg,
+        enable_anime_seg=enable_anime_seg,
+        enable_realesrgan=enable_realesrgan,
+        realesrgan_device=realesrgan_device,
+        realesrgan_model=realesrgan_model,
+        enable_gfpgan=enable_gfpgan,
+        gfpgan_device=gfpgan_device,
+        enable_restoreformer=enable_restoreformer,
+        restoreformer_device=restoreformer_device,
     )
+    print(api_config.model_dump_json(indent=4))
+    api = Api(app, api_config)
     api.launch()
 
 
