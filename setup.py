@@ -28,7 +28,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Sanster/lama-cleaner",
-    packages=setuptools.find_packages("./"),
+    packages=setuptools.find_packages("."),
     package_data={"lama_cleaner": web_files},
     install_requires=load_requirements(),
     python_requires=">=3.7",
