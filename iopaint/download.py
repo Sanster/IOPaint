@@ -61,7 +61,7 @@ def get_sd_model_type(model_abs_path: str) -> ModelType:
                 load_safety_checker=False,
                 local_files_only=True,
                 num_in_channels=9,
-                config_files=get_config_files()
+                config_files=get_config_files(),
             )
             model_type = ModelType.DIFFUSERS_SD_INPAINT
         except ValueError as e:
@@ -86,7 +86,7 @@ def get_sdxl_model_type(model_abs_path: str) -> ModelType:
                 load_safety_checker=False,
                 local_files_only=True,
                 num_in_channels=9,
-                config_files=get_config_files()
+                config_files=get_config_files(),
             )
             if model.unet.config.in_channels == 9:
                 # https://github.com/huggingface/diffusers/issues/6610
@@ -199,7 +199,11 @@ def scan_models() -> List[ModelInfo]:
     diffusers_model_names = []
     for it in cache_dir.glob("**/*/model_index.json"):
         with open(it, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            try:
+                data = json.load(f)
+            except:
+                continue
+
             _class_name = data["_class_name"]
             name = folder_name_to_show_name(it.parent.parent.parent.name)
             if name in diffusers_model_names:
