@@ -54,8 +54,9 @@ Lama Cleaner make it easy to use SOTA AI model in just two commands:
 ```bash
 # In order to use the GPU, install cuda version of pytorch first.
 # pip install torch==1.13.1+cu117 torchvision==0.14.1 --extra-index-url https://download.pytorch.org/whl/cu117
-pip install lama-cleaner
-lama-cleaner --model=lama --device=cpu --port=8080
+git clone https://github.com/Sanster/lama-cleaner.git
+cd lama-cleaner
+python main.py
 ```
 
 That's it, Lama Cleaner is now running at http://localhost:8080
