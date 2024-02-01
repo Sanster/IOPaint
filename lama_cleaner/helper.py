@@ -129,7 +129,8 @@ def numpy_to_bytes(image_numpy: np.ndarray, ext: str) -> bytes:
     data = cv2.imencode(
         f".{ext}",
         image_numpy,
-        [int(cv2.IMWRITE_JPEG_QUALITY), 100, int(cv2.IMWRITE_PNG_COMPRESSION), 0],
+        [int(cv2.IMWRITE_JPEG_QUALITY), 100, int(
+            cv2.IMWRITE_PNG_COMPRESSION), 0],
     )[1]
     image_bytes = data.tobytes()
     return image_bytes
@@ -242,7 +243,7 @@ def pad_img_to_modulo(
     )
 
 
-def boxes_from_mask(mask: np.ndarray) -> List[np.ndarray]:
+def boxes_from_mask(mask: np.ndarray, min_area: float = 0.02) -> List[np.ndarray]:
     """
     Args:
         mask: (h, w, 1)  0~255
@@ -252,7 +253,10 @@ def boxes_from_mask(mask: np.ndarray) -> List[np.ndarray]:
     """
     height, width = mask.shape[:2]
     _, thresh = cv2.threshold(mask, 127, 255, 0)
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(
+        thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours = [c for c in contours if cv2.contourArea(
+        c) > height*width*min_area]
 
     boxes = []
     for cnt in contours:
