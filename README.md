@@ -79,4 +79,3 @@ Some popular used models include:
   - [RestoreFormer](https://iopaint.com/plugins/RestoreFormer): Face Restoration
 - [FileManager](https://iopaint.com/features/file_manager): Browse your pictures conveniently and save them directly to the output directory.
 - [Native macOS app](https://opticlean.io/) for erase task
-- More features at [IOPaint Docs](https://iopaint.com/)
