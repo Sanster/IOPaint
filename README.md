@@ -60,9 +60,15 @@ You can see more information about the available models and plugins supported by
 
 - Completely free and open-source, fully self-hosted, support CPU & GPU & Apple Silicon
 - Supports various AI models:
-  - Erase models: These models can be used to remove unwanted object, defect, watermarks, people from image.
+  - [Erase models](https://www.iopaint.com/models#erase-models): These models can be used to remove unwanted object, defect, watermarks, people from image. I have also developed a macOS native app called [OptiClean](https://opticlean.io/) that provides this feature.
   - Stable Diffusion models: You can use any Stable Diffusion Inpainting(or normal) models from [Huggingface](https://huggingface.co/models?other=stable-diffusion) in IOPaint.
-    Some popular used models include: - [runwayml/stable-diffusion-inpainting](https://huggingface.co/runwayml/stable-diffusion-inpainting) - [diffusers/stable-diffusion-xl-1.0-inpainting-0.1](https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1) - [andregn/Realistic_Vision_V3.0-inpainting](https://huggingface.co/andregn/Realistic_Vision_V3.0-inpainting) - [Lykon/dreamshaper-8-inpainting](https://huggingface.co/Lykon/dreamshaper-8-inpainting) - [Sanster/anything-4.0-inpainting](https://huggingface.co/Sanster/anything-4.0-inpainting) - [Sanster/PowerPaint-V1-stable-diffusion-inpainting](https://huggingface.co/Sanster/PowerPaint-V1-stable-diffusion-inpainting)
+    Some popular used models include:
+    - [runwayml/stable-diffusion-inpainting](https://huggingface.co/runwayml/stable-diffusion-inpainting)
+    - [diffusers/stable-diffusion-xl-1.0-inpainting-0.1](https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1)
+    - [andregn/Realistic_Vision_V3.0-inpainting](https://huggingface.co/andregn/Realistic_Vision_V3.0-inpainting)
+    - [Lykon/dreamshaper-8-inpainting](https://huggingface.co/Lykon/dreamshaper-8-inpainting)
+    - [Sanster/anything-4.0-inpainting](https://huggingface.co/Sanster/anything-4.0-inpainting)
+    - [Sanster/PowerPaint-V1-stable-diffusion-inpainting](https://huggingface.co/Sanster/PowerPaint-V1-stable-diffusion-inpainting)
   - Other Diffusion models:
     - [Sanster/AnyText](https://huggingface.co/Sanster/AnyText)
     - [timbrooks/instruct-pix2pix](https://huggingface.co/timbrooks/instruct-pix2pix)
@@ -75,5 +81,5 @@ You can see more information about the available models and plugins supported by
   - [RealESRGAN](https://iopaint.com/plugins/RealESRGAN): Super Resolution
   - [GFPGAN](https://iopaint.com/plugins/GFPGAN): Face Restoration
   - [RestoreFormer](https://iopaint.com/plugins/RestoreFormer): Face Restoration
-- [FileManager](https://iopaint.com/features/file_manager): Browse your pictures conveniently and save them directly to the output directory.
-- [Native macOS app](https://opticlean.io/) for erase task
+- [FileManager](https://iopaint.com/file_manager): Browse your pictures conveniently and save them directly to the output directory.
+
