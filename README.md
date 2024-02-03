@@ -1,76 +1,75 @@
-<p align="center">
-   <img alt="logo" height=256 src="./assets/logo.png" />
-</p>
-<h1 align="center">Lama Cleaner</h1>
-<p align="center">A free and open-source inpainting tool powered by SOTA AI model.</p>
+<h1 align="center">IOPaint</h1>
+<p align="center">A free and open-source inpainting & outpainting tool powered by SOTA AI model.</p>
 
 <p align="center">
-  <a href="https://github.com/Sanster/lama-cleaner">
-    <img alt="total download" src="https://pepy.tech/badge/lama-cleaner" />
+  <a href="https://github.com/Sanster/IOPaint">
+    <img alt="total download" src="https://pepy.tech/badge/iopaint" />
   </a>
-  <a href="https://pypi.org/project/lama-cleaner/">
-    <img alt="version" src="https://img.shields.io/pypi/v/lama-cleaner" />
+  <a href="https://pypi.org/project/iopaint">
+    <img alt="version" src="https://img.shields.io/pypi/v/iopaint" />
   </a>
-  <a href="https://colab.research.google.com/drive/1e3ZkAJxvkK3uzaTGu91N9TvI_Mahs0Wb?usp=sharing">
-    <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg" />
-  </a>
-
-  <a href="https://huggingface.co/spaces/Sanster/Lama-Cleaner-lama">
-    <img alt="Hugging Face Spaces" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue" />
-  </a>
-
   <a href="">
-    <img alt="python version" src="https://img.shields.io/pypi/pyversions/lama-cleaner" />
-  </a>
-  <a href="https://hub.docker.com/r/cwq1913/lama-cleaner">
-    <img alt="version" src="https://img.shields.io/docker/pulls/cwq1913/lama-cleaner" />
+    <img alt="python version" src="https://img.shields.io/pypi/pyversions/iopaint" />
   </a>
 </p>
 
-https://user-images.githubusercontent.com/3998421/196976498-ba1ad3ab-fa18-4c55-965f-5c6683141375.mp4
-
-## Features
-
-- Completely free and open-source, fully self-hosted, support CPU & GPU & M1/2
-- [Windows 1-Click Installer](https://lama-cleaner-docs.vercel.app/install/windows_1click_installer)
-- [Native macOS app](https://opticlean.io/)
-- Multiple SOTA AI [models](https://lama-cleaner-docs.vercel.app/models)
-  - Erase model: LaMa/LDM/ZITS/MAT/FcF/Manga
-  - Erase and Replace model: Stable Diffusion/Paint by Example
-- [Plugins](https://lama-cleaner-docs.vercel.app/plugins) for post-processing:
-  - [RemoveBG](https://lama-cleaner-docs.vercel.app/plugins/rembg): Remove images background 
-  - [RealESRGAN](https://lama-cleaner-docs.vercel.app/plugins/RealESRGAN): Super Resolution
-  - [GFPGAN](https://lama-cleaner-docs.vercel.app/plugins/GFPGAN): Face Restoration
-  - [RestoreFormer](https://lama-cleaner-docs.vercel.app/plugins/RestoreFormer): Face Restoration
-  - [Segment Anything](https://lama-cleaner-docs.vercel.app/plugins/interactive_seg): Accurate and fast interactive object segmentation
-- [FileManager](https://lama-cleaner-docs.vercel.app/features/file_manager): Browse your pictures conveniently and save them directly to the output directory.
-- [Docker Image](https://lama-cleaner-docs.vercel.app/install/docker)
-- More features at [lama-cleaner-docs](https://lama-cleaner-docs.vercel.app/)
+<p align="center">
+    <img alt="python version" src="https://github.com/Sanster/models/assets/3998421/561b8395-76a2-4c70-ab24-9f6986924c6a" height=600 />
+</p>
 
 ## Quick Start
 
-Lama Cleaner make it easy to use SOTA AI model in just two commands:
+### Start webui
+
+IOPaint provides a convenient webui for using the latest AI models to edit your images.
+You can install and start IOPaint easily by running following command:
 
 ```bash
-# In order to use the GPU, install cuda version of pytorch first.
-# pip install torch==1.13.1+cu117 torchvision==0.14.1 --extra-index-url https://download.pytorch.org/whl/cu117
-pip install lama-cleaner
-lama-cleaner --model=lama --device=cpu --port=8080
+# In order to use GPU, install cuda version of pytorch first.
+# pip3 install torch==2.1.2 torchvision==0.16.2 --index-url https://download.pytorch.org/whl/cu118
+# AMD GPU users, please utilize the following command, only works on linux, as pytorch is not yet supported on Windows with ROCm.
+# pip3 install torch==2.1.2 torchvision==0.16.2 --index-url https://download.pytorch.org/whl/rocm5.6
+
+pip3 install iopaint
+iopaint start --model=lama --device=cpu --port=8080
 ```
 
-That's it, Lama Cleaner is now running at http://localhost:8080
+That's it, you can start using IOPaint by visiting http://localhost:8080 in your web browser.
 
-See all command line arguments at [lama-cleaner-docs](https://lama-cleaner-docs.vercel.app/install/pip)
+### Batch processing
 
-## Development
+You can also use IOPaint in the command line to batch process images:
 
-Only needed if you plan to modify the frontend and recompile yourself.
+```bash
+iopaint run --model=lama --device=cpu \
+--input=/path/to/image_folder \
+--mask=/path/to/mask_folder \
+--output=output_dir
+```
 
-### Frontend
+`--input` is the folder containing input images, `--mask` is the folder containing corresponding mask images.
+When `--mask` is a path to a mask file, all images will be processed using this mask.
 
-Frontend code are modified from [cleanup.pictures](https://github.com/initml/cleanup.pictures), You can experience their
-great online services [here](https://cleanup.pictures/).
+You can see more information about the available models and plugins supported by IOPaint below.
 
-- Install dependencies:`cd lama_cleaner/app/ && pnpm install`
-- Start development server: `pnpm start`
-- Build: `pnpm build`
+## Features
+
+- Completely free and open-source, fully self-hosted, support CPU & GPU & Apple Silicon
+- Supports various AI models:
+  - Erase models: These models can be used to remove unwanted object, defect, watermarks, people from image.
+  - Stable Diffusion models: You can use any Stable Diffusion Inpainting(or normal) models from [Huggingface](https://huggingface.co/models?other=stable-diffusion) in IOPaint.
+    Some popular used models include: - [runwayml/stable-diffusion-inpainting](https://huggingface.co/runwayml/stable-diffusion-inpainting) - [diffusers/stable-diffusion-xl-1.0-inpainting-0.1](https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1) - [andregn/Realistic_Vision_V3.0-inpainting](https://huggingface.co/andregn/Realistic_Vision_V3.0-inpainting) - [Lykon/dreamshaper-8-inpainting](https://huggingface.co/Lykon/dreamshaper-8-inpainting) - [Sanster/anything-4.0-inpainting](https://huggingface.co/Sanster/anything-4.0-inpainting) - [Sanster/PowerPaint-V1-stable-diffusion-inpainting](https://huggingface.co/Sanster/PowerPaint-V1-stable-diffusion-inpainting)
+  - Other Diffusion models:
+    - [Sanster/AnyText](https://huggingface.co/Sanster/AnyText)
+    - [timbrooks/instruct-pix2pix](https://huggingface.co/timbrooks/instruct-pix2pix)
+    - [Fantasy-Studio/Paint-by-Example](https://huggingface.co/Fantasy-Studio/Paint-by-Example)
+    - [kandinsky-community/kandinsky-2-2-decoder-inpaint](https://huggingface.co/kandinsky-community/kandinsky-2-2-decoder-inpaint)
+- Plugins
+  - [Segment Anything](https://iopaint.com/plugins/interactive_seg): Accurate and fast interactive object segmentation
+  - [RemoveBG](https://iopaint.com/plugins/rembg): Remove image background or generate masks for foreground objects
+  - [Anime Segmentation](https://iopaint.com/plugins/anime_seg): Similar to RemoveBG, the model is specifically trained for anime images.
+  - [RealESRGAN](https://iopaint.com/plugins/RealESRGAN): Super Resolution
+  - [GFPGAN](https://iopaint.com/plugins/GFPGAN): Face Restoration
+  - [RestoreFormer](https://iopaint.com/plugins/RestoreFormer): Face Restoration
+- [FileManager](https://iopaint.com/features/file_manager): Browse your pictures conveniently and save them directly to the output directory.
+- [Native macOS app](https://opticlean.io/) for erase task

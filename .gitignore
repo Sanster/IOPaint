@@ -4,7 +4,9 @@ examples/
 .idea/
 .vscode/
 build
-!lama_cleaner/app/build
+!iopaint/app/build
 dist/
-lama_cleaner.egg-info/
+IOPaint.egg-info/
 venv/
+tmp/
+iopaint/web_app/

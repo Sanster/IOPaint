@@ -1,8 +1,15 @@
 import setuptools
 from pathlib import Path
 
-web_files = Path("lama_cleaner/app/build/").glob("**/*")
-web_files = [str(it).replace("lama_cleaner/", "") for it in web_files]
+package_files = Path("iopaint/web_app").glob("**/*")
+package_files = [str(it).replace("iopaint/", "") for it in package_files]
+package_files += ["model/anytext/ocr_recog/ppocr_keys_v1.txt"]
+package_files += ["model/anytext/anytext_sd15.yaml"]
+package_files += ["model/original_sd_configs/sd_xl_base.yaml"]
+package_files += ["model/original_sd_configs/sd_xl_refiner.yaml"]
+package_files += ["model/original_sd_configs/v1-inference.yaml"]
+package_files += ["model/original_sd_configs/v2-inference-v.yaml"]
+
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -20,19 +27,19 @@ def load_requirements():
 
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#including-data-files
 setuptools.setup(
-    name="lama-cleaner",
-    version="1.2.5",
+    name="IOPaint",
+    version="1.0.0",
     author="PanicByte",
     author_email="cwq1913@gmail.com",
-    description="Image inpainting tool powered by SOTA AI Model",
+    description="Image inpainting, outpainting tool powered by SOTA AI Model",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Sanster/lama-cleaner",
     packages=setuptools.find_packages("."),
-    package_data={"lama_cleaner": web_files},
+    package_data={"iopaint": package_files},
     install_requires=load_requirements(),
     python_requires=">=3.7",
-    entry_points={"console_scripts": ["lama-cleaner=lama_cleaner:entry_point"]},
+    entry_points={"console_scripts": ["iopaint=iopaint:entry_point"]},
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
