@@ -13,9 +13,13 @@
   </a>
 </p>
 
-<p align="center">
-    <img alt="python version" src="https://github.com/Sanster/models/assets/3998421/561b8395-76a2-4c70-ab24-9f6986924c6a" height=600 />
-</p>
+|Erase|Replace Object|
+|-----|----|
+|<video src="https://github.com/Sanster/IOPaint/assets/3998421/264bc27c-0abd-4d8b-bb1e-0078ab264c4a">  | <video src="https://github.com/Sanster/IOPaint/assets/3998421/1de5c288-e0e1-4f32-926d-796df0655846">|
+
+|Draw Text|Out-painting|
+|---------|-----------|
+|<video src="https://github.com/Sanster/IOPaint/assets/3998421/ffd4eda4-f7d4-4693-93d8-d2cd5aa7c6d6">|<video src="https://github.com/Sanster/IOPaint/assets/3998421/c4af8aef-8c29-49e0-96eb-0aae2f768da2">|
 
 ## Quick Start
 
