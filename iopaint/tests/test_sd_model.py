@@ -256,10 +256,14 @@ def test_local_file_path(device, sampler, name):
 
     name = f"device_{device}_{sampler}_{name}"
 
+    is_sdxl = "sd_xl" in name
+
     assert_equal(
         model,
         cfg,
         f"sd_local_model_{name}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
+        fx=1.5 if is_sdxl else 1,
+        fy=1.5 if is_sdxl else 1,
     )
