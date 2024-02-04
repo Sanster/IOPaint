@@ -396,11 +396,11 @@ export default function Editor(props: EditorProps) {
   }
 
   const onPointerUp = (ev: SyntheticEvent) => {
-    if (!hadDrawSomething()) {
-      return
-    }
     if (isMidClick(ev)) {
       setIsPanning(false)
+      return
+    }
+    if (!hadDrawSomething()) {
       return
     }
     if (interactiveSegState.isInteractiveSeg) {
