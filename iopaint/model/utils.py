@@ -983,7 +983,11 @@ def handle_from_pretrained_exceptions(func, **kwargs):
     except ValueError as e:
         if "You are trying to load the model files of the `variant=fp16`" in str(e):
             logger.info("variant=fp16 not found, try revision=fp16")
-            return func(**{**kwargs, "variant": None, "revision": "fp16"})
+            try:
+                return func(**{**kwargs, "variant": None, "revision": "fp16"})
+            except Exception as e:
+                logger.info("revision=fp16 not found, try revision=main")
+                return func(**{**kwargs, "variant": None, "revision": "main"})
         raise e
     except OSError as e:
         previous_traceback = traceback.format_exc()
