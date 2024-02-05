@@ -11,6 +11,12 @@
   <a href="">
     <img alt="python version" src="https://img.shields.io/pypi/pyversions/iopaint" />
   </a>
+  <a href="https://huggingface.co/spaces/Sanster/iopaint-lama">
+    <img alt="HuggingFace Spaces" src="https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-Spaces-blue" />
+  </a>
+  <a href="https://colab.research.google.com/drive/1wg3Y874eAgdaX0EIjIgTZROze3hqXyo7?usp=sharing">
+    <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg" />
+  </a>
 </p>
 
 |Erase|Replace Object|
