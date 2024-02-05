@@ -79,6 +79,7 @@ def check_device(device: Device) -> Device:
 
 def setup_model_dir(model_dir: Path):
     model_dir = model_dir.expanduser().absolute()
+    logger.info(f"Model directory: {model_dir}")
     os.environ["U2NET_HOME"] = str(model_dir)
     os.environ["XDG_CACHE_HOME"] = str(model_dir)
     if not model_dir.exists():
