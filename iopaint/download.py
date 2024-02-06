@@ -59,7 +59,6 @@ def get_sd_model_type(model_abs_path: str) -> ModelType:
             StableDiffusionInpaintPipeline.from_single_file(
                 model_abs_path,
                 load_safety_checker=False,
-                local_files_only=True,
                 num_in_channels=9,
                 config_files=get_config_files(),
             )
@@ -84,7 +83,6 @@ def get_sdxl_model_type(model_abs_path: str) -> ModelType:
             model = StableDiffusionXLInpaintPipeline.from_single_file(
                 model_abs_path,
                 load_safety_checker=False,
-                local_files_only=True,
                 num_in_channels=9,
                 config_files=get_config_files(),
             )
