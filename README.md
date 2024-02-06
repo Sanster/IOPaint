@@ -65,6 +65,7 @@ You can see more information about the available models and plugins supported by
 ## Features
 
 - Completely free and open-source, fully self-hosted, support CPU & GPU & Apple Silicon
+- [Windows 1-Click Installer](https://www.iopaint.com/install/windows_1click_installer)
 - Supports various AI models:
   - [Erase models](https://www.iopaint.com/models#erase-models): These models can be used to remove unwanted object, defect, watermarks, people from image. I have also developed a macOS native app called [OptiClean](https://opticlean.io/) that provides this feature.
   - Stable Diffusion models: You can use any Stable Diffusion Inpainting(or normal) models from [Huggingface](https://huggingface.co/models?other=stable-diffusion) in IOPaint.
