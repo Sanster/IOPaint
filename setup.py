@@ -28,13 +28,13 @@ def load_requirements():
 # https://setuptools.readthedocs.io/en/latest/setuptools.html#including-data-files
 setuptools.setup(
     name="IOPaint",
-    version="1.0.3",
+    version="1.0.4",
     author="PanicByte",
     author_email="cwq1913@gmail.com",
     description="Image inpainting, outpainting tool powered by SOTA AI Model",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Sanster/lama-cleaner",
+    url="https://github.com/Sanster/IOPaint",
     packages=setuptools.find_packages("."),
     package_data={"iopaint": package_files},
     install_requires=load_requirements(),
