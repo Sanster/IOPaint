@@ -1,4 +1,14 @@
+import json
 import os
+from pathlib import Path
+
+from iopaint.schema import (
+    Device,
+    InteractiveSegModel,
+    RemoveBGModel,
+    RealESRGANModel,
+    ApiConfig,
+)
 
 os.environ["GRADIO_ANALYTICS_ENABLED"] = "False"
 
@@ -13,6 +23,37 @@ from iopaint.const import *
 
 
 _config_file: Path = None
+
+
+default_configs = dict(
+    host="127.0.0.1",
+    port=8080,
+    model=DEFAULT_MODEL,
+    model_dir=DEFAULT_MODEL_DIR,
+    no_half=False,
+    low_mem=False,
+    cpu_offload=False,
+    disable_nsfw_checker=False,
+    local_files_only=False,
+    cpu_textencoder=False,
+    device=Device.cuda,
+    input=None,
+    output_dir=None,
+    quality=95,
+    enable_interactive_seg=False,
+    interactive_seg_model=InteractiveSegModel.vit_b,
+    interactive_seg_device=Device.cpu,
+    enable_remove_bg=False,
+    remove_bg_model=RemoveBGModel.u2net,
+    enable_anime_seg=False,
+    enable_realesrgan=False,
+    realesrgan_device=Device.cpu,
+    realesrgan_model=RealESRGANModel.realesr_general_x4v3,
+    enable_gfpgan=False,
+    gfpgan_device=Device.cpu,
+    enable_restoreformer=False,
+    restoreformer_device=Device.cpu,
+)
 
 
 class WebConfig(ApiConfig):
@@ -50,6 +91,7 @@ def save_config(
     interactive_seg_model,
     interactive_seg_device,
     enable_remove_bg,
+    remove_bg_model,
     enable_anime_seg,
     enable_realesrgan,
     realesrgan_device,
@@ -115,7 +157,7 @@ def main(config_file: Path):
                 with gr.Row():
                     recommend_model = gr.Dropdown(
                         ["lama", "mat", "migan"] + DIFFUSION_MODELS,
-                        label="Recommend Models",
+                        label="Recommended Models",
                     )
                     downloaded_model = gr.Dropdown(
                         downloaded_models, label="Downloaded Models"
@@ -179,6 +221,11 @@ def main(config_file: Path):
                     enable_remove_bg = gr.Checkbox(
                         init_config.enable_remove_bg, label=REMOVE_BG_HELP
                     )
+                    remove_bg_model = gr.Radio(
+                        RemoveBGModel.values(),
+                        label="Remove bg model",
+                        value=init_config.remove_bg_model,
+                    )
                 with gr.Row():
                     enable_anime_seg = gr.Checkbox(
                         init_config.enable_anime_seg, label=ANIMESEG_HELP
@@ -241,6 +288,7 @@ def main(config_file: Path):
                 interactive_seg_model,
                 interactive_seg_device,
                 enable_remove_bg,
+                remove_bg_model,
                 enable_anime_seg,
                 enable_realesrgan,
                 realesrgan_device,

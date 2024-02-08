@@ -5,11 +5,11 @@ import sys
 from pathlib import Path
 
 import packaging.version
+from iopaint.schema import Device
 from loguru import logger
 from rich import print
 from typing import Dict, Any
 
-from iopaint.const import Device
 
 _PY_VERSION: str = sys.version.split()[0].rstrip("+")
 

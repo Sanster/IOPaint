@@ -9,7 +9,7 @@ from typer_config import use_json_config
 
 from iopaint.const import *
 from iopaint.runtime import setup_model_dir, dump_environment_info, check_device
-from iopaint.schema import InteractiveSegModel, Device, RealESRGANModel
+from iopaint.schema import InteractiveSegModel, Device, RealESRGANModel, RemoveBGModel
 
 typer_app = typer.Typer(pretty_exceptions_show_locals=False, add_completion=False)
 
@@ -127,6 +127,7 @@ def start(
     ),
     interactive_seg_device: Device = Option(Device.cpu),
     enable_remove_bg: bool = Option(False, help=REMOVE_BG_HELP),
+    remove_bg_model: RemoveBGModel = Option(RemoveBGModel.briaai_rmbg_1_4),
     enable_anime_seg: bool = Option(False, help=ANIMESEG_HELP),
     enable_realesrgan: bool = Option(False),
     realesrgan_device: Device = Option(Device.cpu),
@@ -183,6 +184,7 @@ def start(
         interactive_seg_model=interactive_seg_model,
         interactive_seg_device=interactive_seg_device,
         enable_remove_bg=enable_remove_bg,
+        remove_bg_model=remove_bg_model,
         enable_anime_seg=enable_anime_seg,
         enable_realesrgan=enable_realesrgan,
         realesrgan_device=realesrgan_device,

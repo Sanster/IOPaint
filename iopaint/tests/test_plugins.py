@@ -5,7 +5,7 @@ from PIL import Image
 
 from iopaint.helper import encode_pil_to_base64, gen_frontend_mask
 from iopaint.plugins.anime_seg import AnimeSeg
-from iopaint.schema import RunPluginRequest
+from iopaint.schema import RunPluginRequest, RemoveBGModel
 from iopaint.tests.utils import check_device, current_dir, save_dir
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
@@ -34,7 +34,7 @@ def _save(img, name):
 
 
 def test_remove_bg():
-    model = RemoveBG()
+    model = RemoveBG(RemoveBGModel.briaai_rmbg_1_4)
     rgba_np_img = model.gen_image(
         rgb_img, RunPluginRequest(name=RemoveBG.name, image=rgb_img_base64)
     )

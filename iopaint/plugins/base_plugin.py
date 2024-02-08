@@ -25,3 +25,6 @@ class BasePlugin:
 
     def check_dep(self):
         ...
+
+    def switch_model(self, new_model_name: str):
+        ...

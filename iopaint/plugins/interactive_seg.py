@@ -1,8 +1,6 @@
 import hashlib
-import json
 from typing import List
 
-import cv2
 import numpy as np
 import torch
 from loguru import logger

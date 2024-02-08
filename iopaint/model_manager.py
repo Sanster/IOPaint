@@ -8,8 +8,7 @@ from iopaint.download import scan_models
 from iopaint.helper import switch_mps_device
 from iopaint.model import models, ControlNet, SD, SDXL
 from iopaint.model.utils import torch_gc, is_local_files_only
-from iopaint.model_info import ModelInfo, ModelType
-from iopaint.schema import InpaintRequest
+from iopaint.schema import InpaintRequest, ModelInfo, ModelType
 
 
 class ModelManager:

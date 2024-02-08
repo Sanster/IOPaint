@@ -1,11 +1,117 @@
-import json
 import random
 from enum import Enum
 from pathlib import Path
 from typing import Optional, Literal, List
 
+from iopaint.const import (
+    INSTRUCT_PIX2PIX_NAME,
+    KANDINSKY22_NAME,
+    POWERPAINT_NAME,
+    ANYTEXT_NAME,
+    SDXL_CONTROLNET_CHOICES,
+    SD2_CONTROLNET_CHOICES,
+    SD_CONTROLNET_CHOICES,
+)
 from loguru import logger
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, computed_field
+
+
+class ModelType(str, Enum):
+    INPAINT = "inpaint"  # LaMa, MAT...
+    DIFFUSERS_SD = "diffusers_sd"
+    DIFFUSERS_SD_INPAINT = "diffusers_sd_inpaint"
+    DIFFUSERS_SDXL = "diffusers_sdxl"
+    DIFFUSERS_SDXL_INPAINT = "diffusers_sdxl_inpaint"
+    DIFFUSERS_OTHER = "diffusers_other"
+
+
+class ModelInfo(BaseModel):
+    name: str
+    path: str
+    model_type: ModelType
+    is_single_file_diffusers: bool = False
+
+    @computed_field
+    @property
+    def need_prompt(self) -> bool:
+        return self.model_type in [
+            ModelType.DIFFUSERS_SD,
+            ModelType.DIFFUSERS_SDXL,
+            ModelType.DIFFUSERS_SD_INPAINT,
+            ModelType.DIFFUSERS_SDXL_INPAINT,
+        ] or self.name in [
+            INSTRUCT_PIX2PIX_NAME,
+            KANDINSKY22_NAME,
+            POWERPAINT_NAME,
+            ANYTEXT_NAME,
+        ]
+
+    @computed_field
+    @property
+    def controlnets(self) -> List[str]:
+        if self.model_type in [
+            ModelType.DIFFUSERS_SDXL,
+            ModelType.DIFFUSERS_SDXL_INPAINT,
+        ]:
+            return SDXL_CONTROLNET_CHOICES
+        if self.model_type in [ModelType.DIFFUSERS_SD, ModelType.DIFFUSERS_SD_INPAINT]:
+            if "sd2" in self.name.lower():
+                return SD2_CONTROLNET_CHOICES
+            else:
+                return SD_CONTROLNET_CHOICES
+        if self.name == POWERPAINT_NAME:
+            return SD_CONTROLNET_CHOICES
+        return []
+
+    @computed_field
+    @property
+    def support_strength(self) -> bool:
+        return self.model_type in [
+            ModelType.DIFFUSERS_SD,
+            ModelType.DIFFUSERS_SDXL,
+            ModelType.DIFFUSERS_SD_INPAINT,
+            ModelType.DIFFUSERS_SDXL_INPAINT,
+        ] or self.name in [POWERPAINT_NAME, ANYTEXT_NAME]
+
+    @computed_field
+    @property
+    def support_outpainting(self) -> bool:
+        return self.model_type in [
+            ModelType.DIFFUSERS_SD,
+            ModelType.DIFFUSERS_SDXL,
+            ModelType.DIFFUSERS_SD_INPAINT,
+            ModelType.DIFFUSERS_SDXL_INPAINT,
+        ] or self.name in [KANDINSKY22_NAME, POWERPAINT_NAME]
+
+    @computed_field
+    @property
+    def support_lcm_lora(self) -> bool:
+        return self.model_type in [
+            ModelType.DIFFUSERS_SD,
+            ModelType.DIFFUSERS_SDXL,
+            ModelType.DIFFUSERS_SD_INPAINT,
+            ModelType.DIFFUSERS_SDXL_INPAINT,
+        ]
+
+    @computed_field
+    @property
+    def support_controlnet(self) -> bool:
+        return self.model_type in [
+            ModelType.DIFFUSERS_SD,
+            ModelType.DIFFUSERS_SDXL,
+            ModelType.DIFFUSERS_SD_INPAINT,
+            ModelType.DIFFUSERS_SDXL_INPAINT,
+        ]
+
+    @computed_field
+    @property
+    def support_freeu(self) -> bool:
+        return self.model_type in [
+            ModelType.DIFFUSERS_SD,
+            ModelType.DIFFUSERS_SDXL,
+            ModelType.DIFFUSERS_SD_INPAINT,
+            ModelType.DIFFUSERS_SDXL_INPAINT,
+        ] or self.name in [INSTRUCT_PIX2PIX_NAME]
 
 
 class Choices(str, Enum):
@@ -18,6 +124,16 @@ class RealESRGANModel(Choices):
     realesr_general_x4v3 = "realesr-general-x4v3"
     RealESRGAN_x4plus = "RealESRGAN_x4plus"
     RealESRGAN_x4plus_anime_6B = "RealESRGAN_x4plus_anime_6B"
+
+
+class RemoveBGModel(Choices):
+    u2net = "u2net"
+    u2netp = "u2netp"
+    u2net_human_seg = "u2net_human_seg"
+    u2net_cloth_seg = "u2net_cloth_seg"
+    silueta = "silueta"
+    isnet_general_use = "isnet-general-use"
+    briaai_rmbg_1_4 = "briaai/RMBG-1.4"
 
 
 class Device(Choices):
@@ -42,15 +158,6 @@ class PluginInfo(BaseModel):
 class CV2Flag(str, Enum):
     INPAINT_NS = "INPAINT_NS"
     INPAINT_TELEA = "INPAINT_TELEA"
-
-
-class ModelType(str, Enum):
-    INPAINT = "inpaint"  # LaMa, MAT...
-    DIFFUSERS_SD = "diffusers_sd"
-    DIFFUSERS_SD_INPAINT = "diffusers_sd_inpaint"
-    DIFFUSERS_SDXL = "diffusers_sdxl"
-    DIFFUSERS_SDXL_INPAINT = "diffusers_sdxl_inpaint"
-    DIFFUSERS_OTHER = "diffusers_other"
 
 
 class HDStrategy(str, Enum):
@@ -124,6 +231,7 @@ class ApiConfig(BaseModel):
     interactive_seg_model: InteractiveSegModel
     interactive_seg_device: Device
     enable_remove_bg: bool
+    remove_bg_model: str
     enable_anime_seg: bool
     enable_realesrgan: bool
     realesrgan_device: Device
@@ -313,6 +421,9 @@ class GenInfoResponse(BaseModel):
 
 class ServerConfigResponse(BaseModel):
     plugins: List[PluginInfo]
+    modelInfos: List[ModelInfo]
+    removeBGModel: RemoveBGModel
+    removeBGModels: List[str]
     enableFileManager: bool
     enableAutoSaving: bool
     enableControlnet: bool
@@ -324,6 +435,11 @@ class ServerConfigResponse(BaseModel):
 
 class SwitchModelRequest(BaseModel):
     name: str
+
+
+class SwitchPluginModelRequest(BaseModel):
+    plugin_name: str
+    model_name: str
 
 
 AdjustMaskOperate = Literal["expand", "shrink", "reverse"]

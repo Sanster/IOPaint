@@ -12,7 +12,7 @@ export default function useInputImage() {
     fetch(`${API_ENDPOINT}/inputimage`, { headers })
       .then(async (res) => {
         if (!res.ok) {
-          throw new Error("No input image found")
+          return
         }
         const filename = res.headers
           .get("content-disposition")

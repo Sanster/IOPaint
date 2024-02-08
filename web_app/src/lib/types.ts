@@ -14,6 +14,9 @@ export interface PluginInfo {
 
 export interface ServerConfig {
   plugins: PluginInfo[]
+  modelInfos: ModelInfo[]
+  removeBGModel: string
+  removeBGModels: string[]
   enableFileManager: boolean
   enableAutoSaving: boolean
   enableControlnet: boolean

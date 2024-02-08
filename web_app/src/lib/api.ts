@@ -104,13 +104,16 @@ export async function switchModel(name: string): Promise<ModelInfo> {
   return res.data
 }
 
+export async function switchPluginModel(
+  plugin_name: string,
+  model_name: string
+) {
+  return api.post(`/switch_plugin_model`, { plugin_name, model_name })
+}
+
 export async function currentModel(): Promise<ModelInfo> {
   const res = await api.get("/model")
   return res.data
-}
-
-export function fetchModelInfos(): Promise<ModelInfo[]> {
-  return api.get("/models").then((response) => response.data)
 }
 
 export async function runPlugin(

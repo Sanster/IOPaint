@@ -3,6 +3,7 @@ import os
 from functools import lru_cache
 from typing import List
 
+from iopaint.schema import ModelType, ModelInfo
 from loguru import logger
 from pathlib import Path
 
@@ -15,7 +16,6 @@ from iopaint.const import (
     ANYTEXT_NAME,
 )
 from iopaint.model.original_sd_configs import get_config_files
-from iopaint.model_info import ModelInfo, ModelType
 
 
 def cli_download_model(model: str):
