@@ -423,7 +423,9 @@ class ServerConfigResponse(BaseModel):
     plugins: List[PluginInfo]
     modelInfos: List[ModelInfo]
     removeBGModel: RemoveBGModel
-    removeBGModels: List[str]
+    removeBGModels: List[RemoveBGModel]
+    realesrganModel: RealESRGANModel
+    realesrganModels: List[RealESRGANModel]
     enableFileManager: bool
     enableAutoSaving: bool
     enableControlnet: bool

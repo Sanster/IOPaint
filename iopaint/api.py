@@ -43,7 +43,7 @@ from iopaint.helper import (
 )
 from iopaint.model.utils import torch_gc
 from iopaint.model_manager import ModelManager
-from iopaint.plugins import build_plugins
+from iopaint.plugins import build_plugins, RealESRGANUpscaler
 from iopaint.plugins.base_plugin import BasePlugin
 from iopaint.plugins.remove_bg import RemoveBG
 from iopaint.schema import (
@@ -59,6 +59,7 @@ from iopaint.schema import (
     RemoveBGModel,
     SwitchPluginModelRequest,
     ModelInfo,
+    RealESRGANModel,
 )
 
 CURRENT_DIR = Path(__file__).parent.absolute().resolve()
@@ -192,6 +193,8 @@ class Api:
             self.plugins[req.plugin_name].switch_model(req.model_name)
             if req.plugin_name == RemoveBG.name:
                 self.config.remove_bg_model = req.model_name
+            if req.plugin_name == RealESRGANUpscaler.name:
+                self.config.realesrgan_model = req.model_name
 
     def api_server_config(self) -> ServerConfigResponse:
         plugins = []
@@ -209,6 +212,8 @@ class Api:
             modelInfos=self.model_manager.scan_models(),
             removeBGModel=self.config.remove_bg_model,
             removeBGModels=RemoveBGModel.values(),
+            realesrganModel=self.config.realesrgan_model,
+            realesrganModels=RealESRGANModel.values(),
             enableFileManager=self.file_manager is not None,
             enableAutoSaving=self.config.output_dir is not None,
             enableControlnet=self.model_manager.enable_controlnet,

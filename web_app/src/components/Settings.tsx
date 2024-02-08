@@ -57,6 +57,7 @@ const formSchema = z.object({
   enableUploadMask: z.boolean(),
   enableAutoExtractPrompt: z.boolean(),
   removeBGModel: z.string(),
+  realesrganModel: z.string(),
 })
 
 const TAB_GENERAL = "General"
@@ -108,6 +109,7 @@ export function SettingsDialog() {
       inputDirectory: fileManagerState.inputDirectory,
       outputDirectory: fileManagerState.outputDirectory,
       removeBGModel: serverConfig?.removeBGModel,
+      realesrganModel: serverConfig?.realesrganModel,
     },
   })
 
@@ -115,6 +117,7 @@ export function SettingsDialog() {
     if (serverConfig) {
       setServerConfig(serverConfig)
       form.setValue("removeBGModel", serverConfig.removeBGModel)
+      form.setValue("realesrganModel", serverConfig.realesrganModel)
     }
   }, [form, serverConfig])
 
@@ -136,7 +139,12 @@ export function SettingsDialog() {
     const shouldSwitchModel = model.name !== settings.model.name
     const shouldSwitchRemoveBGModel =
       serverConfig?.removeBGModel !== values.removeBGModel
-    const showModelSwitching = shouldSwitchModel || shouldSwitchRemoveBGModel
+    const shouldSwitchRealesrganModel =
+      serverConfig?.realesrganModel !== values.realesrganModel
+    const showModelSwitching =
+      shouldSwitchModel ||
+      shouldSwitchRemoveBGModel ||
+      shouldSwitchRealesrganModel
 
     if (showModelSwitching) {
       const newModelSwitchingTexts: string[] = []
@@ -147,7 +155,12 @@ export function SettingsDialog() {
       }
       if (shouldSwitchRemoveBGModel) {
         newModelSwitchingTexts.push(
-          `Switching removebg model from ${serverConfig?.removeBGModel} to ${values.removeBGModel}`
+          `Switching RemoveBG model from ${serverConfig?.removeBGModel} to ${values.removeBGModel}`
+        )
+      }
+      if (shouldSwitchRealesrganModel) {
+        newModelSwitchingTexts.push(
+          `Switching RealESRGAN model from ${serverConfig?.realesrganModel} to ${values.realesrganModel}`
         )
       }
       setModelSwitchingTexts(newModelSwitchingTexts)
@@ -182,7 +195,24 @@ export function SettingsDialog() {
         } catch (error: any) {
           toast({
             variant: "destructive",
-            title: `Switch removebg model to ${model.name} failed: ${error}`,
+            title: `Switch RemoveBG model to ${model.name} failed: ${error}`,
+          })
+        }
+      }
+
+      if (shouldSwitchRealesrganModel) {
+        try {
+          const res = await switchPluginModel(
+            PluginName.RealESRGAN,
+            values.realesrganModel
+          )
+          if (res.status !== 200) {
+            throw new Error(res.statusText)
+          }
+        } catch (error: any) {
+          toast({
+            variant: "destructive",
+            title: `Switch RealESRGAN model to ${model.name} failed: ${error}`,
           })
         }
       }
@@ -211,6 +241,9 @@ export function SettingsDialog() {
   const plugins = serverConfig.plugins
   const removeBGEnabled = plugins.some(
     (plugin) => plugin.name === PluginName.RemoveBG
+  )
+  const realesrganEnabled = plugins.some(
+    (plugin) => plugin.name === PluginName.RealESRGAN
   )
 
   function onOpenChange(value: boolean) {
@@ -437,13 +470,48 @@ export function SettingsDialog() {
                 disabled={!removeBGEnabled}
               >
                 <FormControl>
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="w-auto">
                     <SelectValue placeholder="Select removebg model" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent align="end">
                   <SelectGroup>
                     {serverConfig?.removeBGModels.map((model) => (
+                      <SelectItem key={model} value={model}>
+                        {model}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+
+        <Separator />
+
+        <FormField
+          control={form.control}
+          name="realesrganModel"
+          render={({ field }) => (
+            <FormItem className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <FormLabel>RealESRGAN</FormLabel>
+                <FormDescription>RealESRGAN Model</FormDescription>
+              </div>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={!realesrganEnabled}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-auto">
+                    <SelectValue placeholder="Select RealESRGAN model" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent align="end">
+                  <SelectGroup>
+                    {serverConfig?.realesrganModels.map((model) => (
                       <SelectItem key={model} value={model}>
                         {model}
                       </SelectItem>
