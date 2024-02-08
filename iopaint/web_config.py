@@ -28,6 +28,7 @@ _config_file: Path = None
 default_configs = dict(
     host="127.0.0.1",
     port=8080,
+    inbrowser=True,
     model=DEFAULT_MODEL,
     model_dir=DEFAULT_MODEL_DIR,
     no_half=False,
@@ -100,6 +101,7 @@ def save_config(
     gfpgan_device,
     enable_restoreformer,
     restoreformer_device,
+    inbrowser,
 ):
     config = WebConfig(**locals())
     if str(config.input) == ".":
@@ -146,6 +148,7 @@ def main(config_file: Path):
                 with gr.Row():
                     host = gr.Textbox(init_config.host, label="Host")
                     port = gr.Number(init_config.port, label="Port", precision=0)
+                    inbrowser = gr.Checkbox(init_config.inbrowser, label=INBROWSER_HELP)
 
                 with gr.Column():
                     model = gr.Textbox(
@@ -297,6 +300,7 @@ def main(config_file: Path):
                 gfpgan_device,
                 enable_restoreformer,
                 restoreformer_device,
+                inbrowser,
             ],
             message,
         )

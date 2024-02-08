@@ -216,6 +216,7 @@ class PowerPaintTask(str, Enum):
 class ApiConfig(BaseModel):
     host: str
     port: int
+    inbrowser: bool
     model: str
     no_half: bool
     low_mem: bool

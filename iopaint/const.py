@@ -116,3 +116,5 @@ REALESRGAN_HELP = "Enable realesrgan super resolution"
 GFPGAN_HELP = "Enable GFPGAN face restore. To also enhance background, use with --enable-realesrgan"
 RESTOREFORMER_HELP = "Enable RestoreFormer face restore. To also enhance background, use with --enable-realesrgan"
 GIF_HELP = "Enable GIF plugin. Make GIF to compare original and cleaned image"
+
+INBROWSER_HELP = "Automatically launch IOPaint in a new tab on the default browser"

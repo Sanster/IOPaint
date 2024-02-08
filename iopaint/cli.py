@@ -1,3 +1,5 @@
+import webbrowser
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -97,6 +99,7 @@ def run(
 def start(
     host: str = Option("127.0.0.1"),
     port: int = Option(8080),
+    inbrowser: bool = Option(False, help=INBROWSER_HELP),
     model: str = Option(
         DEFAULT_MODEL,
         help=f"Erase models: [{', '.join(AVAILABLE_MODELS)}].\n"
@@ -165,10 +168,18 @@ def start(
     from iopaint.api import Api
     from iopaint.schema import ApiConfig
 
-    app = FastAPI()
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        if inbrowser:
+            webbrowser.open(f"http://localhost:{port}", new=0, autoraise=True)
+        yield
+
+    app = FastAPI(lifespan=lifespan)
+
     api_config = ApiConfig(
         host=host,
         port=port,
+        inbrowser=inbrowser,
         model=model,
         no_half=no_half,
         low_mem=low_mem,
