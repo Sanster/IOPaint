@@ -27,6 +27,32 @@
 |---------|-----------|
 |<video src="https://github.com/Sanster/IOPaint/assets/3998421/ffd4eda4-f7d4-4693-93d8-d2cd5aa7c6d6">|<video src="https://github.com/Sanster/IOPaint/assets/3998421/c4af8aef-8c29-49e0-96eb-0aae2f768da2">|
 
+
+## Features
+
+- Completely free and open-source, fully self-hosted, support CPU & GPU & Apple Silicon
+- [Windows 1-Click Installer](https://www.iopaint.com/install/windows_1click_installer)
+- Supports various AI [models](https://www.iopaint.com/models) to perform erase, inpainting or outpainting task.
+  - [Erase models](https://www.iopaint.com/models#erase-models): These models can be used to remove unwanted object, defect, watermarks, people from image. I have also developed a macOS native app called [OptiClean](https://opticlean.io/) that provides this feature.
+  - Diffusion models: These models can be used to replace objects or perform outpainting. Some popular used models include:
+    - [runwayml/stable-diffusion-inpainting](https://huggingface.co/runwayml/stable-diffusion-inpainting)
+    - [diffusers/stable-diffusion-xl-1.0-inpainting-0.1](https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1)
+    - [andregn/Realistic_Vision_V3.0-inpainting](https://huggingface.co/andregn/Realistic_Vision_V3.0-inpainting)
+    - [Lykon/dreamshaper-8-inpainting](https://huggingface.co/Lykon/dreamshaper-8-inpainting)
+    - [Sanster/anything-4.0-inpainting](https://huggingface.co/Sanster/anything-4.0-inpainting)
+    - [Sanster/PowerPaint-V1-stable-diffusion-inpainting](https://huggingface.co/Sanster/PowerPaint-V1-stable-diffusion-inpainting)
+    - [Sanster/AnyText](https://huggingface.co/Sanster/AnyText)
+    - [Fantasy-Studio/Paint-by-Example](https://huggingface.co/Fantasy-Studio/Paint-by-Example)
+- [Plugins](https://www.iopaint.com/plugins):
+  - [Segment Anything](https://iopaint.com/plugins/interactive_seg): Accurate and fast Interactive Object Segmentation
+  - [RemoveBG](https://iopaint.com/plugins/rembg): Remove image background or generate masks for foreground objects
+  - [Anime Segmentation](https://iopaint.com/plugins/anime_seg): Similar to RemoveBG, the model is specifically trained for anime images.
+  - [RealESRGAN](https://iopaint.com/plugins/RealESRGAN): Super Resolution
+  - [GFPGAN](https://iopaint.com/plugins/GFPGAN): Face Restoration
+  - [RestoreFormer](https://iopaint.com/plugins/RestoreFormer): Face Restoration
+- [FileManager](https://iopaint.com/file_manager): Browse your pictures conveniently and save them directly to the output directory.
+
+
 ## Quick Start
 
 ### Start webui
@@ -46,6 +72,15 @@ iopaint start --model=lama --device=cpu --port=8080
 
 That's it, you can start using IOPaint by visiting http://localhost:8080 in your web browser. You can see more models supported by `--model` [here](https://www.iopaint.com/models).
 
+
+### Plugins
+
+You can specify which plugins to use when starting the service, and you can view the commands to enable plugins by using `iopaint start --help`.
+
+```bash
+iopaint start --enable-interactive-seg --interactive-seg-device=cuda
+```
+
 ### Batch processing
 
 You can also use IOPaint in the command line to batch process images:
@@ -61,32 +96,3 @@ iopaint run --model=lama --device=cpu \
 When `--mask` is a path to a mask file, all images will be processed using this mask.
 
 You can see more information about the available models and plugins supported by IOPaint below.
-
-## Features
-
-- Completely free and open-source, fully self-hosted, support CPU & GPU & Apple Silicon
-- [Windows 1-Click Installer](https://www.iopaint.com/install/windows_1click_installer)
-- Supports various AI models:
-  - [Erase models](https://www.iopaint.com/models#erase-models): These models can be used to remove unwanted object, defect, watermarks, people from image. I have also developed a macOS native app called [OptiClean](https://opticlean.io/) that provides this feature.
-  - Stable Diffusion models: These models can be used to replace objects or perform outpainting. You can use any Stable Diffusion inpainting(or normal) models from [Huggingface](https://huggingface.co/models?other=stable-diffusion) in IOPaint.
-    Some popular used models include:
-    - [runwayml/stable-diffusion-inpainting](https://huggingface.co/runwayml/stable-diffusion-inpainting)
-    - [diffusers/stable-diffusion-xl-1.0-inpainting-0.1](https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1)
-    - [andregn/Realistic_Vision_V3.0-inpainting](https://huggingface.co/andregn/Realistic_Vision_V3.0-inpainting)
-    - [Lykon/dreamshaper-8-inpainting](https://huggingface.co/Lykon/dreamshaper-8-inpainting)
-    - [Sanster/anything-4.0-inpainting](https://huggingface.co/Sanster/anything-4.0-inpainting)
-    - [Sanster/PowerPaint-V1-stable-diffusion-inpainting](https://huggingface.co/Sanster/PowerPaint-V1-stable-diffusion-inpainting)
-  - Other Diffusion models:
-    - [Sanster/AnyText](https://huggingface.co/Sanster/AnyText)
-    - [timbrooks/instruct-pix2pix](https://huggingface.co/timbrooks/instruct-pix2pix)
-    - [Fantasy-Studio/Paint-by-Example](https://huggingface.co/Fantasy-Studio/Paint-by-Example)
-    - [kandinsky-community/kandinsky-2-2-decoder-inpaint](https://huggingface.co/kandinsky-community/kandinsky-2-2-decoder-inpaint)
-- Plugins
-  - [Segment Anything](https://iopaint.com/plugins/interactive_seg): Accurate and fast interactive object segmentation
-  - [RemoveBG](https://iopaint.com/plugins/rembg): Remove image background or generate masks for foreground objects
-  - [Anime Segmentation](https://iopaint.com/plugins/anime_seg): Similar to RemoveBG, the model is specifically trained for anime images.
-  - [RealESRGAN](https://iopaint.com/plugins/RealESRGAN): Super Resolution
-  - [GFPGAN](https://iopaint.com/plugins/GFPGAN): Face Restoration
-  - [RestoreFormer](https://iopaint.com/plugins/RestoreFormer): Face Restoration
-- [FileManager](https://iopaint.com/file_manager): Browse your pictures conveniently and save them directly to the output directory.
-
