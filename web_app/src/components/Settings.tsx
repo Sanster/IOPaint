@@ -644,7 +644,6 @@ export function SettingsDialog() {
                 <Button
                   key={item}
                   variant="ghost"
-                  disabled={item === TAB_PLUGINS && !removeBGEnabled}
                   onClick={() => setTab(item)}
                   className={cn(
                     tab === item ? "bg-muted " : "hover:bg-muted",

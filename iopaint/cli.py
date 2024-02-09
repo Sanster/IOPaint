@@ -144,7 +144,10 @@ def start(
     device = check_device(device)
     if input and not input.exists():
         logger.error(f"invalid --input: {input} not exists")
-        exit()
+        exit(-1)
+    if input and input.is_dir() and not output_dir:
+        logger.error(f"invalid --output-dir: must be set when --input is a directory")
+        exit(-1)
     if output_dir:
         output_dir = output_dir.expanduser().absolute()
         logger.info(f"Image will be saved to {output_dir}")

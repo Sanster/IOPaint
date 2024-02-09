@@ -167,6 +167,7 @@ class Api:
         self.add_api_route("/api/v1/run_plugin_gen_image", self.api_run_plugin_gen_image, methods=["POST"])
         self.add_api_route("/api/v1/samplers", self.api_samplers, methods=["GET"])
         self.add_api_route("/api/v1/adjust_mask", self.api_adjust_mask, methods=["POST"])
+        self.add_api_route("/api/v1/save_image", self.api_save_image, methods=["POST"])
         self.app.mount("/", StaticFiles(directory=WEB_APP_DIR, html=True), name="assets")
         # fmt: on
 
@@ -178,6 +179,12 @@ class Api:
 
     def add_api_route(self, path: str, endpoint, **kwargs):
         return self.app.add_api_route(path, endpoint, **kwargs)
+
+    def api_save_image(self, file: UploadFile):
+        filename = file.filename
+        origin_image_bytes = file.file.read()
+        with open(self.config.output_dir / filename, "wb") as fw:
+            fw.write(origin_image_bytes)
 
     def api_current_model(self) -> ModelInfo:
         return self.model_manager.current_model
