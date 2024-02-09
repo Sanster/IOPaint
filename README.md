@@ -44,7 +44,7 @@ pip3 install iopaint
 iopaint start --model=lama --device=cpu --port=8080
 ```
 
-That's it, you can start using IOPaint by visiting http://localhost:8080 in your web browser.
+That's it, you can start using IOPaint by visiting http://localhost:8080 in your web browser. You can see more models supported by `--model` [here](https://www.iopaint.com/models).
 
 ### Batch processing
 
