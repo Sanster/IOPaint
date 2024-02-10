@@ -94,7 +94,11 @@ export function SettingsDialog() {
     setModel(settings.model)
   }, [settings.model])
 
-  const { data: serverConfig, status } = useQuery({
+  const {
+    data: serverConfig,
+    status,
+    refetch,
+  } = useQuery({
     queryKey: ["serverConfig"],
     queryFn: getServerConfig,
   })
@@ -250,6 +254,8 @@ export function SettingsDialog() {
 
       setModelSwitchingTexts([])
       updateAppState({ disableShortCuts: false })
+
+      refetch()
     }
   }
 
