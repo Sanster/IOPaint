@@ -490,9 +490,6 @@ def briarmbg_process(bgr_np_image, session, only_mask=False):
     im_tensor = torch.unsqueeze(im_tensor, 0)
     im_tensor = torch.divide(im_tensor, 255.0)
     im_tensor = normalize(im_tensor, [0.5, 0.5, 0.5], [1.0, 1.0, 1.0])
-    if torch.cuda.is_available():
-        im_tensor = im_tensor.cuda()
-
     # inference
     result = session(im_tensor)
     # post process
