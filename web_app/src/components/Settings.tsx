@@ -686,9 +686,15 @@ export function SettingsDialog() {
                 <span className="sr-only">Loading...</span>
               </div>
 
-              {modelSwitchingTexts.map((text, index) => (
-                <div key={index}>{text}</div>
-              ))}
+              {modelSwitchingTexts ? (
+                <div className="flex flex-col">
+                  {modelSwitchingTexts.map((text, index) => (
+                    <div key={index}>{text}</div>
+                  ))}
+                </div>
+              ) : (
+                <></>
+              )}
             </div>
             {/* </AlertDialogDescription> */}
           </AlertDialogHeader>
