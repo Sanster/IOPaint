@@ -111,7 +111,7 @@ class ControlNet(DiffusionInpaintModel):
                 pretrained_model_name_or_path=model_info.path,
                 controlnet=controlnet,
                 variant="fp16",
-                dtype=torch_dtype,
+                torch_dtype=torch_dtype,
                 **model_kwargs,
             )
 

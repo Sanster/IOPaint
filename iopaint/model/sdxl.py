@@ -39,7 +39,7 @@ class SDXL(DiffusionInpaintModel):
         if os.path.isfile(self.model_id_or_path):
             self.model = StableDiffusionXLInpaintPipeline.from_single_file(
                 self.model_id_or_path,
-                dtype=torch_dtype,
+                torch_dtype=torch_dtype,
                 num_in_channels=num_in_channels,
                 load_safety_checker=False,
                 config_files=get_config_files()

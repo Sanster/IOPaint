@@ -50,7 +50,7 @@ class SD(DiffusionInpaintModel):
 
             self.model = StableDiffusionInpaintPipeline.from_single_file(
                 self.model_id_or_path,
-                dtype=torch_dtype,
+                torch_dtype=torch_dtype,
                 load_safety_checker=not disable_nsfw_checker,
                 config_files=get_config_files(),
                 **model_kwargs,
@@ -60,7 +60,7 @@ class SD(DiffusionInpaintModel):
                 StableDiffusionInpaintPipeline.from_pretrained,
                 pretrained_model_name_or_path=self.model_id_or_path,
                 variant="fp16",
-                dtype=torch_dtype,
+                torch_dtype=torch_dtype,
                 **model_kwargs,
             )
 
