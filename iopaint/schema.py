@@ -427,6 +427,8 @@ class ServerConfigResponse(BaseModel):
     removeBGModels: List[RemoveBGModel]
     realesrganModel: RealESRGANModel
     realesrganModels: List[RealESRGANModel]
+    interactiveSegModel: InteractiveSegModel
+    interactiveSegModels: List[InteractiveSegModel]
     enableFileManager: bool
     enableAutoSaving: bool
     enableControlnet: bool

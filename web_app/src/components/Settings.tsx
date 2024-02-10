@@ -58,6 +58,7 @@ const formSchema = z.object({
   enableAutoExtractPrompt: z.boolean(),
   removeBGModel: z.string(),
   realesrganModel: z.string(),
+  interactiveSegModel: z.string(),
 })
 
 const TAB_GENERAL = "General"
@@ -110,6 +111,7 @@ export function SettingsDialog() {
       outputDirectory: fileManagerState.outputDirectory,
       removeBGModel: serverConfig?.removeBGModel,
       realesrganModel: serverConfig?.realesrganModel,
+      interactiveSegModel: serverConfig?.interactiveSegModel,
     },
   })
 
@@ -118,6 +120,7 @@ export function SettingsDialog() {
       setServerConfig(serverConfig)
       form.setValue("removeBGModel", serverConfig.removeBGModel)
       form.setValue("realesrganModel", serverConfig.realesrganModel)
+      form.setValue("interactiveSegModel", serverConfig.interactiveSegModel)
     }
   }, [form, serverConfig])
 
@@ -138,13 +141,19 @@ export function SettingsDialog() {
 
     const shouldSwitchModel = model.name !== settings.model.name
     const shouldSwitchRemoveBGModel =
-      serverConfig?.removeBGModel !== values.removeBGModel
+      serverConfig?.removeBGModel !== values.removeBGModel && removeBGEnabled
     const shouldSwitchRealesrganModel =
-      serverConfig?.realesrganModel !== values.realesrganModel
+      serverConfig?.realesrganModel !== values.realesrganModel &&
+      realesrganEnabled
+    const shouldSwitchInteractiveModel =
+      serverConfig?.interactiveSegModel !== values.interactiveSegModel &&
+      interactiveSegEnabled
+
     const showModelSwitching =
       shouldSwitchModel ||
       shouldSwitchRemoveBGModel ||
-      shouldSwitchRealesrganModel
+      shouldSwitchRealesrganModel ||
+      shouldSwitchInteractiveModel
 
     if (showModelSwitching) {
       const newModelSwitchingTexts: string[] = []
@@ -161,6 +170,11 @@ export function SettingsDialog() {
       if (shouldSwitchRealesrganModel) {
         newModelSwitchingTexts.push(
           `Switching RealESRGAN model from ${serverConfig?.realesrganModel} to ${values.realesrganModel}`
+        )
+      }
+      if (shouldSwitchInteractiveModel) {
+        newModelSwitchingTexts.push(
+          `Switching ${PluginName.InteractiveSeg} model from ${serverConfig?.interactiveSegModel} to ${values.interactiveSegModel}`
         )
       }
       setModelSwitchingTexts(newModelSwitchingTexts)
@@ -195,7 +209,7 @@ export function SettingsDialog() {
         } catch (error: any) {
           toast({
             variant: "destructive",
-            title: `Switch RemoveBG model to ${model.name} failed: ${error}`,
+            title: `Switch RemoveBG model to ${values.removeBGModel} failed: ${error}`,
           })
         }
       }
@@ -212,7 +226,24 @@ export function SettingsDialog() {
         } catch (error: any) {
           toast({
             variant: "destructive",
-            title: `Switch RealESRGAN model to ${model.name} failed: ${error}`,
+            title: `Switch RealESRGAN model to ${values.realesrganModel} failed: ${error}`,
+          })
+        }
+      }
+
+      if (shouldSwitchInteractiveModel) {
+        try {
+          const res = await switchPluginModel(
+            PluginName.InteractiveSeg,
+            values.interactiveSegModel
+          )
+          if (res.status !== 200) {
+            throw new Error(res.statusText)
+          }
+        } catch (error: any) {
+          toast({
+            variant: "destructive",
+            title: `Switch ${PluginName.InteractiveSeg} model to ${values.interactiveSegModel} failed: ${error}`,
           })
         }
       }
@@ -244,6 +275,9 @@ export function SettingsDialog() {
   )
   const realesrganEnabled = plugins.some(
     (plugin) => plugin.name === PluginName.RealESRGAN
+  )
+  const interactiveSegEnabled = plugins.some(
+    (plugin) => plugin.name === PluginName.InteractiveSeg
   )
 
   function onOpenChange(value: boolean) {
@@ -512,6 +546,43 @@ export function SettingsDialog() {
                 <SelectContent align="end">
                   <SelectGroup>
                     {serverConfig?.realesrganModels.map((model) => (
+                      <SelectItem key={model} value={model}>
+                        {model}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+
+        <Separator />
+
+        <FormField
+          control={form.control}
+          name="interactiveSegModel"
+          render={({ field }) => (
+            <FormItem className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <FormLabel>Interactive Segmentation</FormLabel>
+                <FormDescription>
+                  Interactive Segmentation Model
+                </FormDescription>
+              </div>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={!interactiveSegEnabled}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-auto">
+                    <SelectValue placeholder="Select interactive segmentation model" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent align="end">
+                  <SelectGroup>
+                    {serverConfig?.interactiveSegModels.map((model) => (
                       <SelectItem key={model} value={model}>
                         {model}
                       </SelectItem>

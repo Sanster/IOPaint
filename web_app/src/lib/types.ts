@@ -19,6 +19,8 @@ export interface ServerConfig {
   removeBGModels: string[]
   realesrganModel: string
   realesrganModels: string[]
+  interactiveSegModel: string
+  interactiveSegModels: string[]
   enableFileManager: boolean
   enableAutoSaving: boolean
   enableControlnet: boolean
