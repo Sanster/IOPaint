@@ -25,7 +25,7 @@ def test_instruct_pix2pix(device, disable_nsfw, cpu_offload):
     cfg = get_config(
         strategy=HDStrategy.ORIGINAL,
         prompt="What if it were snowing?",
-        p2p_steps=sd_steps,
+        sd_steps=sd_steps
     )
 
     name = f"device_{device}_disnsfw_{disable_nsfw}_cpu_offload_{cpu_offload}"
