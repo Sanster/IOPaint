@@ -395,7 +395,7 @@ class DiffusionInpaintModel(InpaintModel):
     def set_scheduler(self, config: InpaintRequest):
         scheduler_config = self.model.scheduler.config
         sd_sampler = config.sd_sampler
-        if config.sd_lcm_lora:
+        if config.sd_lcm_lora and self.model_info.support_lcm_lora:
             sd_sampler = SDSampler.lcm
             logger.info(f"LCM Lora enabled, use {sd_sampler} sampler")
         scheduler = get_scheduler(sd_sampler, scheduler_config)
