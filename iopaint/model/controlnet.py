@@ -90,6 +90,7 @@ class ControlNet(DiffusionInpaintModel):
             pretrained_model_name_or_path=controlnet_method,
             resume_download=True,
             local_files_only=model_kwargs["local_files_only"],
+            torch_dtype=self.torch_dtype,
         )
         if model_info.is_single_file_diffusers:
             if self.model_info.model_type == ModelType.DIFFUSERS_SD:
@@ -133,7 +134,10 @@ class ControlNet(DiffusionInpaintModel):
     def switch_controlnet_method(self, new_method: str):
         self.controlnet_method = new_method
         controlnet = ControlNetModel.from_pretrained(
-            new_method, resume_download=True, local_files_only=self.local_files_only
+            new_method,
+            resume_download=True,
+            local_files_only=self.local_files_only,
+            torch_dtype=self.torch_dtype,
         ).to(self.model.device)
         self.model.controlnet = controlnet
 
