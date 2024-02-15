@@ -493,7 +493,8 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
           imageWidth,
           imageHeight,
           [maskLineGroup],
-          maskImages
+          maskImages,
+          BRUSH_COLOR
         )
         if (useLastLineGroup) {
           const temporaryMask = await canvasToImage(maskCanvas)

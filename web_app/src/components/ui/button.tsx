@@ -49,7 +49,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         className={cn(
           buttonVariants({ variant, size, className }),
-          "outline-none cursor-default"
+          "outline-none cursor-default select-none"
         )}
         ref={ref}
         tabIndex={-1}
