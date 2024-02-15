@@ -32,7 +32,7 @@ import useHotKey from "@/hooks/useHotkey"
 import Extender from "./Extender"
 
 const TOOLBAR_HEIGHT = 200
-const MIN_BRUSH_SIZE = 5
+const MIN_BRUSH_SIZE = 3
 const MAX_BRUSH_SIZE = 200
 const COMPARE_SLIDER_DURATION_MS = 300
 
@@ -596,7 +596,7 @@ export default function Editor(props: EditorProps) {
         newBrushSize = baseBrushSize - 10
       }
       if (baseBrushSize <= 10 && baseBrushSize > 0) {
-        newBrushSize = baseBrushSize - 5
+        newBrushSize = baseBrushSize - 3
       }
       setBaseBrushSize(newBrushSize)
     },
