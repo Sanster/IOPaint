@@ -32,7 +32,7 @@ import useHotKey from "@/hooks/useHotkey"
 import Extender from "./Extender"
 
 const TOOLBAR_HEIGHT = 200
-const MIN_BRUSH_SIZE = 10
+const MIN_BRUSH_SIZE = 5
 const MAX_BRUSH_SIZE = 200
 const COMPARE_SLIDER_DURATION_MS = 300
 

@@ -824,7 +824,7 @@ const DiffusionOptions = () => {
               >
                 <div className="flex items-center gap-1 select-none">
                   {/* <Plus size={16} /> */}
-                  expand
+                  Expand
                 </div>
               </Button>
 
