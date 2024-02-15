@@ -1,6 +1,6 @@
 torch>=2.0.0
 opencv-python
-diffusers==0.26.1
+diffusers==0.26.3
 accelerate
 peft==0.7.1
 transformers>=4.35.1
