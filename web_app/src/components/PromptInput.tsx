@@ -46,7 +46,7 @@ const PromptInput = () => {
   }
 
   const onKeyUp = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !isProcessing) {
+    if (e.key === "Enter" && e.ctrlKey && prompt.length !== 0) {
       handleRepaintClick()
     }
   }
