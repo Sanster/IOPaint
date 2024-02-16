@@ -127,6 +127,7 @@ def api_middleware(app: FastAPI):
         "allow_headers": ["*"],
         "allow_origins": ["*"],
         "allow_credentials": True,
+        "expose_headers": ["X-Seed"]
     }
     app.add_middleware(CORSMiddleware, **cors_options)
 
