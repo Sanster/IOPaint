@@ -295,7 +295,7 @@ const defaultValues: AppState = {
     controlnetMethod: "lllyasviel/control_v11p_sd15_canny",
     disableModelSwitch: false,
     isDesktop: false,
-    samplers: ["DPM++ 2M"],
+    samplers: ["DPM++ 2M SDE Karras"],
   },
   settings: {
     model: {
