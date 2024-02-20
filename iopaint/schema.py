@@ -146,6 +146,9 @@ class InteractiveSegModel(Choices):
     vit_b = "vit_b"
     vit_l = "vit_l"
     vit_h = "vit_h"
+    sam_hq_vit_b = "sam_hq_vit_b"
+    sam_hq_vit_l = "sam_hq_vit_l"
+    sam_hq_vit_h = "sam_hq_vit_h"
     mobile_sam = "mobile_sam"
 
 
@@ -392,6 +395,15 @@ class InpaintRequest(BaseModel):
         if use_extender and enable_controlnet:
             logger.info(f"Extender is enabled, set controlnet_conditioning_scale=0")
             return 0
+        return v
+
+    @field_validator("sd_strength")
+    @classmethod
+    def validate_sd_strength(cls, v: float, values):
+        use_extender = values.data["use_extender"]
+        if use_extender:
+            logger.info(f"Extender is enabled, set sd_strength=1")
+            return 1.0
         return v
 
 

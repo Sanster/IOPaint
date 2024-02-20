@@ -43,7 +43,10 @@ def get_cache_path_by_url(url):
 
 
 def download_model(url, model_md5: str = None):
-    cached_file = get_cache_path_by_url(url)
+    if os.path.exists(url):
+        cached_file = url
+    else:
+        cached_file = get_cache_path_by_url(url)
     if not os.path.exists(cached_file):
         sys.stderr.write('Downloading: "{}" to {}\n'.format(url, cached_file))
         hash_prefix = None
