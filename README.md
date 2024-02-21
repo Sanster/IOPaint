@@ -14,7 +14,7 @@
   <a href="https://huggingface.co/spaces/Sanster/iopaint-lama">
     <img alt="HuggingFace Spaces" src="https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-Spaces-blue" />
   </a>
-  <a href="https://colab.research.google.com/drive/1wg3Y874eAgdaX0EIjIgTZROze3hqXyo7?usp=sharing">
+  <a href="https://colab.research.google.com/drive/1TKVlDZiE3MIZnAUMpv2t_S4hLr6TUY1d?usp=sharing">
     <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg" />
   </a>
 </p>
