@@ -181,11 +181,16 @@ class ModelManager:
             lcm_lora_loaded = bool(self.model.model.get_list_adapters())
             if config.sd_lcm_lora:
                 if not lcm_lora_loaded:
+                    logger.info("Load LCM LORA")
                     self.model.model.load_lora_weights(
                         self.model.lcm_lora_id,
                         weight_name="pytorch_lora_weights.safetensors",
                         local_files_only=is_local_files_only(),
                     )
+                else:
+                    logger.info("Enable LCM LORA")
+                    self.model.model.enable_lora()
             else:
                 if lcm_lora_loaded:
+                    logger.info("Disable LCM LORA")
                     self.model.model.disable_lora()
