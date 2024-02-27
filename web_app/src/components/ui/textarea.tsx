@@ -1,12 +1,23 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
+import { useStore } from "@/lib/states"
 
 export interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, ...props }, ref) => {
+    const updateAppState = useStore((state) => state.updateAppState)
+
+    const handleOnFocus = () => {
+      updateAppState({ disableShortCuts: true })
+    }
+
+    const handleOnBlur = () => {
+      updateAppState({ disableShortCuts: false })
+    }
+
     return (
       <textarea
         className={cn(
@@ -16,6 +27,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         )}
         tabIndex={-1}
         ref={ref}
+        onFocus={handleOnFocus}
+        onBlur={handleOnBlur}
         {...props}
       />
     )
