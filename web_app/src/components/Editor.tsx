@@ -866,7 +866,7 @@ export default function Editor(props: EditorProps) {
 
       {showRefBrush && renderBrush(getBrushStyle(windowCenterX, windowCenterY))}
 
-      <div className=" overflow-hidden fixed flex bottom-5 border px-4 py-2 rounded-[3rem] gap-8 items-center justify-center backdrop-filter backdrop-blur-md bg-background/70">
+      <div className="fixed flex bottom-5 border px-4 py-2 rounded-[3rem] gap-8 items-center justify-center backdrop-filter backdrop-blur-md bg-background/70">
         <Slider
           className="w-48"
           defaultValue={[50]}

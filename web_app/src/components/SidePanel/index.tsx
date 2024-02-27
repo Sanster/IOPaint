@@ -47,6 +47,7 @@ const SidePanel = () => {
       <SheetTrigger
         tabIndex={-1}
         className="z-10 outline-none absolute top-[68px] right-6 rounded-lg border bg-background"
+        hidden={open}
       >
         <Button
           variant="ghost"
