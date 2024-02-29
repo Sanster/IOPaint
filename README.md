@@ -87,12 +87,12 @@ You can also use IOPaint in the command line to batch process images:
 
 ```bash
 iopaint run --model=lama --device=cpu \
---input=/path/to/image_folder \
+--image=/path/to/image_folder \
 --mask=/path/to/mask_folder \
 --output=output_dir
 ```
 
-`--input` is the folder containing input images, `--mask` is the folder containing corresponding mask images.
+`--image` is the folder containing input images, `--mask` is the folder containing corresponding mask images.
 When `--mask` is a path to a mask file, all images will be processed using this mask.
 
 You can see more information about the available models and plugins supported by IOPaint below.
