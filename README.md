@@ -112,8 +112,9 @@ Start front-end development environment
 npm run dev
 ```
 
-Start back-end service
+Install back-end requirements and start back-end service
 ```bash
+pip install -r requirements.txt
 python3 main.py --model lama
 ```
 
