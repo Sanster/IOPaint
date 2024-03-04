@@ -24,6 +24,7 @@ import {
   BRUSH_COLOR,
   DEFAULT_BRUSH_SIZE,
   DEFAULT_NEGATIVE_PROMPT,
+  MAX_BRUSH_SIZE,
   MODEL_TYPE_INPAINT,
   PAINT_BY_EXAMPLE,
 } from "./const"
@@ -166,6 +167,8 @@ type AppAction = {
   setIsInpainting: (newValue: boolean) => void
   getIsProcessing: () => boolean
   setBaseBrushSize: (newValue: number) => void
+  decreaseBaseBrushSize: () => void
+  increaseBaseBrushSize: () => void
   getBrushSize: () => number
   setImageSize: (width: number, height: number) => void
 
@@ -887,6 +890,24 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         set((state) => {
           state.editorState.baseBrushSize = newValue
         }),
+
+      decreaseBaseBrushSize: () => {
+        const baseBrushSize = get().editorState.baseBrushSize
+        let newBrushSize = baseBrushSize
+        if (baseBrushSize > 10) {
+          newBrushSize = baseBrushSize - 10
+        }
+        if (baseBrushSize <= 10 && baseBrushSize > 0) {
+          newBrushSize = baseBrushSize - 3
+        }
+        get().setBaseBrushSize(newBrushSize)
+      },
+
+      increaseBaseBrushSize: () => {
+        const baseBrushSize = get().editorState.baseBrushSize
+        const newBrushSize = Math.min(baseBrushSize + 10, MAX_BRUSH_SIZE)
+        get().setBaseBrushSize(newBrushSize)
+      },
 
       setImageSize: (width: number, height: number) => {
         // 根据图片尺寸调整 brushSize 的 scale

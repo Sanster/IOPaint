@@ -30,10 +30,9 @@ import Cropper from "./Cropper"
 import { InteractiveSegPoints } from "./InteractiveSeg"
 import useHotKey from "@/hooks/useHotkey"
 import Extender from "./Extender"
+import { MAX_BRUSH_SIZE, MIN_BRUSH_SIZE } from "@/lib/const"
 
 const TOOLBAR_HEIGHT = 200
-const MIN_BRUSH_SIZE = 3
-const MAX_BRUSH_SIZE = 200
 const COMPARE_SLIDER_DURATION_MS = 300
 
 interface EditorProps {
@@ -67,6 +66,8 @@ export default function Editor(props: EditorProps) {
     runMannually,
     runInpainting,
     isCropperExtenderResizing,
+    decreaseBaseBrushSize,
+    increaseBaseBrushSize,
   ] = useStore((state) => [
     state.disableShortCuts,
     state.windowSize,
@@ -90,6 +91,8 @@ export default function Editor(props: EditorProps) {
     state.runMannually(),
     state.runInpainting,
     state.isCropperExtenderResizing,
+    state.decreaseBaseBrushSize,
+    state.increaseBaseBrushSize,
   ])
   const baseBrushSize = useStore((state) => state.editorState.baseBrushSize)
   const brushSize = useStore((state) => state.getBrushSize())
@@ -121,6 +124,8 @@ export default function Editor(props: EditorProps) {
   const [isDraging, setIsDraging] = useState(false)
 
   const [sliderPos, setSliderPos] = useState<number>(0)
+  const [isChangingBrushSizeByWheel, setIsChangingBrushSizeByWheel] =
+    useState<boolean>(false)
 
   const hadDrawSomething = useCallback(() => {
     return curLineGroup.length !== 0
@@ -591,24 +596,17 @@ export default function Editor(props: EditorProps) {
   useHotKey(
     "[",
     () => {
-      let newBrushSize = baseBrushSize
-      if (baseBrushSize > 10) {
-        newBrushSize = baseBrushSize - 10
-      }
-      if (baseBrushSize <= 10 && baseBrushSize > 0) {
-        newBrushSize = baseBrushSize - 3
-      }
-      setBaseBrushSize(newBrushSize)
+      decreaseBaseBrushSize()
     },
-    [baseBrushSize]
+    [decreaseBaseBrushSize]
   )
 
   useHotKey(
     "]",
     () => {
-      setBaseBrushSize(baseBrushSize + 10)
+      increaseBaseBrushSize()
     },
-    [baseBrushSize]
+    [increaseBaseBrushSize]
   )
 
   // Manual Inpainting Hotkey
@@ -655,6 +653,24 @@ export default function Editor(props: EditorProps) {
         ev?.stopPropagation()
         setShowBrush(true)
         setIsPanning(false)
+      }
+    }
+  )
+
+  useKeyPressEvent(
+    "Alt",
+    (ev) => {
+      if (!disableShortCuts) {
+        ev?.preventDefault()
+        ev?.stopPropagation()
+        setIsChangingBrushSizeByWheel(true)
+      }
+    },
+    (ev) => {
+      if (!disableShortCuts) {
+        ev?.preventDefault()
+        ev?.stopPropagation()
+        setIsChangingBrushSizeByWheel(false)
       }
     }
   )
@@ -722,7 +738,7 @@ export default function Editor(props: EditorProps) {
           }
         }}
         panning={{ disabled: !isPanning, velocityDisabled: true }}
-        wheel={{ step: 0.05 }}
+        wheel={{ step: 0.05, wheelDisabled: isChangingBrushSizeByWheel }}
         centerZoomedOut
         alignmentAnimation={{ disabled: true }}
         centerOnInit
@@ -849,12 +865,29 @@ export default function Editor(props: EditorProps) {
     )
   }
 
+  const handleScroll = (event: React.WheelEvent<HTMLDivElement>) => {
+    // deltaY 是垂直滚动增量，正值表示向下滚动，负值表示向上滚动
+    // deltaX 是水平滚动增量，正值表示向右滚动，负值表示向左滚动
+    if (!isChangingBrushSizeByWheel) {
+      return
+    }
+
+    const { deltaY } = event
+    // console.log(`水平滚动增量: ${deltaX}, 垂直滚动增量: ${deltaY}`)
+    if (deltaY > 0) {
+      increaseBaseBrushSize()
+    } else if (deltaY < 0) {
+      decreaseBaseBrushSize()
+    }
+  }
+
   return (
     <div
       className="flex w-screen h-screen justify-center items-center"
       aria-hidden="true"
       onMouseMove={onMouseMove}
       onMouseUp={onPointerUp}
+      onWheel={handleScroll}
     >
       {renderCanvas()}
       {showBrush &&

@@ -1,5 +1,7 @@
 export const ACCENT_COLOR = "#ffcc00bb"
 export const DEFAULT_BRUSH_SIZE = 40
+export const MIN_BRUSH_SIZE = 3
+export const MAX_BRUSH_SIZE = 200
 export const MODEL_TYPE_INPAINT = "inpaint"
 export const MODEL_TYPE_DIFFUSERS_SD = "diffusers_sd"
 export const MODEL_TYPE_DIFFUSERS_SDXL = "diffusers_sdxl"
