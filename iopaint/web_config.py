@@ -21,9 +21,7 @@ from loguru import logger
 
 from iopaint.const import *
 
-
 _config_file: Path = None
-
 
 default_configs = dict(
     host="127.0.0.1",
@@ -67,41 +65,41 @@ def load_config(p: Path) -> WebConfig:
             try:
                 return WebConfig(**{**default_configs, **json.load(f)})
             except JSONDecodeError:
-                print(f"Load config file failed, using default configs")
+                print("Load config file failed, using default configs")
                 return WebConfig(**default_configs)
     else:
         return WebConfig(**default_configs)
 
 
 def save_config(
-    host,
-    port,
-    model,
-    model_dir,
-    no_half,
-    low_mem,
-    cpu_offload,
-    disable_nsfw_checker,
-    local_files_only,
-    cpu_textencoder,
-    device,
-    input,
-    output_dir,
-    quality,
-    enable_interactive_seg,
-    interactive_seg_model,
-    interactive_seg_device,
-    enable_remove_bg,
-    remove_bg_model,
-    enable_anime_seg,
-    enable_realesrgan,
-    realesrgan_device,
-    realesrgan_model,
-    enable_gfpgan,
-    gfpgan_device,
-    enable_restoreformer,
-    restoreformer_device,
-    inbrowser,
+        host,
+        port,
+        model,
+        model_dir,
+        no_half,
+        low_mem,
+        cpu_offload,
+        disable_nsfw_checker,
+        local_files_only,
+        cpu_textencoder,
+        device,
+        input,
+        output_dir,
+        quality,
+        enable_interactive_seg,
+        interactive_seg_model,
+        interactive_seg_device,
+        enable_remove_bg,
+        remove_bg_model,
+        enable_anime_seg,
+        enable_realesrgan,
+        realesrgan_device,
+        realesrgan_model,
+        enable_gfpgan,
+        gfpgan_device,
+        enable_restoreformer,
+        restoreformer_device,
+        inbrowser,
 ):
     config = WebConfig(**locals())
     if str(config.input) == ".":
@@ -150,13 +148,6 @@ def main(config_file: Path):
                     port = gr.Number(init_config.port, label="Port", precision=0)
                     inbrowser = gr.Checkbox(init_config.inbrowser, label=INBROWSER_HELP)
 
-                with gr.Column():
-                    model = gr.Textbox(
-                        init_config.model,
-                        label="Current Model. This is the model that will be used when the service starts. "
-                        "If the model has not been downloaded before, it will be automatically downloaded. "
-                        "You can select a model from the dropdown box below or manually enter the SD/SDXL model ID from HuggingFace, for example, runwayml/stable-diffusion-inpainting.",
-                    )
                 with gr.Row():
                     recommend_model = gr.Dropdown(
                         ["lama", "mat", "migan"] + DIFFUSION_MODELS,
@@ -164,6 +155,12 @@ def main(config_file: Path):
                     )
                     downloaded_model = gr.Dropdown(
                         downloaded_models, label="Downloaded Models"
+                    )
+                with gr.Column():
+                    model = gr.Textbox(
+                        init_config.model,
+                        label="Current Model. Model will be automatically downloaded. "
+                              "You can select a model in Recommended Models or Downloaded Models or manually enter the SD/SDXL model ID from HuggingFace, for example, runwayml/stable-diffusion-inpainting.",
                     )
 
                 device = gr.Radio(
