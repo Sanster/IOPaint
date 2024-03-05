@@ -13,7 +13,7 @@ from iopaint.helper import (
     switch_mps_device,
 )
 from iopaint.schema import InpaintRequest, HDStrategy, SDSampler
-from .helper.g_diffuser_bot import expand_image
+from .helper.g_diffuser_bot import expand_image, expand_image2
 from .utils import get_scheduler
 
 
@@ -327,7 +327,7 @@ class DiffusionInpaintModel(InpaintModel):
         padding_r = max(0, cropper_r - image_r)
         padding_b = max(0, cropper_b - image_b)
 
-        expanded_image, mask_image = expand_image(
+        expanded_image, mask_image = expand_image2(
             cropped_image,
             left=padding_l,
             top=padding_t,

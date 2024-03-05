@@ -103,7 +103,7 @@ def soften_mask(mask_img, softness, space):
 
 
 def expand_image(
-    cv2_img, top: int, right: int, bottom: int, left: int, softness: float, space: float
+        cv2_img, top: int, right: int, bottom: int, left: int, softness: float, space: float
 ):
     assert cv2_img.shape[2] == 3
     origin_h, origin_w = cv2_img.shape[:2]
@@ -116,7 +116,7 @@ def expand_image(
         cv2_img, top, bottom, left, right, cv2.BORDER_REPLICATE
     )
     mask_img = np.zeros((new_height, new_width), np.uint8)
-    mask_img[top : top + cv2_img.shape[0], left : left + cv2_img.shape[1]] = 255
+    mask_img[top: top + cv2_img.shape[0], left: left + cv2_img.shape[1]] = 255
 
     if softness > 0.0:
         mask_img = soften_mask(mask_img / 255.0, softness / 100.0, space / 100.0)
@@ -124,37 +124,77 @@ def expand_image(
 
     mask_image = 255.0 - mask_img  # extract mask from alpha channel and invert
     rgb_init_image = (
-        0.0 + new_img[:, :, 0:3]
+            0.0 + new_img[:, :, 0:3]
     )  # strip mask from init_img leaving only rgb channels
 
     hard_mask = np.zeros_like(cv2_img[:, :, 0])
     if top != 0:
-        hard_mask[0 : origin_h // 2, :] = 255
+        hard_mask[0: origin_h // 2, :] = 255
     if bottom != 0:
-        hard_mask[origin_h // 2 :, :] = 255
+        hard_mask[origin_h // 2:, :] = 255
     if left != 0:
-        hard_mask[:, 0 : origin_w // 2] = 255
+        hard_mask[:, 0: origin_w // 2] = 255
     if right != 0:
-        hard_mask[:, origin_w // 2 :] = 255
+        hard_mask[:, origin_w // 2:] = 255
 
     hard_mask = cv2.copyMakeBorder(
-        hard_mask, top, bottom, left, right, cv2.BORDER_DEFAULT, value=255
+        hard_mask, top, bottom, left, right, cv2.BORDER_CONSTANT, value=255
     )
     mask_image = np.where(hard_mask > 0, mask_image, 0)
     return rgb_init_image.astype(np.uint8), mask_image.astype(np.uint8)
+
+
+def expand_image2(
+        cv2_img, top: int, right: int, bottom: int, left: int, softness: float, space: float
+):
+    assert cv2_img.shape[2] == 3
+    origin_h, origin_w = cv2_img.shape[:2]
+    new_width = cv2_img.shape[1] + left + right
+    new_height = cv2_img.shape[0] + top + bottom
+
+    # TODO: which is better?
+    # new_img = np.random.randint(0, 255, (new_height, new_width, 3), np.uint8)
+    new_img = cv2.copyMakeBorder(
+        cv2_img, top, bottom, left, right, cv2.BORDER_REPLICATE
+    )
+
+    inner_padding_left = 13 if left > 0 else 0
+    inner_padding_right = 13 if right > 0 else 0
+    inner_padding_top = 13 if top > 0 else 0
+    inner_padding_bottom = 13 if bottom > 0 else 0
+
+    mask_image = np.zeros(
+        (
+            origin_h - inner_padding_top - inner_padding_bottom
+            , origin_w - inner_padding_left - inner_padding_right
+        ),
+        np.uint8)
+    mask_image = cv2.copyMakeBorder(
+        mask_image,
+        top + inner_padding_top,
+        bottom + inner_padding_bottom,
+        left + inner_padding_left,
+        right + inner_padding_right,
+        cv2.BORDER_CONSTANT,
+        value=255
+    )
+    # k = 2*int(min(origin_h, origin_w) // 6)+1
+    k = 7
+    mask_image = cv2.GaussianBlur(mask_image, (k, k), 0)
+    return new_img, mask_image
 
 
 if __name__ == "__main__":
     from pathlib import Path
 
     current_dir = Path(__file__).parent.absolute().resolve()
-    image_path = current_dir.parent / "tests" / "bunny.jpeg"
+    image_path = "/Users/cwq/code/github/IOPaint/iopaint/tests/bunny.jpeg"
     init_image = cv2.imread(str(image_path))
-    init_image, mask_image = expand_image(
+    init_image, mask_image = expand_image2(
         init_image,
-        top=100,
-        right=100,
-        bottom=100,
+        top=0,
+        right=0,
+        bottom=0,
         left=100,
         softness=20,
         space=20,
