@@ -70,12 +70,17 @@ pip3 install iopaint
 iopaint start --model=lama --device=cpu --port=8080
 ```
 
-That's it, you can start using IOPaint by visiting http://localhost:8080 in your web browser. You can see more models supported by `--model` [here](https://www.iopaint.com/models).
+That's it, you can start using IOPaint by visiting http://localhost:8080 in your web browser.
 
+All models will be downloaded automatically at startup. If you want to change the download directory, you can add `--model-dir`. More documentation can be found [here](https://www.iopaint.com/install/download_model)
+
+You can see other supported models at [here](https://www.iopaint.com/models) and how to use local sd ckpt/safetensors file at [here](https://www.iopaint.com/models#load-ckptsafetensors).
 
 ### Plugins
 
-You can specify which plugins to use when starting the service, and you can view the commands to enable plugins by using `iopaint start --help`.
+You can specify which plugins to use when starting the service, and you can view the commands to enable plugins by using `iopaint start --help`. 
+
+More demonstrations of the Plugin can be seen [here](https://www.iopaint.com/plugins)
 
 ```bash
 iopaint start --enable-interactive-seg --interactive-seg-device=cuda
