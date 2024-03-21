@@ -2,6 +2,12 @@ import json
 import os
 from pathlib import Path
 
+import mimetypes
+# fix for windows mimetypes registry entries being borked
+# see https://github.com/invoke-ai/InvokeAI/discussions/3684#discussioncomment-6391352
+mimetypes.add_type('application/javascript', '.js')
+mimetypes.add_type('text/css', '.css')
+
 from iopaint.schema import (
     Device,
     InteractiveSegModel,
