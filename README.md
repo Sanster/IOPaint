@@ -112,6 +112,11 @@ cd IOPaint/web_app
 npm install
 ```
 
+Create a `.env.local` file in `web_app` and fill in the backend IP and port.
+```
+VITE_BACKEND=http://127.0.0.1:8080
+```
+
 Start front-end development environment
 ```bash
 npm run dev
@@ -120,7 +125,7 @@ npm run dev
 Install back-end requirements and start back-end service
 ```bash
 pip install -r requirements.txt
-python3 main.py --model lama
+python3 main.py --model lama --port 8080
 ```
 
 Then you can visit `http://localhost:5173/` for development. The front-end code will automatically update after being modified, but the back-end needs to restart the service after modifying the python code.
