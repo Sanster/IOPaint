@@ -269,7 +269,7 @@ class ZITS(InpaintModel):
             get_cache_path_by_url(ZITS_STRUCTURE_UPSAMPLE_MODEL_URL),
             get_cache_path_by_url(ZITS_INPAINT_MODEL_URL),
         ]
-        return all([os.path.exists(it) for it in model_paths])
+        return all(os.path.exists(it) for it in model_paths)
 
     def wireframe_edge_and_line(self, items, enable: bool):
         # 最终向 items 中添加 edge 和 line key
