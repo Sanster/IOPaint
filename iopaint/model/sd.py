@@ -52,7 +52,7 @@ class SD(DiffusionInpaintModel):
                 self.model_id_or_path,
                 torch_dtype=torch_dtype,
                 load_safety_checker=not disable_nsfw_checker,
-                config_files=get_config_files(),
+                original_config_file=get_config_files()['v1'],
                 **model_kwargs,
             )
         else:

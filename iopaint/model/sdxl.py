@@ -42,7 +42,7 @@ class SDXL(DiffusionInpaintModel):
                 torch_dtype=torch_dtype,
                 num_in_channels=num_in_channels,
                 load_safety_checker=False,
-                config_files=get_config_files()
+                original_config_file=get_config_files()['xl'],
             )
         else:
             model_kwargs = {
