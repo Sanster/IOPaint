@@ -109,6 +109,84 @@ const DiffusionOptions = () => {
     )
   }
 
+  const renderBrushNetSetting = () => {
+    if (!settings.model.support_brushnet) {
+      return null
+    }
+
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-between items-center pr-2">
+            <LabelTitle
+              text="BrushNet"
+              toolTip="BrushNet: A Plug-and-Play Image Inpainting Model with Decomposed Dual-Branch Diffusion"
+              url="https://github.com/TencentARC/BrushNet"
+            />
+            <Switch
+              id="brushnet"
+              checked={settings.enableBrushNet}
+              onCheckedChange={(value) => {
+                updateSettings({ enableBrushNet: value })
+              }}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <RowContainer>
+              <Slider
+                className="w-[180px]"
+                defaultValue={[100]}
+                min={1}
+                max={100}
+                step={1}
+                disabled={!settings.enableBrushNet}
+                value={[Math.floor(settings.brushnetConditioningScale * 100)]}
+                onValueChange={(vals) =>
+                  updateSettings({ brushnetConditioningScale: vals[0] / 100 })
+                }
+              />
+              <NumberInput
+                id="controlnet-weight"
+                className="w-[60px] rounded-full"
+                disabled={!settings.enableBrushNet}
+                numberValue={settings.brushnetConditioningScale}
+                allowFloat={false}
+                onNumberValueChange={(val) => {
+                  updateSettings({ brushnetConditioningScale: val })
+                }}
+              />
+            </RowContainer>
+          </div>
+
+          <div className="pr-2">
+            <Select
+              defaultValue={settings.brushnetMethod}
+              value={settings.brushnetMethod}
+              onValueChange={(value) => {
+                updateSettings({ brushnetMethod: value })
+              }}
+              disabled={!settings.enableBrushNet}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select brushnet model" />
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectGroup>
+                  {Object.values(settings.model.brushnets).map((method) => (
+                    <SelectItem key={method} value={method}>
+                      {method}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <Separator />
+      </div>
+    )
+  }
+
   const renderConterNetSetting = () => {
     if (!settings.model.support_controlnet) {
       return null
@@ -881,6 +959,7 @@ const DiffusionOptions = () => {
       {renderSeed()}
       {renderNegativePrompt()}
       <Separator />
+      {renderBrushNetSetting()}
       {renderConterNetSetting()}
       {renderLCMLora()}
       {renderMaskBlur()}

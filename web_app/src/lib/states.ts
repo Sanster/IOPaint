@@ -99,6 +99,11 @@ export type Settings = {
   controlnetConditioningScale: number
   controlnetMethod: string
 
+  // BrushNet
+  enableBrushNet: boolean
+  brushnetMethod: string
+  brushnetConditioningScale: number
+
   enableLCMLora: boolean
   enableFreeu: boolean
   freeuConfig: FreeuConfig
@@ -306,15 +311,16 @@ const defaultValues: AppState = {
       path: "lama",
       model_type: "inpaint",
       support_controlnet: false,
+      support_brushnet: false,
       support_strength: false,
       support_outpainting: false,
       controlnets: [],
+      brushnets: [],
       support_freeu: false,
       support_lcm_lora: false,
       is_single_file_diffusers: false,
       need_prompt: false,
     },
-    enableControlnet: false,
     showCropper: false,
     showExtender: false,
     extenderDirection: ExtenderDirection.xy,
@@ -339,8 +345,12 @@ const defaultValues: AppState = {
     sdMatchHistograms: false,
     sdScale: 1.0,
     p2pImageGuidanceScale: 1.5,
-    controlnetConditioningScale: 0.4,
+    enableControlnet: false,
     controlnetMethod: "lllyasviel/control_v11p_sd15_canny",
+    controlnetConditioningScale: 0.4,
+    enableBrushNet: false,
+    brushnetMethod: "random_mask",
+    brushnetConditioningScale: 1.0,
     enableLCMLora: false,
     enableFreeu: false,
     freeuConfig: { s1: 0.9, s2: 0.2, b1: 1.2, b2: 1.4 },
@@ -1076,7 +1086,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
     })),
     {
       name: "ZUSTAND_STATE", // name of the item in the storage (must be unique)
-      version: 1,
+      version: 2,
       partialize: (state) =>
         Object.fromEntries(
           Object.entries(state).filter(([key]) =>

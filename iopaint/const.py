@@ -6,7 +6,6 @@ KANDINSKY22_NAME = "kandinsky-community/kandinsky-2-2-decoder-inpaint"
 POWERPAINT_NAME = "Sanster/PowerPaint-V1-stable-diffusion-inpainting"
 ANYTEXT_NAME = "Sanster/AnyText"
 
-
 DIFFUSERS_SD_CLASS_NAME = "StableDiffusionPipeline"
 DIFFUSERS_SD_INPAINT_CLASS_NAME = "StableDiffusionInpaintPipeline"
 DIFFUSERS_SDXL_CLASS_NAME = "StableDiffusionXLPipeline"
@@ -60,6 +59,11 @@ SD_CONTROLNET_CHOICES: List[str] = [
     "lllyasviel/control_v11p_sd15_openpose",
     "lllyasviel/control_v11p_sd15_inpaint",
     "lllyasviel/control_v11f1p_sd15_depth",
+]
+
+SD_BRUSHNET_CHOICES: List[str] = [
+    "Sanster/brushnet_random_mask",
+    "Sanster/brushnet_segmentation_mask"
 ]
 
 SD2_CONTROLNET_CHOICES = [

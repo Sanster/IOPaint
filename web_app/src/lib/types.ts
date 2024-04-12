@@ -48,7 +48,9 @@ export interface ModelInfo {
   support_strength: boolean
   support_outpainting: boolean
   support_controlnet: boolean
+  support_brushnet: boolean
   controlnets: string[]
+  brushnets: string[]
   support_freeu: boolean
   support_lcm_lora: boolean
   need_prompt: boolean
