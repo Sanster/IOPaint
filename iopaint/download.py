@@ -68,7 +68,7 @@ def get_sd_model_type(model_abs_path: str) -> ModelType:
             if "Trying to set a tensor of shape torch.Size([320, 4, 3, 3])" in str(e):
                 model_type = ModelType.DIFFUSERS_SD
             else:
-                raise e
+                logger.info(f"Ignore non sd or sdxl file: {model_abs_path}")
     return model_type
 
 
@@ -96,7 +96,7 @@ def get_sdxl_model_type(model_abs_path: str) -> ModelType:
             if "but got torch.Size([320, 4, 3, 3])" in str(e):
                 model_type = ModelType.DIFFUSERS_SDXL
             else:
-                raise e
+                logger.info(f"Ignore non sd or sdxl file: {model_abs_path}")
     return model_type
 
 
