@@ -13,7 +13,7 @@ from iopaint.helper import (
     switch_mps_device,
 )
 from iopaint.schema import InpaintRequest, HDStrategy, SDSampler
-from .helper.g_diffuser_bot import expand_image, expand_image2
+from .helper.g_diffuser_bot import expand_image
 from .utils import get_scheduler
 
 
@@ -35,8 +35,7 @@ class InpaintModel:
         self.init_model(device, **kwargs)
 
     @abc.abstractmethod
-    def init_model(self, device, **kwargs):
-        ...
+    def init_model(self, device, **kwargs): ...
 
     @staticmethod
     @abc.abstractmethod
@@ -53,8 +52,7 @@ class InpaintModel:
         ...
 
     @staticmethod
-    def download():
-        ...
+    def download(): ...
 
     def _pad_forward(self, image, mask, config: InpaintRequest):
         origin_height, origin_width = image.shape[:2]
@@ -96,7 +94,7 @@ class InpaintModel:
         # logger.info(f"hd_strategy: {config.hd_strategy}")
         if config.hd_strategy == HDStrategy.CROP:
             if max(image.shape) > config.hd_strategy_crop_trigger_size:
-                logger.info(f"Run crop strategy")
+                logger.info("Run crop strategy")
                 boxes = boxes_from_mask(mask)
                 crop_result = []
                 for box in boxes:
@@ -327,14 +325,12 @@ class DiffusionInpaintModel(InpaintModel):
         padding_r = max(0, cropper_r - image_r)
         padding_b = max(0, cropper_b - image_b)
 
-        expanded_image, mask_image = expand_image2(
+        expanded_image, mask_image = expand_image(
             cropped_image,
             left=padding_l,
             top=padding_t,
             right=padding_r,
             bottom=padding_b,
-            softness=config.sd_outpainting_softness,
-            space=config.sd_outpainting_space,
         )
 
         # 最终扩大了的 image, BGR
@@ -381,15 +377,6 @@ class DiffusionInpaintModel(InpaintModel):
             interpolation=cv2.INTER_CUBIC,
         )
 
-        # blend result, copy from g_diffuser_bot
-        # mask_rgb = 1.0 - np_img_grey_to_rgb(mask / 255.0)
-        # inpaint_result = np.clip(
-        #     inpaint_result * (1.0 - mask_rgb) + image * mask_rgb, 0.0, 255.0
-        # )
-        # original_pixel_indices = mask < 127
-        # inpaint_result[original_pixel_indices] = image[:, :, ::-1][
-        #     original_pixel_indices
-        # ]
         return inpaint_result
 
     def set_scheduler(self, config: InpaintRequest):
@@ -412,7 +399,7 @@ class DiffusionInpaintModel(InpaintModel):
         if config.sd_match_histograms:
             result = self._match_histograms(result, image[:, :, ::-1], mask)
 
-        # if config.sd_mask_blur != 0:
-        #     k = 2 * config.sd_mask_blur + 1
-        #     mask = cv2.GaussianBlur(mask, (k, k), 0)
+        if config.use_extender and config.sd_mask_blur != 0:
+            k = 2 * config.sd_mask_blur + 1
+            mask = cv2.GaussianBlur(mask, (k, k), 0)
         return result, image, mask

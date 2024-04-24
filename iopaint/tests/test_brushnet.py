@@ -10,7 +10,7 @@ import pytest
 import torch
 
 from iopaint.model_manager import ModelManager
-from iopaint.schema import HDStrategy, SDSampler, FREEUConfig
+from iopaint.schema import HDStrategy, SDSampler, FREEUConfig, PowerPaintTask
 
 current_dir = Path(__file__).parent.absolute().resolve()
 save_dir = current_dir / "result"
@@ -35,7 +35,7 @@ def test_runway_brushnet(device, sampler):
         sd_freeu=True,
         sd_freeu_config=FREEUConfig(),
         enable_brushnet=True,
-        brushnet_method=SD_BRUSHNET_CHOICES[0]
+        brushnet_method=SD_BRUSHNET_CHOICES[0],
     )
     cfg.sd_sampler = sampler
 
@@ -49,38 +49,64 @@ def test_runway_brushnet(device, sampler):
 
 
 @pytest.mark.parametrize("device", ["cuda", "mps"])
-@pytest.mark.parametrize("sampler", [SDSampler.dpm_plus_plus_2m_karras])
-@pytest.mark.parametrize(
-    "name",
-    [
-        "v1-5-pruned-emaonly.safetensors",
-    ],
-)
-def test_brushnet_local_file_path(device, sampler, name):
+@pytest.mark.parametrize("sampler", [SDSampler.dpm_plus_plus_2m])
+def test_runway_powerpaint_v2(device, sampler):
     sd_steps = check_device(device)
     model = ModelManager(
-        name=name,
+        name="runwayml/stable-diffusion-v1-5",
         device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
-        cpu_offload=False,
     )
-    cfg = get_config(
-        strategy=HDStrategy.ORIGINAL,
-        prompt="face of a fox, sitting on a bench",
-        sd_steps=sd_steps,
-        sd_seed=1234,
-        enable_brushnet=True,
-        brushnet_method=SD_BRUSHNET_CHOICES[1]
-    )
-    cfg.sd_sampler = sampler
 
-    assert_equal(
-        model,
-        cfg,
-        f"brushnet_segmentation_mask_{device}.png",
-        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
-        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
-        fx=1,
-        fy=1,
-    )
+    tasks = {
+        PowerPaintTask.text_guided: {
+            "prompt": "face of a fox, sitting on a bench",
+            "scale": 7.5,
+        },
+        PowerPaintTask.context_aware: {
+            "prompt": "face of a fox, sitting on a bench",
+            "scale": 7.5,
+        },
+        PowerPaintTask.shape_guided: {
+            "prompt": "face of a fox, sitting on a bench",
+            "scale": 7.5,
+        },
+        PowerPaintTask.object_remove: {
+            "prompt": "",
+            "scale": 12,
+        },
+        PowerPaintTask.outpainting: {
+            "prompt": "",
+            "scale": 7.5,
+        },
+    }
+
+    for task, data in tasks.items():
+        cfg = get_config(
+            strategy=HDStrategy.ORIGINAL,
+            prompt=data["prompt"],
+            negative_prompt="out of frame, lowres, error, cropped, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, out of frame, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, disfigured, gross proportions, malformed limbs, watermark, signature",
+            sd_steps=sd_steps,
+            sd_guidance_scale=data["scale"],
+            enable_powerpaint_v2=True,
+            powerpaint_task=task,
+            sd_sampler=sampler,
+            sd_mask_blur=11,
+            sd_seed=42,
+            # sd_keep_unmasked_area=False
+        )
+        if task == PowerPaintTask.outpainting:
+            cfg.use_extender = True
+            cfg.extender_x = -128
+            cfg.extender_y = -128
+            cfg.extender_width = 768
+            cfg.extender_height = 768
+
+        assert_equal(
+            model,
+            cfg,
+            f"powerpaint_v2_{device}_{task}.png",
+            img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
+            mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
+        )

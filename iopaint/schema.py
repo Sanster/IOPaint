@@ -121,6 +121,13 @@ class ModelInfo(BaseModel):
 
     @computed_field
     @property
+    def support_powerpaint_v2(self) -> bool:
+        return self.model_type in [
+            ModelType.DIFFUSERS_SD,
+        ]
+
+    @computed_field
+    @property
     def support_freeu(self) -> bool:
         return self.model_type in [
             ModelType.DIFFUSERS_SD,
@@ -225,8 +232,9 @@ class FREEUConfig(BaseModel):
     b2: float = 1.4
 
 
-class PowerPaintTask(str, Enum):
+class PowerPaintTask(Choices):
     text_guided = "text-guided"
+    context_aware = "context-aware"
     shape_guided = "shape-guided"
     object_remove = "object-remove"
     outpainting = "outpainting"
@@ -387,12 +395,13 @@ class InpaintRequest(BaseModel):
 
     # BrushNet
     enable_brushnet: bool = Field(False, description="Enable brushnet")
-    brushnet_method: str = Field(
-        SD_BRUSHNET_CHOICES[0], description="Brushnet method"
+    brushnet_method: str = Field(SD_BRUSHNET_CHOICES[0], description="Brushnet method")
+    brushnet_conditioning_scale: float = Field(
+        1.0, description="brushnet conditioning scale", ge=0.0, le=1.0
     )
-    brushnet_conditioning_scale: float = Field(1.0, description="brushnet conditioning scale", ge=0.0, le=1.0)
 
     # PowerPaint
+    enable_powerpaint_v2: bool = Field(False, description="Enable PowerPaint v2")
     powerpaint_task: PowerPaintTask = Field(
         PowerPaintTask.text_guided, description="PowerPaint task"
     )
@@ -403,8 +412,8 @@ class InpaintRequest(BaseModel):
         le=1.0,
     )
 
-    @model_validator(mode='after')
-    def validate_field(cls, values: 'InpaintRequest'):
+    @model_validator(mode="after")
+    def validate_field(cls, values: "InpaintRequest"):
         if values.sd_seed == -1:
             values.sd_seed = random.randint(1, 99999999)
             logger.info(f"Generate random seed: {values.sd_seed}")
