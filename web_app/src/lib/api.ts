@@ -68,8 +68,6 @@ export default async function inpaint(
       sd_sampler: settings.sdSampler,
       sd_seed: settings.seedFixed ? settings.seed : -1,
       sd_match_histograms: settings.sdMatchHistograms,
-      sd_freeu: settings.enableFreeu,
-      sd_freeu_config: settings.freeuConfig,
       sd_lcm_lora: settings.enableLCMLora,
       paint_by_example_example_image: exampleImageBase64,
       p2p_image_guidance_scale: settings.p2pImageGuidanceScale,

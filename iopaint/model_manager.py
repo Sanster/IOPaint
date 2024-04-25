@@ -103,7 +103,6 @@ class ModelManager:
             self.switch_brushnet_method(config)
 
         self.enable_disable_powerpaint_v2(config)
-        self.enable_disable_freeu(config)
         self.enable_disable_lcm_lora(config)
         return self.model(image, mask, config).astype(np.uint8)
 
@@ -239,22 +238,6 @@ class ModelManager:
                 logger.info("Enable PowerPaintV2")
             else:
                 logger.info("Disable PowerPaintV2")
-
-    def enable_disable_freeu(self, config: InpaintRequest):
-        if str(self.model.device) == "mps":
-            return
-
-        if self.available_models[self.name].support_freeu:
-            if config.sd_freeu:
-                freeu_config = config.sd_freeu_config
-                self.model.model.enable_freeu(
-                    s1=freeu_config.s1,
-                    s2=freeu_config.s2,
-                    b1=freeu_config.b1,
-                    b2=freeu_config.b2,
-                )
-            else:
-                self.model.model.disable_freeu()
 
     def enable_disable_lcm_lora(self, config: InpaintRequest):
         if self.available_models[self.name].support_lcm_lora:

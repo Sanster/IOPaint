@@ -316,129 +316,6 @@ const DiffusionOptions = () => {
     )
   }
 
-  const renderFreeu = () => {
-    if (!settings.model.support_freeu) {
-      return null
-    }
-
-    let toolTip =
-      "FreeU is a technique for improving image quality. Different models may require different FreeU-specific hyperparameters, which can be viewed in the more info section."
-    if (settings.enableBrushNet) {
-      toolTip = "BrushNet is enabled, FreeU is disabled."
-    }
-
-    let disable = settings.enableBrushNet || !settings.enableFreeu
-
-    return (
-      <div className="flex flex-col gap-4">
-        <RowContainer>
-          <LabelTitle
-            text="FreeU"
-            url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/freeu"
-            toolTip={toolTip}
-            disabled={disable}
-          />
-          <Switch
-            id="freeu"
-            checked={settings.enableFreeu}
-            onCheckedChange={(value) => {
-              updateSettings({ enableFreeu: value })
-            }}
-            disabled={settings.enableBrushNet}
-          />
-        </RowContainer>
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-center gap-6">
-            <div className="flex gap-4 items-center justify-center">
-              <LabelTitle
-                htmlFor="freeu-s1"
-                text="s1"
-                disabled={disable}
-                className="min-w-0"
-              />
-              <NumberInput
-                id="freeu-s1"
-                className="w-14"
-                disabled={disable}
-                numberValue={settings.freeuConfig.s1}
-                allowFloat
-                onNumberValueChange={(value) => {
-                  updateSettings({
-                    freeuConfig: { ...settings.freeuConfig, s1: value },
-                  })
-                }}
-              />
-            </div>
-            <div className="flex gap-2 items-center justify-center">
-              <LabelTitle
-                htmlFor="freeu-s2"
-                text="s2"
-                disabled={disable}
-                className="min-w-0"
-              />
-              <NumberInput
-                id="freeu-s2"
-                className="w-14"
-                disabled={disable}
-                numberValue={settings.freeuConfig.s2}
-                allowFloat
-                onNumberValueChange={(value) => {
-                  updateSettings({
-                    freeuConfig: { ...settings.freeuConfig, s2: value },
-                  })
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-center gap-6">
-            <div className="flex gap-2 items-center justify-center">
-              <LabelTitle
-                htmlFor="freeu-b1"
-                text="b1"
-                disabled={disable}
-                className="min-w-0"
-              />
-              <NumberInput
-                id="freeu-b1"
-                className="w-14"
-                disabled={disable}
-                numberValue={settings.freeuConfig.b1}
-                allowFloat
-                onNumberValueChange={(value) => {
-                  updateSettings({
-                    freeuConfig: { ...settings.freeuConfig, b1: value },
-                  })
-                }}
-              />
-            </div>
-            <div className="flex gap-2 items-center justify-center">
-              <LabelTitle
-                htmlFor="freeu-b2"
-                text="b2"
-                disabled={disable}
-                className="min-w-0"
-              />
-              <NumberInput
-                id="freeu-b2"
-                className="w-14"
-                disabled={disable}
-                numberValue={settings.freeuConfig.b2}
-                allowFloat
-                onNumberValueChange={(value) => {
-                  updateSettings({
-                    freeuConfig: { ...settings.freeuConfig, b2: value },
-                  })
-                }}
-              />
-            </div>
-          </div>
-        </div>
-        <Separator />
-      </div>
-    )
-  }
-
   const renderNegativePrompt = () => {
     if (!settings.model.need_prompt) {
       return null
@@ -851,30 +728,33 @@ const DiffusionOptions = () => {
 
   const renderMaskBlur = () => {
     return (
-      <RowContainer>
-        <LabelTitle
-          text="Mask blur"
-          toolTip="How much to blur the mask before processing, in pixels. Make the generated inpainting boundaries appear more natural."
-        />
-        <Slider
-          className="w-[100px]"
-          defaultValue={[settings.sdMaskBlur]}
-          min={0}
-          max={96}
-          step={1}
-          value={[Math.floor(settings.sdMaskBlur)]}
-          onValueChange={(vals) => updateSettings({ sdMaskBlur: vals[0] })}
-        />
-        <NumberInput
-          id="mask-blur"
-          className="w-[60px] rounded-full"
-          numberValue={settings.sdMaskBlur}
-          allowFloat={false}
-          onNumberValueChange={(value) => {
-            updateSettings({ sdMaskBlur: value })
-          }}
-        />
-      </RowContainer>
+      <>
+        <RowContainer>
+          <LabelTitle
+            text="Mask blur"
+            toolTip="How much to blur the mask before processing, in pixels. Make the generated inpainting boundaries appear more natural."
+          />
+          <Slider
+            className="w-[100px]"
+            defaultValue={[settings.sdMaskBlur]}
+            min={0}
+            max={96}
+            step={1}
+            value={[Math.floor(settings.sdMaskBlur)]}
+            onValueChange={(vals) => updateSettings({ sdMaskBlur: vals[0] })}
+          />
+          <NumberInput
+            id="mask-blur"
+            className="w-[60px] rounded-full"
+            numberValue={settings.sdMaskBlur}
+            allowFloat={false}
+            onNumberValueChange={(value) => {
+              updateSettings({ sdMaskBlur: value })
+            }}
+          />
+        </RowContainer>
+        <Separator />
+      </>
     )
   }
 
@@ -985,7 +865,9 @@ const DiffusionOptions = () => {
     <div className="flex flex-col gap-4 mt-4">
       {renderCropper()}
       {renderExtender()}
+      {renderMaskBlur()}
       {renderMaskAdjuster()}
+      {renderMatchHistograms()}
       {renderPowerPaintTaskType()}
       {renderSteps()}
       {renderGuidanceScale()}
@@ -998,9 +880,6 @@ const DiffusionOptions = () => {
       {renderBrushNetSetting()}
       {renderConterNetSetting()}
       {renderLCMLora()}
-      {renderMaskBlur()}
-      {renderMatchHistograms()}
-      {renderFreeu()}
       {renderPaintByExample()}
     </div>
   )

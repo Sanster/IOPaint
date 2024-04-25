@@ -8,7 +8,7 @@ import pytest
 import torch
 
 from iopaint.model_manager import ModelManager
-from iopaint.schema import HDStrategy, SDSampler, FREEUConfig
+from iopaint.schema import HDStrategy, SDSampler
 from iopaint.tests.test_model import get_config, assert_equal
 
 
@@ -69,60 +69,6 @@ def test_sdxl_cpu_text_encoder(device, strategy, sampler):
         model,
         cfg,
         f"sdxl_device_{device}.png",
-        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
-        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
-        fx=2,
-        fy=2,
-    )
-
-
-@pytest.mark.parametrize("device", ["cuda", "mps"])
-@pytest.mark.parametrize("strategy", [HDStrategy.ORIGINAL])
-@pytest.mark.parametrize("sampler", [SDSampler.ddim])
-def test_sdxl_lcm_lora_and_freeu(device, strategy, sampler):
-    sd_steps = check_device(device)
-
-    model = ModelManager(
-        name="diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
-        device=torch.device(device),
-        disable_nsfw=True,
-        sd_cpu_textencoder=False,
-    )
-    cfg = get_config(
-        strategy=strategy,
-        prompt="face of a fox, sitting on a bench",
-        sd_steps=sd_steps,
-        sd_strength=1.0,
-        sd_guidance_scale=2.0,
-        sd_lcm_lora=True,
-    )
-    cfg.sd_sampler = sampler
-
-    name = f"device_{device}_{sampler}"
-
-    assert_equal(
-        model,
-        cfg,
-        f"sdxl_{name}_lcm_lora.png",
-        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
-        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
-        fx=2,
-        fy=2,
-    )
-
-    cfg = get_config(
-        strategy=strategy,
-        prompt="face of a fox, sitting on a bench",
-        sd_steps=sd_steps,
-        sd_guidance_scale=7.5,
-        sd_freeu=True,
-        sd_freeu_config=FREEUConfig(),
-    )
-
-    assert_equal(
-        model,
-        cfg,
-        f"sdxl_{name}_freeu_device_{device}.png",
         img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
         fx=2,

@@ -51,7 +51,6 @@ export interface ModelInfo {
   support_brushnet: boolean
   controlnets: string[]
   brushnets: string[]
-  support_freeu: boolean
   support_lcm_lora: boolean
   need_prompt: boolean
   is_single_file_diffusers: boolean
@@ -96,13 +95,6 @@ export interface Rect {
   y: number
   width: number
   height: number
-}
-
-export interface FreeuConfig {
-  s1: number
-  s2: number
-  b1: number
-  b2: number
 }
 
 export interface Point {

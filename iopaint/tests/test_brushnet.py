@@ -10,7 +10,7 @@ import pytest
 import torch
 
 from iopaint.model_manager import ModelManager
-from iopaint.schema import HDStrategy, SDSampler, FREEUConfig, PowerPaintTask
+from iopaint.schema import HDStrategy, SDSampler, PowerPaintTask
 
 current_dir = Path(__file__).parent.absolute().resolve()
 save_dir = current_dir / "result"
@@ -32,8 +32,6 @@ def test_runway_brushnet(device, sampler):
         prompt="face of a fox, sitting on a bench",
         sd_steps=sd_steps,
         sd_guidance_scale=7.5,
-        sd_freeu=True,
-        sd_freeu_config=FREEUConfig(),
         enable_brushnet=True,
         brushnet_method=SD_BRUSHNET_CHOICES[0],
     )

@@ -126,16 +126,6 @@ class ModelInfo(BaseModel):
             ModelType.DIFFUSERS_SD,
         ]
 
-    @computed_field
-    @property
-    def support_freeu(self) -> bool:
-        return self.model_type in [
-            ModelType.DIFFUSERS_SD,
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SD_INPAINT,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ] or self.name in [INSTRUCT_PIX2PIX_NAME]
-
 
 class Choices(str, Enum):
     @classmethod
@@ -224,12 +214,6 @@ class SDSampler(str, Enum):
     uni_pc = "UniPC"
     lcm = "LCM"
 
-
-class FREEUConfig(BaseModel):
-    s1: float = 0.9
-    s2: float = 0.2
-    b1: float = 1.2
-    b2: float = 1.4
 
 
 class PowerPaintTask(Choices):
@@ -352,12 +336,6 @@ class InpaintRequest(BaseModel):
     sd_outpainting_softness: float = Field(20.0)
     sd_outpainting_space: float = Field(20.0)
 
-    sd_freeu: bool = Field(
-        False,
-        description="Enable freeu mode. https://huggingface.co/docs/diffusers/main/en/using-diffusers/freeu",
-    )
-    sd_freeu_config: FREEUConfig = FREEUConfig()
-
     sd_lcm_lora: bool = Field(
         False,
         description="Enable lcm-lora mode. https://huggingface.co/docs/diffusers/main/en/using-diffusers/inference_with_lcm#texttoimage",
@@ -433,9 +411,6 @@ class InpaintRequest(BaseModel):
             if values.sd_lcm_lora:
                 logger.info("BrushNet is enabled, set sd_lcm_lora=False")
                 values.sd_lcm_lora = False
-            if values.sd_freeu:
-                logger.info("BrushNet is enabled, set sd_freeu=False")
-                values.sd_freeu = False
 
         if values.enable_controlnet:
             logger.info("ControlNet is enabled, set enable_brushnet=False")

@@ -7,7 +7,6 @@ import {
   AdjustMaskOperate,
   CV2Flag,
   ExtenderDirection,
-  FreeuConfig,
   LDMSampler,
   Line,
   LineGroup,
@@ -105,8 +104,6 @@ export type Settings = {
   brushnetConditioningScale: number
 
   enableLCMLora: boolean
-  enableFreeu: boolean
-  freeuConfig: FreeuConfig
 
   // PowerPaint
   powerpaintTask: PowerPaintTask
@@ -316,7 +313,6 @@ const defaultValues: AppState = {
       support_outpainting: false,
       controlnets: [],
       brushnets: [],
-      support_freeu: false,
       support_lcm_lora: false,
       is_single_file_diffusers: false,
       need_prompt: false,
@@ -352,8 +348,6 @@ const defaultValues: AppState = {
     brushnetMethod: "random_mask",
     brushnetConditioningScale: 1.0,
     enableLCMLora: false,
-    enableFreeu: false,
-    freeuConfig: { s1: 0.9, s2: 0.2, b1: 1.2, b2: 1.4 },
     powerpaintTask: PowerPaintTask.text_guided,
     adjustMaskKernelSize: 12,
   },
