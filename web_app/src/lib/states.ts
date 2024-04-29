@@ -200,6 +200,7 @@ type AppAction = {
   updateEnablePowerPaintV2: (newValue: boolean) => void
   updateEnableBrushNet: (newValue: boolean) => void
   updateEnableControlnet: (newValue: boolean) => void
+  updateLCMLora: (newValue: boolean) => void
 
   setModel: (newModel: ModelInfo) => void
   updateFileManagerState: (newState: Partial<FileManagerState>) => void
@@ -832,6 +833,16 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
 
       updateEnableControlnet(newValue) {
         get().updateSettings({ enableControlnet: newValue })
+        if (newValue) {
+          get().updateSettings({
+            enablePowerPaintV2: false,
+            enableBrushNet: false,
+          })
+        }
+      },
+
+      updateLCMLora(newValue) {
+        get().updateSettings({ enableLCMLora: newValue })
         if (newValue) {
           get().updateSettings({
             enablePowerPaintV2: false,

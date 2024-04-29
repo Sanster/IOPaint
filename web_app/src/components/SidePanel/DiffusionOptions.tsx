@@ -62,6 +62,7 @@ const DiffusionOptions = () => {
     updateEnablePowerPaintV2,
     updateEnableBrushNet,
     updateEnableControlnet,
+    updateLCMLora,
   ] = useStore((state) => [
     state.serverConfig.samplers,
     state.settings,
@@ -77,6 +78,7 @@ const DiffusionOptions = () => {
     state.updateEnablePowerPaintV2,
     state.updateEnableBrushNet,
     state.updateEnableControlnet,
+    state.updateLCMLora,
   ])
   const [exampleImage, isExampleImageLoaded] = useImage(paintByExampleFile)
   const negativePromptRef = useRef(null)
@@ -295,7 +297,7 @@ const DiffusionOptions = () => {
             id="lcm-lora"
             checked={settings.enableLCMLora}
             onCheckedChange={(value) => {
-              updateSettings({ enableLCMLora: value })
+              updateLCMLora(value)
             }}
           />
         </RowContainer>
