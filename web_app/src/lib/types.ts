@@ -49,6 +49,7 @@ export interface ModelInfo {
   support_outpainting: boolean
   support_controlnet: boolean
   support_brushnet: boolean
+  support_powerpaint_v2: boolean
   controlnets: string[]
   brushnets: string[]
   support_lcm_lora: boolean
@@ -123,6 +124,7 @@ export enum ExtenderDirection {
 export enum PowerPaintTask {
   text_guided = "text-guided",
   shape_guided = "shape-guided",
+  context_aware = "context-aware",
   object_remove = "object-remove",
   outpainting = "outpainting",
 }

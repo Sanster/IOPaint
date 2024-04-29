@@ -122,9 +122,13 @@ class ModelInfo(BaseModel):
     @computed_field
     @property
     def support_powerpaint_v2(self) -> bool:
-        return self.model_type in [
-            ModelType.DIFFUSERS_SD,
-        ]
+        return (
+            self.model_type
+            in [
+                ModelType.DIFFUSERS_SD,
+            ]
+            and self.name != POWERPAINT_NAME
+        )
 
 
 class Choices(str, Enum):
@@ -213,7 +217,6 @@ class SDSampler(str, Enum):
     pndm = "PNDM"
     uni_pc = "UniPC"
     lcm = "LCM"
-
 
 
 class PowerPaintTask(Choices):

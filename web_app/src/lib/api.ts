@@ -79,6 +79,7 @@ export default async function inpaint(
       enable_brushnet: settings.enableBrushNet,
       brushnet_method: settings.brushnetMethod ? settings.brushnetMethod : "",
       brushnet_conditioning_scale: settings.brushnetConditioningScale,
+      enable_powerpaint_v2: settings.enablePowerPaintV2,
       powerpaint_task: settings.showExtender
         ? PowerPaintTask.outpainting
         : settings.powerpaintTask,

@@ -59,6 +59,9 @@ const DiffusionOptions = () => {
     updateExtenderDirection,
     adjustMask,
     clearMask,
+    updateEnablePowerPaintV2,
+    updateEnableBrushNet,
+    updateEnableControlnet,
   ] = useStore((state) => [
     state.serverConfig.samplers,
     state.settings,
@@ -71,6 +74,9 @@ const DiffusionOptions = () => {
     state.updateExtenderDirection,
     state.adjustMask,
     state.clearMask,
+    state.updateEnablePowerPaintV2,
+    state.updateEnableBrushNet,
+    state.updateEnableControlnet,
   ])
   const [exampleImage, isExampleImageLoaded] = useImage(paintByExampleFile)
   const negativePromptRef = useRef(null)
@@ -114,12 +120,8 @@ const DiffusionOptions = () => {
       return null
     }
 
-    let disable = settings.enableControlnet
     let toolTip =
-      "BrushNet is a plug-and-play image inpainting model with decomposed dual-branch diffusion. It can be used to inpaint images by conditioning on a mask."
-    if (disable) {
-      toolTip = "ControlNet is enabled, BrushNet is disabled."
-    }
+      "BrushNet is a plug-and-play image inpainting model works on any SD1.5 base models."
 
     return (
       <div className="flex flex-col gap-4">
@@ -129,20 +131,19 @@ const DiffusionOptions = () => {
               text="BrushNet"
               url="https://github.com/TencentARC/BrushNet"
               toolTip={toolTip}
-              disabled={disable}
             />
             <Switch
               id="brushnet"
               checked={settings.enableBrushNet}
               onCheckedChange={(value) => {
-                updateSettings({ enableBrushNet: value })
+                updateEnableBrushNet(value)
               }}
-              disabled={disable}
             />
           </RowContainer>
-          <RowContainer>
+          {/* <RowContainer>
             <Slider
               defaultValue={[100]}
+              className="w-[180px]"
               min={1}
               max={100}
               step={1}
@@ -155,14 +156,13 @@ const DiffusionOptions = () => {
             <NumberInput
               id="brushnet-weight"
               className="w-[60px] rounded-full"
-              disabled={!settings.enableBrushNet || disable}
               numberValue={settings.brushnetConditioningScale}
               allowFloat={false}
               onNumberValueChange={(val) => {
                 updateSettings({ brushnetConditioningScale: val })
               }}
             />
-          </RowContainer>
+          </RowContainer> */}
 
           <RowContainer>
             <Select
@@ -198,12 +198,8 @@ const DiffusionOptions = () => {
       return null
     }
 
-    let disable = settings.enableBrushNet
     let toolTip =
       "Using an additional conditioning image to control how an image is generated"
-    if (disable) {
-      toolTip = "BrushNet is enabled, ControlNet is disabled."
-    }
 
     return (
       <div className="flex flex-col gap-4">
@@ -213,15 +209,13 @@ const DiffusionOptions = () => {
               text="ControlNet"
               url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inpaint#controlnet"
               toolTip={toolTip}
-              disabled={disable}
             />
             <Switch
               id="controlnet"
               checked={settings.enableControlnet}
               onCheckedChange={(value) => {
-                updateSettings({ enableControlnet: value })
+                updateEnableControlnet(value)
               }}
-              disabled={disable}
             />
           </RowContainer>
 
@@ -233,7 +227,7 @@ const DiffusionOptions = () => {
                 min={1}
                 max={100}
                 step={1}
-                disabled={!settings.enableControlnet || disable}
+                disabled={!settings.enableControlnet}
                 value={[Math.floor(settings.controlnetConditioningScale * 100)]}
                 onValueChange={(vals) =>
                   updateSettings({ controlnetConditioningScale: vals[0] / 100 })
@@ -242,7 +236,7 @@ const DiffusionOptions = () => {
               <NumberInput
                 id="controlnet-weight"
                 className="w-[60px] rounded-full"
-                disabled={!settings.enableControlnet || disable}
+                disabled={!settings.enableControlnet}
                 numberValue={settings.controlnetConditioningScale}
                 allowFloat={false}
                 onNumberValueChange={(val) => {
@@ -286,12 +280,8 @@ const DiffusionOptions = () => {
       return null
     }
 
-    let disable = settings.enableBrushNet
     let toolTip =
-      "Enable quality image generation in typically 2-4 steps. Suggest disabling guidance_scale by setting it to 0. You can also try values between 1.0 and 2.0. When LCM Lora is enabled, LCMSampler will be used automatically."
-    if (disable) {
-      toolTip = "BrushNet is enabled, LCM Lora is disabled."
-    }
+      "Enable quality image generation in typically 2-8 steps. Suggest disabling guidance_scale by setting it to 0. You can also try values between 1.0 and 2.0. When LCM Lora is enabled, LCMSampler will be used automatically."
 
     return (
       <>
@@ -300,7 +290,6 @@ const DiffusionOptions = () => {
             text="LCM LoRA"
             url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inference_with_lcm_lora"
             toolTip={toolTip}
-            disabled={disable}
           />
           <Switch
             id="lcm-lora"
@@ -308,7 +297,6 @@ const DiffusionOptions = () => {
             onCheckedChange={(value) => {
               updateSettings({ enableLCMLora: value })
             }}
-            disabled={disable}
           />
         </RowContainer>
         <Separator />
@@ -561,10 +549,6 @@ const DiffusionOptions = () => {
   }
 
   const renderPowerPaintTaskType = () => {
-    if (settings.model.name !== POWERPAINT) {
-      return null
-    }
-
     return (
       <RowContainer>
         <LabelTitle
@@ -579,7 +563,7 @@ const DiffusionOptions = () => {
           }}
           disabled={settings.showExtender}
         >
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-[130px]">
             <SelectValue placeholder="Select task" />
           </SelectTrigger>
           <SelectContent align="end">
@@ -587,6 +571,7 @@ const DiffusionOptions = () => {
               {[
                 PowerPaintTask.text_guided,
                 PowerPaintTask.object_remove,
+                PowerPaintTask.context_aware,
                 PowerPaintTask.shape_guided,
               ].map((task) => (
                 <SelectItem key={task} value={task}>
@@ -597,6 +582,44 @@ const DiffusionOptions = () => {
           </SelectContent>
         </Select>
       </RowContainer>
+    )
+  }
+
+  const renderPowerPaintV1 = () => {
+    if (settings.model.name !== POWERPAINT) {
+      return null
+    }
+    return (
+      <>
+        {renderPowerPaintTaskType()}
+        <Separator />
+      </>
+    )
+  }
+
+  const renderPowerPaintV2 = () => {
+    if (settings.model.support_powerpaint_v2 === false) {
+      return null
+    }
+
+    return (
+      <>
+        <RowContainer>
+          <LabelTitle
+            text="PowerPaint V2"
+            toolTip="PowerPaint is a plug-and-play image inpainting model works on any SD1.5 base models."
+          />
+          <Switch
+            id="powerpaint-v2"
+            checked={settings.enablePowerPaintV2}
+            onCheckedChange={(value) => {
+              updateEnablePowerPaintV2(value)
+            }}
+          />
+        </RowContainer>
+        {renderPowerPaintTaskType()}
+        <Separator />
+      </>
     )
   }
 
@@ -868,7 +891,7 @@ const DiffusionOptions = () => {
       {renderMaskBlur()}
       {renderMaskAdjuster()}
       {renderMatchHistograms()}
-      {renderPowerPaintTaskType()}
+      {renderPowerPaintV1()}
       {renderSteps()}
       {renderGuidanceScale()}
       {renderP2PImageGuidanceScale()}
@@ -878,6 +901,7 @@ const DiffusionOptions = () => {
       {renderNegativePrompt()}
       <Separator />
       {renderBrushNetSetting()}
+      {renderPowerPaintV2()}
       {renderConterNetSetting()}
       {renderLCMLora()}
       {renderPaintByExample()}

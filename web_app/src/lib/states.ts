@@ -106,6 +106,7 @@ export type Settings = {
   enableLCMLora: boolean
 
   // PowerPaint
+  enablePowerPaintV2: boolean
   powerpaintTask: PowerPaintTask
 
   // AdjustMask
@@ -194,6 +195,12 @@ type AppAction = {
   setServerConfig: (newValue: ServerConfig) => void
   setSeed: (newValue: number) => void
   updateSettings: (newSettings: Partial<Settings>) => void
+
+  // 互斥
+  updateEnablePowerPaintV2: (newValue: boolean) => void
+  updateEnableBrushNet: (newValue: boolean) => void
+  updateEnableControlnet: (newValue: boolean) => void
+
   setModel: (newModel: ModelInfo) => void
   updateFileManagerState: (newState: Partial<FileManagerState>) => void
   updateInteractiveSegState: (newState: Partial<InteractiveSegState>) => void
@@ -311,6 +318,7 @@ const defaultValues: AppState = {
       support_brushnet: false,
       support_strength: false,
       support_outpainting: false,
+      support_powerpaint_v2: false,
       controlnets: [],
       brushnets: [],
       support_lcm_lora: false,
@@ -425,6 +433,8 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         if (
           get().settings.model.support_outpainting &&
           settings.showExtender &&
+          extenderState.x === 0 &&
+          extenderState.y === 0 &&
           extenderState.height === imageHeight &&
           extenderState.width === imageWidth
         ) {
@@ -796,6 +806,38 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
             ...newSettings,
           }
         })
+      },
+
+      updateEnablePowerPaintV2: (newValue: boolean) => {
+        get().updateSettings({ enablePowerPaintV2: newValue })
+        if (newValue) {
+          get().updateSettings({
+            enableBrushNet: false,
+            enableControlnet: false,
+            enableLCMLora: false,
+          })
+        }
+      },
+
+      updateEnableBrushNet: (newValue: boolean) => {
+        get().updateSettings({ enableBrushNet: newValue })
+        if (newValue) {
+          get().updateSettings({
+            enablePowerPaintV2: false,
+            enableControlnet: false,
+            enableLCMLora: false,
+          })
+        }
+      },
+
+      updateEnableControlnet(newValue) {
+        get().updateSettings({ enableControlnet: newValue })
+        if (newValue) {
+          get().updateSettings({
+            enablePowerPaintV2: false,
+            enableBrushNet: false,
+          })
+        }
       },
 
       setModel: (newModel: ModelInfo) => {
