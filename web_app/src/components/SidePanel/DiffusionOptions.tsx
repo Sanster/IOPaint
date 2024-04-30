@@ -427,12 +427,11 @@ const DiffusionOptions = () => {
       return null
     }
 
-    let disable = settings.enableBrushNet
     let toolTip =
       "Strength is a measure of how much noise is added to the base image, which influences how similar the output is to the base image. Higher value means more noise and more different from the base image"
-    if (disable) {
-      toolTip = "BrushNet is enabled, Strength is disabled."
-    }
+    // if (disable) {
+    //   toolTip = "BrushNet is enabled, Strength is disabled."
+    // }
 
     return (
       <RowContainer>
@@ -440,7 +439,7 @@ const DiffusionOptions = () => {
           text="Strength"
           url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inpaint#strength"
           toolTip={toolTip}
-          disabled={disable}
+          // disabled={disable}
         />
         <Slider
           className="w-[100px]"
@@ -452,7 +451,7 @@ const DiffusionOptions = () => {
           onValueChange={(vals) =>
             updateSettings({ sdStrength: vals[0] / 100 })
           }
-          disabled={disable}
+          // disabled={disable}
         />
         <NumberInput
           id="strength"
@@ -462,7 +461,7 @@ const DiffusionOptions = () => {
           onNumberValueChange={(val) => {
             updateSettings({ sdStrength: val })
           }}
-          disabled={disable}
+          // disabled={disable}
         />
       </RowContainer>
     )
