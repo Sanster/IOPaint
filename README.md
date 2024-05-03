@@ -125,7 +125,7 @@ npm run dev
 Install back-end requirements and start back-end service
 ```bash
 pip install -r requirements.txt
-python3 main.py --model lama --port 8080
+python3 main.py start --model lama --port 8080
 ```
 
 Then you can visit `http://localhost:5173/` for development. The front-end code will automatically update after being modified, but the back-end needs to restart the service after modifying the python code.
