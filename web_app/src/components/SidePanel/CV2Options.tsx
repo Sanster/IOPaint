@@ -62,7 +62,7 @@ const CV2Options = () => {
         />
         <NumberInput
           id="cv2-radius"
-          className="w-[60px] rounded-full"
+          className="w-[50px] rounded-full"
           numberValue={settings.cv2Radius}
           allowFloat={false}
           onNumberValueChange={(val) => {

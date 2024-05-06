@@ -83,7 +83,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         ref={ref}
         value={value}
         onInput={onInput}
-        className={cn("text-center", className)}
+        className={cn("text-center h-7 px-1", className)}
         {...rest}
       />
     )

@@ -157,7 +157,7 @@ const DiffusionOptions = () => {
             />
             <NumberInput
               id="brushnet-weight"
-              className="w-[60px] rounded-full"
+              className="w-[50px] rounded-full"
               numberValue={settings.brushnetConditioningScale}
               allowFloat={false}
               onNumberValueChange={(val) => {
@@ -237,7 +237,7 @@ const DiffusionOptions = () => {
               />
               <NumberInput
                 id="controlnet-weight"
-                className="w-[60px] rounded-full"
+                className="w-[50px] rounded-full"
                 disabled={!settings.enableControlnet}
                 numberValue={settings.controlnetConditioningScale}
                 allowFloat={false}
@@ -410,7 +410,7 @@ const DiffusionOptions = () => {
           />
           <NumberInput
             id="image-guidance-scale"
-            className="w-[60px] rounded-full"
+            className="w-[50px] rounded-full"
             numberValue={settings.p2pImageGuidanceScale}
             allowFloat
             onNumberValueChange={(val) => {
@@ -442,7 +442,7 @@ const DiffusionOptions = () => {
           // disabled={disable}
         />
         <Slider
-          className="w-[100px]"
+          className="w-[110px]"
           defaultValue={[100]}
           min={10}
           max={100}
@@ -455,7 +455,7 @@ const DiffusionOptions = () => {
         />
         <NumberInput
           id="strength"
-          className="w-[60px] rounded-full"
+          className="w-[50px] rounded-full"
           numberValue={settings.sdStrength}
           allowFloat
           onNumberValueChange={(val) => {
@@ -473,7 +473,7 @@ const DiffusionOptions = () => {
     }
     return (
       <>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           <RowContainer>
             <LabelTitle
               text="Extender"
@@ -633,7 +633,7 @@ const DiffusionOptions = () => {
           toolTip="The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference."
         />
         <Slider
-          className="w-[100px]"
+          className="w-[110px]"
           defaultValue={[30]}
           min={1}
           max={100}
@@ -643,7 +643,7 @@ const DiffusionOptions = () => {
         />
         <NumberInput
           id="steps"
-          className="w-[60px] rounded-full"
+          className="w-[50px] rounded-full"
           numberValue={settings.sdSteps}
           allowFloat={false}
           onNumberValueChange={(val) => {
@@ -663,7 +663,7 @@ const DiffusionOptions = () => {
           toolTip="Guidance scale affects how aligned the text prompt and generated image are. Higher value means the prompt and generated image are closely aligned, so the output is a stricter interpretation of the prompt"
         />
         <Slider
-          className="w-[100px]"
+          className="w-[110px]"
           defaultValue={[750]}
           min={0}
           max={1500}
@@ -675,7 +675,7 @@ const DiffusionOptions = () => {
         />
         <NumberInput
           id="guid"
-          className="w-[60px] rounded-full"
+          className="w-[50px] rounded-full"
           numberValue={settings.sdGuidanceScale}
           allowFloat
           onNumberValueChange={(val) => {
@@ -737,7 +737,7 @@ const DiffusionOptions = () => {
           />
           <NumberInput
             id="seed"
-            className="w-[100px]"
+            className="w-[110px]"
             disabled={!settings.seedFixed}
             numberValue={settings.seed}
             allowFloat={false}
@@ -759,7 +759,7 @@ const DiffusionOptions = () => {
             toolTip="How much to blur the mask before processing, in pixels. Make the generated inpainting boundaries appear more natural."
           />
           <Slider
-            className="w-[100px]"
+            className="w-[110px]"
             defaultValue={[settings.sdMaskBlur]}
             min={0}
             max={96}
@@ -769,7 +769,7 @@ const DiffusionOptions = () => {
           />
           <NumberInput
             id="mask-blur"
-            className="w-[60px] rounded-full"
+            className="w-[50px] rounded-full"
             numberValue={settings.sdMaskBlur}
             allowFloat={false}
             onNumberValueChange={(value) => {
@@ -807,7 +807,7 @@ const DiffusionOptions = () => {
   const renderMaskAdjuster = () => {
     return (
       <>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
           <RowContainer>
             <LabelTitle
               htmlFor="adjustMaskKernelSize"
@@ -815,7 +815,7 @@ const DiffusionOptions = () => {
               toolTip="Expand or shrink mask. Using the slider to adjust the kernel size for dilation or erosion."
             />
             <Slider
-              className="w-[100px]"
+              className="w-[110px]"
               defaultValue={[12]}
               min={1}
               max={100}
@@ -827,7 +827,7 @@ const DiffusionOptions = () => {
             />
             <NumberInput
               id="adjustMaskKernelSize"
-              className="w-[60px] rounded-full"
+              className="w-[50px] rounded-full"
               numberValue={settings.adjustMaskKernelSize}
               allowFloat={false}
               onNumberValueChange={(val) => {
@@ -886,7 +886,7 @@ const DiffusionOptions = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4 mt-4">
+    <div className="flex flex-col gap-[14px] mt-4">
       {renderCropper()}
       {renderExtender()}
       {renderMaskBlur()}
