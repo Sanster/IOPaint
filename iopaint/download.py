@@ -2,7 +2,7 @@ import glob
 import json
 import os
 from functools import lru_cache
-from typing import List
+from typing import List, Optional
 
 from iopaint.schema import ModelType, ModelInfo
 from loguru import logger
@@ -49,7 +49,7 @@ def folder_name_to_show_name(name: str) -> str:
 
 
 @lru_cache(maxsize=512)
-def get_sd_model_type(model_abs_path: str) -> ModelType:
+def get_sd_model_type(model_abs_path: str) -> Optional[ModelType]:
     if "inpaint" in Path(model_abs_path).name.lower():
         model_type = ModelType.DIFFUSERS_SD_INPAINT
     else:
@@ -65,15 +65,19 @@ def get_sd_model_type(model_abs_path: str) -> ModelType:
             )
             model_type = ModelType.DIFFUSERS_SD_INPAINT
         except ValueError as e:
-            if "Trying to set a tensor of shape torch.Size([320, 4, 3, 3])" in str(e):
+            if "[320, 4, 3, 3]" in str(e):
                 model_type = ModelType.DIFFUSERS_SD
             else:
-                logger.info(f"Ignore non sd or sdxl file: {model_abs_path}")
+                logger.info(f"Ignore non sdxl file: {model_abs_path}")
+                return
+        except Exception as e:
+            logger.error(f"Failed to load {model_abs_path}: {e}")
+            return
     return model_type
 
 
 @lru_cache()
-def get_sdxl_model_type(model_abs_path: str) -> ModelType:
+def get_sdxl_model_type(model_abs_path: str) -> Optional[ModelType]:
     if "inpaint" in model_abs_path:
         model_type = ModelType.DIFFUSERS_SDXL_INPAINT
     else:
@@ -93,10 +97,14 @@ def get_sdxl_model_type(model_abs_path: str) -> ModelType:
             else:
                 model_type = ModelType.DIFFUSERS_SDXL
         except ValueError as e:
-            if "but got torch.Size([320, 4, 3, 3])" in str(e):
+            if "[320, 4, 3, 3]" in str(e):
                 model_type = ModelType.DIFFUSERS_SDXL
             else:
-                logger.info(f"Ignore non sd or sdxl file: {model_abs_path}")
+                logger.info(f"Ignore non sdxl file: {model_abs_path}")
+                return
+        except Exception as e:
+            logger.error(f"Failed to load {model_abs_path}: {e}")
+            return
     return model_type
 
 
@@ -121,6 +129,9 @@ def scan_single_file_diffusion_models(cache_dir) -> List[ModelInfo]:
         model_type = model_type_cache.get(it.name)
         if model_type is None:
             model_type = get_sd_model_type(model_abs_path)
+        if model_type is None:
+            continue
+
         model_type_cache[it.name] = model_type
         res.append(
             ModelInfo(
@@ -152,6 +163,9 @@ def scan_single_file_diffusion_models(cache_dir) -> List[ModelInfo]:
         model_type = sdxl_model_type_cache.get(it.name)
         if model_type is None:
             model_type = get_sdxl_model_type(model_abs_path)
+        if model_type is None:
+            continue
+
         sdxl_model_type_cache[it.name] = model_type
         if stable_diffusion_xl_dir.exists():
             with open(sdxl_cache_file, "w", encoding="utf-8") as fw:
