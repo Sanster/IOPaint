@@ -357,6 +357,7 @@ const defaultValues: AppState = {
     brushnetMethod: "random_mask",
     brushnetConditioningScale: 1.0,
     enableLCMLora: false,
+    enablePowerPaintV2: false,
     powerpaintTask: PowerPaintTask.text_guided,
     adjustMaskKernelSize: 12,
   },
