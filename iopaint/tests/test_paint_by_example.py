@@ -1,6 +1,7 @@
 import cv2
 import pytest
 from PIL import Image
+from iopaint.helper import encode_pil_to_base64
 
 from iopaint.model_manager import ModelManager
 from iopaint.schema import HDStrategy
@@ -34,7 +35,9 @@ def assert_equal(
     )
 
     print(f"Input image shape: {img.shape}, example_image: {example_image.shape}")
-    config.paint_by_example_example_image = Image.fromarray(example_image)
+    config.paint_by_example_example_image = encode_pil_to_base64(
+        Image.fromarray(example_image), 100, {}
+    ).decode("utf-8")
     res = model(img, mask, config)
     cv2.imwrite(str(save_dir / save_name), res)
 

@@ -48,8 +48,10 @@ export interface ModelInfo {
   support_strength: boolean
   support_outpainting: boolean
   support_controlnet: boolean
+  support_brushnet: boolean
+  support_powerpaint_v2: boolean
   controlnets: string[]
-  support_freeu: boolean
+  brushnets: string[]
   support_lcm_lora: boolean
   need_prompt: boolean
   is_single_file_diffusers: boolean
@@ -96,13 +98,6 @@ export interface Rect {
   height: number
 }
 
-export interface FreeuConfig {
-  s1: number
-  s2: number
-  b1: number
-  b2: number
-}
-
 export interface Point {
   x: number
   y: number
@@ -129,6 +124,7 @@ export enum ExtenderDirection {
 export enum PowerPaintTask {
   text_guided = "text-guided",
   shape_guided = "shape-guided",
+  context_aware = "context-aware",
   object_remove = "object-remove",
   outpainting = "outpainting",
 }

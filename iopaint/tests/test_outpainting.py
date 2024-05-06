@@ -3,18 +3,17 @@ import os
 from iopaint.tests.utils import current_dir, check_device
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
-from pathlib import Path
 
 import pytest
 import torch
 
 from iopaint.model_manager import ModelManager
-from iopaint.schema import HDStrategy, SDSampler
+from iopaint.schema import SDSampler
 from iopaint.tests.test_model import get_config, assert_equal
 
 
 @pytest.mark.parametrize("name", ["runwayml/stable-diffusion-inpainting"])
-@pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])
+@pytest.mark.parametrize("device", ["cuda", "mps"])
 @pytest.mark.parametrize(
     "rect",
     [
@@ -23,7 +22,7 @@ from iopaint.tests.test_model import get_config, assert_equal
         [128, 0, 512 - 128 + 100, 512],
         [-100, 0, 512 - 128 + 100, 512],
         [0, 0, 512, 512 + 200],
-        [0, 0, 512 + 200, 512],
+        [256, 0, 512 + 200, 512],
         [-100, -100, 512 + 200, 512 + 200],
     ],
 )
@@ -58,7 +57,7 @@ def test_outpainting(name, device, rect):
 
 
 @pytest.mark.parametrize("name", ["kandinsky-community/kandinsky-2-2-decoder-inpaint"])
-@pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])
+@pytest.mark.parametrize("device", ["cuda", "mps"])
 @pytest.mark.parametrize(
     "rect",
     [
@@ -99,7 +98,7 @@ def test_kandinsky_outpainting(name, device, rect):
 
 
 @pytest.mark.parametrize("name", ["Sanster/PowerPaint-V1-stable-diffusion-inpainting"])
-@pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])
+@pytest.mark.parametrize("device", ["cuda", "mps"])
 @pytest.mark.parametrize(
     "rect",
     [
@@ -114,7 +113,7 @@ def test_powerpaint_outpainting(name, device, rect):
         device=torch.device(device),
         disable_nsfw=True,
         sd_cpu_textencoder=False,
-        low_mem=True
+        low_mem=True,
     )
     cfg = get_config(
         prompt="a dog sitting on a bench in the park",

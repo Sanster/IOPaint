@@ -59,6 +59,10 @@ const DiffusionOptions = () => {
     updateExtenderDirection,
     adjustMask,
     clearMask,
+    updateEnablePowerPaintV2,
+    updateEnableBrushNet,
+    updateEnableControlnet,
+    updateLCMLora,
   ] = useStore((state) => [
     state.serverConfig.samplers,
     state.settings,
@@ -71,6 +75,10 @@ const DiffusionOptions = () => {
     state.updateExtenderDirection,
     state.adjustMask,
     state.clearMask,
+    state.updateEnablePowerPaintV2,
+    state.updateEnableBrushNet,
+    state.updateEnableControlnet,
+    state.updateLCMLora,
   ])
   const [exampleImage, isExampleImageLoaded] = useImage(paintByExampleFile)
   const negativePromptRef = useRef(null)
@@ -109,28 +117,109 @@ const DiffusionOptions = () => {
     )
   }
 
+  const renderBrushNetSetting = () => {
+    if (!settings.model.support_brushnet) {
+      return null
+    }
+
+    let toolTip =
+      "BrushNet is a plug-and-play image inpainting model works on any SD1.5 base models."
+
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
+          <RowContainer>
+            <LabelTitle
+              text="BrushNet"
+              url="https://github.com/TencentARC/BrushNet"
+              toolTip={toolTip}
+            />
+            <Switch
+              id="brushnet"
+              checked={settings.enableBrushNet}
+              onCheckedChange={(value) => {
+                updateEnableBrushNet(value)
+              }}
+            />
+          </RowContainer>
+          {/* <RowContainer>
+            <Slider
+              defaultValue={[100]}
+              className="w-[180px]"
+              min={1}
+              max={100}
+              step={1}
+              disabled={!settings.enableBrushNet || disable}
+              value={[Math.floor(settings.brushnetConditioningScale * 100)]}
+              onValueChange={(vals) =>
+                updateSettings({ brushnetConditioningScale: vals[0] / 100 })
+              }
+            />
+            <NumberInput
+              id="brushnet-weight"
+              className="w-[50px] rounded-full"
+              numberValue={settings.brushnetConditioningScale}
+              allowFloat={false}
+              onNumberValueChange={(val) => {
+                updateSettings({ brushnetConditioningScale: val })
+              }}
+            />
+          </RowContainer> */}
+
+          <RowContainer>
+            <Select
+              defaultValue={settings.brushnetMethod}
+              value={settings.brushnetMethod}
+              onValueChange={(value) => {
+                updateSettings({ brushnetMethod: value })
+              }}
+              disabled={!settings.enableBrushNet}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select brushnet model" />
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectGroup>
+                  {Object.values(settings.model.brushnets).map((method) => (
+                    <SelectItem key={method} value={method}>
+                      {method.split("/")[1]}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </RowContainer>
+        </div>
+        <Separator />
+      </div>
+    )
+  }
+
   const renderConterNetSetting = () => {
     if (!settings.model.support_controlnet) {
       return null
     }
 
+    let toolTip =
+      "Using an additional conditioning image to control how an image is generated"
+
     return (
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center pr-2">
+          <RowContainer>
             <LabelTitle
               text="ControlNet"
-              toolTip="Using an additional conditioning image to control how an image is generated"
               url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inpaint#controlnet"
+              toolTip={toolTip}
             />
             <Switch
               id="controlnet"
               checked={settings.enableControlnet}
               onCheckedChange={(value) => {
-                updateSettings({ enableControlnet: value })
+                updateEnableControlnet(value)
               }}
             />
-          </div>
+          </RowContainer>
 
           <div className="flex flex-col gap-1">
             <RowContainer>
@@ -148,7 +237,7 @@ const DiffusionOptions = () => {
               />
               <NumberInput
                 id="controlnet-weight"
-                className="w-[60px] rounded-full"
+                className="w-[50px] rounded-full"
                 disabled={!settings.enableControlnet}
                 numberValue={settings.controlnetConditioningScale}
                 allowFloat={false}
@@ -159,7 +248,7 @@ const DiffusionOptions = () => {
             </RowContainer>
           </div>
 
-          <div className="pr-2">
+          <RowContainer>
             <Select
               defaultValue={settings.controlnetMethod}
               value={settings.controlnetMethod}
@@ -181,7 +270,7 @@ const DiffusionOptions = () => {
                 </SelectGroup>
               </SelectContent>
             </Select>
-          </div>
+          </RowContainer>
         </div>
         <Separator />
       </div>
@@ -193,133 +282,27 @@ const DiffusionOptions = () => {
       return null
     }
 
+    let toolTip =
+      "Enable quality image generation in typically 2-8 steps. Suggest disabling guidance_scale by setting it to 0. You can also try values between 1.0 and 2.0. When LCM Lora is enabled, LCMSampler will be used automatically."
+
     return (
       <>
         <RowContainer>
           <LabelTitle
             text="LCM LoRA"
             url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inference_with_lcm_lora"
-            toolTip="Enable quality image generation in typically 2-4 steps. Suggest disabling guidance_scale by setting it to 0. You can also try values between 1.0 and 2.0. When LCM Lora is enabled, LCMSampler will be used automatically."
+            toolTip={toolTip}
           />
           <Switch
             id="lcm-lora"
             checked={settings.enableLCMLora}
             onCheckedChange={(value) => {
-              updateSettings({ enableLCMLora: value })
+              updateLCMLora(value)
             }}
           />
         </RowContainer>
         <Separator />
       </>
-    )
-  }
-
-  const renderFreeu = () => {
-    if (!settings.model.support_freeu) {
-      return null
-    }
-
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-between items-center pr-2">
-          <LabelTitle
-            text="FreeU"
-            toolTip="FreeU is a technique for improving image quality. Different models may require different FreeU-specific hyperparameters, which can be viewed in the more info section."
-            url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/freeu"
-          />
-          <Switch
-            id="freeu"
-            checked={settings.enableFreeu}
-            onCheckedChange={(value) => {
-              updateSettings({ enableFreeu: value })
-            }}
-          />
-        </div>
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-center gap-6">
-            <div className="flex gap-2 items-center justify-center">
-              <LabelTitle
-                htmlFor="freeu-s1"
-                text="s1"
-                disabled={!settings.enableFreeu}
-              />
-              <NumberInput
-                id="freeu-s1"
-                className="w-14"
-                disabled={!settings.enableFreeu}
-                numberValue={settings.freeuConfig.s1}
-                allowFloat
-                onNumberValueChange={(value) => {
-                  updateSettings({
-                    freeuConfig: { ...settings.freeuConfig, s1: value },
-                  })
-                }}
-              />
-            </div>
-            <div className="flex gap-2 items-center justify-center">
-              <LabelTitle
-                htmlFor="freeu-s2"
-                text="s2"
-                disabled={!settings.enableFreeu}
-              />
-              <NumberInput
-                id="freeu-s2"
-                className="w-14"
-                disabled={!settings.enableFreeu}
-                numberValue={settings.freeuConfig.s2}
-                allowFloat
-                onNumberValueChange={(value) => {
-                  updateSettings({
-                    freeuConfig: { ...settings.freeuConfig, s2: value },
-                  })
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-center gap-6">
-            <div className="flex gap-2 items-center justify-center">
-              <LabelTitle
-                htmlFor="freeu-b1"
-                text="b1"
-                disabled={!settings.enableFreeu}
-              />
-              <NumberInput
-                id="freeu-b1"
-                className="w-14"
-                disabled={!settings.enableFreeu}
-                numberValue={settings.freeuConfig.b1}
-                allowFloat
-                onNumberValueChange={(value) => {
-                  updateSettings({
-                    freeuConfig: { ...settings.freeuConfig, b1: value },
-                  })
-                }}
-              />
-            </div>
-            <div className="flex gap-2 items-center justify-center">
-              <LabelTitle
-                htmlFor="freeu-b2"
-                text="b2"
-                disabled={!settings.enableFreeu}
-              />
-              <NumberInput
-                id="freeu-b2"
-                className="w-14"
-                disabled={!settings.enableFreeu}
-                numberValue={settings.freeuConfig.b2}
-                allowFloat
-                onNumberValueChange={(value) => {
-                  updateSettings({
-                    freeuConfig: { ...settings.freeuConfig, b2: value },
-                  })
-                }}
-              />
-            </div>
-          </div>
-        </div>
-        <Separator />
-      </div>
     )
   }
 
@@ -427,7 +410,7 @@ const DiffusionOptions = () => {
           />
           <NumberInput
             id="image-guidance-scale"
-            className="w-[60px] rounded-full"
+            className="w-[50px] rounded-full"
             numberValue={settings.p2pImageGuidanceScale}
             allowFloat
             onNumberValueChange={(val) => {
@@ -444,36 +427,43 @@ const DiffusionOptions = () => {
       return null
     }
 
+    let toolTip =
+      "Strength is a measure of how much noise is added to the base image, which influences how similar the output is to the base image. Higher value means more noise and more different from the base image"
+    // if (disable) {
+    //   toolTip = "BrushNet is enabled, Strength is disabled."
+    // }
+
     return (
-      <div className="flex flex-col gap-1">
+      <RowContainer>
         <LabelTitle
           text="Strength"
           url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inpaint#strength"
-          toolTip="Strength is a measure of how much noise is added to the base image, which influences how similar the output is to the base image. Higher value means more noise and more different from the base image"
+          toolTip={toolTip}
+          // disabled={disable}
         />
-        <RowContainer>
-          <Slider
-            className="w-[180px]"
-            defaultValue={[100]}
-            min={10}
-            max={100}
-            step={1}
-            value={[Math.floor(settings.sdStrength * 100)]}
-            onValueChange={(vals) =>
-              updateSettings({ sdStrength: vals[0] / 100 })
-            }
-          />
-          <NumberInput
-            id="strength"
-            className="w-[60px] rounded-full"
-            numberValue={settings.sdStrength}
-            allowFloat
-            onNumberValueChange={(val) => {
-              updateSettings({ sdStrength: val })
-            }}
-          />
-        </RowContainer>
-      </div>
+        <Slider
+          className="w-[110px]"
+          defaultValue={[100]}
+          min={10}
+          max={100}
+          step={1}
+          value={[Math.floor(settings.sdStrength * 100)]}
+          onValueChange={(vals) =>
+            updateSettings({ sdStrength: vals[0] / 100 })
+          }
+          // disabled={disable}
+        />
+        <NumberInput
+          id="strength"
+          className="w-[50px] rounded-full"
+          numberValue={settings.sdStrength}
+          allowFloat
+          onNumberValueChange={(val) => {
+            updateSettings({ sdStrength: val })
+          }}
+          // disabled={disable}
+        />
+      </RowContainer>
     )
   }
 
@@ -483,7 +473,7 @@ const DiffusionOptions = () => {
     }
     return (
       <>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           <RowContainer>
             <LabelTitle
               text="Extender"
@@ -560,10 +550,6 @@ const DiffusionOptions = () => {
   }
 
   const renderPowerPaintTaskType = () => {
-    if (settings.model.name !== POWERPAINT) {
-      return null
-    }
-
     return (
       <RowContainer>
         <LabelTitle
@@ -578,7 +564,7 @@ const DiffusionOptions = () => {
           }}
           disabled={settings.showExtender}
         >
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-[130px]">
             <SelectValue placeholder="Select task" />
           </SelectTrigger>
           <SelectContent align="end">
@@ -586,6 +572,7 @@ const DiffusionOptions = () => {
               {[
                 PowerPaintTask.text_guided,
                 PowerPaintTask.object_remove,
+                PowerPaintTask.context_aware,
                 PowerPaintTask.shape_guided,
               ].map((task) => (
                 <SelectItem key={task} value={task}>
@@ -599,69 +586,103 @@ const DiffusionOptions = () => {
     )
   }
 
+  const renderPowerPaintV1 = () => {
+    if (settings.model.name !== POWERPAINT) {
+      return null
+    }
+    return (
+      <>
+        {renderPowerPaintTaskType()}
+        <Separator />
+      </>
+    )
+  }
+
+  const renderPowerPaintV2 = () => {
+    if (settings.model.support_powerpaint_v2 === false) {
+      return null
+    }
+
+    return (
+      <>
+        <RowContainer>
+          <LabelTitle
+            text="PowerPaint V2"
+            toolTip="PowerPaint is a plug-and-play image inpainting model works on any SD1.5 base models."
+          />
+          <Switch
+            id="powerpaint-v2"
+            checked={settings.enablePowerPaintV2}
+            onCheckedChange={(value) => {
+              updateEnablePowerPaintV2(value)
+            }}
+          />
+        </RowContainer>
+        {renderPowerPaintTaskType()}
+        <Separator />
+      </>
+    )
+  }
+
   const renderSteps = () => {
     return (
-      <div className="flex flex-col gap-1">
+      <RowContainer>
         <LabelTitle
           htmlFor="steps"
           text="Steps"
           toolTip="The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference."
         />
-        <RowContainer>
-          <Slider
-            className="w-[180px]"
-            defaultValue={[30]}
-            min={1}
-            max={100}
-            step={1}
-            value={[Math.floor(settings.sdSteps)]}
-            onValueChange={(vals) => updateSettings({ sdSteps: vals[0] })}
-          />
-          <NumberInput
-            id="steps"
-            className="w-[60px] rounded-full"
-            numberValue={settings.sdSteps}
-            allowFloat={false}
-            onNumberValueChange={(val) => {
-              updateSettings({ sdSteps: val })
-            }}
-          />
-        </RowContainer>
-      </div>
+        <Slider
+          className="w-[110px]"
+          defaultValue={[30]}
+          min={1}
+          max={100}
+          step={1}
+          value={[Math.floor(settings.sdSteps)]}
+          onValueChange={(vals) => updateSettings({ sdSteps: vals[0] })}
+        />
+        <NumberInput
+          id="steps"
+          className="w-[50px] rounded-full"
+          numberValue={settings.sdSteps}
+          allowFloat={false}
+          onNumberValueChange={(val) => {
+            updateSettings({ sdSteps: val })
+          }}
+        />
+      </RowContainer>
     )
   }
 
   const renderGuidanceScale = () => {
     return (
-      <div className="flex flex-col gap-1">
+      <RowContainer>
         <LabelTitle
-          text="Guidance scale"
+          text="Guidance"
           url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inpaint#guidance-scale"
           toolTip="Guidance scale affects how aligned the text prompt and generated image are. Higher value means the prompt and generated image are closely aligned, so the output is a stricter interpretation of the prompt"
         />
-        <RowContainer>
-          <Slider
-            className="w-[180px]"
-            defaultValue={[750]}
-            min={0}
-            max={1500}
-            step={1}
-            value={[Math.floor(settings.sdGuidanceScale * 100)]}
-            onValueChange={(vals) =>
-              updateSettings({ sdGuidanceScale: vals[0] / 100 })
-            }
-          />
-          <NumberInput
-            id="guidance-scale"
-            className="w-[60px] rounded-full"
-            numberValue={settings.sdGuidanceScale}
-            allowFloat
-            onNumberValueChange={(val) => {
-              updateSettings({ sdGuidanceScale: val })
-            }}
-          />
-        </RowContainer>
-      </div>
+        <Slider
+          className="w-[110px]"
+          defaultValue={[750]}
+          min={0}
+          max={1500}
+          step={1}
+          value={[Math.floor(settings.sdGuidanceScale * 100)]}
+          onValueChange={(vals) =>
+            updateSettings({ sdGuidanceScale: vals[0] / 100 })
+          }
+        />
+        <NumberInput
+          id="guid"
+          className="w-[50px] rounded-full"
+          numberValue={settings.sdGuidanceScale}
+          allowFloat
+          onNumberValueChange={(val) => {
+            updateSettings({ sdGuidanceScale: val })
+          }}
+        />
+      </RowContainer>
     )
   }
 
@@ -716,7 +737,7 @@ const DiffusionOptions = () => {
           />
           <NumberInput
             id="seed"
-            className="w-[100px]"
+            className="w-[110px]"
             disabled={!settings.seedFixed}
             numberValue={settings.seed}
             allowFloat={false}
@@ -731,14 +752,14 @@ const DiffusionOptions = () => {
 
   const renderMaskBlur = () => {
     return (
-      <div className="flex flex-col gap-1">
-        <LabelTitle
-          text="Mask blur"
-          toolTip="How much to blur the mask before processing, in pixels. Make the generated inpainting boundaries appear more natural."
-        />
+      <>
         <RowContainer>
+          <LabelTitle
+            text="Mask blur"
+            toolTip="How much to blur the mask before processing, in pixels. Make the generated inpainting boundaries appear more natural."
+          />
           <Slider
-            className="w-[180px]"
+            className="w-[110px]"
             defaultValue={[settings.sdMaskBlur]}
             min={0}
             max={96}
@@ -748,7 +769,7 @@ const DiffusionOptions = () => {
           />
           <NumberInput
             id="mask-blur"
-            className="w-[60px] rounded-full"
+            className="w-[50px] rounded-full"
             numberValue={settings.sdMaskBlur}
             allowFloat={false}
             onNumberValueChange={(value) => {
@@ -756,7 +777,8 @@ const DiffusionOptions = () => {
             }}
           />
         </RowContainer>
-      </div>
+        <Separator />
+      </>
     )
   }
 
@@ -785,15 +807,15 @@ const DiffusionOptions = () => {
   const renderMaskAdjuster = () => {
     return (
       <>
-        <div className="flex flex-col gap-1">
-          <LabelTitle
-            htmlFor="adjustMaskKernelSize"
-            text="Adjust Mask"
-            toolTip="Expand or shrink mask. Using the slider to adjust the kernel size for dilation or erosion."
-          />
+        <div className="flex flex-col gap-2">
           <RowContainer>
+            <LabelTitle
+              htmlFor="adjustMaskKernelSize"
+              text="Mask OP"
+              toolTip="Expand or shrink mask. Using the slider to adjust the kernel size for dilation or erosion."
+            />
             <Slider
-              className="w-[180px]"
+              className="w-[110px]"
               defaultValue={[12]}
               min={1}
               max={100}
@@ -805,7 +827,7 @@ const DiffusionOptions = () => {
             />
             <NumberInput
               id="adjustMaskKernelSize"
-              className="w-[60px] rounded-full"
+              className="w-[50px] rounded-full"
               numberValue={settings.adjustMaskKernelSize}
               allowFloat={false}
               onNumberValueChange={(val) => {
@@ -815,42 +837,38 @@ const DiffusionOptions = () => {
           </RowContainer>
 
           <RowContainer>
-            <div className="flex gap-1 justify-start">
-              <Button
-                variant="outline"
-                className="p-1 h-8"
-                onClick={() => adjustMask("expand")}
-                disabled={isProcessing}
-              >
-                <div className="flex items-center gap-1 select-none">
-                  {/* <Plus size={16} /> */}
-                  Expand
-                </div>
-              </Button>
+            <Button
+              variant="outline"
+              className="p-1 h-8"
+              onClick={() => adjustMask("expand")}
+              disabled={isProcessing}
+            >
+              <div className="flex items-center gap-1 select-none">
+                {/* <Plus size={16} /> */}
+                Expand
+              </div>
+            </Button>
 
-              <Button
-                variant="outline"
-                className="p-1 h-8"
-                onClick={() => adjustMask("shrink")}
-                disabled={isProcessing}
-              >
-                <div className="flex items-center gap-1 select-none">
-                  {/* <Minus size={16} /> */}
-                  Shrink
-                </div>
-              </Button>
+            <Button
+              variant="outline"
+              className="p-1 h-8"
+              onClick={() => adjustMask("shrink")}
+              disabled={isProcessing}
+            >
+              <div className="flex items-center gap-1 select-none">
+                {/* <Minus size={16} /> */}
+                Shrink
+              </div>
+            </Button>
 
-              <Button
-                variant="outline"
-                className="p-1 h-8"
-                onClick={() => adjustMask("reverse")}
-                disabled={isProcessing}
-              >
-                <div className="flex items-center gap-1 select-none">
-                  Reverse
-                </div>
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              className="p-1 h-8"
+              onClick={() => adjustMask("reverse")}
+              disabled={isProcessing}
+            >
+              <div className="flex items-center gap-1 select-none">Reverse</div>
+            </Button>
 
             <Button
               variant="outline"
@@ -868,11 +886,13 @@ const DiffusionOptions = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4 mt-4">
+    <div className="flex flex-col gap-[14px] mt-4">
       {renderCropper()}
       {renderExtender()}
+      {renderMaskBlur()}
       {renderMaskAdjuster()}
-      {renderPowerPaintTaskType()}
+      {renderMatchHistograms()}
+      {renderPowerPaintV1()}
       {renderSteps()}
       {renderGuidanceScale()}
       {renderP2PImageGuidanceScale()}
@@ -881,11 +901,10 @@ const DiffusionOptions = () => {
       {renderSeed()}
       {renderNegativePrompt()}
       <Separator />
+      {renderBrushNetSetting()}
+      {renderPowerPaintV2()}
       {renderConterNetSetting()}
       {renderLCMLora()}
-      {renderMaskBlur()}
-      {renderMatchHistograms()}
-      {renderFreeu()}
       {renderPaintByExample()}
     </div>
   )

@@ -10,7 +10,7 @@ import pytest
 import torch
 
 from iopaint.model_manager import ModelManager
-from iopaint.schema import HDStrategy, SDSampler, FREEUConfig
+from iopaint.schema import HDStrategy, SDSampler
 
 
 @pytest.mark.parametrize("device", ["cuda", "mps"])
@@ -74,35 +74,6 @@ def test_runway_sd_lcm_lora_low_mem(device, sampler):
         mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
     )
 
-
-@pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])
-@pytest.mark.parametrize("sampler", [SDSampler.ddim])
-def test_runway_sd_freeu(device, sampler):
-    sd_steps = check_device(device)
-    model = ModelManager(
-        name="runwayml/stable-diffusion-inpainting",
-        device=torch.device(device),
-        disable_nsfw=True,
-        sd_cpu_textencoder=False,
-        low_mem=True,
-    )
-    cfg = get_config(
-        strategy=HDStrategy.ORIGINAL,
-        prompt="face of a fox, sitting on a bench",
-        sd_steps=sd_steps,
-        sd_guidance_scale=7.5,
-        sd_freeu=True,
-        sd_freeu_config=FREEUConfig(),
-    )
-    cfg.sd_sampler = sampler
-
-    assert_equal(
-        model,
-        cfg,
-        f"runway_sd_1_5_freeu_device_{device}_low_mem.png",
-        img_p=current_dir / "overture-creations-5sI6fQgYIuo.png",
-        mask_p=current_dir / "overture-creations-5sI6fQgYIuo_mask.png",
-    )
 
 
 @pytest.mark.parametrize("device", ["cuda", "mps", "cpu"])

@@ -68,8 +68,6 @@ export default async function inpaint(
       sd_sampler: settings.sdSampler,
       sd_seed: settings.seedFixed ? settings.seed : -1,
       sd_match_histograms: settings.sdMatchHistograms,
-      sd_freeu: settings.enableFreeu,
-      sd_freeu_config: settings.freeuConfig,
       sd_lcm_lora: settings.enableLCMLora,
       paint_by_example_example_image: exampleImageBase64,
       p2p_image_guidance_scale: settings.p2pImageGuidanceScale,
@@ -78,6 +76,10 @@ export default async function inpaint(
       controlnet_method: settings.controlnetMethod
         ? settings.controlnetMethod
         : "",
+      enable_brushnet: settings.enableBrushNet,
+      brushnet_method: settings.brushnetMethod ? settings.brushnetMethod : "",
+      brushnet_conditioning_scale: settings.brushnetConditioningScale,
+      enable_powerpaint_v2: settings.enablePowerPaintV2,
       powerpaint_task: settings.showExtender
         ? PowerPaintTask.outpainting
         : settings.powerpaintTask,

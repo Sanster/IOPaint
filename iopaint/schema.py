@@ -3,6 +3,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, Literal, List
 
+from loguru import logger
+
 from iopaint.const import (
     INSTRUCT_PIX2PIX_NAME,
     KANDINSKY22_NAME,
@@ -11,9 +13,9 @@ from iopaint.const import (
     SDXL_CONTROLNET_CHOICES,
     SD2_CONTROLNET_CHOICES,
     SD_CONTROLNET_CHOICES,
+    SD_BRUSHNET_CHOICES,
 )
-from loguru import logger
-from pydantic import BaseModel, Field, field_validator, computed_field
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 
 class ModelType(str, Enum):
@@ -65,6 +67,13 @@ class ModelInfo(BaseModel):
 
     @computed_field
     @property
+    def brushnets(self) -> List[str]:
+        if self.model_type in [ModelType.DIFFUSERS_SD]:
+            return SD_BRUSHNET_CHOICES
+        return []
+
+    @computed_field
+    @property
     def support_strength(self) -> bool:
         return self.model_type in [
             ModelType.DIFFUSERS_SD,
@@ -105,13 +114,21 @@ class ModelInfo(BaseModel):
 
     @computed_field
     @property
-    def support_freeu(self) -> bool:
+    def support_brushnet(self) -> bool:
         return self.model_type in [
             ModelType.DIFFUSERS_SD,
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SD_INPAINT,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ] or self.name in [INSTRUCT_PIX2PIX_NAME]
+        ]
+
+    @computed_field
+    @property
+    def support_powerpaint_v2(self) -> bool:
+        return (
+            self.model_type
+            in [
+                ModelType.DIFFUSERS_SD,
+            ]
+            and self.name != POWERPAINT_NAME
+        )
 
 
 class Choices(str, Enum):
@@ -202,15 +219,9 @@ class SDSampler(str, Enum):
     lcm = "LCM"
 
 
-class FREEUConfig(BaseModel):
-    s1: float = 0.9
-    s2: float = 0.2
-    b1: float = 1.2
-    b2: float = 1.4
-
-
-class PowerPaintTask(str, Enum):
+class PowerPaintTask(Choices):
     text_guided = "text-guided"
+    context_aware = "context-aware"
     shape_guided = "shape-guided"
     object_remove = "object-remove"
     outpainting = "outpainting"
@@ -328,12 +339,6 @@ class InpaintRequest(BaseModel):
     sd_outpainting_softness: float = Field(20.0)
     sd_outpainting_space: float = Field(20.0)
 
-    sd_freeu: bool = Field(
-        False,
-        description="Enable freeu mode. https://huggingface.co/docs/diffusers/main/en/using-diffusers/freeu",
-    )
-    sd_freeu_config: FREEUConfig = FREEUConfig()
-
     sd_lcm_lora: bool = Field(
         False,
         description="Enable lcm-lora mode. https://huggingface.co/docs/diffusers/main/en/using-diffusers/inference_with_lcm#texttoimage",
@@ -369,7 +374,15 @@ class InpaintRequest(BaseModel):
         "lllyasviel/control_v11p_sd15_canny", description="Controlnet method"
     )
 
+    # BrushNet
+    enable_brushnet: bool = Field(False, description="Enable brushnet")
+    brushnet_method: str = Field(SD_BRUSHNET_CHOICES[0], description="Brushnet method")
+    brushnet_conditioning_scale: float = Field(
+        1.0, description="brushnet conditioning scale", ge=0.0, le=1.0
+    )
+
     # PowerPaint
+    enable_powerpaint_v2: bool = Field(False, description="Enable PowerPaint v2")
     powerpaint_task: PowerPaintTask = Field(
         PowerPaintTask.text_guided, description="PowerPaint task"
     )
@@ -380,31 +393,34 @@ class InpaintRequest(BaseModel):
         le=1.0,
     )
 
-    @field_validator("sd_seed")
-    @classmethod
-    def sd_seed_validator(cls, v: int) -> int:
-        if v == -1:
-            return random.randint(1, 99999999)
-        return v
+    @model_validator(mode="after")
+    def validate_field(cls, values: "InpaintRequest"):
+        if values.sd_seed == -1:
+            values.sd_seed = random.randint(1, 99999999)
+            logger.info(f"Generate random seed: {values.sd_seed}")
 
-    @field_validator("controlnet_conditioning_scale")
-    @classmethod
-    def validate_field(cls, v: float, values):
-        use_extender = values.data["use_extender"]
-        enable_controlnet = values.data["enable_controlnet"]
-        if use_extender and enable_controlnet:
-            logger.info(f"Extender is enabled, set controlnet_conditioning_scale=0")
-            return 0
-        return v
+        if values.use_extender and values.enable_controlnet:
+            logger.info("Extender is enabled, set controlnet_conditioning_scale=0")
+            values.controlnet_conditioning_scale = 0
 
-    @field_validator("sd_strength")
-    @classmethod
-    def validate_sd_strength(cls, v: float, values):
-        use_extender = values.data["use_extender"]
-        if use_extender:
-            logger.info(f"Extender is enabled, set sd_strength=1")
-            return 1.0
-        return v
+        if values.use_extender:
+            logger.info("Extender is enabled, set sd_strength=1")
+            values.sd_strength = 1.0
+
+        if values.enable_brushnet:
+            logger.info("BrushNet is enabled, set enable_controlnet=False")
+            if values.enable_controlnet:
+                values.enable_controlnet = False
+            if values.sd_lcm_lora:
+                logger.info("BrushNet is enabled, set sd_lcm_lora=False")
+                values.sd_lcm_lora = False
+
+        if values.enable_controlnet:
+            logger.info("ControlNet is enabled, set enable_brushnet=False")
+            if values.enable_brushnet:
+                values.enable_brushnet = False
+
+        return values
 
 
 class RunPluginRequest(BaseModel):

@@ -3,9 +3,8 @@ import cv2
 import pytest
 import torch
 
-from iopaint.helper import encode_pil_to_base64
 from iopaint.schema import LDMSampler, HDStrategy, InpaintRequest, SDSampler
-from PIL import Image
+import numpy as np
 
 current_dir = Path(__file__).parent.absolute().resolve()
 save_dir = current_dir / "result"
@@ -32,6 +31,7 @@ def assert_equal(
 ):
     img, mask = get_data(fx=fx, fy=fy, img_p=img_p, mask_p=mask_p)
     print(f"Input image shape: {img.shape}")
+
     res = model(img, mask, config)
     ok = cv2.imwrite(
         str(save_dir / gt_name),

@@ -61,7 +61,7 @@ const SidePanel = () => {
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-[300px] mt-[60px] outline-none pl-4 pr-1"
+        className="w-[286px] mt-[60px] outline-none pl-3 pr-1"
         onOpenAutoFocus={(event) => event.preventDefault()}
         onPointerDownOutside={(event) => event.preventDefault()}
       >
@@ -85,10 +85,7 @@ const SidePanel = () => {
           </RowContainer>
           <Separator />
         </SheetHeader>
-        <ScrollArea
-          style={{ height: windowSize.height - 160 }}
-          className="pr-3"
-        >
+        <ScrollArea style={{ height: windowSize.height - 160 }}>
           {renderSidePanelOptions()}
         </ScrollArea>
       </SheetContent>

@@ -44,7 +44,10 @@ export interface NumberInputProps extends InputProps {
 }
 
 const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
-  ({ numberValue, allowFloat, onNumberValueChange, ...rest }, ref) => {
+  (
+    { numberValue, allowFloat, onNumberValueChange, className, ...rest },
+    ref
+  ) => {
     const [value, setValue] = React.useState<string>(numberValue.toString())
 
     React.useEffect(() => {
@@ -75,7 +78,15 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       setValue(val)
     }
 
-    return <Input ref={ref} value={value} onInput={onInput} {...rest} />
+    return (
+      <Input
+        ref={ref}
+        value={value}
+        onInput={onInput}
+        className={cn("text-center h-7 px-1", className)}
+        {...rest}
+      />
+    )
   }
 )
 

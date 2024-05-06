@@ -7,7 +7,6 @@ import {
   AdjustMaskOperate,
   CV2Flag,
   ExtenderDirection,
-  FreeuConfig,
   LDMSampler,
   Line,
   LineGroup,
@@ -99,11 +98,15 @@ export type Settings = {
   controlnetConditioningScale: number
   controlnetMethod: string
 
+  // BrushNet
+  enableBrushNet: boolean
+  brushnetMethod: string
+  brushnetConditioningScale: number
+
   enableLCMLora: boolean
-  enableFreeu: boolean
-  freeuConfig: FreeuConfig
 
   // PowerPaint
+  enablePowerPaintV2: boolean
   powerpaintTask: PowerPaintTask
 
   // AdjustMask
@@ -192,6 +195,13 @@ type AppAction = {
   setServerConfig: (newValue: ServerConfig) => void
   setSeed: (newValue: number) => void
   updateSettings: (newSettings: Partial<Settings>) => void
+
+  // 互斥
+  updateEnablePowerPaintV2: (newValue: boolean) => void
+  updateEnableBrushNet: (newValue: boolean) => void
+  updateEnableControlnet: (newValue: boolean) => void
+  updateLCMLora: (newValue: boolean) => void
+
   setModel: (newModel: ModelInfo) => void
   updateFileManagerState: (newState: Partial<FileManagerState>) => void
   updateInteractiveSegState: (newState: Partial<InteractiveSegState>) => void
@@ -306,15 +316,16 @@ const defaultValues: AppState = {
       path: "lama",
       model_type: "inpaint",
       support_controlnet: false,
+      support_brushnet: false,
       support_strength: false,
       support_outpainting: false,
+      support_powerpaint_v2: false,
       controlnets: [],
-      support_freeu: false,
+      brushnets: [],
       support_lcm_lora: false,
       is_single_file_diffusers: false,
       need_prompt: false,
     },
-    enableControlnet: false,
     showCropper: false,
     showExtender: false,
     extenderDirection: ExtenderDirection.xy,
@@ -339,11 +350,14 @@ const defaultValues: AppState = {
     sdMatchHistograms: false,
     sdScale: 1.0,
     p2pImageGuidanceScale: 1.5,
-    controlnetConditioningScale: 0.4,
+    enableControlnet: false,
     controlnetMethod: "lllyasviel/control_v11p_sd15_canny",
+    controlnetConditioningScale: 0.4,
+    enableBrushNet: false,
+    brushnetMethod: "random_mask",
+    brushnetConditioningScale: 1.0,
     enableLCMLora: false,
-    enableFreeu: false,
-    freeuConfig: { s1: 0.9, s2: 0.2, b1: 1.2, b2: 1.4 },
+    enablePowerPaintV2: false,
     powerpaintTask: PowerPaintTask.text_guided,
     adjustMaskKernelSize: 12,
   },
@@ -421,6 +435,8 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         if (
           get().settings.model.support_outpainting &&
           settings.showExtender &&
+          extenderState.x === 0 &&
+          extenderState.y === 0 &&
           extenderState.height === imageHeight &&
           extenderState.width === imageWidth
         ) {
@@ -794,6 +810,48 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
         })
       },
 
+      updateEnablePowerPaintV2: (newValue: boolean) => {
+        get().updateSettings({ enablePowerPaintV2: newValue })
+        if (newValue) {
+          get().updateSettings({
+            enableBrushNet: false,
+            enableControlnet: false,
+            enableLCMLora: false,
+          })
+        }
+      },
+
+      updateEnableBrushNet: (newValue: boolean) => {
+        get().updateSettings({ enableBrushNet: newValue })
+        if (newValue) {
+          get().updateSettings({
+            enablePowerPaintV2: false,
+            enableControlnet: false,
+            enableLCMLora: false,
+          })
+        }
+      },
+
+      updateEnableControlnet(newValue) {
+        get().updateSettings({ enableControlnet: newValue })
+        if (newValue) {
+          get().updateSettings({
+            enablePowerPaintV2: false,
+            enableBrushNet: false,
+          })
+        }
+      },
+
+      updateLCMLora(newValue) {
+        get().updateSettings({ enableLCMLora: newValue })
+        if (newValue) {
+          get().updateSettings({
+            enablePowerPaintV2: false,
+            enableBrushNet: false,
+          })
+        }
+      },
+
       setModel: (newModel: ModelInfo) => {
         set((state) => {
           state.settings.model = newModel
@@ -1076,7 +1134,7 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
     })),
     {
       name: "ZUSTAND_STATE", // name of the item in the storage (must be unique)
-      version: 1,
+      version: 2,
       partialize: (state) =>
         Object.fromEntries(
           Object.entries(state).filter(([key]) =>

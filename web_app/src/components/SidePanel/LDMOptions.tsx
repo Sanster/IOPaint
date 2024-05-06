@@ -38,7 +38,7 @@ const LDMOptions = () => {
           />
           <NumberInput
             id="steps"
-            className="w-[60px] rounded-full"
+            className="w-[50px] rounded-full"
             numberValue={settings.ldmSteps}
             allowFloat={false}
             onNumberValueChange={(val) => {

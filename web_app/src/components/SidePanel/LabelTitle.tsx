@@ -1,9 +1,10 @@
+import { cn } from "@/lib/utils"
 import { Button } from "../ui/button"
 import { Label } from "../ui/label"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
 
 const RowContainer = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex justify-between items-center pr-2">{children}</div>
+  <div className="flex justify-between items-center pr-4">{children}</div>
 )
 
 const LabelTitle = ({
@@ -12,19 +13,21 @@ const LabelTitle = ({
   url,
   htmlFor,
   disabled = false,
+  className = "",
 }: {
   text: string
   toolTip?: string
   url?: string
   htmlFor?: string
   disabled?: boolean
+  className?: string
 }) => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <Label
           htmlFor={htmlFor ? htmlFor : text.toLowerCase().replace(" ", "-")}
-          className="font-medium"
+          className={cn("font-medium min-w-[65px]", className)}
           disabled={disabled}
         >
           {text}
