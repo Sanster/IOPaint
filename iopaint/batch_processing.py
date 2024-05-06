@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import cv2
-import psutil
+import numpy as np
 from PIL import Image
 from loguru import logger
 from rich.console import Console
@@ -35,6 +35,7 @@ def glob_images(path: Path) -> Dict[str, Path]:
         return res
 
 
+
 def batch_inpaint(
     model: str,
     device,
@@ -46,7 +47,7 @@ def batch_inpaint(
 ):
     if image.is_dir() and output.is_file():
         logger.error(
-            f"invalid --output: when image is a directory, output should be a directory"
+            "invalid --output: when image is a directory, output should be a directory"
         )
         exit(-1)
     output.mkdir(parents=True, exist_ok=True)
@@ -54,10 +55,10 @@ def batch_inpaint(
     image_paths = glob_images(image)
     mask_paths = glob_images(mask)
     if len(image_paths) == 0:
-        logger.error(f"invalid --image: empty image folder")
+        logger.error("invalid --image: empty image folder")
         exit(-1)
     if len(mask_paths) == 0:
-        logger.error(f"invalid --mask: empty mask folder")
+        logger.error("invalid --mask: empty mask folder")
         exit(-1)
 
     if config is None:
@@ -92,9 +93,9 @@ def batch_inpaint(
 
             infos = Image.open(image_p).info
 
-            img = cv2.imread(str(image_p))
-            img = cv2.cvtColor(img, cv2.COLOR_BGRA2RGB)
-            mask_img = cv2.imread(str(mask_p), cv2.IMREAD_GRAYSCALE)
+            img = np.array(Image.open(image_p).convert("RGB"))
+            mask_img = np.array(Image.open(mask_p).convert("L"))
+
             if mask_img.shape[:2] != img.shape[:2]:
                 progress.log(
                     f"resize mask {mask_p.name} to image {image_p.name} size: {img.shape[:2]}"
