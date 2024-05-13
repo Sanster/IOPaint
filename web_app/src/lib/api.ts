@@ -135,7 +135,7 @@ export async function runPlugin(
     body: JSON.stringify({
       name,
       image: imageBase64,
-      upscale,
+      scale:upscale,
       clicks,
     }),
   })
