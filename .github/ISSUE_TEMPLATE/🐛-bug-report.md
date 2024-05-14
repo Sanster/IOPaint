@@ -18,6 +18,6 @@ If applicable, add screenshots to help explain your problem.
 
 **System Info**
 Software version used
-- lama-cleaner: 
+- iopaint: 
 - pytorch: 
 - CUDA:
