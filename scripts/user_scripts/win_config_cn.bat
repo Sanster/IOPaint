@@ -10,6 +10,7 @@ set PATH=C:\Windows\System32;%PATH%
 @call conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
 @call conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
 @call conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/linux-64/
+@call conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ 
 @call conda config --set show_channel_urls yes
 
 @call conda install -y -c conda-forge cudatoolkit=11.8
