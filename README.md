@@ -40,9 +40,11 @@
     - [andregn/Realistic_Vision_V3.0-inpainting](https://huggingface.co/andregn/Realistic_Vision_V3.0-inpainting)
     - [Lykon/dreamshaper-8-inpainting](https://huggingface.co/Lykon/dreamshaper-8-inpainting)
     - [Sanster/anything-4.0-inpainting](https://huggingface.co/Sanster/anything-4.0-inpainting)
-    - [Sanster/PowerPaint-V1-stable-diffusion-inpainting](https://huggingface.co/Sanster/PowerPaint-V1-stable-diffusion-inpainting)
+    - [BrushNet](https://www.iopaint.com/models/diffusion/brushnet)
+    - [PowerPaintV2](https://www.iopaint.com/models/diffusion/powerpaint_v2)
     - [Sanster/AnyText](https://huggingface.co/Sanster/AnyText)
     - [Fantasy-Studio/Paint-by-Example](https://huggingface.co/Fantasy-Studio/Paint-by-Example)
+
 - [Plugins](https://www.iopaint.com/plugins):
   - [Segment Anything](https://iopaint.com/plugins/interactive_seg): Accurate and fast Interactive Object Segmentation
   - [RemoveBG](https://iopaint.com/plugins/rembg): Remove image background or generate masks for foreground objects
