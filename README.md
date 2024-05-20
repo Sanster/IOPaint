@@ -112,6 +112,8 @@ Install [nodejs](https://nodejs.org/en), then install the front-end dependencies
 git clone https://github.com/Sanster/IOPaint.git
 cd IOPaint/web_app
 npm install
+cd ..
+mv web_app/ iopaint/
 ```
 
 Create a `.env.local` file in `web_app` and fill in the backend IP and port.
