@@ -180,8 +180,18 @@ export function downloadImage(uri: string, name: string) {
 }
 
 export function mouseXY(ev: SyntheticEvent) {
-  const mouseEvent = ev.nativeEvent as MouseEvent
-  return { x: mouseEvent.offsetX, y: mouseEvent.offsetY }
+    const mouseEvent = ev.nativeEvent as MouseEvent
+    // Handle mask drawing coordinate on mobile/tablet devices
+    if ('touches' in ev) {
+        const rect = (ev.target as HTMLCanvasElement).getBoundingClientRect();
+        const touches = ev.touches as (Touch & { target: HTMLCanvasElement })[]
+        const touch = touches[0]
+        return {
+            x: (touch.clientX - rect.x) / rect.width * touch.target.offsetWidth,
+            y: (touch.clientY - rect.y) / rect.height * touch.target.offsetHeight,
+        }
+    }
+    return {x: mouseEvent.offsetX, y: mouseEvent.offsetY}
 }
 
 export function drawLines(
