@@ -106,12 +106,14 @@ You can see more information about the available models and plugins supported by
 
 ## Development
 
-Install [nodejs](https://nodejs.org/en), then install the front-end dependencies.
+Install [nodejs](https://nodejs.org/en), then install the frontend dependencies.
 
 ```bash
 git clone https://github.com/Sanster/IOPaint.git
 cd IOPaint/web_app
 npm install
+npm run build
+cp -r dist/ ../iopaint/web_app
 ```
 
 Create a `.env.local` file in `web_app` and fill in the backend IP and port.
@@ -124,10 +126,12 @@ Start front-end development environment
 npm run dev
 ```
 
-Install back-end requirements and start back-end service
+Install back-end requirements and start backend service
 ```bash
 pip install -r requirements.txt
 python3 main.py start --model lama --port 8080
 ```
 
-Then you can visit `http://localhost:5173/` for development. The front-end code will automatically update after being modified, but the back-end needs to restart the service after modifying the python code.
+Then you can visit `http://localhost:5173/` for development.
+The frontend code will automatically update after being modified,
+but the backend needs to restart the service after modifying the python code.
