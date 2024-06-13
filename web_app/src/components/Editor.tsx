@@ -800,6 +800,9 @@ export default function Editor(props: EditorProps) {
               onMouseDown={onMouseDown}
               onMouseUp={onCanvasMouseUp}
               onMouseMove={onMouseDrag}
+              onTouchStart={onMouseDown}
+              onTouchEnd={onCanvasMouseUp}
+              onTouchMove={onMouseDrag}
               ref={(r) => {
                 if (r && !context) {
                   const ctx = r.getContext("2d")
