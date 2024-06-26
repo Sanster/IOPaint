@@ -98,74 +98,74 @@ class Activation(nn.Module):
     def forward(self, inputs):
         return self.act(inputs)
     
-def print_coverage_swish():
-    for branch, hit in branch_coverage_swish.items():
-        print(f"{branch} in function Swish was {'hit' if hit else 'not hit'}")
-        branch_coverage_swish[branch] = False
+# def print_coverage_swish():
+#     for branch, hit in branch_coverage_swish.items():
+#         print(f"{branch} in function Swish was {'hit' if hit else 'not hit'}")
+#         branch_coverage_swish[branch] = False
 
-def print_coverage_activation():
-    for branch, hit in branch_coverage_activation.items():
-        print(f"{branch} in function Activation was {'hit' if hit else 'not hit'}")
-        branch_coverage_activation[branch] = False
+# def print_coverage_activation():
+#     for branch, hit in branch_coverage_activation.items():
+#         print(f"{branch} in function Activation was {'hit' if hit else 'not hit'}")
+#         branch_coverage_activation[branch] = False
 
 
-def main():
-    swish = Swish(inplace=True)
-    swish(torch.tensor([1.0, 2.0, 3.0]))
-    print("Test inplace branch(11)\n")
-    print_coverage_swish()
+# def main():
+#     swish = Swish(inplace=True)
+#     swish(torch.tensor([1.0, 2.0, 3.0]))
+#     print("Test inplace branch(11)\n")
+#     print_coverage_swish()
     
-    swish = Swish(inplace=False)
-    swish(torch.tensor([1.0, 2.0, 3.0]))
-    print("Test not-inplace branch(12)\n")
-    print_coverage_swish()
+#     swish = Swish(inplace=False)
+#     swish(torch.tensor([1.0, 2.0, 3.0]))
+#     print("Test not-inplace branch(12)\n")
+#     print_coverage_swish()
     
-    activation = Activation('relu')
-    activation(torch.tensor([1.0, 2.0, 3.0]))
-    print("Test relu branch(13)\n")
-    print_coverage_activation()
+#     activation = Activation('relu')
+#     activation(torch.tensor([1.0, 2.0, 3.0]))
+#     print("Test relu branch(13)\n")
+#     print_coverage_activation()
     
-    activation = Activation('relu6')
-    activation(torch.tensor([1.0, 2.0, 3.0]))
-    print("Test relu6 branch(14)\n")
-    print_coverage_activation()
+#     activation = Activation('relu6')
+#     activation(torch.tensor([1.0, 2.0, 3.0]))
+#     print("Test relu6 branch(14)\n")
+#     print_coverage_activation()
     
-    activation = Activation('hard_sigmoid')
-    activation(torch.tensor([1.0, 2.0, 3.0]))
-    print("Test hard_sigmoid branch(16)\n")
-    print_coverage_activation()
+#     activation = Activation('hard_sigmoid')
+#     activation(torch.tensor([1.0, 2.0, 3.0]))
+#     print("Test hard_sigmoid branch(16)\n")
+#     print_coverage_activation()
     
-    activation = Activation('hard_swish')
-    activation(torch.tensor([1.0, 2.0, 3.0]))
-    print("Test hard_swish branch(17)\n")
-    print_coverage_activation()
+#     activation = Activation('hard_swish')
+#     activation(torch.tensor([1.0, 2.0, 3.0]))
+#     print("Test hard_swish branch(17)\n")
+#     print_coverage_activation()
     
-    activation = Activation('leakyrelu')
-    activation(torch.tensor([1.0, 2.0, 3.0]))
-    print("Test leakyrelu branch(18)\n")
-    print_coverage_activation()
+#     activation = Activation('leakyrelu')
+#     activation(torch.tensor([1.0, 2.0, 3.0]))
+#     print("Test leakyrelu branch(18)\n")
+#     print_coverage_activation()
     
-    activation = Activation('gelu')
-    activation(torch.tensor([1.0, 2.0, 3.0]))
-    print("Test gelu branch(19)\n")
-    print_coverage_activation()
+#     activation = Activation('gelu')
+#     activation(torch.tensor([1.0, 2.0, 3.0]))
+#     print("Test gelu branch(19)\n")
+#     print_coverage_activation()
     
-    activation = Activation('swish')
-    activation(torch.tensor([1.0, 2.0, 3.0]))
-    print("Test swish branch(20)\n")
-    print_coverage_activation()
+#     activation = Activation('swish')
+#     activation(torch.tensor([1.0, 2.0, 3.0]))
+#     print("Test swish branch(20)\n")
+#     print_coverage_activation()
     
-    try:
-        activation = Activation('sigmoid')
-    except NotImplementedError:
-        print("Test sigmoid branch(15)\n")
-        print_coverage_activation()
+#     try:
+#         activation = Activation('sigmoid')
+#     except NotImplementedError:
+#         print("Test sigmoid branch(15)\n")
+#         print_coverage_activation()
     
-    try:
-        activation = Activation('none')
-    except NotImplementedError:
-        print("Test not implemented branch(41)\n")
-        print_coverage_activation()
+#     try:
+#         activation = Activation('none')
+#     except NotImplementedError:
+#         print("Test not implemented branch(41)\n")
+#         print_coverage_activation()
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
