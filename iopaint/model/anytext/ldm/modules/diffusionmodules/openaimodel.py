@@ -5,6 +5,7 @@ import numpy as np
 import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
+import unittest # added
 
 from iopaint.model.anytext.ldm.modules.diffusionmodules.util import (
     checkpoint,
@@ -69,6 +70,15 @@ class TimestepBlock(nn.Module):
         Apply the module to `x` given `emb` timestep embeddings.
         """
 
+# coverage information
+coverage_info = {
+    "branch_21": False, # if TimestepBlock
+    "branch_22": False, # if SpatialTransformer
+    "branch_23": False, # if non-specialised layer
+    "branch_24": False, # if 3D
+    "branch_25": False, # if not 3D
+    "branch_26": False # if uses convolution
+}
 
 class TimestepEmbedSequential(nn.Sequential, TimestepBlock):
     """
@@ -76,13 +86,20 @@ class TimestepEmbedSequential(nn.Sequential, TimestepBlock):
     support it as an extra input.
     """
 
+    # type of nn.Sequential that has been modified to handle the special case of
+    # passing additional arguments (emb and optionally context) to its layers during the forward pass.
+    # The forward method is defining how data x flows through this sequence of layers.
+
     def forward(self, x, emb, context=None):
         for layer in self:
             if isinstance(layer, TimestepBlock):
+                coverage_info["branch_21"] = True
                 x = layer(x, emb)
             elif isinstance(layer, SpatialTransformer):
+                coverage_info["branch_22"] = True
                 x = layer(x, context)
             else:
+                coverage_info["branch_23"] = True
                 x = layer(x)
         return x
 
@@ -107,15 +124,25 @@ class Upsample(nn.Module):
 
     def forward(self, x):
         assert x.shape[1] == self.channels
-        if self.dims == 3:
+        if self.dims == 3: # condition: signal is 3D
+            coverage_info["branch_24"] = True
             x = F.interpolate(
                 x, (x.shape[2], x.shape[3] * 2, x.shape[4] * 2), mode="nearest"
             )
-        else:
+        else: # condition: signal is not 3D
+            coverage_info["branch_25"] = True
             x = F.interpolate(x, scale_factor=2, mode="nearest")
-        if self.use_conv:
+        if self.use_conv: # condition: convolution is applied
+            coverage_info["branch_26"] = True
             x = self.conv(x)
+
+        CoverageTest.test_coverage_info(self)
         return x
+
+class CoverageTest(unittest.TestCase):
+    def test_coverage_info(self):
+        for branch, hit in coverage_info.items():
+            print(f"{branch} was {'hit' if hit else 'not hit'}")
 
 class TransposedUpsample(nn.Module):
     'Learned 2x upsampling without padding'
