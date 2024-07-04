@@ -35,7 +35,6 @@ def glob_images(path: Path) -> Dict[str, Path]:
         return res
 
 
-
 def batch_inpaint(
     model: str,
     device,
@@ -67,6 +66,7 @@ def batch_inpaint(
     else:
         with open(config, "r", encoding="utf-8") as f:
             inpaint_request = InpaintRequest(**json.load(f))
+        logger.info(f"Using config: {inpaint_request}")
 
     model_manager = ModelManager(name=model, device=device)
     first_mask = list(mask_paths.values())[0]
