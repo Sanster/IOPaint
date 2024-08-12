@@ -1,6 +1,4 @@
-import hashlib
 import os
-import time
 from PIL import Image
 
 from iopaint.helper import encode_pil_to_base64, gen_frontend_mask
