@@ -8,4 +8,3 @@ def install(package):
 
 def install_plugins_package():
     install("rembg")
-    install("gfpgan")

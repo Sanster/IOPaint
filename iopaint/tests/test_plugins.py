@@ -26,6 +26,11 @@ rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
 rgb_img_base64 = encode_pil_to_base64(Image.fromarray(rgb_img), 100, {})
 bgr_img_base64 = encode_pil_to_base64(Image.fromarray(bgr_img), 100, {})
 
+person_p = current_dir / "image.png"
+person_bgr_img = cv2.imread(str(person_p))
+person_rgb_img = cv2.cvtColor(person_bgr_img, cv2.COLOR_BGR2RGB)
+person_rgb_img = cv2.resize(person_rgb_img, (512, 512))
+
 
 def _save(img, name):
     cv2.imwrite(str(save_dir / name), img)
@@ -86,7 +91,7 @@ def test_gfpgan(device):
     check_device(device)
     model = GFPGANPlugin(device)
     res = model.gen_image(
-        rgb_img, RunPluginRequest(name=GFPGANPlugin.name, image=rgb_img_base64)
+        person_rgb_img, RunPluginRequest(name=GFPGANPlugin.name, image=rgb_img_base64)
     )
     _save(res, f"test_gfpgan_{device}.png")
 
@@ -96,7 +101,8 @@ def test_restoreformer(device):
     check_device(device)
     model = RestoreFormerPlugin(device)
     res = model.gen_image(
-        rgb_img, RunPluginRequest(name=RestoreFormerPlugin.name, image=rgb_img_base64)
+        person_rgb_img,
+        RunPluginRequest(name=RestoreFormerPlugin.name, image=rgb_img_base64),
     )
     _save(res, f"test_restoreformer_{device}.png")
 

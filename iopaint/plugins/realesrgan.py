@@ -466,6 +466,3 @@ class RealESRGANUpscaler(BasePlugin):
         # 输出是 BGR
         upsampled = self.model.enhance(bgr_np_img, outscale=scale)[0]
         return upsampled
-
-    def check_dep(self):
-        pass

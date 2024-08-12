@@ -20,11 +20,6 @@ class RestoreFormerPlugin(BasePlugin):
         model_path = download_model(url, model_md5)
         logger.info(f"RestoreFormer model path: {model_path}")
 
-        import facexlib
-
-        if hasattr(facexlib.detection.retinaface, "device"):
-            facexlib.detection.retinaface.device = device
-
         self.face_enhancer = MyGFPGANer(
             model_path=model_path,
             upscale=1,
@@ -47,11 +42,3 @@ class RestoreFormerPlugin(BasePlugin):
         )
         logger.info(f"RestoreFormer output shape: {bgr_output.shape}")
         return bgr_output
-
-    def check_dep(self):
-        try:
-            import gfpgan
-        except ImportError:
-            return (
-                "gfpgan is not installed, please install it first. pip install gfpgan"
-            )

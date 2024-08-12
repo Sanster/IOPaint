@@ -20,11 +20,6 @@ class GFPGANPlugin(BasePlugin):
         model_path = download_model(url, model_md5)
         logger.info(f"GFPGAN model path: {model_path}")
 
-        import facexlib
-
-        if hasattr(facexlib.detection.retinaface, "device"):
-            facexlib.detection.retinaface.device = device
-
         # Use GFPGAN for face enhancement
         self.face_enhancer = MyGFPGANer(
             model_path=model_path,
@@ -64,11 +59,3 @@ class GFPGANPlugin(BasePlugin):
         # except Exception as error:
         #     print("wrong scale input.", error)
         return bgr_output
-
-    def check_dep(self):
-        try:
-            import gfpgan
-        except ImportError:
-            return (
-                "gfpgan is not installed, please install it first. pip install gfpgan"
-            )
