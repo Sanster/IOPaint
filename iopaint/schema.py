@@ -244,6 +244,7 @@ class ApiConfig(BaseModel):
     cpu_textencoder: bool
     device: Device
     input: Optional[Path]
+    mask_dir: Optional[Path]
     output_dir: Optional[Path]
     quality: int
     enable_interactive_seg: bool
@@ -436,7 +437,7 @@ class RunPluginRequest(BaseModel):
     scale: float = Field(2.0, description="Scale for upscaling")
 
 
-MediaTab = Literal["input", "output"]
+MediaTab = Literal["input", "output", "mask"]
 
 
 class MediasResponse(BaseModel):

@@ -50,6 +50,7 @@ const SORT_BY_MODIFIED_TIME = "Modified time"
 
 const IMAGE_TAB = "input"
 const OUTPUT_TAB = "output"
+export const MASK_TAB = "mask"
 
 const SortByMap = {
   [SortBy.NAME]: SORT_BY_NAME,
@@ -264,6 +265,7 @@ export default function FileManager(props: Props) {
             <TabsList aria-label="Manage your account">
               <TabsTrigger value={IMAGE_TAB}>Image Directory</TabsTrigger>
               <TabsTrigger value={OUTPUT_TAB}>Output Directory</TabsTrigger>
+              <TabsTrigger value={MASK_TAB}>Mask Directory</TabsTrigger>
             </TabsList>
           </Tabs>
 

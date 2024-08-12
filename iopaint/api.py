@@ -19,7 +19,6 @@ try:
 except:
     pass
 
-
 import uvicorn
 from PIL import Image
 from fastapi import APIRouter, FastAPI, Request, UploadFile
@@ -127,7 +126,7 @@ def api_middleware(app: FastAPI):
         "allow_headers": ["*"],
         "allow_origins": ["*"],
         "allow_credentials": True,
-        "expose_headers": ["X-Seed"]
+        "expose_headers": ["X-Seed"],
     }
     app.add_middleware(CORSMiddleware, **cors_options)
 
@@ -159,7 +158,8 @@ class Api:
 
         # fmt: off
         self.add_api_route("/api/v1/gen-info", self.api_geninfo, methods=["POST"], response_model=GenInfoResponse)
-        self.add_api_route("/api/v1/server-config", self.api_server_config, methods=["GET"], response_model=ServerConfigResponse)
+        self.add_api_route("/api/v1/server-config", self.api_server_config, methods=["GET"],
+                           response_model=ServerConfigResponse)
         self.add_api_route("/api/v1/model", self.api_current_model, methods=["GET"], response_model=ModelInfo)
         self.add_api_route("/api/v1/model", self.api_switch_model, methods=["POST"], response_model=ModelInfo)
         self.add_api_route("/api/v1/inputimage", self.api_input_image, methods=["GET"])
@@ -361,6 +361,7 @@ class Api:
             return FileManager(
                 app=self.app,
                 input_dir=self.config.input,
+                mask_dir=self.config.mask_dir,
                 output_dir=self.config.output_dir,
             )
         return None

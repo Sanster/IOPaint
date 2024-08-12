@@ -207,6 +207,7 @@ type AppAction = {
   updateInteractiveSegState: (newState: Partial<InteractiveSegState>) => void
   resetInteractiveSegState: () => void
   handleInteractiveSegAccept: () => void
+  handleFileManagerMaskSelect: (blob: Blob) => Promise<void>
   showPromptInput: () => boolean
 
   runInpainting: () => Promise<void>
@@ -901,6 +902,16 @@ export const useStore = createWithEqualityFn<AppState & AppAction>()(
             ...defaultValues.interactiveSegState,
           })
         })
+      },
+
+      handleFileManagerMaskSelect: async (blob: Blob) => {
+        const newMask = new Image()
+
+        await loadImage(newMask, URL.createObjectURL(blob))
+        set((state) => {
+          state.editorState.extraMasks.push(castDraft(newMask))
+        })
+        get().runInpainting()
       },
 
       setIsInpainting: (newValue: boolean) =>

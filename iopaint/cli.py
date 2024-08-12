@@ -1,7 +1,7 @@
 import webbrowser
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 import typer
 from fastapi import FastAPI
@@ -120,6 +120,9 @@ def start(
     local_files_only: bool = Option(False, help=LOCAL_FILES_ONLY_HELP),
     device: Device = Option(Device.cpu),
     input: Optional[Path] = Option(None, help=INPUT_HELP),
+    mask_dir: Optional[Path] = Option(
+        None, help=MODEL_DIR_HELP, dir_okay=True, file_okay=False
+    ),
     output_dir: Optional[Path] = Option(
         None, help=OUTPUT_DIR_HELP, dir_okay=True, file_okay=False
     ),
@@ -145,8 +148,11 @@ def start(
     if input and not input.exists():
         logger.error(f"invalid --input: {input} not exists")
         exit(-1)
+    if mask_dir and not mask_dir.exists():
+        logger.error(f"invalid --mask-dir: {mask_dir} not exists")
+        exit(-1)
     if input and input.is_dir() and not output_dir:
-        logger.error(f"invalid --output-dir: must be set when --input is a directory")
+        logger.error("invalid --output-dir: --output-dir must be set when --input is a directory")
         exit(-1)
     if output_dir:
         output_dir = output_dir.expanduser().absolute()
@@ -154,6 +160,8 @@ def start(
         if not output_dir.exists():
             logger.info(f"Create output directory {output_dir}")
             output_dir.mkdir(parents=True)
+    if mask_dir:
+        mask_dir = mask_dir.expanduser().absolute()
 
     model_dir = model_dir.expanduser().absolute()
 
@@ -192,6 +200,7 @@ def start(
         cpu_textencoder=cpu_textencoder if device == Device.cuda else False,
         device=device,
         input=input,
+        mask_dir=mask_dir,
         output_dir=output_dir,
         quality=quality,
         enable_interactive_seg=enable_interactive_seg,

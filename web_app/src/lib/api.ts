@@ -135,7 +135,7 @@ export async function runPlugin(
     body: JSON.stringify({
       name,
       image: imageBase64,
-      scale:upscale,
+      scale: upscale,
       clicks,
     }),
   })
@@ -162,6 +162,23 @@ export async function getMediaFile(tab: string, filename: string) {
       type: res.headers.get("Content-Type") ?? "image/png",
     })
     return file
+  }
+  const errMsg = await res.json()
+  throw new Error(errMsg.errors)
+}
+
+export async function getMediaBlob(tab: string, filename: string) {
+  const res = await fetch(
+    `${API_ENDPOINT}/media_file?tab=${tab}&filename=${encodeURIComponent(
+      filename
+    )}`,
+    {
+      method: "GET",
+    }
+  )
+  if (res.ok) {
+    const blob = await res.blob()
+    return blob
   }
   const errMsg = await res.json()
   throw new Error(errMsg.errors)

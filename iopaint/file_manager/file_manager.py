@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List
 
 from PIL import Image, ImageOps, PngImagePlugin
-from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi import FastAPI, HTTPException
 from starlette.responses import FileResponse
 
 from ..schema import MediasResponse, MediaTab
@@ -16,9 +16,10 @@ from .utils import aspect_to_string, generate_filename, glob_img
 
 
 class FileManager:
-    def __init__(self, app: FastAPI, input_dir: Path, output_dir: Path):
+    def __init__(self, app: FastAPI, input_dir: Path, mask_dir: Path, output_dir: Path):
         self.app = app
         self.input_dir: Path = input_dir
+        self.mask_dir: Path = mask_dir
         self.output_dir: Path = output_dir
 
         self.image_dir_filenames = []
@@ -63,6 +64,8 @@ class FileManager:
             return self.input_dir
         elif tab == "output":
             return self.output_dir
+        elif tab == "mask":
+            return self.mask_dir
         else:
             raise HTTPException(status_code=422, detail=f"tab not found: {tab}")
 

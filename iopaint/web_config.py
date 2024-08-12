@@ -3,10 +3,11 @@ import os
 from pathlib import Path
 
 import mimetypes
+
 # fix for windows mimetypes registry entries being borked
 # see https://github.com/invoke-ai/InvokeAI/discussions/3684#discussioncomment-6391352
-mimetypes.add_type('application/javascript', '.js')
-mimetypes.add_type('text/css', '.css')
+mimetypes.add_type("application/javascript", ".js")
+mimetypes.add_type("text/css", ".css")
 
 from iopaint.schema import (
     Device,
@@ -78,40 +79,43 @@ def load_config(p: Path) -> WebConfig:
 
 
 def save_config(
-        host,
-        port,
-        model,
-        model_dir,
-        no_half,
-        low_mem,
-        cpu_offload,
-        disable_nsfw_checker,
-        local_files_only,
-        cpu_textencoder,
-        device,
-        input,
-        output_dir,
-        quality,
-        enable_interactive_seg,
-        interactive_seg_model,
-        interactive_seg_device,
-        enable_remove_bg,
-        remove_bg_model,
-        enable_anime_seg,
-        enable_realesrgan,
-        realesrgan_device,
-        realesrgan_model,
-        enable_gfpgan,
-        gfpgan_device,
-        enable_restoreformer,
-        restoreformer_device,
-        inbrowser,
+    host,
+    port,
+    model,
+    model_dir,
+    no_half,
+    low_mem,
+    cpu_offload,
+    disable_nsfw_checker,
+    local_files_only,
+    cpu_textencoder,
+    device,
+    input,
+    mask_dir,
+    output_dir,
+    quality,
+    enable_interactive_seg,
+    interactive_seg_model,
+    interactive_seg_device,
+    enable_remove_bg,
+    remove_bg_model,
+    enable_anime_seg,
+    enable_realesrgan,
+    realesrgan_device,
+    realesrgan_model,
+    enable_gfpgan,
+    gfpgan_device,
+    enable_restoreformer,
+    restoreformer_device,
+    inbrowser,
 ):
     config = WebConfig(**locals())
     if str(config.input) == ".":
         config.input = None
     if str(config.output_dir) == ".":
         config.output_dir = None
+    if str(config.mask_dir) == ".":
+        config.mask_dir = None
     config.model = config.model.strip()
     print(config.model_dump_json(indent=4))
     if config.input and not os.path.exists(config.input):
@@ -166,7 +170,7 @@ def main(config_file: Path):
                     model = gr.Textbox(
                         init_config.model,
                         label="Current Model. Model will be automatically downloaded. "
-                              "You can select a model in Recommended Models or Downloaded Models or manually enter the SD/SDXL model ID from HuggingFace, for example, runwayml/stable-diffusion-inpainting.",
+                        "You can select a model in Recommended Models or Downloaded Models or manually enter the SD/SDXL model ID from HuggingFace, for example, runwayml/stable-diffusion-inpainting.",
                     )
 
                 device = gr.Radio(
@@ -206,6 +210,10 @@ def main(config_file: Path):
                     output_dir = gr.Textbox(
                         init_config.output_dir,
                         label=f"Output directory. {OUTPUT_DIR_HELP}",
+                    )
+                    mask_dir = gr.Textbox(
+                        init_config.mask_dir,
+                        label=f"Mask directory. {MASK_DIR_HELP}",
                     )
 
             with gr.Tab("Plugins"):
@@ -288,6 +296,7 @@ def main(config_file: Path):
                 cpu_textencoder,
                 device,
                 input,
+                mask_dir,
                 output_dir,
                 quality,
                 enable_interactive_seg,

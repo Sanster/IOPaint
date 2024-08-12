@@ -7,8 +7,8 @@ import { useImage } from "@/hooks/useImage"
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import PromptInput from "./PromptInput"
 import { RotateCw, Image, Upload } from "lucide-react"
-import FileManager from "./FileManager"
-import { getMediaFile } from "@/lib/api"
+import FileManager, { MASK_TAB } from "./FileManager"
+import { getMediaBlob, getMediaFile } from "@/lib/api"
 import { useStore } from "@/lib/states"
 import SettingsDialog from "./Settings"
 import { cn, fileToImage } from "@/lib/utils"
@@ -31,6 +31,7 @@ const Header = () => {
     hidePrevMask,
     imageHeight,
     imageWidth,
+    handleFileManagerMaskSelect,
   ] = useStore((state) => [
     state.file,
     state.customMask,
@@ -46,6 +47,7 @@ const Header = () => {
     state.hidePrevMask,
     state.imageHeight,
     state.imageWidth,
+    state.handleFileManagerMaskSelect,
   ])
 
   const { toast } = useToast()
@@ -64,25 +66,29 @@ const Header = () => {
     hidePrevMask()
   }
 
+  const handleOnPhotoClick = async (tab: string, filename: string) => {
+    try {
+      if (tab === MASK_TAB) {
+        const maskBlob = await getMediaBlob(tab, filename)
+        handleFileManagerMaskSelect(maskBlob)
+      } else {
+        const newFile = await getMediaFile(tab, filename)
+        setFile(newFile)
+      }
+    } catch (e: any) {
+      toast({
+        variant: "destructive",
+        description: e.message ? e.message : e.toString(),
+      })
+      return
+    }
+  }
+
   return (
     <header className="h-[60px] px-6 py-4 absolute top-[0] flex justify-between items-center w-full z-20 border-b backdrop-filter backdrop-blur-md bg-background/70">
       <div className="flex items-center gap-1">
         {serverConfig.enableFileManager ? (
-          <FileManager
-            photoWidth={512}
-            onPhotoClick={async (tab: string, filename: string) => {
-              try {
-                const newFile = await getMediaFile(tab, filename)
-                setFile(newFile)
-              } catch (e: any) {
-                toast({
-                  variant: "destructive",
-                  description: e.message ? e.message : e.toString(),
-                })
-                return
-              }
-            }}
-          />
+          <FileManager photoWidth={512} onPhotoClick={handleOnPhotoClick} />
         ) : (
           <></>
         )}

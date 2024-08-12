@@ -63,7 +63,7 @@ SD_CONTROLNET_CHOICES: List[str] = [
 
 SD_BRUSHNET_CHOICES: List[str] = [
     "Sanster/brushnet_random_mask",
-    "Sanster/brushnet_segmentation_mask"
+    "Sanster/brushnet_segmentation_mask",
 ]
 
 SD2_CONTROLNET_CHOICES = [
@@ -97,6 +97,10 @@ Model download directory (by setting XDG_CACHE_HOME environment variable), by de
 
 OUTPUT_DIR_HELP = """
 Result images will be saved to output directory automatically.
+"""
+
+MASK_DIR_HELP = """
+You can view masks in FileManager
 """
 
 INPUT_HELP = """
