@@ -81,6 +81,8 @@ class FileManager:
 
     @staticmethod
     def _media_names(directory: Path) -> List[MediasResponse]:
+        if directory is None:
+            return []
         names = sorted([it.name for it in glob_img(directory)])
         res = []
         for name in names:

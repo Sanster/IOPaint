@@ -44,6 +44,7 @@ default_configs = dict(
     cpu_textencoder=False,
     device=Device.cuda,
     input=None,
+    mask_dir=None,
     output_dir=None,
     quality=95,
     enable_interactive_seg=False,
