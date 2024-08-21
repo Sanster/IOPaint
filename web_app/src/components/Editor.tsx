@@ -30,7 +30,11 @@ import Cropper from "./Cropper"
 import { InteractiveSegPoints } from "./InteractiveSeg"
 import useHotKey from "@/hooks/useHotkey"
 import Extender from "./Extender"
-import { MAX_BRUSH_SIZE, MIN_BRUSH_SIZE } from "@/lib/const"
+import {
+  MAX_BRUSH_SIZE,
+  MIN_BRUSH_SIZE,
+  SHORTCUT_KEY_CHANGE_BRUSH_SIZE,
+} from "@/lib/const"
 
 const TOOLBAR_HEIGHT = 200
 const COMPARE_SLIDER_DURATION_MS = 300
@@ -657,8 +661,28 @@ export default function Editor(props: EditorProps) {
     }
   )
 
+  useEffect(() => {
+    const handleKeyUp = (ev: KeyboardEvent) => {
+      if (ev.key === SHORTCUT_KEY_CHANGE_BRUSH_SIZE) {
+        setIsChangingBrushSizeByWheel(false)
+      }
+    }
+
+    const handleBlur = () => {
+      setIsChangingBrushSizeByWheel(false)
+    }
+
+    window.addEventListener("keyup", handleKeyUp)
+    window.addEventListener("blur", handleBlur)
+
+    return () => {
+      window.removeEventListener("keyup", handleKeyUp)
+      window.removeEventListener("blur", handleBlur)
+    }
+  }, [])
+
   useKeyPressEvent(
-    "Alt",
+    SHORTCUT_KEY_CHANGE_BRUSH_SIZE,
     (ev) => {
       if (!disableShortCuts) {
         ev?.preventDefault()

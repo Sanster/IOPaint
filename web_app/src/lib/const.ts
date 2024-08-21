@@ -21,3 +21,5 @@ export const ANYTEXT = "Sanster/AnyText"
 
 export const DEFAULT_NEGATIVE_PROMPT =
   "out of frame, lowres, error, cropped, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, out of frame, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, disfigured, gross proportions, malformed limbs, watermark, signature"
+
+export const SHORTCUT_KEY_CHANGE_BRUSH_SIZE = "Alt"
