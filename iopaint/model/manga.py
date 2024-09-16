@@ -54,7 +54,7 @@ class Manga(InpaintModel):
             get_cache_path_by_url(MANGA_INPAINTOR_MODEL_URL),
             get_cache_path_by_url(MANGA_LINE_MODEL_URL),
         ]
-        return all([os.path.exists(it) for it in model_paths])
+        return all(os.path.exists(it) for it in model_paths)
 
     def forward(self, image, mask, config: InpaintRequest):
         """

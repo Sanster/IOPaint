@@ -274,7 +274,7 @@ class LDM(InpaintModel):
             get_cache_path_by_url(LDM_DECODE_MODEL_URL),
             get_cache_path_by_url(LDM_ENCODE_MODEL_URL),
         ]
-        return all([os.path.exists(it) for it in model_paths])
+        return all(os.path.exists(it) for it in model_paths)
 
     @torch.cuda.amp.autocast()
     def forward(self, image, mask, config: InpaintRequest):
