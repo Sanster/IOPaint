@@ -60,7 +60,7 @@ def download_model(url, model_md5: str = None):
                     os.remove(cached_file)
                     logger.error(
                         f"Model md5: {_md5}, expected md5: {model_md5}, wrong model deleted. Please restart iopaint."
-                        f"If you still have errors, please try download model manually first https://lama-cleaner-docs.vercel.app/install/download_model_manually.\n"
+                        f"If you still have errors, please try to download the model manually https://lama-cleaner-docs.vercel.app/install/download_model_manually.\n"
                     )
                 except:
                     logger.error(
@@ -84,7 +84,7 @@ def handle_error(model_path, model_md5, e):
             os.remove(model_path)
             logger.error(
                 f"Model md5: {_md5}, expected md5: {model_md5}, wrong model deleted. Please restart iopaint."
-                f"If you still have errors, please try download model manually first https://lama-cleaner-docs.vercel.app/install/download_model_manually.\n"
+                f"If you still have errors, please try to download the model manually https://lama-cleaner-docs.vercel.app/install/download_model_manually.\n"
             )
         except:
             logger.error(
