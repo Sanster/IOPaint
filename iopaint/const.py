@@ -105,7 +105,7 @@ You can view masks in FileManager
 
 INPUT_HELP = """
 If input is image, it will be loaded by default.
-If input is directory, you can browse and select image in file manager.
+If input is directory, you can browse and select image in the file manager.
 """
 
 GUI_HELP = """
