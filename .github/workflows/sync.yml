@@ -1,0 +1,20 @@
+name: Sync with Original Repo
+
+on:
+  schedule:
+    - cron: '*/5 * * * *' # Set the schedule as needed
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Sync with Upstream
+        run: |
+          git remote add upstream https://github.com/Sanster/lama-cleaner.git
+          git fetch upstream
+          git merge upstream/main
+          git push
