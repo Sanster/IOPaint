@@ -1,6 +1,7 @@
 torch>=2.0.0
 opencv-python
 diffusers==0.27.2
+huggingface_hub==0.25.2
 accelerate
 peft==0.7.1
 transformers>=4.35.1
