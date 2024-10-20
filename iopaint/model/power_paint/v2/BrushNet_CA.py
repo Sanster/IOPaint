@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch
 from diffusers import UNet2DConditionModel
-from diffusers.models.unet_2d_blocks import (
+from diffusers.models.unets.unet_2d_blocks import (
     get_down_block,
     get_mid_block,
     get_up_block,

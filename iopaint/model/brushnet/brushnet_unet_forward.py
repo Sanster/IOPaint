@@ -1,7 +1,7 @@
 from typing import Union, Optional, Dict, Any, Tuple
 
 import torch
-from diffusers.models.unet_2d_condition import UNet2DConditionOutput
+from diffusers.models.unets.unet_2d_condition import UNet2DConditionOutput
 from diffusers.utils import USE_PEFT_BACKEND, unscale_lora_layers, deprecate, scale_lora_layers
 
 
