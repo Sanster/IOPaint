@@ -183,9 +183,12 @@ class Api:
         return self.app.add_api_route(path, endpoint, **kwargs)
 
     def api_save_image(self, file: UploadFile):
-        filename = file.filename
+        file_to_write = Path(file.filename)
+        if not file_to_write.is_file():
+            return
+        
         origin_image_bytes = file.file.read()
-        with open(self.config.output_dir / filename, "wb") as fw:
+        with open(self.config.output_dir / file_to_write.name, "wb") as fw:
             fw.write(origin_image_bytes)
 
     def api_current_model(self) -> ModelInfo:
