@@ -1,0 +1,9 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule: "weekly"
+  
+  - package-ecosystem: "npm"
+    directory: "/web_app"
+    schedule: "weekly"
