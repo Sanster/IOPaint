@@ -36,23 +36,25 @@ def _save(img, name):
     cv2.imwrite(str(save_dir / name), img)
 
 
-def test_remove_bg():
-    model = RemoveBG(RemoveBGModel.briaai_rmbg_1_4)
+@pytest.mark.parametrize("model_name", RemoveBGModel.values())
+def test_remove_bg(model_name):
+    print(f"Testing {model_name}")
+    model = RemoveBG(model_name)
     rgba_np_img = model.gen_image(
         rgb_img, RunPluginRequest(name=RemoveBG.name, image=rgb_img_base64)
     )
     res = cv2.cvtColor(rgba_np_img, cv2.COLOR_RGBA2BGRA)
-    _save(res, "test_remove_bg.png")
+    _save(res, f"test_remove_bg_{model_name}.png")
 
     bgr_np_img = model.gen_mask(
         rgb_img, RunPluginRequest(name=RemoveBG.name, image=rgb_img_base64)
     )
 
     res_mask = gen_frontend_mask(bgr_np_img)
-    _save(res_mask, "test_remove_bg_frontend_mask.png")
+    _save(res_mask, f"test_remove_bg_frontend_mask_{model_name}.png")
 
     assert len(bgr_np_img.shape) == 2
-    _save(bgr_np_img, "test_remove_bg_mask.jpeg")
+    _save(bgr_np_img, f"test_remove_bg_mask_{model_name}.jpeg")
 
 
 def test_anime_seg():

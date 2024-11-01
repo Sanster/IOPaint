@@ -17,6 +17,14 @@ class RemoveBG(BasePlugin):
         super().__init__()
         self.model_name = model_name
 
+        if model_name.startswith("birefnet"):
+            import rembg
+
+            if rembg.__version__ < "2.0.59":
+                raise ValueError(
+                    "To use birefnet models, please upgrade rembg to >= 2.0.59. pip install -U rembg"
+                )
+
         hub_dir = get_dir()
         model_dir = os.path.join(hub_dir, "checkpoints")
         os.environ["U2NET_HOME"] = model_dir
@@ -66,6 +74,4 @@ class RemoveBG(BasePlugin):
         try:
             import rembg
         except ImportError:
-            return (
-                "RemoveBG is not installed, please install it first. pip install rembg"
-            )
+            return "RemoveBG is not installed, please install it first. pip install -U rembg"
