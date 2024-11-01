@@ -3,7 +3,7 @@ from .controlnet import ControlNet
 from .fcf import FcF
 from .instruct_pix2pix import InstructPix2Pix
 from .kandinsky import Kandinsky22
-from .lama import LaMa
+from .lama import LaMa, AnimeLaMa
 from .ldm import LDM
 from .manga import Manga
 from .mat import MAT
@@ -17,6 +17,7 @@ from .zits import ZITS
 
 models = {
     LaMa.name: LaMa,
+    AnimeLaMa.name: AnimeLaMa,
     LDM.name: LDM,
     ZITS.name: ZITS,
     MAT.name: MAT,
