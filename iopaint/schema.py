@@ -175,10 +175,16 @@ class InteractiveSegModel(Choices):
     sam_hq_vit_l = "sam_hq_vit_l"
     sam_hq_vit_h = "sam_hq_vit_h"
     mobile_sam = "mobile_sam"
+
     sam2_tiny = "sam2_tiny"
     sam2_small = "sam2_small"
     sam2_base = "sam2_base"
     sam2_large = "sam2_large"
+
+    sam2_1_tiny = "sam2_1_tiny"
+    sam2_1_small = "sam2_1_small"
+    sam2_1_base = "sam2_1_base"
+    sam2_1_large = "sam2_1_large"
 
 
 class PluginInfo(BaseModel):

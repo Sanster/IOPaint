@@ -59,6 +59,22 @@ SEGMENT_ANYTHING_MODELS = {
         "url": "https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_large.pt",
         "md5": "08083462423be3260cd6a5eef94dc01c",
     },
+    "sam2_1_tiny": {
+        "url": "https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt",
+        "md5": "6aa6761c9da74fbaa74b4c790a0a2007",
+    },
+    "sam2_1_small": {
+        "url": "https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_small.pt",
+        "md5": "51713b3d1994696d27f35f9c6de6f5ef",
+    },
+    "sam2_1_base": {
+        "url": "https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_base_plus.pt",
+        "md5": "ec7bd7d23d280d5e3cfa45984c02eda5",
+    },
+    "sam2_1_large": {
+        "url": "https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.pt",
+        "md5": "2b30654b6112c42a115563c638d238d9",
+    },
 }
 
 

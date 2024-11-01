@@ -17,9 +17,6 @@ from .modeling.position_encoding import PositionEmbeddingSine
 from .modeling.sam.transformer import RoPEAttention
 from .modeling.sam2_base import SAM2Base
 
-CURRENT_DIR = Path(__file__).parent
-CONFIG_DIR = CURRENT_DIR / "sam2_configs"
-
 common_kwargs = dict(
     num_maskmem=7,
     image_size=1024,
@@ -32,6 +29,33 @@ common_kwargs = dict(
     iou_prediction_use_sigmoid=True,
     use_obj_ptrs_in_encoder=True,
     add_tpos_enc_to_obj_ptrs=False,
+    only_obj_ptrs_in_the_past_for_eval=True,
+    pred_obj_scores=True,
+    pred_obj_scores_mlp=True,
+    fixed_no_obj_ptr=True,
+    multimask_output_for_tracking=True,
+    use_multimask_token_for_obj_ptr=True,
+    multimask_min_pt_num=0,
+    multimask_max_pt_num=1,
+    use_mlp_for_obj_ptr_proj=True,
+    compile_image_encoder=False,
+)
+
+common_kwargs_for_2_1 = dict(
+    num_maskmem=7,
+    image_size=1024,
+    sigmoid_scale_for_mem_enc=20.0,
+    sigmoid_bias_for_mem_enc=-10.0,
+    use_mask_input_as_output_without_sam=True,
+    directly_add_no_mem_embed=True,
+    no_obj_embed_spatial=True,
+    use_high_res_features_in_sam=True,
+    multimask_output_in_sam=True,
+    iou_prediction_use_sigmoid=True,
+    use_obj_ptrs_in_encoder=True,
+    add_tpos_enc_to_obj_ptrs=True,
+    proj_tpos_enc_in_obj_ptrs=True,
+    use_signed_tpos_enc_to_obj_ptrs=True,
     only_obj_ptrs_in_the_past_for_eval=True,
     pred_obj_scores=True,
     pred_obj_scores_mlp=True,
@@ -103,32 +127,114 @@ def build_memory_encoder():
     )
 
 
+def build_image_encoder_tiny():
+    return ImageEncoder(
+        scalp=1,
+        trunk=Hiera(
+            embed_dim=96,
+            num_heads=1,
+            stages=(1, 2, 7, 2),
+            global_att_blocks=(5, 7, 9),
+            window_pos_embed_bkg_spatial_size=(7, 7),
+            window_spec=(8, 4, 14, 7),
+        ),
+        neck=FpnNeck(
+            position_encoding=PositionEmbeddingSine(
+                num_pos_feats=256,
+                normalize=True,
+                scale=None,
+                temperature=10000,
+            ),
+            d_model=256,
+            backbone_channel_list=[768, 384, 192, 96],
+            fpn_top_down_levels=[2, 3],
+            fpn_interp_model="nearest",
+        ),
+    )
+
+
+def build_image_encoder_small():
+    return ImageEncoder(
+        scalp=1,
+        trunk=Hiera(
+            embed_dim=96,
+            num_heads=1,
+            stages=(1, 2, 11, 2),
+            global_att_blocks=(7, 10, 13),
+            window_pos_embed_bkg_spatial_size=(7, 7),
+            window_spec=(8, 4, 14, 7),
+        ),
+        neck=FpnNeck(
+            position_encoding=PositionEmbeddingSine(
+                num_pos_feats=256,
+                normalize=True,
+                scale=None,
+                temperature=10000,
+            ),
+            d_model=256,
+            backbone_channel_list=[768, 384, 192, 96],
+            fpn_top_down_levels=[2, 3],
+            fpn_interp_model="nearest",
+        ),
+    )
+
+
+def build_image_encoder_base():
+    return ImageEncoder(
+        scalp=1,
+        trunk=Hiera(
+            embed_dim=112,
+            num_heads=2,
+            stages=(2, 3, 16, 3),
+            global_att_blocks=(12, 16, 20),
+            window_pos_embed_bkg_spatial_size=(14, 14),
+            window_spec=(8, 4, 14, 7),
+        ),
+        neck=FpnNeck(
+            position_encoding=PositionEmbeddingSine(
+                num_pos_feats=256,
+                normalize=True,
+                scale=None,
+                temperature=10000,
+            ),
+            d_model=256,
+            backbone_channel_list=[896, 448, 224, 112],
+            fpn_top_down_levels=[2, 3],
+            fpn_interp_model="nearest",
+        ),
+    )
+
+
+def build_image_encoder_large():
+    return ImageEncoder(
+        scalp=1,
+        trunk=Hiera(
+            embed_dim=144,
+            num_heads=2,
+            stages=(2, 6, 36, 4),
+            global_att_blocks=(23, 33, 43),
+            window_pos_embed_bkg_spatial_size=(7, 7),
+            window_spec=(8, 4, 16, 8),
+        ),
+        neck=FpnNeck(
+            position_encoding=PositionEmbeddingSine(
+                num_pos_feats=256,
+                normalize=True,
+                scale=None,
+                temperature=10000,
+            ),
+            d_model=256,
+            backbone_channel_list=[1152, 576, 288, 144],
+            fpn_top_down_levels=[2, 3],
+            fpn_interp_model="nearest",
+        ),
+    )
+
+
 def build_sam2_tiny():
     return SAM2Base(
         **common_kwargs,
-        image_encoder=ImageEncoder(
-            scalp=1,
-            trunk=Hiera(
-                embed_dim=96,
-                num_heads=1,
-                stages=(1, 2, 7, 2),
-                global_att_blocks=(5, 7, 9),
-                window_pos_embed_bkg_spatial_size=(7, 7),
-                window_spec=(8, 4, 14, 7),
-            ),
-            neck=FpnNeck(
-                position_encoding=PositionEmbeddingSine(
-                    num_pos_feats=256,
-                    normalize=True,
-                    scale=None,
-                    temperature=10000,
-                ),
-                d_model=256,
-                backbone_channel_list=[768, 384, 192, 96],
-                fpn_top_down_levels=[2, 3],
-                fpn_interp_model="nearest",
-            ),
-        ),
+        image_encoder=build_image_encoder_tiny(),
         memory_attention=build_memory_attention(),
         memory_encoder=build_memory_encoder(),
     )
@@ -137,29 +243,7 @@ def build_sam2_tiny():
 def build_sam2_small():
     return SAM2Base(
         **common_kwargs,
-        image_encoder=ImageEncoder(
-            scalp=1,
-            trunk=Hiera(
-                embed_dim=96,
-                num_heads=1,
-                stages=(1, 2, 11, 2),
-                global_att_blocks=(7, 10, 13),
-                window_pos_embed_bkg_spatial_size=(7, 7),
-                window_spec=(8, 4, 14, 7),
-            ),
-            neck=FpnNeck(
-                position_encoding=PositionEmbeddingSine(
-                    num_pos_feats=256,
-                    normalize=True,
-                    scale=None,
-                    temperature=10000,
-                ),
-                d_model=256,
-                backbone_channel_list=[768, 384, 192, 96],
-                fpn_top_down_levels=[2, 3],
-                fpn_interp_model="nearest",
-            ),
-        ),
+        image_encoder=build_image_encoder_small(),
         memory_attention=build_memory_attention(),
         memory_encoder=build_memory_encoder(),
     )
@@ -168,29 +252,7 @@ def build_sam2_small():
 def build_sam2_base():
     return SAM2Base(
         **common_kwargs,
-        image_encoder=ImageEncoder(
-            scalp=1,
-            trunk=Hiera(
-                embed_dim=112,
-                num_heads=2,
-                stages=(2, 3, 16, 3),
-                global_att_blocks=(12, 16, 20),
-                window_pos_embed_bkg_spatial_size=(14, 14),
-                window_spec=(8, 4, 14, 7),
-            ),
-            neck=FpnNeck(
-                position_encoding=PositionEmbeddingSine(
-                    num_pos_feats=256,
-                    normalize=True,
-                    scale=None,
-                    temperature=10000,
-                ),
-                d_model=256,
-                backbone_channel_list=[896, 448, 224, 112],
-                fpn_top_down_levels=[2, 3],
-                fpn_interp_model="nearest",
-            ),
-        ),
+        image_encoder=build_image_encoder_base(),
         memory_attention=build_memory_attention(),
         memory_encoder=build_memory_encoder(),
     )
@@ -199,29 +261,43 @@ def build_sam2_base():
 def build_sam2_large():
     return SAM2Base(
         **common_kwargs,
-        image_encoder=ImageEncoder(
-            scalp=1,
-            trunk=Hiera(
-                embed_dim=144,
-                num_heads=2,
-                stages=(2, 6, 36, 4),
-                global_att_blocks=(23, 33, 43),
-                window_pos_embed_bkg_spatial_size=(7, 7),
-                window_spec=(8, 4, 16, 8),
-            ),
-            neck=FpnNeck(
-                position_encoding=PositionEmbeddingSine(
-                    num_pos_feats=256,
-                    normalize=True,
-                    scale=None,
-                    temperature=10000,
-                ),
-                d_model=256,
-                backbone_channel_list=[1152, 576, 288, 144],
-                fpn_top_down_levels=[2, 3],
-                fpn_interp_model="nearest",
-            ),
-        ),
+        image_encoder=build_image_encoder_large(),
+        memory_attention=build_memory_attention(),
+        memory_encoder=build_memory_encoder(),
+    )
+
+
+def build_sam2_1_tiny():
+    return SAM2Base(
+        **common_kwargs_for_2_1,
+        image_encoder=build_image_encoder_tiny(),
+        memory_attention=build_memory_attention(),
+        memory_encoder=build_memory_encoder(),
+    )
+
+
+def build_sam2_1_small():
+    return SAM2Base(
+        **common_kwargs_for_2_1,
+        image_encoder=build_image_encoder_small(),
+        memory_attention=build_memory_attention(),
+        memory_encoder=build_memory_encoder(),
+    )
+
+
+def build_sam2_1_base():
+    return SAM2Base(
+        **common_kwargs_for_2_1,
+        image_encoder=build_image_encoder_base(),
+        memory_attention=build_memory_attention(),
+        memory_encoder=build_memory_encoder(),
+    )
+
+
+def build_sam2_1_large():
+    return SAM2Base(
+        **common_kwargs_for_2_1,
+        image_encoder=build_image_encoder_large(),
         memory_attention=build_memory_attention(),
         memory_encoder=build_memory_encoder(),
     )
@@ -232,6 +308,10 @@ sam2_model_registry = {
     "sam2_small": build_sam2_small,
     "sam2_base": build_sam2_base,
     "sam2_large": build_sam2_large,
+    "sam2_1_tiny": build_sam2_1_tiny,
+    "sam2_1_small": build_sam2_1_small,
+    "sam2_1_base": build_sam2_1_base,
+    "sam2_1_large": build_sam2_1_large,
 }
 
 

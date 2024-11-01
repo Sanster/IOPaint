@@ -247,7 +247,7 @@ class MaskDecoder(nn.Module):
     def _get_stability_scores(self, mask_logits):
         """
         Compute stability scores of the mask logits based on the IoU between upper and
-        lower thresholds, similar to https://github.com/fairinternal/onevision/pull/568.
+        lower thresholds.
         """
         mask_logits = mask_logits.flatten(-2)
         stability_delta = self.dynamic_multimask_stability_delta

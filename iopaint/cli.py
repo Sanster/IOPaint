@@ -129,7 +129,7 @@ def start(
     quality: int = Option(95, help=QUALITY_HELP),
     enable_interactive_seg: bool = Option(False, help=INTERACTIVE_SEG_HELP),
     interactive_seg_model: InteractiveSegModel = Option(
-        InteractiveSegModel.vit_b, help=INTERACTIVE_SEG_MODEL_HELP
+        InteractiveSegModel.sam2_1_tiny, help=INTERACTIVE_SEG_MODEL_HELP
     ),
     interactive_seg_device: Device = Option(Device.cpu),
     enable_remove_bg: bool = Option(False, help=REMOVE_BG_HELP),
