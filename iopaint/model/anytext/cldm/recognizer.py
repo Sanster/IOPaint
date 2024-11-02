@@ -92,7 +92,7 @@ def create_predictor(model_dir=None, model_lang="ch", is_onnx=False):
 
 def _check_image_file(path):
     img_end = {"jpg", "bmp", "png", "jpeg", "rgb", "tif", "tiff"}
-    return any([path.lower().endswith(e) for e in img_end])
+    return any(path.lower().endswith(e) for e in img_end)
 
 
 def get_image_file_list(img_file):
