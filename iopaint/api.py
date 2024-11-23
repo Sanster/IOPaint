@@ -388,6 +388,7 @@ class Api:
             self.config.interactive_seg_model,
             self.config.interactive_seg_device,
             self.config.enable_remove_bg,
+            self.config.remove_bg_device,
             self.config.remove_bg_model,
             self.config.enable_anime_seg,
             self.config.enable_realesrgan,

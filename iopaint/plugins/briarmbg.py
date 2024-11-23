@@ -480,7 +480,7 @@ def create_briarmbg_session():
     return net
 
 
-def briarmbg_process(bgr_np_image, session, only_mask=False):
+def briarmbg_process(device, bgr_np_image, session, only_mask=False):
     # prepare input
     orig_bgr_image = Image.fromarray(bgr_np_image)
     w, h = orig_im_size = orig_bgr_image.size
@@ -490,6 +490,7 @@ def briarmbg_process(bgr_np_image, session, only_mask=False):
     im_tensor = torch.unsqueeze(im_tensor, 0)
     im_tensor = torch.divide(im_tensor, 255.0)
     im_tensor = normalize(im_tensor, [0.5, 0.5, 0.5], [1.0, 1.0, 1.0])
+    im_tensor = im_tensor.to(device)
     # inference
     result = session(im_tensor)
     # post process

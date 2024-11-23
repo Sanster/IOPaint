@@ -51,6 +51,7 @@ default_configs = dict(
     interactive_seg_model=InteractiveSegModel.sam2_1_tiny,
     interactive_seg_device=Device.cpu,
     enable_remove_bg=False,
+    remove_bg_device=Device.cpu,
     remove_bg_model=RemoveBGModel.briaai_rmbg_1_4,
     enable_anime_seg=False,
     enable_realesrgan=False,
@@ -99,6 +100,7 @@ def save_config(
     interactive_seg_model,
     interactive_seg_device,
     enable_remove_bg,
+    remove_bg_device,
     remove_bg_model,
     enable_anime_seg,
     enable_realesrgan,
@@ -236,6 +238,11 @@ def main(config_file: Path):
                     enable_remove_bg = gr.Checkbox(
                         init_config.enable_remove_bg, label=REMOVE_BG_HELP
                     )
+                    remove_bg_device = gr.Radio(
+                        Device.values(),
+                        label=REMOVE_BG_DEVICE_HELP,
+                        value=init_config.remove_bg_device,
+                    )
                     remove_bg_model = gr.Radio(
                         RemoveBGModel.values(),
                         label="Remove bg model",
@@ -304,6 +311,7 @@ def main(config_file: Path):
                 interactive_seg_model,
                 interactive_seg_device,
                 enable_remove_bg,
+                remove_bg_device,
                 remove_bg_model,
                 enable_anime_seg,
                 enable_realesrgan,

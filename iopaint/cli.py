@@ -133,6 +133,7 @@ def start(
     ),
     interactive_seg_device: Device = Option(Device.cpu),
     enable_remove_bg: bool = Option(False, help=REMOVE_BG_HELP),
+    remove_bg_device: Device = Option(Device.cpu, help=REMOVE_BG_DEVICE_HELP),
     remove_bg_model: RemoveBGModel = Option(RemoveBGModel.briaai_rmbg_1_4),
     enable_anime_seg: bool = Option(False, help=ANIMESEG_HELP),
     enable_realesrgan: bool = Option(False),
@@ -145,6 +146,10 @@ def start(
 ):
     dump_environment_info()
     device = check_device(device)
+    remove_bg_device = check_device(remove_bg_device)
+    realesrgan_device = check_device(realesrgan_device)
+    gfpgan_device = check_device(gfpgan_device)
+
     if input and not input.exists():
         logger.error(f"invalid --input: {input} not exists")
         exit(-1)
@@ -152,7 +157,9 @@ def start(
         logger.error(f"invalid --mask-dir: {mask_dir} not exists")
         exit(-1)
     if input and input.is_dir() and not output_dir:
-        logger.error("invalid --output-dir: --output-dir must be set when --input is a directory")
+        logger.error(
+            "invalid --output-dir: --output-dir must be set when --input is a directory"
+        )
         exit(-1)
     if output_dir:
         output_dir = output_dir.expanduser().absolute()
@@ -207,6 +214,7 @@ def start(
         interactive_seg_model=interactive_seg_model,
         interactive_seg_device=interactive_seg_device,
         enable_remove_bg=enable_remove_bg,
+        remove_bg_device=remove_bg_device,
         remove_bg_model=remove_bg_model,
         enable_anime_seg=enable_anime_seg,
         enable_realesrgan=enable_realesrgan,

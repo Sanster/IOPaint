@@ -16,6 +16,7 @@ def build_plugins(
     interactive_seg_model: InteractiveSegModel,
     interactive_seg_device: Device,
     enable_remove_bg: bool,
+    remove_bg_device: Device,
     remove_bg_model: str,
     enable_anime_seg: bool,
     enable_realesrgan: bool,
@@ -36,7 +37,7 @@ def build_plugins(
 
     if enable_remove_bg:
         logger.info(f"Initialize {RemoveBG.name} plugin")
-        plugins[RemoveBG.name] = RemoveBG(remove_bg_model)
+        plugins[RemoveBG.name] = RemoveBG(remove_bg_model, remove_bg_device)
 
     if enable_anime_seg:
         logger.info(f"Initialize {AnimeSeg.name} plugin")
