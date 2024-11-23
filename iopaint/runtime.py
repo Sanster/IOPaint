@@ -40,7 +40,7 @@ for name in _CANDIDATES:
         pass
 
 
-def dump_environment_info() -> Dict[str, str]:
+def dump_environment_info() -> Dict[str, Any]:
     """Dump information about the machine to help debugging issues."""
 
     # Generic machine info
