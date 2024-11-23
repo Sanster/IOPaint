@@ -36,10 +36,7 @@ def cli_download_model(model: str):
         from diffusers import DiffusionPipeline
 
         downloaded_path = handle_from_pretrained_exceptions(
-            DiffusionPipeline.download,
-            pretrained_model_name=model,
-            variant="fp16",
-            resume_download=True,
+            DiffusionPipeline.download, pretrained_model_name=model, variant="fp16"
         )
         logger.info(f"Done. Downloaded to {downloaded_path}")
 

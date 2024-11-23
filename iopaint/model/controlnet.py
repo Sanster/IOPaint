@@ -79,6 +79,7 @@ class ControlNet(DiffusionInpaintModel):
             from diffusers import (
                 StableDiffusionControlNetInpaintPipeline as PipeClass,
             )
+
             original_config_file_name = "v1"
 
         elif model_info.model_type in [
@@ -88,11 +89,11 @@ class ControlNet(DiffusionInpaintModel):
             from diffusers import (
                 StableDiffusionXLControlNetInpaintPipeline as PipeClass,
             )
+
             original_config_file_name = "xl"
 
         controlnet = ControlNetModel.from_pretrained(
             pretrained_model_name_or_path=controlnet_method,
-            resume_download=True,
             local_files_only=model_kwargs["local_files_only"],
             torch_dtype=self.torch_dtype,
         )
@@ -139,7 +140,6 @@ class ControlNet(DiffusionInpaintModel):
         self.controlnet_method = new_method
         controlnet = ControlNetModel.from_pretrained(
             new_method,
-            resume_download=True,
             local_files_only=self.local_files_only,
             torch_dtype=self.torch_dtype,
         ).to(self.model.device)
