@@ -186,7 +186,7 @@ class Api:
         file_to_write = Path(file.filename)
         if not file_to_write.is_file():
             return
-        
+
         origin_image_bytes = file.file.read()
         with open(self.config.output_dir / file_to_write.name, "wb") as fw:
             fw.write(origin_image_bytes)
@@ -241,7 +241,10 @@ class Api:
         )
 
     def api_input_image(self) -> FileResponse:
-        if self.config.input and self.config.input.is_file():
+        if self.config.input is None:
+            raise HTTPException(status_code=200, detail="No input image configured")
+
+        if self.config.input.is_file():
             return FileResponse(self.config.input)
         raise HTTPException(status_code=404, detail="Input image not found")
 
