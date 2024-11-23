@@ -18,7 +18,7 @@ const api = axios.create({
   baseURL: API_ENDPOINT,
 })
 
-const throwErrors = async (res: any) => {
+const throwErrors = async (res: any): Promise<never> => {
   const errMsg = await res.json()
   throw new Error(
     `${errMsg.errors}\nPlease take a screenshot of the detailed error message in your terminal`
@@ -99,7 +99,7 @@ export default async function inpaint(
       seed: res.headers.get("X-Seed"),
     }
   }
-  await throwErrors(res)
+  throw await throwErrors(res)
 }
 
 export async function getServerConfig(): Promise<ServerConfig> {
@@ -149,7 +149,7 @@ export async function runPlugin(
     const blob = await res.blob()
     return { blob: URL.createObjectURL(blob) }
   }
-  await throwErrors(res)
+  throw await throwErrors(res)
 }
 
 export async function getMediaFile(tab: string, filename: string) {
@@ -168,7 +168,7 @@ export async function getMediaFile(tab: string, filename: string) {
     })
     return file
   }
-  await throwErrors(res)
+  throw await throwErrors(res)
 }
 
 export async function getMediaBlob(tab: string, filename: string) {
@@ -184,7 +184,7 @@ export async function getMediaBlob(tab: string, filename: string) {
     const blob = await res.blob()
     return blob
   }
-  await throwErrors(res)
+  throw await throwErrors(res)
 }
 
 export async function getMedias(tab: string): Promise<Filename[]> {
@@ -207,7 +207,7 @@ export async function downloadToOutput(
       body: fd,
     })
     if (!res.ok) {
-      await throwErrors(res)
+      throw await throwErrors(res)
     }
   } catch (error) {
     throw new Error(`Something went wrong: ${error}`)
@@ -247,5 +247,5 @@ export async function postAdjustMask(
     const blob = await res.blob()
     return blob
   }
-  throwErrors(res)
+  throw await throwErrors(res)
 }
