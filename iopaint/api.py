@@ -183,12 +183,22 @@ class Api:
         return self.app.add_api_route(path, endpoint, **kwargs)
 
     def api_save_image(self, file: UploadFile):
-        file_to_write = Path(file.filename)
-        if not file_to_write.is_file():
-            return
+        # Sanitize filename to prevent path traversal
+        safe_filename = Path(file.filename).name  # Get just the filename component
 
+        # Construct the full path within output_dir
+        output_path = self.config.output_dir / safe_filename
+
+        # Ensure output directory exists
+        if not self.config.output_dir or not self.config.output_dir.exists():
+            raise HTTPException(
+                status_code=400,
+                detail="Output directory not configured or doesn't exist",
+            )
+
+        # Read and write the file
         origin_image_bytes = file.file.read()
-        with open(self.config.output_dir / file_to_write.name, "wb") as fw:
+        with open(output_path, "wb") as fw:
             fw.write(origin_image_bytes)
 
     def api_current_model(self) -> ModelInfo:
