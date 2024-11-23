@@ -4,7 +4,7 @@ diffusers==0.27.2
 huggingface_hub==0.25.2
 accelerate
 peft==0.7.1
-transformers>=4.35.1
+transformers>=4.39.1
 safetensors
 controlnet-aux==0.0.3
 fastapi==0.108.0

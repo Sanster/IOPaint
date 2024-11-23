@@ -145,6 +145,7 @@ class RealESRGANModel(Choices):
 
 class RemoveBGModel(Choices):
     briaai_rmbg_1_4 = "briaai/RMBG-1.4"
+    briaai_rmbg_2_0 = "briaai/RMBG-2.0"
     # models from https://github.com/danielgatis/rembg
     u2net = "u2net"
     u2netp = "u2netp"

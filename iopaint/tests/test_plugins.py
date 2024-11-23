@@ -33,6 +33,7 @@ person_rgb_img = cv2.resize(person_rgb_img, (512, 512))
 
 
 def _save(img, name):
+    name = name.replace("/", "_")
     cv2.imwrite(str(save_dir / name), img)
 
 

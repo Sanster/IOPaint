@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 from loguru import logger
+import torch
 from torch.hub import get_dir
 
 from iopaint.plugins.base_plugin import BasePlugin
@@ -40,6 +41,14 @@ class RemoveBG(BasePlugin):
 
             self.session = create_briarmbg_session()
             self.remove = briarmbg_process
+        elif model_name == RemoveBGModel.briaai_rmbg_2_0:
+            from iopaint.plugins.briarmbg2 import (
+                create_briarmbg2_session,
+                briarmbg2_process,
+            )
+
+            self.session = create_briarmbg2_session()
+            self.remove = briarmbg2_process
         else:
             from rembg import new_session, remove
 
@@ -56,6 +65,7 @@ class RemoveBG(BasePlugin):
         self._init_session(new_model_name)
         self.model_name = new_model_name
 
+    @torch.inference_mode()
     def gen_image(self, rgb_np_img, req: RunPluginRequest) -> np.ndarray:
         bgr_np_img = cv2.cvtColor(rgb_np_img, cv2.COLOR_RGB2BGR)
 
@@ -63,6 +73,7 @@ class RemoveBG(BasePlugin):
         output = self.remove(bgr_np_img, session=self.session)
         return cv2.cvtColor(output, cv2.COLOR_BGRA2RGBA)
 
+    @torch.inference_mode()
     def gen_mask(self, rgb_np_img, req: RunPluginRequest) -> np.ndarray:
         bgr_np_img = cv2.cvtColor(rgb_np_img, cv2.COLOR_RGB2BGR)
 
