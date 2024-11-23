@@ -283,7 +283,7 @@ class InpaintRequest(BaseModel):
     mask: Optional[str] = Field(None, description="base64 encoded mask")
 
     ldm_steps: int = Field(20, description="Steps for ldm model.")
-    ldm_sampler: str = Field(LDMSampler.plms, discription="Sampler for ldm model.")
+    ldm_sampler: str = Field(LDMSampler.plms, description="Sampler for ldm model.")
     zits_wireframe: bool = Field(True, description="Enable wireframe for zits model.")
 
     hd_strategy: str = Field(
@@ -342,7 +342,7 @@ class InpaintRequest(BaseModel):
     )
     sd_guidance_scale: float = Field(
         7.5,
-        help="Higher guidance scale encourages to generate images that are closely linked to the text prompt, usually at the expense of lower image quality.",
+        description="Higher guidance scale encourages to generate images that are closely linked to the text prompt, usually at the expense of lower image quality.",
     )
     sd_sampler: str = Field(
         SDSampler.uni_pc, description="Sampler for diffusion model."
