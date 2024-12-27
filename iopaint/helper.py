@@ -1,5 +1,5 @@
 import base64
-import imghdr
+import filetype
 import io
 import os
 import sys
@@ -298,7 +298,7 @@ def is_mac():
 
 
 def get_image_ext(img_bytes):
-    w = imghdr.what("", img_bytes)
+    w = filetype.guess_extension(img_bytes)
     if w is None:
         w = "jpeg"
     return w
