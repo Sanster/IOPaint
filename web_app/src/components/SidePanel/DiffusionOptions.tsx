@@ -142,14 +142,14 @@ const DiffusionOptions = () => {
               }}
             />
           </RowContainer>
-          {/* <RowContainer>
+          <RowContainer>
             <Slider
               defaultValue={[100]}
               className="w-[180px]"
               min={1}
               max={100}
               step={1}
-              disabled={!settings.enableBrushNet || disable}
+              disabled={!settings.enableBrushNet}
               value={[Math.floor(settings.brushnetConditioningScale * 100)]}
               onValueChange={(vals) =>
                 updateSettings({ brushnetConditioningScale: vals[0] / 100 })
@@ -159,12 +159,12 @@ const DiffusionOptions = () => {
               id="brushnet-weight"
               className="w-[50px] rounded-full"
               numberValue={settings.brushnetConditioningScale}
-              allowFloat={false}
+              allowFloat
               onNumberValueChange={(val) => {
                 updateSettings({ brushnetConditioningScale: val })
               }}
             />
-          </RowContainer> */}
+          </RowContainer>
 
           <RowContainer>
             <Select
@@ -240,7 +240,7 @@ const DiffusionOptions = () => {
                 className="w-[50px] rounded-full"
                 disabled={!settings.enableControlnet}
                 numberValue={settings.controlnetConditioningScale}
-                allowFloat={false}
+                allowFloat
                 onNumberValueChange={(val) => {
                   updateSettings({ controlnetConditioningScale: val })
                 }}

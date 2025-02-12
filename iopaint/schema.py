@@ -14,6 +14,7 @@ from iopaint.const import (
     SD2_CONTROLNET_CHOICES,
     SD_CONTROLNET_CHOICES,
     SD_BRUSHNET_CHOICES,
+    SDXL_BRUSHNET_CHOICES
 )
 from pydantic import BaseModel, Field, computed_field, model_validator
 
@@ -70,6 +71,8 @@ class ModelInfo(BaseModel):
     def brushnets(self) -> List[str]:
         if self.model_type in [ModelType.DIFFUSERS_SD]:
             return SD_BRUSHNET_CHOICES
+        if self.model_type in [ModelType.DIFFUSERS_SDXL]:
+            return SDXL_BRUSHNET_CHOICES
         return []
 
     @computed_field
@@ -117,6 +120,7 @@ class ModelInfo(BaseModel):
     def support_brushnet(self) -> bool:
         return self.model_type in [
             ModelType.DIFFUSERS_SD,
+            ModelType.DIFFUSERS_SDXL,
         ]
 
     @computed_field

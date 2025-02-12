@@ -30,6 +30,9 @@ DIFFUSION_MODELS = [
     "Sanster/anything-4.0-inpainting",
     "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
     "Fantasy-Studio/Paint-by-Example",
+    "RunDiffusion/Juggernaut-XI-v11",
+    "SG161222/RealVisXL_V5.0",
+    "eienmojiki/Anything-XL",
     POWERPAINT_NAME,
     ANYTEXT_NAME,
 ]
@@ -81,6 +84,10 @@ SDXL_CONTROLNET_CHOICES = [
     "diffusers/controlnet-depth-sdxl-1.0",
     "diffusers/controlnet-depth-sdxl-1.0-mid",
     "diffusers/controlnet-depth-sdxl-1.0-small",
+]
+
+SDXL_BRUSHNET_CHOICES = [
+    "Regulus0725/random_mask_brushnet_ckpt_sdxl_regulus_v1"
 ]
 
 LOCAL_FILES_ONLY_HELP = """

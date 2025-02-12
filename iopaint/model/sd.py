@@ -29,7 +29,7 @@ class SD(DiffusionInpaintModel):
             **kwargs.get("pipe_components", {}),
             "local_files_only": is_local_files_only(**kwargs),
         }
-        disable_nsfw_checker = kwargs["disable_nsfw"] or kwargs.get(
+        disable_nsfw_checker = kwargs.get("disable_nsfw", False) or kwargs.get(
             "cpu_offload", False
         )
         if disable_nsfw_checker:
@@ -71,7 +71,7 @@ class SD(DiffusionInpaintModel):
             self.model.enable_sequential_cpu_offload(gpu_id=0)
         else:
             self.model = self.model.to(device)
-            if kwargs["sd_cpu_textencoder"]:
+            if kwargs.get("sd_cpu_textencoder", False):
                 logger.info("Run Stable Diffusion TextEncoder on CPU")
                 self.model.text_encoder = CPUTextEncoderWrapper(
                     self.model.text_encoder, torch_dtype
