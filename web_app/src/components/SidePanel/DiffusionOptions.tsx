@@ -441,28 +441,30 @@ const DiffusionOptions = () => {
           toolTip={toolTip}
           // disabled={disable}
         />
-        <Slider
-          className="w-[110px]"
-          defaultValue={[100]}
-          min={10}
-          max={100}
-          step={1}
-          value={[Math.floor(settings.sdStrength * 100)]}
-          onValueChange={(vals) =>
-            updateSettings({ sdStrength: vals[0] / 100 })
-          }
-          // disabled={disable}
-        />
-        <NumberInput
-          id="strength"
-          className="w-[50px] rounded-full"
-          numberValue={settings.sdStrength}
-          allowFloat
-          onNumberValueChange={(val) => {
-            updateSettings({ sdStrength: val })
-          }}
-          // disabled={disable}
-        />
+        <div className="flex gap-4">
+          <Slider
+            className="w-[120px]"
+            defaultValue={[100]}
+            min={10}
+            max={100}
+            step={1}
+            value={[Math.floor(settings.sdStrength * 100)]}
+            onValueChange={(vals) =>
+              updateSettings({ sdStrength: vals[0] / 100 })
+            }
+            // disabled={disable}
+          />
+          <NumberInput
+            id="strength"
+            className="w-[50px] rounded-full"
+            numberValue={settings.sdStrength}
+            allowFloat
+            onNumberValueChange={(val) => {
+              updateSettings({ sdStrength: val })
+            }}
+            // disabled={disable}
+          />
+        </div>
       </RowContainer>
     )
   }
@@ -632,24 +634,27 @@ const DiffusionOptions = () => {
           text="Steps"
           toolTip="The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference."
         />
-        <Slider
-          className="w-[110px]"
-          defaultValue={[30]}
-          min={1}
-          max={100}
-          step={1}
-          value={[Math.floor(settings.sdSteps)]}
-          onValueChange={(vals) => updateSettings({ sdSteps: vals[0] })}
-        />
-        <NumberInput
-          id="steps"
-          className="w-[50px] rounded-full"
-          numberValue={settings.sdSteps}
-          allowFloat={false}
-          onNumberValueChange={(val) => {
-            updateSettings({ sdSteps: val })
-          }}
-        />
+
+        <div className="flex gap-4">
+          <Slider
+            className="w-[120px]"
+            defaultValue={[30]}
+            min={1}
+            max={100}
+            step={1}
+            value={[Math.floor(settings.sdSteps)]}
+            onValueChange={(vals) => updateSettings({ sdSteps: vals[0] })}
+          />
+          <NumberInput
+            id="steps"
+            className="w-[50px] rounded-full"
+            numberValue={settings.sdSteps}
+            allowFloat={false}
+            onNumberValueChange={(val) => {
+              updateSettings({ sdSteps: val })
+            }}
+          />
+        </div>
       </RowContainer>
     )
   }
@@ -662,26 +667,28 @@ const DiffusionOptions = () => {
           url="https://huggingface.co/docs/diffusers/main/en/using-diffusers/inpaint#guidance-scale"
           toolTip="Guidance scale affects how aligned the text prompt and generated image are. Higher value means the prompt and generated image are closely aligned, so the output is a stricter interpretation of the prompt"
         />
-        <Slider
-          className="w-[110px]"
-          defaultValue={[750]}
-          min={0}
-          max={1500}
-          step={1}
-          value={[Math.floor(settings.sdGuidanceScale * 100)]}
-          onValueChange={(vals) =>
-            updateSettings({ sdGuidanceScale: vals[0] / 100 })
-          }
-        />
-        <NumberInput
-          id="guid"
-          className="w-[50px] rounded-full"
-          numberValue={settings.sdGuidanceScale}
-          allowFloat
-          onNumberValueChange={(val) => {
-            updateSettings({ sdGuidanceScale: val })
-          }}
-        />
+        <div className="flex gap-4">
+          <Slider
+            className="w-[120px]"
+            defaultValue={[750]}
+            min={0}
+            max={1500}
+            step={1}
+            value={[Math.floor(settings.sdGuidanceScale * 100)]}
+            onValueChange={(vals) =>
+              updateSettings({ sdGuidanceScale: vals[0] / 100 })
+            }
+          />
+          <NumberInput
+            id="guid"
+            className="w-[50px] rounded-full"
+            numberValue={settings.sdGuidanceScale}
+            allowFloat
+            onNumberValueChange={(val) => {
+              updateSettings({ sdGuidanceScale: val })
+            }}
+          />
+        </div>
       </RowContainer>
     )
   }
@@ -758,24 +765,26 @@ const DiffusionOptions = () => {
             text="Mask blur"
             toolTip="How much to blur the mask before processing, in pixels. Make the generated inpainting boundaries appear more natural."
           />
-          <Slider
-            className="w-[110px]"
-            defaultValue={[settings.sdMaskBlur]}
-            min={0}
-            max={96}
-            step={1}
-            value={[Math.floor(settings.sdMaskBlur)]}
-            onValueChange={(vals) => updateSettings({ sdMaskBlur: vals[0] })}
-          />
-          <NumberInput
-            id="mask-blur"
-            className="w-[50px] rounded-full"
-            numberValue={settings.sdMaskBlur}
-            allowFloat={false}
-            onNumberValueChange={(value) => {
-              updateSettings({ sdMaskBlur: value })
-            }}
-          />
+          <div className="flex gap-4">
+            <Slider
+              className="w-[120px]"
+              defaultValue={[settings.sdMaskBlur]}
+              min={0}
+              max={96}
+              step={1}
+              value={[Math.floor(settings.sdMaskBlur)]}
+              onValueChange={(vals) => updateSettings({ sdMaskBlur: vals[0] })}
+            />
+            <NumberInput
+              id="mask-blur"
+              className="w-[50px] rounded-full"
+              numberValue={settings.sdMaskBlur}
+              allowFloat={false}
+              onNumberValueChange={(value) => {
+                updateSettings({ sdMaskBlur: value })
+              }}
+            />
+          </div>
         </RowContainer>
         <Separator />
       </>
@@ -814,26 +823,28 @@ const DiffusionOptions = () => {
               text="Mask OP"
               toolTip="Expand or shrink mask. Using the slider to adjust the kernel size for dilation or erosion."
             />
-            <Slider
-              className="w-[110px]"
-              defaultValue={[12]}
-              min={1}
-              max={100}
-              step={1}
-              value={[Math.floor(settings.adjustMaskKernelSize)]}
-              onValueChange={(vals) =>
-                updateSettings({ adjustMaskKernelSize: vals[0] })
-              }
-            />
-            <NumberInput
-              id="adjustMaskKernelSize"
-              className="w-[50px] rounded-full"
-              numberValue={settings.adjustMaskKernelSize}
-              allowFloat={false}
-              onNumberValueChange={(val) => {
-                updateSettings({ adjustMaskKernelSize: val })
-              }}
-            />
+            <div className="flex gap-4">
+              <Slider
+                className="w-[120px]"
+                defaultValue={[12]}
+                min={1}
+                max={100}
+                step={1}
+                value={[Math.floor(settings.adjustMaskKernelSize)]}
+                onValueChange={(vals) =>
+                  updateSettings({ adjustMaskKernelSize: vals[0] })
+                }
+              />
+              <NumberInput
+                id="adjustMaskKernelSize"
+                className="w-[50px] rounded-full"
+                numberValue={settings.adjustMaskKernelSize}
+                allowFloat={false}
+                onNumberValueChange={(val) => {
+                  updateSettings({ adjustMaskKernelSize: val })
+                }}
+              />
+            </div>
           </RowContainer>
 
           <RowContainer>
