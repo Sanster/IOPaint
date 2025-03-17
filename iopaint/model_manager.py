@@ -173,6 +173,10 @@ class ModelManager:
             }
             if hasattr(self.model.model, "text_encoder_2"):
                 pipe_components["text_encoder_2"] = self.model.model.text_encoder_2
+            if hasattr(self.model.model, "tokenizer"):
+                pipe_components["tokenizer"] = self.model.model.tokenizer
+            if hasattr(self.model.model, "tokenizer_2"):
+                pipe_components["tokenizer_2"] = self.model.model.tokenizer_2
 
             self.model = self.init_model(
                 self.name,

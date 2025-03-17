@@ -26,10 +26,8 @@ from ...const import SDXL_BRUSHNET_CHOICES
 
 
 class BrushNetXLWrapper(DiffusionInpaintModel):
-    name = "RunDiffusion/Juggernaut-XI-v11"
     pad_mod = 8
     min_size = 1024
-    model_id_or_path = "RunDiffusion/Juggernaut-XI-v11"
     support_brushnet = True
     support_lcm_lora = False
 
