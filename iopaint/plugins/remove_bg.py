@@ -95,8 +95,11 @@ class RemoveBG(BasePlugin):
     def check_dep(self):
         try:
             import rembg
-        except ImportError:
-            return "RemoveBG is not installed, please install it first. pip install -U rembg"
+        except ImportError as e:
+            import traceback
+
+            error_msg = traceback.format_exc()
+            return f"Install rembg failed, Error details:\n{error_msg}"
 
     def device_warning(self):
         if self.device == Device.cuda and self.model_name not in [
