@@ -8,6 +8,7 @@ from iopaint.download import scan_models
 from iopaint.helper import switch_mps_device
 from iopaint.model import models, ControlNet, SD, SDXL
 from iopaint.model.brushnet.brushnet_wrapper import BrushNetWrapper
+from iopaint.model.brushnet.brushnet_xl_wrapper import BrushNetXLWrapper
 from iopaint.model.power_paint.power_paint_v2 import PowerPaintV2
 from iopaint.model.utils import torch_gc, is_local_files_only
 from iopaint.schema import InpaintRequest, ModelInfo, ModelType
@@ -63,7 +64,10 @@ class ModelManager:
             return ControlNet(device, **kwargs)
 
         if model_info.support_brushnet and self.enable_brushnet:
-            return BrushNetWrapper(device, **kwargs)
+            if model_info.model_type == ModelType.DIFFUSERS_SD:
+                return BrushNetWrapper(device, **kwargs)
+            elif model_info.model_type == ModelType.DIFFUSERS_SDXL:
+                return BrushNetXLWrapper(device, **kwargs)
 
         if model_info.support_powerpaint_v2 and self.enable_powerpaint_v2:
             return PowerPaintV2(device, **kwargs)

@@ -61,7 +61,7 @@ const SidePanel = () => {
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-[286px] mt-[60px] outline-none pl-3 pr-1"
+        className="min-w-[286px] max-w-full mt-[60px] outline-none pl-3 pr-1"
         onOpenAutoFocus={(event) => event.preventDefault()}
         onPointerDownOutside={(event) => event.preventDefault()}
       >
