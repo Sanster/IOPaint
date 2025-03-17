@@ -49,7 +49,7 @@ class PaintByExample(DiffusionInpaintModel):
         """
         if config.paint_by_example_example_image is None:
             raise ValueError("paint_by_example_example_image is required")
-        example_image, _, _ = decode_base64_to_image(
+        example_image, _, _, _ = decode_base64_to_image(
             config.paint_by_example_example_image
         )
         output = self.model(

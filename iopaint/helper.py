@@ -306,12 +306,14 @@ def get_image_ext(img_bytes):
 
 def decode_base64_to_image(
     encoding: str, gray=False
-) -> Tuple[np.array, Optional[np.array], Dict]:
+) -> Tuple[np.array, Optional[np.array], Dict, str]:
     if encoding.startswith("data:image/") or encoding.startswith(
         "data:application/octet-stream;base64,"
     ):
         encoding = encoding.split(";")[1].split(",")[1]
-    image = Image.open(io.BytesIO(base64.b64decode(encoding)))
+    image_bytes = base64.b64decode(encoding)
+    ext = get_image_ext(image_bytes)
+    image = Image.open(io.BytesIO(image_bytes))
 
     alpha_channel = None
     try:
@@ -333,7 +335,7 @@ def decode_base64_to_image(
             image = image.convert("RGB")
             np_img = np.array(image)
 
-    return np_img, alpha_channel, infos
+    return np_img, alpha_channel, infos, ext
 
 
 def encode_pil_to_base64(image: Image, quality: int, infos: Dict) -> bytes:
