@@ -126,7 +126,7 @@ def start(
     output_dir: Optional[Path] = Option(
         None, help=OUTPUT_DIR_HELP, dir_okay=True, file_okay=False
     ),
-    quality: int = Option(95, help=QUALITY_HELP),
+    quality: int = Option(100, help=QUALITY_HELP),
     enable_interactive_seg: bool = Option(False, help=INTERACTIVE_SEG_HELP),
     interactive_seg_model: InteractiveSegModel = Option(
         InteractiveSegModel.sam2_1_tiny, help=INTERACTIVE_SEG_MODEL_HELP
