@@ -7,4 +7,5 @@ def install(package):
 
 
 def install_plugins_package():
+    install("onnxruntime<=1.19.2")
     install("rembg[cpu]")
